@@ -1,0 +1,205 @@
+#include "main.h"
+#include "FreeRTOS.h"
+#include "cmsis_os2.h"
+#include "LogDebugInfo.h"
+#include "task.h"
+#include "app_freertos.h"
+
+
+volatile uint8_t SensorDebounce_flag = 0;
+volatile uint8_t ToggleDebounce_flag = 0;
+
+extern osMessageQueueId_t xSensor_QueueHandle;
+extern _CarCheckFlag_obj CarCheckFlagobj;
+extern CarToPlcData CarToPlcData_obj;
+
+/**
+ * 传感器状态检查函数
+ *
+ * 该函数负责读取并检查各个传感器的状态，包括前碰撞、后碰撞、前近距离和后近距离传感器。
+ * 根据传感器状态，更新CarCheckFlagobj结构体中的相应状态标志。
+ * 如果任何一个传感器触发或释放，发送SensorEvent消息到motion_Queue。
+ */
+void vSensorStatusCheck(void)
+{
+  volatile uint8_t FC_H_value;
+  volatile uint8_t FC_L_value;
+  volatile uint8_t RC_H_value;
+  volatile uint8_t RC_L_value;
+  volatile uint8_t FP_H_value;
+  volatile uint8_t FP_L_value;
+  volatile uint8_t RP_H_value;
+  volatile uint8_t RP_L_value;
+  uint8_t sensor_msg;
+
+  // 读FC_H电平
+  FC_H_value = GPIO_READ(FC_H);
+  // 读FC_L电平
+  FC_L_value = GPIO_READ(FC_L);
+  // 读RC_H电平
+  RC_H_value = GPIO_READ(RC_H);
+  // 读RC_L电平
+  RC_L_value = GPIO_READ(RC_L);
+
+  // 读FP_H电平
+  FP_H_value = GPIO_READ(FP_H);
+  // 读FP_L电平
+  FP_L_value = GPIO_READ(FP_L);
+  // 读RP_H电平
+  RP_H_value = GPIO_READ(RP_H);
+  // 读RP_L电平
+  RP_L_value = GPIO_READ(RP_L);
+
+  if ((FC_H_value == GPIO_PIN_RESET)&&(FC_L_value == GPIO_PIN_SET)) //FC Trigger
+  {
+    CarCheckFlagobj.FrontCrashStatus = SensorTrigger;
+    CarToPlcData_obj.wSta |= 1 << 4;
+  }
+  if ((FC_H_value == GPIO_PIN_SET)&&(FC_L_value == GPIO_PIN_RESET)) //FC Release
+  {
+    CarCheckFlagobj.FrontCrashStatus = SensorRelease;
+    CarToPlcData_obj.wSta &= ~(1 << 4);
+  }
+  if ((RC_H_value == GPIO_PIN_RESET)&&(RC_L_value == GPIO_PIN_SET)) //RC Trigger
+  {
+    CarCheckFlagobj.RearCrashStatus = SensorTrigger;
+    CarToPlcData_obj.wSta |= 1 << 5;
+  }
+  if ((RC_H_value == GPIO_PIN_SET)&&(RC_L_value == GPIO_PIN_RESET)) //RC Release
+  {
+    CarCheckFlagobj.RearCrashStatus = SensorRelease;
+    CarToPlcData_obj.wSta &= ~(1 << 5);
+  }
+  if ((FP_H_value == GPIO_PIN_RESET)&&(FP_L_value == GPIO_PIN_SET)) //FP Trigger
+  {
+    CarCheckFlagobj.FrontProxStatus = SensorTrigger;
+    CarToPlcData_obj.wSta |= 1 << 2;
+  }
+  if ((FP_H_value == GPIO_PIN_SET)&&(FP_L_value == GPIO_PIN_RESET)) //FP Release
+  {
+    CarCheckFlagobj.FrontProxStatus = SensorRelease;
+    CarToPlcData_obj.wSta &= ~(1 << 2);
+  }
+  if ((RP_H_value == GPIO_PIN_RESET)&&(RP_L_value == GPIO_PIN_SET)) //RP Trigger
+  {
+    CarCheckFlagobj.RearProxStatus = SensorTrigger;
+    CarToPlcData_obj.wSta |= 1 << 3;
+  }
+  if ((RP_H_value == GPIO_PIN_SET)&&(RP_L_value == GPIO_PIN_RESET)) //RP Release
+  {
+    CarCheckFlagobj.RearProxStatus = SensorRelease;
+    CarToPlcData_obj.wSta &= ~(1 << 3);
+  }
+
+  // 发送消息到xSensor_Queue
+  sensor_msg = SensorEvent;//碰撞触发
+  DEBUGINFO_ALL("motion_msg = SensorTrigger\r\n");
+  if(osMessageQueuePut(xSensor_QueueHandle, &sensor_msg, 0, pdMS_TO_TICKS(100)) != osOK)
+  {
+      DEBUGINFO_ALL("vSensorStatusCheck() send motion error 1\r\n");
+  }
+
+}
+
+/**
+ * 拨动开关状态检查函数
+ *
+ * 该函数用于检查MOVE_FRONT和MOVE_BACK电平的状态，根据状态设置motion_msg和CarCheckFlagobj.ToggleSwtichPosition的值。
+ *
+ * @note 该函数会发送拨动开关时事件到motion_QueueHandle队列中。
+ *
+ * @return 无返回值
+ */
+void vToggleSwitchStatusCheck(void)
+{
+  volatile uint8_t TOGGLE_FRONT_value;
+  volatile uint8_t TOGGLE_BACK_value;
+  uint8_t sensor_msg;
+
+  // 读MOVE_FRONT电平
+  TOGGLE_FRONT_value = GPIO_READ(TOGGLE_FRONT);
+  // 读MOVE_BACK电平
+  TOGGLE_BACK_value = GPIO_READ(TOGGLE_BACK);
+
+  //拨动开关拨向前
+  if((TOGGLE_FRONT_value == GPIO_PIN_RESET)&&(TOGGLE_BACK_value == GPIO_PIN_SET))
+  {
+    sensor_msg = ToggleFront;
+    CarCheckFlagobj.ToggleSwtichPosition = ToggleFront;
+    DEBUGINFO_ALL("motion_msg = ToggleFront\r\n");
+  }
+  //拨动开关拨向后
+  else if((TOGGLE_FRONT_value == GPIO_PIN_SET)&&(TOGGLE_BACK_value == GPIO_PIN_RESET))
+  {
+    sensor_msg = ToggleBack;
+    CarCheckFlagobj.ToggleSwtichPosition = ToggleBack;
+    DEBUGINFO_ALL("motion_msg = ToggleBack\r\n");
+  }
+  //拨动开关拨向停止(中间挡位)
+  else if(TOGGLE_FRONT_value == GPIO_PIN_SET && TOGGLE_BACK_value == GPIO_PIN_SET)
+  {
+    sensor_msg = ToggleStop;
+    CarCheckFlagobj.ToggleSwtichPosition = ToggleStop;
+    DEBUGINFO_ALL("motion_msg = ToggleStop\r\n");
+  }
+
+  //发送拨动开关时事件
+  if(osMessageQueuePut(xSensor_QueueHandle, &sensor_msg, 0, pdMS_TO_TICKS(100)) != osOK)
+  {
+    DEBUGINFO_ALL("vToggleSwitchStatusCheck() send motion error\r\n");
+  }
+
+}
+
+/**
+ * 重置LED状态检查函数
+ *
+ * 该函数检查RESET引脚的状态，并根据状态设置LED_RESET引脚的状态。
+ *
+ * @note 该函数会打印LED_RESET的状态信息到控制台。
+ */
+void vResetLedStatusCheck(void)
+{
+  if (GPIO_READ(RESET) == GPIO_PIN_RESET)
+  {
+    GPIO_WRITE(LED_RESET, GPIO_PIN_SET); // 使能LED_RESET
+    DEBUGINFO_ALL("LED_RESET on\r\n");
+    //DEBUGINFO_ALL("reset trigger\r\n");
+    //osTimerStart(xResetButtonTimerHandle, pdMS_TO_TICKS(ResetDuration));
+  }
+  else
+  {
+    GPIO_WRITE(LED_RESET, GPIO_PIN_RESET); // 关闭LED_RESET
+    DEBUGINFO_ALL("LED_RESET off\r\n");
+  }
+}
+
+
+void vSensorDebounceCallback(void *argument)
+{
+  SensorDebounce_flag = 0;  //重置防重入标志位
+  vSensorStatusCheck();     //检测传感器状态
+}
+
+
+void vToggleSwitchCallback(void *argument)
+{
+  ToggleDebounce_flag = 0;      //重置防重入标志位
+  vToggleSwitchStatusCheck();   //检测开关状态
+}
+
+
+void vResetButtonCallback(void *argument)
+{
+  u8 sensor_msg;
+  if(GPIO_READ(RESET) == GPIO_PIN_RESET)
+  {
+    sensor_msg = Reset;
+  if(osMessageQueuePut(xSensor_QueueHandle, &sensor_msg, 0, pdMS_TO_TICKS(100)) != osOK)
+    {
+      DEBUGINFO_ALL("ResetButtonCallback() send sensor msg error\r\n");
+    }
+
+  }
+}
+
