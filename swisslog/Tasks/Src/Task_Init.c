@@ -2,6 +2,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "cmsis_os2.h"
+#include "LogDebugInfo.h"
 
 extern osThreadId_t InitTaskHandle;
 extern osThreadId_t IntProcessTaskHandle;
@@ -22,9 +23,12 @@ void vInitTask(void *argument)
   osThreadResume(MotorFeedbackTaskHandle); 
   osThreadResume(RfidTaskHandle); 
   osThreadResume(SensorTaskHandle);
-  osThreadResume(TestTaskHandle);
-  osThreadResume(WifiManagerTaskHandle);
-  osThreadResume(WifiReceiveTaskHandle);
+  //osThreadResume(TestTaskHandle);
+  //osThreadResume(WifiManagerTaskHandle);
+  //osThreadResume(WifiReceiveTaskHandle);
 
+  DEBUGINFO("InitTask\r\n");
+  DEBUGINFO("InitTask1\r\n");
+  DEBUGINFO("InitTask2\r\n");
   osThreadExit();
 }

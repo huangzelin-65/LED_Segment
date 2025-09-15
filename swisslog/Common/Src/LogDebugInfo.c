@@ -9,47 +9,65 @@
 
 extern osMessageQueueId_t xPrint_QueueHandle;
 
-
-//打印函数
-void safe_printf_all(const char *format, ...) {
-    if (format == NULL) {  // 检查格式字符串有效性
-        return;
+extern UART_HandleTypeDef huart1;
+//普通打印函数
+void safe_printf(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    char *buffer  = pvPortMalloc(LOG_LENGTH * sizeof(char));
+    int len = vsnprintf(buffer, LOG_LENGTH, format, args);
+    // 手动添加终止符
+    if (len >= LOG_LENGTH) {
+        buffer[LOG_LENGTH - 1] = '\0';
+        len = LOG_LENGTH - 1;
     }
+    va_end(args);
+
+    if(xPrint_QueueHandle != NULL && len > 0) {
+        xQueueSend(xPrint_QueueHandle, &buffer, pdMS_TO_TICKS(100));
+    }
+}
+//中断中打印函数
+void safe_printf_isr(const char *format, ...) {
+
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
     va_list args;
     va_start(args, format);
-
-    // 1. 分配缓冲区并检查是否成功
-    char *buffer = pvPortMalloc(LOG_LENGTH * sizeof(char));
-    if (buffer == NULL) {  // 处理内存分配失败
-        va_end(args);
-        return;
-    }
-
-    // 2. 格式化字符串（确保LOG_LENGTH至少为1，避免vsnprintf异常）
+    char *buffer  = pvPortMalloc(LOG_LENGTH * sizeof(char));
     int len = vsnprintf(buffer, LOG_LENGTH, format, args);
     va_end(args);
 
-    // 3. 检查格式化结果（len<0表示格式错误，可能由invalid format导致）
-    if (len < 0) {
-        vPortFree(buffer);  // 释放内存
-        return;
-    }
+    if(xPrint_QueueHandle != NULL && len > 0) {
+    	if(xQueueSendFromISR(xPrint_QueueHandle, &buffer, &xHigherPriorityTaskWoken) != pdPASS)
+    	{
 
-    // 4. 向消息队列发送数据（传递指针本身，而非指针的地址）
-    if (xPrint_QueueHandle != NULL) {
-        // 等待队列有空间（超时时间可根据需求调整，如osWaitForever）
-        osStatus_t status = osMessageQueuePut(xPrint_QueueHandle, 
-                                             &buffer,  // 传递char*指针
-                                             0, 
-                                             0);  // 超时时间0表示不等待
-        if (status != osOK) {  // 队列满或失败时释放内存，避免泄漏
-            vPortFree(buffer);
-        }
-    } else {  // 队列未初始化，直接释放
-        vPortFree(buffer);
+    	}
+    }
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+//普通和中断都可以使用的打印函数
+void safe_printf_all(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    char *buffer  = pvPortMalloc(LOG_LENGTH * sizeof(char));
+    int len = vsnprintf(buffer, LOG_LENGTH, format, args);
+    va_end(args);
+
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    if(__get_IPSR() != 0) {//中断中
+		if(xPrint_QueueHandle != NULL && len > 0) {
+			xQueueSendFromISR(xPrint_QueueHandle, &buffer, &xHigherPriorityTaskWoken);
+		}
+    }
+    else
+    {
+		if(xPrint_QueueHandle != NULL && len > 0) {
+			xQueueSend(xPrint_QueueHandle, &buffer, portMAX_DELAY);//pdMS_TO_TICKS(100)
+		}
     }
 }
+
 
 
 

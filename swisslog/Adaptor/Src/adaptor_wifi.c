@@ -63,7 +63,7 @@ void vSendToWifiTX(uint8_t *ucCmdDataArr, uint8_t len)
 {
   if (ucCmdDataArr == NULL || len == 0)
   {
-    DEBUGINFO_ALL("Invalid TX parameters");
+    DEBUGINFO("Invalid TX parameters");
     return;
   }
 
@@ -75,7 +75,7 @@ void vSendToWifiTX(uint8_t *ucCmdDataArr, uint8_t len)
     // HAL_UART_Transmit_IT(&huart2, CmdDataArr, len); // 启动中断发送
     taskEXIT_CRITICAL(); // 退出临界区
 
-    DEBUGINFO_ALL("wifi send:%s,len:%d\r\n", ucCmdDataArr, len);
+    DEBUGINFO("wifi send:%s,len:%d\r\n", ucCmdDataArr, len);
   }
 }
 
@@ -102,7 +102,7 @@ HAL_StatusTypeDef at_send_command(const char *cmd, const char *expect, uint32_t 
     // 等待响应, 检查信号量
     if (osMessageQueueGet(xWifi_Rx_QueueHandle, &frame, NULL, rsp_timeout) == osOK) 
     {
-      DEBUGINFO_ALL("wifi received:%s\r\n",at_resp_buf);
+      DEBUGINFO("wifi received:%s\r\n",at_resp_buf);
       // 检查是否收到预期回复
       ret = (strstr((char *)frame.data, expect) != NULL) ? HAL_OK : HAL_ERROR;
       if(ret == HAL_OK)

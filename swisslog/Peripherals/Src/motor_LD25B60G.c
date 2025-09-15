@@ -38,7 +38,7 @@ void vMotorOps(u8 Direction, u8 Speed)
 	switch (Direction)
 	{
 		case NoDirection:
-			DEBUGINFO_ALL("MOTOR_STOP\r\n");
+			DEBUGINFO("MOTOR_STOP\r\n");
 			vSendToMotor(MotorStopCmd,8);
 			CarToPlcData_obj.bSpdMode = ZeroSpeed; //实际速度记录为0
 			break;
@@ -50,17 +50,17 @@ void vMotorOps(u8 Direction, u8 Speed)
 			{
 				case LowSpeed:
 					vSendToMotor(MotorCCWCmd_100Speed,8);
-					DEBUGINFO_ALL("MOTOR_FORWARD, LowSpeed\r\n");
+					DEBUGINFO("MOTOR_FORWARD, LowSpeed\r\n");
 					CarToPlcData_obj.bSpdMode = LowSpeed;
 					break;
 				case NormalSpeed:
 					vSendToMotor(MotorCCWCmd_500Speed,8);
-					DEBUGINFO_ALL("MOTOR_FORWARD, NormalSpeed\r\n");
+					DEBUGINFO("MOTOR_FORWARD, NormalSpeed\r\n");
 					CarToPlcData_obj.bSpdMode = NormalSpeed;
 					break;
 				case HighSpeed:
 					vSendToMotor(MotorCCWCmd_1000Speed,8);
-					DEBUGINFO_ALL("MOTOR_FORWARD, HighSpeed\r\n");
+					DEBUGINFO("MOTOR_FORWARD, HighSpeed\r\n");
 					CarToPlcData_obj.bSpdMode = HighSpeed;
 					break;
 				default:
@@ -75,17 +75,17 @@ void vMotorOps(u8 Direction, u8 Speed)
 			{
 				case LowSpeed:
 					vSendToMotor(MotorCWCmd_100Speed,8);
-					DEBUGINFO_ALL("MOTOR_BACKWARD, LowSpeed\r\n");
+					DEBUGINFO("MOTOR_BACKWARD, LowSpeed\r\n");
 					CarToPlcData_obj.bSpdMode = LowSpeed;
 					break;
 				case NormalSpeed:
 					vSendToMotor(MotorCWCmd_500Speed,8);
-					DEBUGINFO_ALL("MOTOR_BACKWARD, NormalSpeed\r\n");
+					DEBUGINFO("MOTOR_BACKWARD, NormalSpeed\r\n");
 					CarToPlcData_obj.bSpdMode = NormalSpeed;
 					break;
 				case HighSpeed:
 					vSendToMotor(MotorCWCmd_1000Speed,8);
-					DEBUGINFO_ALL("MOTOR_BACKWARD, HighSpeed\r\n");
+					DEBUGINFO("MOTOR_BACKWARD, HighSpeed\r\n");
 					CarToPlcData_obj.bSpdMode = HighSpeed;
 					break;
 				default:
@@ -105,19 +105,19 @@ void vMotorRead(u8 Cmd)
 	{
 		//获取速度
 		case MOTOR_GET_SPEED:
-			DEBUGINFO_ALL("MOTOR_GET_SPEED\r\n");
+			DEBUGINFO("MOTOR_GET_SPEED\r\n");
 			vSendToMotor(MotorCmd_GetSpeed,8);
 			break;
 
 		//获取状态
 		case MOTOR_GET_STATUS:
-			DEBUGINFO_ALL("MOTOR_GET_STATUS\r\n");
+			DEBUGINFO("MOTOR_GET_STATUS\r\n");
 			vSendToMotor(MotorCmd_GetStatus,8);
 			break;
 		
 		//获取故障码
 		case MOTOR_GET_ERROR:
-			DEBUGINFO_ALL("MOTOR_GET_ERROR\r\n");
+			DEBUGINFO("MOTOR_GET_ERROR\r\n");
 			vSendToMotor(MotorCmd_GetErr,8);
 			break;
 

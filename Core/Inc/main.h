@@ -78,6 +78,8 @@ typedef enum {
 	RearProxSensor,   //后距离传感器
     ToggleSwitch,     //拨动开关
     ResetButton,      //复位按钮
+    SensorDebounce,   //传感器防抖
+    ToggleDebounce,   //拨动开关防抖
 }eInterruptType;
 
 
@@ -270,6 +272,8 @@ void Error_Handler(void);
 #define USART1_TX_GPIO_Port GPIOA
 #define Motor_RXC7_Pin GPIO_PIN_7
 #define Motor_RXC7_GPIO_Port GPIOC
+#define TOGGLE_FRONT_Pin GPIO_PIN_4
+#define TOGGLE_FRONT_GPIO_Port GPIOH
 #define LED5_Pin GPIO_PIN_8
 #define LED5_GPIO_Port GPIOG
 #define Motor_TXC6_Pin GPIO_PIN_6
@@ -280,34 +284,39 @@ void Error_Handler(void);
 #define LED4_GPIO_Port GPIOG
 #define FC_L_Pin GPIO_PIN_12
 #define FC_L_GPIO_Port GPIOH
+#define FC_L_EXTI_IRQn EXTI12_IRQn
 #define FC_H_Pin GPIO_PIN_5
 #define FC_H_GPIO_Port GPIOG
+#define FC_H_EXTI_IRQn EXTI5_IRQn
 #define LED2_Pin GPIO_PIN_4
 #define LED2_GPIO_Port GPIOG
 #define FP_H_Pin GPIO_PIN_11
 #define FP_H_GPIO_Port GPIOH
+#define FP_H_EXTI_IRQn EXTI11_IRQn
 #define RC_H_Pin GPIO_PIN_10
 #define RC_H_GPIO_Port GPIOH
+#define RC_H_EXTI_IRQn EXTI10_IRQn
 #define MOTOR_RS485_CTRL_Pin GPIO_PIN_3
 #define MOTOR_RS485_CTRL_GPIO_Port GPIOC
 #define TOGGLE_BACK_Pin GPIO_PIN_1
 #define TOGGLE_BACK_GPIO_Port GPIOG
+#define TOGGLE_BACK_EXTI_IRQn EXTI1_IRQn
 #define RC_L_Pin GPIO_PIN_9
 #define RC_L_GPIO_Port GPIOH
-#define RESET_Pin GPIO_PIN_0
-#define RESET_GPIO_Port GPIOA
+#define RC_L_EXTI_IRQn EXTI9_IRQn
+#define LED_RESET_Pin GPIO_PIN_0
+#define LED_RESET_GPIO_Port GPIOA
 #define RP_H_Pin GPIO_PIN_13
 #define RP_H_GPIO_Port GPIOF
+#define RP_H_EXTI_IRQn EXTI13_IRQn
 #define FP_L_Pin GPIO_PIN_0
 #define FP_L_GPIO_Port GPIOG
 #define OUT_DIR_Pin GPIO_PIN_11
 #define OUT_DIR_GPIO_Port GPIOD
 #define LED1_Pin GPIO_PIN_10
 #define LED1_GPIO_Port GPIOD
-#define TOGGLE_FRONT_Pin GPIO_PIN_12
-#define TOGGLE_FRONT_GPIO_Port GPIOF
-#define LED_RESET_Pin GPIO_PIN_15
-#define LED_RESET_GPIO_Port GPIOF
+#define RESET_Pin GPIO_PIN_15
+#define RESET_GPIO_Port GPIOF
 #define Wifi_RX_Pin GPIO_PIN_9
 #define Wifi_RX_GPIO_Port GPIOE
 #define Rfid_RX_Pin GPIO_PIN_12
@@ -316,6 +325,7 @@ void Error_Handler(void);
 #define Rfid_TX_GPIO_Port GPIOB
 #define RP_L_Pin GPIO_PIN_3
 #define RP_L_GPIO_Port GPIOA
+#define RP_L_EXTI_IRQn EXTI3_IRQn
 #define Wifi_TX_Pin GPIO_PIN_10
 #define Wifi_TX_GPIO_Port GPIOE
 

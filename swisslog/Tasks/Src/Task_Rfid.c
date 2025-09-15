@@ -53,7 +53,7 @@ char* pcGetRfidCardNum(char *data, u32 RfidDataLen)
   // 验证起始/结束符
   if (!data || RfidDataLen < 2 || data[0] != '$' || data[RfidDataLen - 1] != '#')
   {
-    DEBUGINFO_ALL("RFID data error\r\n");
+    DEBUGINFO("RFID data error\r\n");
     return '\0'; // 格式错误
   }
 
@@ -77,7 +77,7 @@ char* pcGetRfidCardNum(char *data, u32 RfidDataLen)
   // 重复性校验：比较两段是否相同
   if (strncmp(data, data + segmentLen, segmentLen) != 0) 
   {
-    DEBUGINFO_ALL("RFID data error\r\n");
+    DEBUGINFO("RFID data error\r\n");
     free(segment1);
     return '\0'; // 两段不一致
   }
@@ -90,7 +90,7 @@ char* pcGetRfidCardNum(char *data, u32 RfidDataLen)
   }
   else
   {
-    DEBUGINFO_ALL("Invalid RFID format\r\n");
+    DEBUGINFO("Invalid RFID format\r\n");
   }
   free(segment1);
   return pcTempCardNum;
@@ -112,10 +112,10 @@ void vGetCarPosition(char *data)
   {
     // 记录上一次位置
     CarToPlcData_obj.dwPrevPos = CarToPlcData_obj.dwCurPos; 
-    DEBUGINFO_ALL("dwPrevPos:%d\r\n",CarToPlcData_obj.dwPrevPos);
+    DEBUGINFO("dwPrevPos:%d\r\n",CarToPlcData_obj.dwPrevPos);
     // 更新当前位置
     CarToPlcData_obj.dwCurPos = ulCurPos; 
-    DEBUGINFO_ALL("dwCurPos:%d\r\n",CarToPlcData_obj.dwCurPos);
+    DEBUGINFO("dwCurPos:%d\r\n",CarToPlcData_obj.dwCurPos);
   }
 }
 
@@ -133,7 +133,7 @@ void vGetTagPosType(char *data)
 
   pcPosType[1] = ucPosType/10; //位置类型高10位
   pcPosType[0] = ucPosType%10; //位置类型个位
-  DEBUGINFO_ALL("vGetTagPosType: int-%d  array-%d,%d\r\n",ucPosType,pcPosType[1],pcPosType[0]);
+  DEBUGINFO("vGetTagPosType: int-%d  array-%d,%d\r\n",ucPosType,pcPosType[1],pcPosType[0]);
 
   //检测到停止标签
   if((pcPosType[1] == 0) || (pcPosType[1] == 1))
@@ -144,9 +144,10 @@ void vGetTagPosType(char *data)
       && (CarRunStatus_obj.AutoMode == Auto))
     {
       ucMotion_msg = CarStop;
-      if(xQueueSend(xMotion_QueueHandle, &ucMotion_msg, pdMS_TO_TICKS(100)) != pdPASS)
+      //if(xQueueSend(xMotion_QueueHandle, &ucMotion_msg, pdMS_TO_TICKS(100)) != pdPASS)
+      if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
       {
-        DEBUGINFO_ALL("vGetTagPosType() send motion msg error\r\n");
+        DEBUGINFO("vGetTagPosType() send motion msg error\r\n");
       }
     }
 
@@ -164,7 +165,7 @@ void vGetTagSpeed(char *data)
 
   pcSpeed[1] = ucSpeed/10; //速度高10位
   pcSpeed[0] = ucSpeed%10; //速度个位
-  DEBUGINFO_ALL("vGetTagSpeed:int-%d  array-%d,%d\r\n",ucSpeed,pcSpeed[1],pcSpeed[0]);
+  DEBUGINFO("vGetTagSpeed:int-%d  array-%d,%d\r\n",ucSpeed,pcSpeed[1],pcSpeed[0]);
 
   // 判断目标速度在1-3之间
   if((pcSpeed[0]>=1) && (pcSpeed[0]<=3))
@@ -176,9 +177,10 @@ void vGetTagSpeed(char *data)
       CarRunStatus_obj.SetSpeed = pcSpeed[0]; 
 
       ucMotion_msg = CarRunning;
-      if(xQueueSend(xMotion_QueueHandle, &ucMotion_msg, pdMS_TO_TICKS(100)) != pdPASS)
+      //if(xQueueSend(xMotion_QueueHandle, &ucMotion_msg, pdMS_TO_TICKS(100)) != pdPASS)
+      if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
       {
-        DEBUGINFO_ALL("vGetTagSpeed() send motion msg error\r\n");
+        DEBUGINFO("vGetTagSpeed() send motion msg error\r\n");
       }
 
     }
@@ -199,14 +201,14 @@ void vRfidTask(void *argument)
     if (osMessageQueueGet(xRfid_Rx_QueueHandle, &frame, NULL, osWaitForever) == osOK) 
     {
 
-      DEBUGINFO_ALL("rfid received:%s, len:%d\r\n",frame.data,frame.len);
+      DEBUGINFO("rfid received:%s, len:%d\r\n",frame.data,frame.len);
       // 解析RFID卡号
       strcpy(pcCardNum, pcGetRfidCardNum((char*)frame.data, frame.len));
       //判断卡号非空和cardNum的长度是否大于等于9
       if((strcmp(pcCardNum, "\0") != 0)&&(strlen(pcCardNum) >= CARD_NUM_LEN))
       {
 
-        DEBUGINFO_ALL("cardNum:%s,len:%d\r\n",pcCardNum,strlen(pcCardNum));
+        DEBUGINFO("cardNum:%s,len:%d\r\n",pcCardNum,strlen(pcCardNum));
 
         //把卡号通过wifi发送到上位机
         vSendToWifiTX((uint8_t *)pcCardNum, strlen(pcCardNum));
@@ -223,7 +225,7 @@ void vRfidTask(void *argument)
       }
       else
       {
-        DEBUGINFO_ALL("GetRfidCardNum error\r\n");
+        DEBUGINFO("GetRfidCardNum error\r\n");
       }
 
       // 重启DMA接收(DMA循环模式下，重启后从缓冲区起始地址覆盖写入)

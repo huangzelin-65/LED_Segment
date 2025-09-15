@@ -1,6 +1,7 @@
 #include "Task_Test.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "queue.h"
 #include "cmsis_os2.h"
 #include <string.h>
 #include "motor_LD25B60G.h"
@@ -32,7 +33,7 @@ void vTestTask(void *argument)
     if (osMessageQueueGet(xTest_Rx_QueueHandle, &frame, NULL, osWaitForever) == osOK)
     {
 
-      DEBUGINFO_ALL("Test received:%s, len:%d\r\n",frame.data,frame.len);
+      DEBUGINFO("Test received:%s, len:%d\r\n",frame.data,frame.len);
 
       PlcToCarData_obj.wSeq = frame.data[1]<<8 | frame.data[0]; // 序号
       PlcToCarData_obj.dwPlcNum = frame.data[5]<<24 | frame.data[4]<<16 | frame.data[3]<<8 | frame.data[2]; // PLC编号
@@ -41,7 +42,7 @@ void vTestTask(void *argument)
       PlcToCarData_obj.wCtrl = frame.data[BASE_COUNT+5]<<8 | frame.data[BASE_COUNT+4]; // 控制信号
       PlcToCarData_obj.bDire = frame.data[BASE_COUNT+30]; // 小车运行方向 1=正转 2=反转
 
-      DEBUGINFO_ALL("wCtrl : %X\r\n",PlcToCarData_obj.wCtrl);
+      DEBUGINFO("wCtrl : %X\r\n",PlcToCarData_obj.wCtrl);
 
       vParseCommandToCar();
 
@@ -52,18 +53,16 @@ void vTestTask(void *argument)
 }
 
 
-/*  print任务入口函数  */
 void vPrintTask(void *argument)
 {
-  char *rxData = NULL;
-  while (1)
-  {
-    osStatus_t stat = osMessageQueueGet(xPrint_QueueHandle, &rxData, NULL,portMAX_DELAY);
-    if(stat == osOK)
-    {
-      //HAL_UART_Transmit(&huart1, (uint8_t *)rxData, strlen(rxData), HAL_MAX_DELAY);
-      vPrint_start_Transmit((uint8_t *)rxData, (uint16_t)strlen(rxData));
-      vPortFree(rxData);
-    }
-  }
+  /* Infinite loop */
+	char *rxData = NULL;
+	while (1)
+	{
+		if(xQueueReceive(xPrint_QueueHandle, &rxData, portMAX_DELAY) == pdPASS)
+		{
+			HAL_UART_Transmit(&huart1, (uint8_t *)rxData, strlen(rxData), HAL_MAX_DELAY);
+			vPortFree(rxData);
+		}
+	}
 }

@@ -6,9 +6,6 @@
 #include "app_freertos.h"
 
 
-volatile uint8_t SensorDebounce_flag = 0;
-volatile uint8_t ToggleDebounce_flag = 0;
-
 extern osMessageQueueId_t xSensor_QueueHandle;
 extern _CarCheckFlag_obj CarCheckFlagobj;
 extern CarToPlcData CarToPlcData_obj;
@@ -93,10 +90,10 @@ void vSensorStatusCheck(void)
 
   // 发送消息到xSensor_Queue
   sensor_msg = SensorEvent;//碰撞触发
-  DEBUGINFO_ALL("motion_msg = SensorTrigger\r\n");
+  DEBUGINFO("send Event to Sensor_Queue\r\n");
   if(osMessageQueuePut(xSensor_QueueHandle, &sensor_msg, 0, pdMS_TO_TICKS(100)) != osOK)
   {
-      DEBUGINFO_ALL("vSensorStatusCheck() send motion error 1\r\n");
+      DEBUGINFO("vSensorStatusCheck() send motion error 1\r\n");
   }
 
 }
@@ -126,27 +123,27 @@ void vToggleSwitchStatusCheck(void)
   {
     sensor_msg = ToggleFront;
     CarCheckFlagobj.ToggleSwtichPosition = ToggleFront;
-    DEBUGINFO_ALL("motion_msg = ToggleFront\r\n");
+    DEBUGINFO("motion_msg = ToggleFront\r\n");
   }
   //拨动开关拨向后
   else if((TOGGLE_FRONT_value == GPIO_PIN_SET)&&(TOGGLE_BACK_value == GPIO_PIN_RESET))
   {
     sensor_msg = ToggleBack;
     CarCheckFlagobj.ToggleSwtichPosition = ToggleBack;
-    DEBUGINFO_ALL("motion_msg = ToggleBack\r\n");
+    DEBUGINFO("motion_msg = ToggleBack\r\n");
   }
   //拨动开关拨向停止(中间挡位)
   else if(TOGGLE_FRONT_value == GPIO_PIN_SET && TOGGLE_BACK_value == GPIO_PIN_SET)
   {
     sensor_msg = ToggleStop;
     CarCheckFlagobj.ToggleSwtichPosition = ToggleStop;
-    DEBUGINFO_ALL("motion_msg = ToggleStop\r\n");
+    DEBUGINFO("motion_msg = ToggleStop\r\n");
   }
 
   //发送拨动开关时事件
   if(osMessageQueuePut(xSensor_QueueHandle, &sensor_msg, 0, pdMS_TO_TICKS(100)) != osOK)
   {
-    DEBUGINFO_ALL("vToggleSwitchStatusCheck() send motion error\r\n");
+    DEBUGINFO("vToggleSwitchStatusCheck() send motion error\r\n");
   }
 
 }
@@ -163,31 +160,32 @@ void vResetLedStatusCheck(void)
   if (GPIO_READ(RESET) == GPIO_PIN_RESET)
   {
     GPIO_WRITE(LED_RESET, GPIO_PIN_SET); // 使能LED_RESET
-    DEBUGINFO_ALL("LED_RESET on\r\n");
-    //DEBUGINFO_ALL("reset trigger\r\n");
+    DEBUGINFO("LED_RESET on\r\n");
+    //DEBUGINFO("reset trigger\r\n");
     //osTimerStart(xResetButtonTimerHandle, pdMS_TO_TICKS(ResetDuration));
   }
   else
   {
     GPIO_WRITE(LED_RESET, GPIO_PIN_RESET); // 关闭LED_RESET
-    DEBUGINFO_ALL("LED_RESET off\r\n");
+    DEBUGINFO("LED_RESET off\r\n");
   }
 }
 
 
 void vSensorDebounceCallback(void *argument)
 {
-  SensorDebounce_flag = 0;  //重置防重入标志位
-  vSensorStatusCheck();     //检测传感器状态
+  uint8_t msg;
+  msg = SensorDebounce;
+  osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
 }
-
 
 void vToggleSwitchCallback(void *argument)
 {
-  ToggleDebounce_flag = 0;      //重置防重入标志位
-  vToggleSwitchStatusCheck();   //检测开关状态
+  uint8_t msg;
+  msg = ToggleDebounce;
+  osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
+  
 }
-
 
 void vResetButtonCallback(void *argument)
 {
@@ -197,9 +195,7 @@ void vResetButtonCallback(void *argument)
     sensor_msg = Reset;
   if(osMessageQueuePut(xSensor_QueueHandle, &sensor_msg, 0, pdMS_TO_TICKS(100)) != osOK)
     {
-      DEBUGINFO_ALL("ResetButtonCallback() send sensor msg error\r\n");
+      DEBUGINFO("ResetButtonCallback() send sensor msg error\r\n");
     }
-
   }
 }
-

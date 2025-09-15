@@ -29,12 +29,12 @@ extern u8 Beep_enable;
 
 void vCarInStation(void)
 {
-  DEBUGINFO_ALL("Car In Station\r\n");
+  DEBUGINFO("Car In Station\r\n");
 }
 
 void vCarOutStation(void)
 {
-  DEBUGINFO_ALL("Car Out Station\r\n");
+  DEBUGINFO("Car Out Station\r\n");
 }
 
 
@@ -52,9 +52,15 @@ void vSensorTask(void *argument)
   u8 ucSensorRecv_msg;
   u8 ucMotion_msg;
 
+  if (xSensor_QueueHandle == NULL) {
+    // 队列创建失败，处理错误
+    DEBUGINFO("xSensor_QueueHandle == NULL\r\n");
+  }
+  
   //蜂鸣器响0.5s
   vBeep_Control(ENABLE);
   //osDelay(500);
+  //vTaskDelay(500);
   vBeep_Control(DISABLE);
 
   //延时0.5s，让电机上电完成
@@ -68,7 +74,8 @@ void vSensorTask(void *argument)
   
   while (1)
   {
-    if (xQueueReceive(xSensor_QueueHandle, &ucSensorRecv_msg, portMAX_DELAY) == pdPASS) 
+    //if (xQueueReceive(xSensor_QueueHandle, &ucSensorRecv_msg, portMAX_DELAY) == pdPASS) 
+    if (osMessageQueueGet(xSensor_QueueHandle, &ucSensorRecv_msg, NULL, osWaitForever) == osOK) 
     {
       switch (ucSensorRecv_msg)
       {
@@ -83,7 +90,7 @@ void vSensorTask(void *argument)
                 || (CarCheckFlagobj.FrontProxStatus == SensorTrigger)))
               {
                 GPIO_WRITE(LED1, GPIO_PIN_SET); // 使能LED1
-                DEBUGINFO_ALL("enable LED1\r\n");
+                DEBUGINFO("enable LED1\r\n");
 
                 //请求停止电机
                 ucMotion_msg = CarStop;
@@ -93,7 +100,7 @@ void vSensorTask(void *argument)
                 && (CarCheckFlagobj.FrontProxStatus == SensorRelease))
               {
                 GPIO_WRITE(LED1, GPIO_PIN_RESET); // 关闭LED1
-                DEBUGINFO_ALL("disable LED1\r\n");
+                DEBUGINFO("disable LED1\r\n");
 
                 //请求启动电机
                 ucMotion_msg = CarRunning;
@@ -107,7 +114,7 @@ void vSensorTask(void *argument)
                 || (CarCheckFlagobj.RearProxStatus == SensorTrigger)))
               {
                 GPIO_WRITE(LED1, GPIO_PIN_SET); // 使能LED1
-                DEBUGINFO_ALL("enable LED1\r\n");
+                DEBUGINFO("enable LED1\r\n");
 
                 //请求停止电机
                 ucMotion_msg = CarStop;
@@ -117,16 +124,17 @@ void vSensorTask(void *argument)
                 && (CarCheckFlagobj.RearProxStatus == SensorRelease))
               {
                 GPIO_WRITE(LED1, GPIO_PIN_RESET); // 关闭LED1
-                DEBUGINFO_ALL("disable LED1\r\n");
+                DEBUGINFO("disable LED1\r\n");
 
                 //请求启动电机
                 ucMotion_msg = CarRunning;
               }
             }
           }
-          if(xQueueSend(xMotion_QueueHandle, &ucMotion_msg, pdMS_TO_TICKS(100)) != pdPASS)
+          //if(xQueueSend(xMotion_QueueHandle, &ucMotion_msg, pdMS_TO_TICKS(100)) != pdPASS)
+          if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
           {
-            DEBUGINFO_ALL("vSensorask() send motion msg error1\r\n");
+            DEBUGINFO("vSensorask() send motion msg error1\r\n");
           }
           break;
 
@@ -152,9 +160,10 @@ void vSensorTask(void *argument)
           CarRunStatus_obj.AutoMode = Manual;
           // 停止电机
           ucMotion_msg = CarStop;
-          if(xQueueSend(xMotion_QueueHandle, &ucMotion_msg, pdMS_TO_TICKS(100)) != pdPASS)
+          //if(xQueueSend(xMotion_QueueHandle, &ucMotion_msg, pdMS_TO_TICKS(100)) != pdPASS)
+          if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
           {
-            DEBUGINFO_ALL("vSensorask() send motion msg error2\r\n");
+            DEBUGINFO("vSensorask() send motion msg error2\r\n");
           }
           break;
 
@@ -164,13 +173,14 @@ void vSensorTask(void *argument)
           if(GPIO_READ(RESET) == GPIO_PIN_RESET)
           {
             GPIO_WRITE(LED_RESET, GPIO_PIN_SET); // 使能LED_RESET
-            DEBUGINFO_ALL("reset button trigger\r\n");
+            DEBUGINFO("reset button trigger\r\n");
 
             // 请求停止电机
             ucMotion_msg = CarStop;
-            if(xQueueSend(xMotion_QueueHandle, &ucMotion_msg, pdMS_TO_TICKS(100)) != pdPASS)
+            //if(xQueueSend(xMotion_QueueHandle, &ucMotion_msg, pdMS_TO_TICKS(100)) != pdPASS)
+            if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
             {
-              DEBUGINFO_ALL("vSensorask() send motion msg error3\r\n");
+              DEBUGINFO("vSensorask() send motion msg error3\r\n");
             }
             osTimerStart(xResetButtonTimerHandle, pdMS_TO_TICKS(ResetDuration));
           }
@@ -178,13 +188,13 @@ void vSensorTask(void *argument)
           else
           {
             GPIO_WRITE(LED_RESET, GPIO_PIN_RESET); // 关闭LED_RESET
-            DEBUGINFO_ALL("reset button release\r\n");
+            DEBUGINFO("reset button release\r\n");
           }
           break;
         
         // 开始复位（复位按钮持续触发1秒）
         case Reset:
-          DEBUGINFO_ALL("SystemReset\r\n");
+          DEBUGINFO("SystemReset\r\n");
           NVIC_SystemReset();
           break;
 

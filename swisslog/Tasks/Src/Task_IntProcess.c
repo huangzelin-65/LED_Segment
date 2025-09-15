@@ -21,8 +21,8 @@ extern QueueHandle_t xSensor_QueueHandle;
 extern osTimerId_t xSensorDebounceTimerHandle;
 extern osTimerId_t xToggleSwitchTimerHandle;
 
-extern volatile uint8_t SensorDebounce_flag;
-extern volatile uint8_t ToggleDebounce_flag;
+volatile uint8_t SensorDebounce_flag;
+volatile uint8_t ToggleDebounce_flag;
 
 
 void vIntProcessTask(void *argument)
@@ -30,9 +30,14 @@ void vIntProcessTask(void *argument)
   u8 IntProcessRecv_msg;
   u8 sensor_msg;
 
+  SensorDebounce_flag = 0;
+  ToggleDebounce_flag = 0;
+
   while(1)
   {
-    if (xQueueReceive(xInterrupt_QueueHandle, &IntProcessRecv_msg, portMAX_DELAY) == pdPASS) {
+    //if (xQueueReceive(xInterrupt_QueueHandle, &IntProcessRecv_msg, portMAX_DELAY) == pdPASS) 
+    if (osMessageQueueGet(xInterrupt_QueueHandle, &IntProcessRecv_msg, NULL, osWaitForever) == osOK) 
+    {
       switch(IntProcessRecv_msg)
       {
         // 判断 前碰撞传感器 是否触发或释放
@@ -62,12 +67,22 @@ void vIntProcessTask(void *argument)
         
         case ResetButton:
           sensor_msg = ResetButtonTrigger;
-          if(xQueueSend(xSensor_QueueHandle, &sensor_msg, pdMS_TO_TICKS(100)) != pdPASS)
+          //if(xQueueSend(xSensor_QueueHandle, &sensor_msg, pdMS_TO_TICKS(100)) != pdPASS)
+          if(osMessageQueuePut(xSensor_QueueHandle, &sensor_msg, 0, pdMS_TO_TICKS(100)) != osOK)
           {
-            DEBUGINFO_ALL("vIntProcessTask() send sensor msg error\r\n");
+            DEBUGINFO("vIntProcessTask() send sensor msg error\r\n");
           }
           break;
 
+        case SensorDebounce:
+          SensorDebounce_flag = 0;
+          vSensorStatusCheck();     //检测传感器状态
+          break;
+
+        case ToggleDebounce:
+          ToggleDebounce_flag = 0;
+          vToggleSwitchStatusCheck();   //检测开关状态
+          break;
         default:
           break;
       }

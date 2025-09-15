@@ -64,21 +64,20 @@ extern osThreadId_t TestTaskHandle;
 extern osThreadId_t WifiManagerTaskHandle;
 extern osThreadId_t WifiReceiveTaskHandle;
 extern osThreadId_t PrintTaskHandle;
+extern osTimerId_t xResetButtonTimerHandle;
 extern osTimerId_t xSensorDebounceTimerHandle;
 extern osTimerId_t xToggleSwitchTimerHandle;
-extern osTimerId_t xResetButtonTimerHandle;
-extern osMessageQueueId_t xPrint_QueueHandle;
 extern osMessageQueueId_t xInterrupt_QueueHandle;
-extern osMessageQueueId_t xMotion_QueueHandle;
 extern osMessageQueueId_t xSensor_QueueHandle;
 extern osMessageQueueId_t xWifi_Rx_QueueHandle;
 extern osMessageQueueId_t xTest_Rx_QueueHandle;
 extern osMessageQueueId_t xMotor_Rx_QueueHandle;
 extern osMessageQueueId_t xRfid_Rx_QueueHandle;
+extern osMessageQueueId_t xMotion_QueueHandle;
+extern osMessageQueueId_t xPrint_QueueHandle;
 extern osSemaphoreId_t xMotorTxSemHandle;
 extern osSemaphoreId_t xWifiTxSemHandle;
 extern osSemaphoreId_t xWifiReadySemHandle;
-extern osSemaphoreId_t xPrintSemHandle;
 
 /* Exported function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -95,9 +94,9 @@ extern void vTestTask(void *argument);
 extern void vWifiManagerTask(void *argument);
 extern void vWifiReceiveTask(void *argument);
 extern void vPrintTask(void *argument);
+extern void vResetButtonCallback(void *argument);
 extern void vSensorDebounceCallback(void *argument);
 extern void vToggleSwitchCallback(void *argument);
-extern void vResetButtonCallback(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 

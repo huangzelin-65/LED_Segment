@@ -30,8 +30,8 @@ static HAL_StatusTypeDef wb502a_init(void)
 {
   char wifi_cmd[WIFI_TX_BUF_SIZE];
 
-  DEBUGINFO_ALL("test\r\n");
-  DEBUGINFO_ALL("wifi init\r\n");
+  DEBUGINFO("test\r\n");
+  DEBUGINFO("wifi init\r\n");
 
   //退出透传模式步骤1
   at_send_command("+++", "a", 500);
@@ -119,13 +119,14 @@ static HAL_StatusTypeDef wb502a_init(void)
 /* WiFi管理任务入口函数 */
 void vWifiManagerTask(void *argument)
 {
-  DEBUGINFO_ALL("vWifiManagerTask\r\n");
+  DEBUGINFO("vWifiManagerTask\r\n");
   
   // 初始化WiFi模块
   while (wb502a_init() != HAL_OK) 
   {
      // 初始化失败重试
        osDelay(1000);
+       DEBUGINFO("wifi retry!\r\n");
   }
   
   
@@ -154,15 +155,15 @@ void vWifiReceiveTask(void *argument)
       if (osMessageQueueGet(xWifi_Rx_QueueHandle, &frame, NULL, osWaitForever) == osOK)
       {
 
-        DEBUGINFO_ALL("wifi received:%s, len:%d\r\n",frame.data,frame.len);
+        DEBUGINFO("wifi received:%s, len:%d\r\n",frame.data,frame.len);
 
         vSendToWifiTX(frame.data, frame.len);
 
         // for (uint8_t i=0;i<ucWifiDataLen;i++)
         // {
-        //   DEBUGINFO_ALL("%X ",frame.data[i]);
+        //   DEBUGINFO("%X ",frame.data[i]);
         // }
-        // DEBUGINFO_ALL("\r\n");  
+        // DEBUGINFO("\r\n");  
 
         PlcToCarData_obj.wSeq = frame.data[1]<<8 | frame.data[0]; // 序号
         PlcToCarData_obj.dwPlcNum = frame.data[5]<<24 | frame.data[4]<<16 | frame.data[3]<<8 | frame.data[2]; // PLC编号
@@ -171,7 +172,7 @@ void vWifiReceiveTask(void *argument)
         PlcToCarData_obj.wCtrl = frame.data[CMD_BASE_COUNT+5]<<8 | frame.data[CMD_BASE_COUNT+4]; // 控制信号
         PlcToCarData_obj.bDire = frame.data[CMD_BASE_COUNT+30]; // 小车运行方向 1=正转 2=反转
 
-        DEBUGINFO_ALL("wCtrl : %X\r\n",PlcToCarData_obj.wCtrl);
+        DEBUGINFO("wCtrl : %X\r\n",PlcToCarData_obj.wCtrl);
 
         vParseCommandToCar();
 

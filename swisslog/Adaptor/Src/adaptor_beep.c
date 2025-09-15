@@ -18,13 +18,13 @@ void vBeep_Control(uint8_t enable)
 {
   if (enable) {
     // 启动PWM输出
-    HAL_TIM_PWM_Start(BUZZER_TIM, BUZZER_CHANNEL);
-    DEBUGINFO_ALL("Beep enable\r\n");
+    //HAL_TIM_PWM_Start(BUZZER_TIM, BUZZER_CHANNEL);
+    DEBUGINFO("Beep enable\r\n");
   } else {
     // 停止PWM输出
-    HAL_TIM_PWM_Stop(BUZZER_TIM, BUZZER_CHANNEL);
+    //HAL_TIM_PWM_Stop(BUZZER_TIM, BUZZER_CHANNEL);
     GPIO_WRITE(BEEP_PWM, GPIO_PIN_RESET); // 将蜂鸣器引脚置为低电平
-    DEBUGINFO_ALL("Beep disable\r\n");
+    DEBUGINFO("Beep disable\r\n");
 
   }
 }
