@@ -12,6 +12,6 @@ typedef struct {
 
 void vPrint_start_Transmit(uint8_t *rxData, uint16_t Size);
 void vTest_Start_GPDMA_Receive(void);
-void vTest_RxEventCallback(uint16_t Size);
+void vTest_RxEventCallback(uint16_t dataLength);
 
 #endif /* ADAPTOR_INC_ADAPTOR_TEST_H_ */

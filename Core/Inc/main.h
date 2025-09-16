@@ -274,6 +274,7 @@ void Error_Handler(void);
 #define Motor_RXC7_GPIO_Port GPIOC
 #define TOGGLE_FRONT_Pin GPIO_PIN_4
 #define TOGGLE_FRONT_GPIO_Port GPIOH
+#define TOGGLE_FRONT_EXTI_IRQn EXTI4_IRQn
 #define LED5_Pin GPIO_PIN_8
 #define LED5_GPIO_Port GPIOG
 #define Motor_TXC6_Pin GPIO_PIN_6
@@ -311,12 +312,14 @@ void Error_Handler(void);
 #define RP_H_EXTI_IRQn EXTI13_IRQn
 #define FP_L_Pin GPIO_PIN_0
 #define FP_L_GPIO_Port GPIOG
+#define FP_L_EXTI_IRQn EXTI0_IRQn
 #define OUT_DIR_Pin GPIO_PIN_11
 #define OUT_DIR_GPIO_Port GPIOD
 #define LED1_Pin GPIO_PIN_10
 #define LED1_GPIO_Port GPIOD
 #define RESET_Pin GPIO_PIN_15
 #define RESET_GPIO_Port GPIOF
+#define RESET_EXTI_IRQn EXTI15_IRQn
 #define Wifi_RX_Pin GPIO_PIN_9
 #define Wifi_RX_GPIO_Port GPIOE
 #define Rfid_RX_Pin GPIO_PIN_12

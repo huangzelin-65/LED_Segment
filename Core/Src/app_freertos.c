@@ -83,7 +83,7 @@ osThreadId_t RfidTaskHandle;
 const osThreadAttr_t RfidTask_attributes = {
   .name = "RfidTask",
   .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 128 * 4
+  .stack_size = 256 * 4
 };
 /* Definitions for SensorTask */
 osThreadId_t SensorTaskHandle;
@@ -238,13 +238,13 @@ void MX_FREERTOS_Init(void) {
   /* creation of xSensor_Queue */
   xSensor_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xSensor_Queue_attributes);
   /* creation of xWifi_Rx_Queue */
-  xWifi_Rx_QueueHandle = osMessageQueueNew (3, sizeof(Wifi_Rx_Frame_t), &xWifi_Rx_Queue_attributes);
+  xWifi_Rx_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xWifi_Rx_Queue_attributes);
   /* creation of xTest_Rx_Queue */
-  xTest_Rx_QueueHandle = osMessageQueueNew (3, sizeof(Test_Rx_Frame_t), &xTest_Rx_Queue_attributes);
+  xTest_Rx_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xTest_Rx_Queue_attributes);
   /* creation of xMotor_Rx_Queue */
-  xMotor_Rx_QueueHandle = osMessageQueueNew (3, sizeof(Motor_Rx_Frame_t), &xMotor_Rx_Queue_attributes);
+  xMotor_Rx_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xMotor_Rx_Queue_attributes);
   /* creation of xRfid_Rx_Queue */
-  xRfid_Rx_QueueHandle = osMessageQueueNew (3, sizeof(Rfid_Rx_Frame_t), &xRfid_Rx_Queue_attributes);
+  xRfid_Rx_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xRfid_Rx_Queue_attributes);
   /* creation of xMotion_Queue */
   xMotion_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xMotion_Queue_attributes);
   /* creation of xPrint_Queue */

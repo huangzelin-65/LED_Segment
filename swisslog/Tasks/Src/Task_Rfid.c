@@ -27,7 +27,6 @@
 char pcCardNum[10] = {0};
 u8 ucRfidDataLen = 0;
 u8 ucMotion_msg;
-Rfid_Rx_Frame_t frame;
 
 
 extern QueueHandle_t xMotion_QueueHandle;
@@ -36,64 +35,61 @@ extern _CarCheckFlag_obj CarCheckFlagobj;
 extern _CarRunStatus_obj CarRunStatus_obj;
 extern osMessageQueueId_t xRfid_Rx_QueueHandle;
 
-
-/**
- * 获取RFID卡号
- *
- * 该函数从提供的数据中提取RFID卡号。它首先验证数据的起始和结束符，接着定位第一个"#"位置，
- * 提取第一段子串（从$到#），并进行重复性校验。如果数据格式正确，函数将卡号提取到cardNum数组中。
- *
- * @param data   RFID数据
- * @param RfidDataLen RFID数据长度
- */
+//获取9位卡号
 char* pcGetRfidCardNum(char *data, u32 RfidDataLen)
 {
-  static char pcTempCardNum[10] = {0};
+    static char pcTempCardNum[10] = {0}; // 存储9位卡号加终止符
+    // 重置临时缓冲区
+    memset(pcTempCardNum, 0, sizeof(pcTempCardNum));
 
-  // 验证起始/结束符
-  if (!data || RfidDataLen < 2 || data[0] != '$' || data[RfidDataLen - 1] != '#')
-  {
-    DEBUGINFO("RFID data error\r\n");
-    return '\0'; // 格式错误
-  }
+    // 验证输入参数
+    if (!data || RfidDataLen < 2)
+    {
+        DEBUGINFO("RFID invalid parameters\r\n");
+        return NULL; // 返回空指针而非字符
+    }
 
-  // 定位第一个"#"位置
-  char *firstEnd = strchr(data, '#'); 
-  if (!firstEnd) return '\0';
+    // 验证起始/结束符
+    if (data[0] != '$' || data[RfidDataLen - 1] != '#')
+    {
+        DEBUGINFO("RFID data format error\r\n");
+        return NULL;
+    }
 
-  // 提取第一段子串（从$到#）
-  u32 segmentLen = firstEnd - data + 1;
-  // 验证数据长度有效性
-  if (segmentLen >= RfidDataLen) 
-  {
-    return '\0';
-  }
-  char* segment1 = malloc(segmentLen + 1);
-  if (!segment1) return '\0';
+    // 定位第一个"#"位置
+    char *firstEnd = strchr(data, '#'); 
+    if (!firstEnd) return NULL;
 
-  strncpy(segment1, data, segmentLen);
-  segment1[segmentLen] = '\0';
+    // 提取第一段子串（从$到#）
+    u32 segmentLen = firstEnd - data + 1;
+    // 验证数据长度有效性
+    if (segmentLen >= RfidDataLen || segmentLen * 2 != RfidDataLen) 
+    {
+        DEBUGINFO("RFID segment length error\r\n");
+        return NULL;
+    }
 
-  // 重复性校验：比较两段是否相同
-  if (strncmp(data, data + segmentLen, segmentLen) != 0) 
-  {
-    DEBUGINFO("RFID data error\r\n");
-    free(segment1);
-    return '\0'; // 两段不一致
-  }
+    // 重复性校验：比较两段是否相同
+    if (memcmp(data, data + segmentLen, segmentLen) != 0) 
+    {
+        DEBUGINFO("RFID data mismatch\r\n");
+        return NULL; // 两段不一致
+    }
 
-  // 提取9位卡号，卡号位置：跳过"$E000000"（8字节）
-  if (strlen(segment1) >= (CHAR_OFFSET + CARD_NUM_LEN)) // $ + 8字符偏移 + 9位卡号
-  {                                            
-    strncpy(pcTempCardNum, segment1 + CHAR_OFFSET, CARD_NUM_LEN);  // 提取9位卡号
-    pcTempCardNum[CARD_NUM_LEN] = '\0';      // 显式添加终止符
-  }
-  else
-  {
-    DEBUGINFO("Invalid RFID format\r\n");
-  }
-  free(segment1);
-  return pcTempCardNum;
+    // 提取9位卡号，确保不会越界
+    // 假设CHAR_OFFSET是8（"$E000000"的长度），CARD_NUM_LEN是9
+    if (segmentLen >= (CHAR_OFFSET + CARD_NUM_LEN + 1)) // +1确保有终止符空间
+    {                                            
+        // 修正：使用data而不是segment1，因为我们已经验证了数据有效性
+        strncpy(pcTempCardNum, data + CHAR_OFFSET, CARD_NUM_LEN);
+        pcTempCardNum[CARD_NUM_LEN] = '\0'; // 确保终止符
+        return pcTempCardNum;
+    }
+    else
+    {
+        DEBUGINFO("Invalid RFID format, insufficient length\r\n");
+        return NULL;
+    }
 }
 
 // 获取小车当前位置
@@ -112,10 +108,10 @@ void vGetCarPosition(char *data)
   {
     // 记录上一次位置
     CarToPlcData_obj.dwPrevPos = CarToPlcData_obj.dwCurPos; 
-    DEBUGINFO("dwPrevPos:%d\r\n",CarToPlcData_obj.dwPrevPos);
+    DEBUGINFO("dwPrevPos:%lu\r\n",CarToPlcData_obj.dwPrevPos);
     // 更新当前位置
     CarToPlcData_obj.dwCurPos = ulCurPos; 
-    DEBUGINFO("dwCurPos:%d\r\n",CarToPlcData_obj.dwCurPos);
+    DEBUGINFO("dwCurPos:%lu\r\n",CarToPlcData_obj.dwCurPos);
   }
 }
 
@@ -144,7 +140,6 @@ void vGetTagPosType(char *data)
       && (CarRunStatus_obj.AutoMode == Auto))
     {
       ucMotion_msg = CarStop;
-      //if(xQueueSend(xMotion_QueueHandle, &ucMotion_msg, pdMS_TO_TICKS(100)) != pdPASS)
       if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
       {
         DEBUGINFO("vGetTagPosType() send motion msg error\r\n");
@@ -192,41 +187,51 @@ void vGetTagSpeed(char *data)
 //任务入口函数
 void vRfidTask(void *argument)
 {
+  uint8_t ucRfid_Task_Rx_Buffer[RFID_RX_BUF_SIZE];
   
   //启动DMA接收
   vRfid_Start_GPDMA_Receive();
 
   while(1) {
     // 等待DMA接收完成信号
-    if (osMessageQueueGet(xRfid_Rx_QueueHandle, &frame, NULL, osWaitForever) == osOK) 
+    if (osMessageQueueGet(xRfid_Rx_QueueHandle, ucRfid_Task_Rx_Buffer, NULL, osWaitForever) == osOK) 
     {
 
-      DEBUGINFO("rfid received:%s, len:%d\r\n",frame.data,frame.len);
+      DEBUGINFO("rfid received:%s, len:%d\r\n",ucRfid_Task_Rx_Buffer,strlen((char *)ucRfid_Task_Rx_Buffer));
       // 解析RFID卡号
-      strcpy(pcCardNum, pcGetRfidCardNum((char*)frame.data, frame.len));
-      //判断卡号非空和cardNum的长度是否大于等于9
-      if((strcmp(pcCardNum, "\0") != 0)&&(strlen(pcCardNum) >= CARD_NUM_LEN))
+      //strcpy(pcCardNum, pcGetRfidCardNum((char*)frame.data, frame.len));
+      char* pResult = pcGetRfidCardNum((char*)ucRfid_Task_Rx_Buffer, strlen((char *)ucRfid_Task_Rx_Buffer));
+      //判断卡号非空
+      if (pResult != NULL)
       {
+        strcpy(pcCardNum, pResult);
 
-        DEBUGINFO("cardNum:%s,len:%d\r\n",pcCardNum,strlen(pcCardNum));
+        //cardNum的长度是否等于9
+        if(strlen(pcCardNum) == CARD_NUM_LEN)
+        {
+          DEBUGINFO("cardNum:%s,len:%d\r\n",pcCardNum,strlen(pcCardNum));
 
-        //把卡号通过wifi发送到上位机
-        vSendToWifiTX((uint8_t *)pcCardNum, strlen(pcCardNum));
+          //把卡号通过wifi发送到上位机
+          //vSendToWifiTX((uint8_t *)pcCardNum, strlen(pcCardNum));
 
-        // 获取小车当前位置
-        vGetCarPosition(pcCardNum);
+          // 获取小车当前位置
+          vGetCarPosition(pcCardNum);
 
-        //获取标签位置类型，并判断是否需要停车
-        vGetTagPosType(pcCardNum);
+          //获取标签位置类型，并判断是否需要停车
+          vGetTagPosType(pcCardNum);
 
-        //获取标签速度设置，并设置速度
-        vGetTagSpeed(pcCardNum);
-
+          //获取标签速度设置，并设置速度
+          vGetTagSpeed(pcCardNum);
+        }
       }
       else
       {
-        DEBUGINFO("GetRfidCardNum error\r\n");
+        // 处理错误情况
+        DEBUGINFO("Failed to get RFID card number\r\n");
+        // 可以清零pcCardNum或者做其他错误处理
+        memset(pcCardNum, 0, sizeof(pcCardNum));
       }
+
 
       // 重启DMA接收(DMA循环模式下，重启后从缓冲区起始地址覆盖写入)
       vRfid_Start_GPDMA_Receive();

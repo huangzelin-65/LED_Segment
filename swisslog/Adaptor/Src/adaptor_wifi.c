@@ -17,7 +17,6 @@ uint8_t at_cmd_buf[WIFI_TX_BUF_SIZE];
 uint8_t at_resp_buf[WIFI_RX_BUF_SIZE];
 uint16_t resp_length = 0;
 
-Wifi_Rx_Frame_t xWifi_Rx_Frame;
 
 // 外部声明
 extern UART_HandleTypeDef huart6;
@@ -28,9 +27,8 @@ extern osSemaphoreId_t xWifiTxSemHandle;
 // 启动WIFI的GPDMA接收
 void vWifi_Start_GPDMA_Receive(void) {
   // 启动DMA接收（空闲模式）
-  if (HAL_UARTEx_ReceiveToIdle_DMA(&huart6, ucWifi_Rx_Buffer[ucWifi_current_buf_idx], WIFI_RX_BUF_SIZE) != HAL_OK) {
-    Error_Handler();
-  }
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart6, ucWifi_Rx_Buffer[ucWifi_current_buf_idx], WIFI_RX_BUF_SIZE);
+  __HAL_DMA_DISABLE_IT(huart6.hdmarx, DMA_IT_HT);
 }
 
 
@@ -41,16 +39,13 @@ void vWifi_Stop_GPDMA_Receive(void) {
 
 
 // WIFI的GPDMA接收处理，在stm32h5xx_it.c中调用
-void vWifi_RxEventCallback(uint16_t Size)
+void vWifi_RxEventCallback(uint16_t dataLength)
 {
-  HAL_UART_DMAStop(&huart6);           // 停止当前DMA传输
+  //HAL_UART_DMAStop(&huart6);           // 停止当前DMA传输
 
-  if (Size > 0) 
+  if (dataLength > 0) 
   {
-    Wifi_Rx_Frame_t xWifi_Rx_Frame;
-    memcpy(xWifi_Rx_Frame.data, ucWifi_Rx_Buffer[ucWifi_current_buf_idx], Size);
-    xWifi_Rx_Frame.len = Size;
-    osMessageQueuePut(xWifi_Rx_QueueHandle, &xWifi_Rx_Frame, 0, 0);
+    osMessageQueuePut(xWifi_Rx_QueueHandle, ucWifi_Rx_Buffer[ucWifi_current_buf_idx], 0, 0);
   }
 
   // 切换缓冲区并重启接收
@@ -85,7 +80,8 @@ HAL_StatusTypeDef at_send_command(const char *cmd, const char *expect, uint32_t 
   uint32_t start_tick = osKernelGetTickCount();
   uint32_t rsp_timeout = 100;  // 每次等待回复的超时时间（ms）
   HAL_StatusTypeDef ret = HAL_ERROR;
-  Wifi_Rx_Frame_t frame;
+  //Wifi_Rx_Frame_t frame;
+  uint8_t ucWifi_Respond_Buffer[WIFI_RX_BUF_SIZE];
   
   //启动DMA接收
   vWifi_Start_GPDMA_Receive();
@@ -100,11 +96,11 @@ HAL_StatusTypeDef at_send_command(const char *cmd, const char *expect, uint32_t 
   {
     
     // 等待响应, 检查信号量
-    if (osMessageQueueGet(xWifi_Rx_QueueHandle, &frame, NULL, rsp_timeout) == osOK) 
+    if (osMessageQueueGet(xWifi_Rx_QueueHandle, ucWifi_Respond_Buffer, NULL, rsp_timeout) == osOK) 
     {
       DEBUGINFO("wifi received:%s\r\n",at_resp_buf);
       // 检查是否收到预期回复
-      ret = (strstr((char *)frame.data, expect) != NULL) ? HAL_OK : HAL_ERROR;
+      ret = (strstr((char *)ucWifi_Respond_Buffer, expect) != NULL) ? HAL_OK : HAL_ERROR;
       if(ret == HAL_OK)
       {
         break;

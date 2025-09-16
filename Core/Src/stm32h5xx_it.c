@@ -69,7 +69,7 @@ uint8_t msg;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-extern DMA_HandleTypeDef handle_GPDMA2_Channel0;
+extern DMA_HandleTypeDef handle_GPDMA1_Channel5;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel1;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel0;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel4;
@@ -188,6 +188,21 @@ void DebugMon_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles EXTI Line0 interrupt.
+  */
+void EXTI0_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI0_IRQn 0 */
+
+  /* USER CODE END EXTI0_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(FP_L_Pin);
+  /* USER CODE BEGIN EXTI0_IRQn 1 */
+  msg = FrontProxSensor; // 前距离传感器
+  osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
+  /* USER CODE END EXTI0_IRQn 1 */
+}
+
+/**
   * @brief This function handles EXTI Line1 interrupt.
   */
 void EXTI1_IRQHandler(void)
@@ -198,10 +213,6 @@ void EXTI1_IRQHandler(void)
   HAL_GPIO_EXTI_IRQHandler(TOGGLE_BACK_Pin);
   /* USER CODE BEGIN EXTI1_IRQn 1 */
   msg = ToggleSwitch; // 拨动开关
-
-  // xHigherPriorityTaskWoken = pdFALSE;
-  // xQueueSendFromISR(xInterrupt_QueueHandle, &msg, &xHigherPriorityTaskWoken); // 发送到队列
-  // portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
   osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
   /* USER CODE END EXTI1_IRQn 1 */
 }
@@ -217,12 +228,23 @@ void EXTI3_IRQHandler(void)
   HAL_GPIO_EXTI_IRQHandler(RP_L_Pin);
   /* USER CODE BEGIN EXTI3_IRQn 1 */
   msg = RearProxSensor; // 后距离传感器
-  
-  // xHigherPriorityTaskWoken = pdFALSE;
-  // xQueueSendFromISR(xInterrupt_QueueHandle, &msg, &xHigherPriorityTaskWoken); // 发送到队列
-  // portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
   osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
   /* USER CODE END EXTI3_IRQn 1 */
+}
+
+/**
+  * @brief This function handles EXTI Line4 interrupt.
+  */
+void EXTI4_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI4_IRQn 0 */
+
+  /* USER CODE END EXTI4_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(TOGGLE_FRONT_Pin);
+  /* USER CODE BEGIN EXTI4_IRQn 1 */
+  msg = ToggleSwitch; // 拨动开关
+  osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
+  /* USER CODE END EXTI4_IRQn 1 */
 }
 
 /**
@@ -236,10 +258,6 @@ void EXTI5_IRQHandler(void)
   HAL_GPIO_EXTI_IRQHandler(FC_H_Pin);
   /* USER CODE BEGIN EXTI5_IRQn 1 */
   msg = FrontCrashSensor; // 前碰撞传感器
-
-  // xHigherPriorityTaskWoken = pdFALSE;
-  // xQueueSendFromISR(xInterrupt_QueueHandle, &msg, &xHigherPriorityTaskWoken); // 发送到队列
-  // portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
   osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
   /* USER CODE END EXTI5_IRQn 1 */
 }
@@ -255,10 +273,6 @@ void EXTI9_IRQHandler(void)
   HAL_GPIO_EXTI_IRQHandler(RC_L_Pin);
   /* USER CODE BEGIN EXTI9_IRQn 1 */
   msg = RearCrashSensor; // 后碰撞传感器
-
-  // xHigherPriorityTaskWoken = pdFALSE;
-  // xQueueSendFromISR(xInterrupt_QueueHandle, &msg, &xHigherPriorityTaskWoken); // 发送到队列
-  // portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
   osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
   /* USER CODE END EXTI9_IRQn 1 */
 }
@@ -274,10 +288,6 @@ void EXTI10_IRQHandler(void)
   HAL_GPIO_EXTI_IRQHandler(RC_H_Pin);
   /* USER CODE BEGIN EXTI10_IRQn 1 */
   msg = RearCrashSensor; // 后碰撞传感器
-
-  // xHigherPriorityTaskWoken = pdFALSE;
-  // xQueueSendFromISR(xInterrupt_QueueHandle, &msg, &xHigherPriorityTaskWoken); // 发送到队列
-  // portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
   osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
   /* USER CODE END EXTI10_IRQn 1 */
 }
@@ -293,10 +303,6 @@ void EXTI11_IRQHandler(void)
   HAL_GPIO_EXTI_IRQHandler(FP_H_Pin);
   /* USER CODE BEGIN EXTI11_IRQn 1 */
   msg = FrontProxSensor; // 前距离传感器
-
-  // xHigherPriorityTaskWoken = pdFALSE;
-  // xQueueSendFromISR(xInterrupt_QueueHandle, &msg, &xHigherPriorityTaskWoken); // 发送到队列
-  // portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
   osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
   /* USER CODE END EXTI11_IRQn 1 */
 }
@@ -311,11 +317,7 @@ void EXTI12_IRQHandler(void)
   /* USER CODE END EXTI12_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(FC_L_Pin);
   /* USER CODE BEGIN EXTI12_IRQn 1 */
-  msg = ToggleSwitch; // 拨动开关
-
-  // xHigherPriorityTaskWoken = pdFALSE;
-  // xQueueSendFromISR(xInterrupt_QueueHandle, &msg, &xHigherPriorityTaskWoken); // 发送到队列
-  // portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+  msg = FrontCrashSensor; // 前碰撞传感器
   osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
   /* USER CODE END EXTI12_IRQn 1 */
 }
@@ -331,12 +333,23 @@ void EXTI13_IRQHandler(void)
   HAL_GPIO_EXTI_IRQHandler(RP_H_Pin);
   /* USER CODE BEGIN EXTI13_IRQn 1 */
   msg = RearProxSensor; // 后距离传感器
-
-  // xHigherPriorityTaskWoken = pdFALSE;
-  // xQueueSendFromISR(xInterrupt_QueueHandle, &msg, &xHigherPriorityTaskWoken); // 发送到队列
-  // portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
   osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
   /* USER CODE END EXTI13_IRQn 1 */
+}
+
+/**
+  * @brief This function handles EXTI Line15 interrupt.
+  */
+void EXTI15_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI15_IRQn 0 */
+
+  /* USER CODE END EXTI15_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(RESET_Pin);
+  /* USER CODE BEGIN EXTI15_IRQn 1 */
+  msg = ResetButton; // RESET按键
+  osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
+  /* USER CODE END EXTI15_IRQn 1 */
 }
 
 /**
@@ -410,6 +423,20 @@ void GPDMA1_Channel4_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles GPDMA1 Channel 5 global interrupt.
+  */
+void GPDMA1_Channel5_IRQHandler(void)
+{
+  /* USER CODE BEGIN GPDMA1_Channel5_IRQn 0 */
+
+  /* USER CODE END GPDMA1_Channel5_IRQn 0 */
+  HAL_DMA_IRQHandler(&handle_GPDMA1_Channel5);
+  /* USER CODE BEGIN GPDMA1_Channel5_IRQn 1 */
+
+  /* USER CODE END GPDMA1_Channel5_IRQn 1 */
+}
+
+/**
   * @brief This function handles TIM2 global interrupt.
   */
 void TIM2_IRQHandler(void)
@@ -452,20 +479,6 @@ void USART6_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles GPDMA2 Channel 0 global interrupt.
-  */
-void GPDMA2_Channel0_IRQHandler(void)
-{
-  /* USER CODE BEGIN GPDMA2_Channel0_IRQn 0 */
-
-  /* USER CODE END GPDMA2_Channel0_IRQn 0 */
-  HAL_DMA_IRQHandler(&handle_GPDMA2_Channel0);
-  /* USER CODE BEGIN GPDMA2_Channel0_IRQn 1 */
-
-  /* USER CODE END GPDMA2_Channel0_IRQn 1 */
-}
-
-/**
   * @brief This function handles UART7 global interrupt.
   */
 void UART7_IRQHandler(void)
@@ -484,16 +497,19 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
   if (huart->Instance == USART1)
   {
+    uint16_t dataLength = RFID_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart->hdmarx);
     //Test串口接收处理
-    vTest_RxEventCallback(Size);
+    vTest_RxEventCallback(dataLength);
   }
   else if (huart->Instance == UART5) {
     //Rfid串口接收处理
-    vRfid_RxEventCallback(Size);
+    uint16_t dataLength = RFID_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart->hdmarx);
+    vRfid_RxEventCallback(dataLength);
   }
   else if (huart->Instance == USART6) {
     //Wifi串口接收处理
-    vWifi_RxEventCallback(Size);
+    uint16_t dataLength = RFID_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart->hdmarx);
+    vWifi_RxEventCallback(dataLength);
   }
 
 }
@@ -513,11 +529,11 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
     // char* tx_data = (char*)huart->pTxBuffPtr;
     // vPortFree(tx_data);
   }
-  if (huart->Instance == USART6)
+  else if (huart->Instance == USART6)
   {
     osSemaphoreRelease(xWifiTxSemHandle);  // 释放信号量,允许下一次wifi发送
   }
-  if (huart->Instance == UART7)
+  else if (huart->Instance == UART7)
   {
     Motor_RS485_RX_MODE(); // 发送完成切接收模式
     

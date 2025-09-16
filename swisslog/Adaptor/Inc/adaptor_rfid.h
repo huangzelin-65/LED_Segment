@@ -14,6 +14,6 @@ typedef struct {
 
 // 函数声明
 void vRfid_Start_GPDMA_Receive(void);
-void vRfid_RxEventCallback(uint16_t Size);
+void vRfid_RxEventCallback(uint16_t dataLength);
 
 #endif /* ADAPTOR_INC_ADAPTOR_RFID_H_ */

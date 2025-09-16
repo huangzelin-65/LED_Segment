@@ -17,6 +17,7 @@
 // 序号+PLC编号 所用字节数
 #define CMD_BASE_COUNT 6
 
+/*
 // 数据帧结构体（包含数据和长度）
 typedef struct {
     uint8_t data[WIFI_TX_BUF_SIZE];
@@ -27,12 +28,12 @@ typedef struct {
     uint8_t data[WIFI_RX_BUF_SIZE];
     uint16_t len;
 } Wifi_Rx_Frame_t;
-
+*/
 
 // 函数声明
 void vWifi_Start_GPDMA_Receive(void);
 void vWifi_Stop_GPDMA_Receive(void);
-void vWifi_RxEventCallback(uint16_t Size);
+void vWifi_RxEventCallback(uint16_t dataLength);
 void vSendToWifiTX(uint8_t * CmdDataArr,uint8_t len); //发送数据到WIFI TX
 
 HAL_StatusTypeDef at_send_command(const char *cmd, const char *expect, uint32_t timeout_ms);

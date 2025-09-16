@@ -20,7 +20,7 @@
 
 // DMA缓冲区
 #define MOTOR_BUF_SIZE 16
-u8 MotorDmaBuffer[MOTOR_BUF_SIZE]={0};
+u8 MotorDmaBuffer[2][MOTOR_BUF_SIZE]={0};
 u8* motor_msg;
 u8 MotorDataLen = 0;
 
@@ -150,7 +150,8 @@ void vMotionCtrlTask(void *argument)
 /* 电机反馈任务入口函数 */
 void vMotorFeedbackTask(void *argument)
 {
-  Motor_Rx_Frame_t xMotor_Rx_Frame;
+  //Motor_Rx_Frame_t xMotor_Rx_Frame;
+  uint8_t ucMotor_Task_Rx_Buffer[MOTOR_RX_BUF_SIZE];
 
   //启动DMA接收
   vMotor_Start_GPDMA_Receive();
@@ -159,10 +160,10 @@ void vMotorFeedbackTask(void *argument)
   {
 
     // 等待DMA接收完成信号
-    if (osMessageQueueGet(xMotion_QueueHandle, &xMotor_Rx_Frame, NULL, osWaitForever) == osOK) 
+    if (osMessageQueueGet(xMotion_QueueHandle, ucMotor_Task_Rx_Buffer, NULL, osWaitForever) == osOK) 
     {
 
-      DEBUGINFO("Motor received:%s, len:%d\r\n",xMotor_Rx_Frame.data,xMotor_Rx_Frame.len);
+      DEBUGINFO("Motor received:%s, len:%d\r\n",ucMotor_Task_Rx_Buffer,strlen((char *)ucMotor_Task_Rx_Buffer));
 
       // 重启DMA接收(DMA循环模式下，重启后从缓冲区起始地址覆盖写入)
       vMotor_Start_GPDMA_Receive();

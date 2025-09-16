@@ -85,11 +85,13 @@ void vSensorTask(void *argument)
           {
             if(CarToPlcData_obj.bDire == Forward)
             {
+              DEBUGINFO("Forward\r\n");
               //运动方向上其中一个传感器触发即可触发
               if (((CarCheckFlagobj.FrontCrashStatus == SensorTrigger) \
                 || (CarCheckFlagobj.FrontProxStatus == SensorTrigger)))
               {
                 GPIO_WRITE(LED1, GPIO_PIN_SET); // 使能LED1
+                DEBUGINFO("sensors Trigger\r\n");
                 DEBUGINFO("enable LED1\r\n");
 
                 //请求停止电机
@@ -100,6 +102,7 @@ void vSensorTask(void *argument)
                 && (CarCheckFlagobj.FrontProxStatus == SensorRelease))
               {
                 GPIO_WRITE(LED1, GPIO_PIN_RESET); // 关闭LED1
+                DEBUGINFO("sensors release\r\n");
                 DEBUGINFO("disable LED1\r\n");
 
                 //请求启动电机
@@ -109,11 +112,13 @@ void vSensorTask(void *argument)
             //向后运动时
             else if(CarToPlcData_obj.bDire == Backward)
             {
+              DEBUGINFO("Backward\r\n");
               //运动方向上其中一个传感器触发即可触发
               if (((CarCheckFlagobj.RearCrashStatus == SensorTrigger) \
                 || (CarCheckFlagobj.RearProxStatus == SensorTrigger)))
               {
                 GPIO_WRITE(LED1, GPIO_PIN_SET); // 使能LED1
+                DEBUGINFO("sensors Trigger\r\n");
                 DEBUGINFO("enable LED1\r\n");
 
                 //请求停止电机
@@ -124,6 +129,7 @@ void vSensorTask(void *argument)
                 && (CarCheckFlagobj.RearProxStatus == SensorRelease))
               {
                 GPIO_WRITE(LED1, GPIO_PIN_RESET); // 关闭LED1
+                DEBUGINFO("sensors release\r\n");
                 DEBUGINFO("disable LED1\r\n");
 
                 //请求启动电机

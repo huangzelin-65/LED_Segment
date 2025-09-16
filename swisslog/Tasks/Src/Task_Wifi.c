@@ -143,7 +143,8 @@ void vWifiManagerTask(void *argument)
 /* wifi接收任务入口函数 */
 void vWifiReceiveTask(void *argument)
 {
-  Wifi_Rx_Frame_t frame;
+  //Wifi_Rx_Frame_t frame;
+  uint8_t ucWifi_Respond_Buffer[WIFI_RX_BUF_SIZE];
   
   if (osSemaphoreAcquire(xWifiReadySemHandle, osWaitForever) == osOK)
   {
@@ -152,25 +153,25 @@ void vWifiReceiveTask(void *argument)
 
     while(1) {
       // 等待DMA接收完成信号
-      if (osMessageQueueGet(xWifi_Rx_QueueHandle, &frame, NULL, osWaitForever) == osOK)
+      if (osMessageQueueGet(xWifi_Rx_QueueHandle,ucWifi_Respond_Buffer, NULL, osWaitForever) == osOK)
       {
 
-        DEBUGINFO("wifi received:%s, len:%d\r\n",frame.data,frame.len);
+        DEBUGINFO("wifi received:%s, len:%d\r\n",ucWifi_Respond_Buffer,strlen((char *)ucWifi_Respond_Buffer));
 
-        vSendToWifiTX(frame.data, frame.len);
+        vSendToWifiTX(ucWifi_Respond_Buffer, strlen((char *)ucWifi_Respond_Buffer));
 
         // for (uint8_t i=0;i<ucWifiDataLen;i++)
         // {
-        //   DEBUGINFO("%X ",frame.data[i]);
+        //   DEBUGINFO("%X ",ucWifi_Respond_Buffer[i]);
         // }
         // DEBUGINFO("\r\n");  
 
-        PlcToCarData_obj.wSeq = frame.data[1]<<8 | frame.data[0]; // 序号
-        PlcToCarData_obj.dwPlcNum = frame.data[5]<<24 | frame.data[4]<<16 | frame.data[3]<<8 | frame.data[2]; // PLC编号
-        PlcToCarData_obj.wHeatBeat = frame.data[CMD_BASE_COUNT+1]<<8 | frame.data[CMD_BASE_COUNT]; // 心跳信号
-        PlcToCarData_obj.wAlm = frame.data[CMD_BASE_COUNT+3]<<8 | frame.data[CMD_BASE_COUNT+2]; // 报警信号
-        PlcToCarData_obj.wCtrl = frame.data[CMD_BASE_COUNT+5]<<8 | frame.data[CMD_BASE_COUNT+4]; // 控制信号
-        PlcToCarData_obj.bDire = frame.data[CMD_BASE_COUNT+30]; // 小车运行方向 1=正转 2=反转
+        PlcToCarData_obj.wSeq = ucWifi_Respond_Buffer[1]<<8 | ucWifi_Respond_Buffer[0]; // 序号
+        PlcToCarData_obj.dwPlcNum = ucWifi_Respond_Buffer[5]<<24 | ucWifi_Respond_Buffer[4]<<16 | ucWifi_Respond_Buffer[3]<<8 | ucWifi_Respond_Buffer[2]; // PLC编号
+        PlcToCarData_obj.wHeatBeat = ucWifi_Respond_Buffer[CMD_BASE_COUNT+1]<<8 | ucWifi_Respond_Buffer[CMD_BASE_COUNT]; // 心跳信号
+        PlcToCarData_obj.wAlm = ucWifi_Respond_Buffer[CMD_BASE_COUNT+3]<<8 | ucWifi_Respond_Buffer[CMD_BASE_COUNT+2]; // 报警信号
+        PlcToCarData_obj.wCtrl = ucWifi_Respond_Buffer[CMD_BASE_COUNT+5]<<8 | ucWifi_Respond_Buffer[CMD_BASE_COUNT+4]; // 控制信号
+        PlcToCarData_obj.bDire = ucWifi_Respond_Buffer[CMD_BASE_COUNT+30]; // 小车运行方向 1=正转 2=反转
 
         DEBUGINFO("wCtrl : %X\r\n",PlcToCarData_obj.wCtrl);
 

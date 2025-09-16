@@ -34,24 +34,19 @@ void vSendToMotor(u8 * CmdDataArr,u8 len)
 // 启动Motor的GPDMA接收
 void vMotor_Start_GPDMA_Receive(void) {
   // 启动DMA接收（中断模式）
-  if (HAL_UARTEx_ReceiveToIdle_DMA(&huart7, ucMotor_Rx_Buffer[ucMotor_current_buf_idx], MOTOR_RX_BUF_SIZE) != HAL_OK) {
-    Error_Handler();
-  }
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart7, ucMotor_Rx_Buffer[ucMotor_current_buf_idx], MOTOR_RX_BUF_SIZE);
   // 禁用半传输中断(否则会产生两次中断)
-  //__HAL_DMA_DISABLE_IT(&hdma_usart7_rx, DMA_IT_HT); 
+  __HAL_DMA_DISABLE_IT(huart7.hdmarx, DMA_IT_HT);
 }
 
 // Motor的GPDMA接收处理，在stm32h5xx_it.c中调用
 void vMotor_RxEventCallback(uint16_t Size)
 {
-  HAL_UART_DMAStop(&huart7);           // 停止当前DMA传输
+  //HAL_UART_DMAStop(&huart7);           // 停止当前DMA传输
 
   if (Size > 0) 
   {
-    Motor_Rx_Frame_t xMotor_Rx_Frame_temp;
-    memcpy(xMotor_Rx_Frame_temp.data, ucMotor_Rx_Buffer[ucMotor_current_buf_idx], Size);
-    xMotor_Rx_Frame_temp.len = Size;
-    osMessageQueuePut(xMotor_Rx_Queue, &xMotor_Rx_Frame_temp, 0, 0);
+    osMessageQueuePut(xMotor_Rx_Queue, ucMotor_Rx_Buffer[ucMotor_current_buf_idx], 0, 0);
   }
         
   // 切换缓冲区并重启接收

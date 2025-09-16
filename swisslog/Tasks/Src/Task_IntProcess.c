@@ -38,6 +38,7 @@ void vIntProcessTask(void *argument)
     //if (xQueueReceive(xInterrupt_QueueHandle, &IntProcessRecv_msg, portMAX_DELAY) == pdPASS) 
     if (osMessageQueueGet(xInterrupt_QueueHandle, &IntProcessRecv_msg, NULL, osWaitForever) == osOK) 
     {
+      DEBUGINFO("IntProcessRecv_msg = %d \r\n",IntProcessRecv_msg);
       switch(IntProcessRecv_msg)
       {
         // 判断 前碰撞传感器 是否触发或释放
@@ -67,7 +68,6 @@ void vIntProcessTask(void *argument)
         
         case ResetButton:
           sensor_msg = ResetButtonTrigger;
-          //if(xQueueSend(xSensor_QueueHandle, &sensor_msg, pdMS_TO_TICKS(100)) != pdPASS)
           if(osMessageQueuePut(xSensor_QueueHandle, &sensor_msg, 0, pdMS_TO_TICKS(100)) != osOK)
           {
             DEBUGINFO("vIntProcessTask() send sensor msg error\r\n");

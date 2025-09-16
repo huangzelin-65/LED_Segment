@@ -47,6 +47,9 @@ void vSensorStatusCheck(void)
   // 读RP_L电平
   RP_L_value = GPIO_READ(RP_L);
 
+  DEBUGINFO("FC_H = %d, FC_L = %d, RC_H = %d, RC_L = %d,\r\n",FC_H_value,FC_L_value,RC_H_value,RC_L_value);
+  DEBUGINFO("FP_H = %d, FP_L = %d, RP_H = %d, RP_L = %d,\r\n",FP_H_value,FP_L_value,RP_H_value,RP_L_value);
+
   if ((FC_H_value == GPIO_PIN_RESET)&&(FC_L_value == GPIO_PIN_SET)) //FC Trigger
   {
     CarCheckFlagobj.FrontCrashStatus = SensorTrigger;
@@ -90,7 +93,7 @@ void vSensorStatusCheck(void)
 
   // 发送消息到xSensor_Queue
   sensor_msg = SensorEvent;//碰撞触发
-  DEBUGINFO("send Event to Sensor_Queue\r\n");
+  //DEBUGINFO("send Event to Sensor_Queue\r\n");
   if(osMessageQueuePut(xSensor_QueueHandle, &sensor_msg, 0, pdMS_TO_TICKS(100)) != osOK)
   {
       DEBUGINFO("vSensorStatusCheck() send motion error 1\r\n");
