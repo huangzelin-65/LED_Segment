@@ -89,6 +89,7 @@ extern osSemaphoreId_t xMotorTxSemHandle;
 extern osSemaphoreId_t xWifiTxSemHandle;
 extern osSemaphoreId_t xPrintSemHandle;
 extern osSemaphoreId_t xRfidRxSemHandle;
+extern osSemaphoreId_t xTestRxSemHandle;
 
 /* USER CODE END EV */
 
@@ -528,14 +529,18 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
   if (huart->Instance == USART1)
   {
-    uint16_t dataLength = RFID_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart->hdmarx);
     //Test串口接收处理
-    vTest_RxEventCallback(dataLength);
+    uint16_t dataLength = RFID_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart->hdmarx);
+
+    if (dataLength > 0) 
+    {
+      osSemaphoreRelease(xTestRxSemHandle);  // 释放信号量,允许读取Test命令数据
+    }
   }
   else if (huart->Instance == UART5) {
     //Rfid串口接收处理
     uint16_t dataLength = RFID_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart->hdmarx);
-    //vRfid_RxEventCallback(dataLength);
+
     if (dataLength > 0) 
     {
       osSemaphoreRelease(xRfidRxSemHandle);  // 释放信号量,允许读取RFID数据

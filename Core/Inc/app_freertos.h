@@ -53,6 +53,7 @@ extern "C" {
 /* Exported macro -------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
 extern osSemaphoreId_t xRfidRxSemHandle;
+extern osSemaphoreId_t xTestRxSemHandle;
 extern osSemaphoreId_t xWifiReadySemHandle;
 /* USER CODE END EM */
 extern osThreadId_t InitTaskHandle;

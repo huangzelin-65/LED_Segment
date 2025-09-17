@@ -27,6 +27,19 @@ extern _CarCheckFlag_obj CarCheckFlagobj;
 void vParseCommandToCar()
 {
   u8 ucMotion_msg;
+  
+  // PLC下发设置前进(正转)
+  if(PlcToCarData_obj.bDire == Forward)
+  {
+    DEBUGINFO("auto Forward\r\n");
+    CarRunStatus_obj.SetDirection = Forward; //小车预设运行方向为前进
+  }
+  // PLC下发设置后退(反转)
+  else if(PlcToCarData_obj.bDire == Backward)
+  {
+    DEBUGINFO("auto Backward\r\n");
+    CarRunStatus_obj.SetDirection = Backward; //小车预设运行方向为后退
+  }
 
   //小车远程手动模式(拨动开关需要在自动档位下才能使用)
   if(PlcToCarData_obj.wCtrl & 0x0001)
@@ -39,6 +52,7 @@ void vParseCommandToCar()
     {
       // 手动设置前进(正转)
       DEBUGINFO("manual Forward\r\n");
+      CarToPlcData_obj.bDire = Forward;
     }
     else if(PlcToCarData_obj.wCtrl & 0x0004)
     {
@@ -54,25 +68,12 @@ void vParseCommandToCar()
   {
     DEBUGINFO("auto mode\r\n");
     CarRunStatus_obj.AutoMode = Auto;
-
-    // PLC设置前进(正转)
-    if(PlcToCarData_obj.bDire == Forward)
-    {
-      DEBUGINFO("auto Forward\r\n");
-      CarRunStatus_obj.SetDirection = Forward; //小车预设运行方向为前进
-    }
-    // PLC设置后退(反转)
-    else if(PlcToCarData_obj.bDire == Backward)
-    {
-      DEBUGINFO("auto Backward\r\n");
-      CarRunStatus_obj.SetDirection = Backward; //小车预设运行方向为后退
-    }
   }
   // 无效命令
-  else
-  {
-    DEBUGINFO("Invalid commond\r\n");
-  }
+  // else
+  // {
+  //   DEBUGINFO("Invalid commond\r\n");
+  // }
   
   //判断启动/停止电机
   if(PlcToCarData_obj.wCtrl & 0x0008) //使能运行位为1

@@ -83,9 +83,9 @@ void vMotionCtrlTask(void *argument)
                 // 已允许电机运行
                 else if(CarRunStatus_obj.MotorEnable == MotorEnable)
                 {
-                  // 电机按预设速度运行，方向不变
+                  // 电机按预设运行方向 和 预设速度运行
                   CarRunStatus_obj.IsCarRunning = CarRunning;
-                  vMotorOps(CarToPlcData_obj.bDire, CarRunStatus_obj.SetSpeed);  
+                  vMotorOps(CarRunStatus_obj.SetDirection, CarRunStatus_obj.SetSpeed);  
                   GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
                   DEBUGINFO("LED4 ON\r\n");
                 }
@@ -95,7 +95,7 @@ void vMotionCtrlTask(void *argument)
               else if(CarRunStatus_obj.AutoMode == Manual)
               {
                 DEBUGINFO("remote Manual mode\r\n");
-                // 电机按普通速度运行（手动档下），方向不变
+                // 电机按实际运行方向 和 普通速度运行（手动档下）
                 CarRunStatus_obj.IsCarRunning = CarRunning;
                 vMotorOps(CarToPlcData_obj.bDire, NormalSpeed);  
                 GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4

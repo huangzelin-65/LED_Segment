@@ -44,6 +44,13 @@ const osSemaphoreAttr_t xRfidRxSem_attributes = {
   .name = "xRfidRxSem"
 };
 
+/* Definitions for xTestRxSem */
+osSemaphoreId_t xTestRxSemHandle;
+const osSemaphoreAttr_t xTestRxSem_attributes = {
+  .name = "xTestRxSem"
+};
+
+
 /* Definitions for xWifiReadySem */
 osSemaphoreId_t xWifiReadySemHandle;
 const osSemaphoreAttr_t xWifiReadySem_attributes = {
@@ -233,6 +240,10 @@ void MX_FREERTOS_Init(void) {
   /* add semaphores, ... */
   /* creation of xRfidRxSem */
   xRfidRxSemHandle = osSemaphoreNew(1, 0, &xRfidRxSem_attributes);
+
+  /* creation of xTestRxSem */
+  xTestRxSemHandle = osSemaphoreNew(1, 0, &xTestRxSem_attributes);
+  
 
   /* creation of xWifiReadySem */
   xWifiReadySemHandle = osSemaphoreNew(1, 0, &xWifiReadySem_attributes);

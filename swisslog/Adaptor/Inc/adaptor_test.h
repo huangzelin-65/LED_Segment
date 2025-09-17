@@ -2,7 +2,7 @@
 #define ADAPTOR_INC_ADAPTOR_TEST_H_
 
 // 缓冲区大小
-#define TEST_RX_BUF_SIZE   64
+#define TEST_RX_BUF_SIZE   10
 
 // 数据帧结构体（包含数据和长度）
 typedef struct {
@@ -11,7 +11,8 @@ typedef struct {
 } Test_Rx_Frame_t;
 
 void vPrint_start_Transmit(uint8_t *rxData, uint16_t Size);
-void vTest_Start_GPDMA_Receive(void);
+//void vTest_Start_GPDMA_Receive(void);
+void vTest_Start_GPDMA_Receive(uint8_t* ucTest_Rx_Buffer);
 void vTest_RxEventCallback(uint16_t dataLength);
 
 #endif /* ADAPTOR_INC_ADAPTOR_TEST_H_ */
