@@ -48,9 +48,10 @@ UART_HandleTypeDef huart5;
 UART_HandleTypeDef huart7;
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart6;
-DMA_HandleTypeDef handle_GPDMA1_Channel5;
+DMA_HandleTypeDef handle_GPDMA1_Channel6;
 DMA_HandleTypeDef handle_GPDMA1_Channel1;
 DMA_HandleTypeDef handle_GPDMA1_Channel0;
+DMA_HandleTypeDef handle_GPDMA1_Channel5;
 DMA_HandleTypeDef handle_GPDMA1_Channel4;
 DMA_HandleTypeDef handle_GPDMA1_Channel3;
 DMA_HandleTypeDef handle_GPDMA1_Channel2;
@@ -241,6 +242,8 @@ static void MX_GPDMA1_Init(void)
     HAL_NVIC_EnableIRQ(GPDMA1_Channel4_IRQn);
     HAL_NVIC_SetPriority(GPDMA1_Channel5_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(GPDMA1_Channel5_IRQn);
+    HAL_NVIC_SetPriority(GPDMA1_Channel6_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(GPDMA1_Channel6_IRQn);
 
   /* USER CODE BEGIN GPDMA1_Init 1 */
 
@@ -406,7 +409,7 @@ static void MX_UART7_Init(void)
 
   /* USER CODE END UART7_Init 1 */
   huart7.Instance = UART7;
-  huart7.Init.BaudRate = 115200;
+  huart7.Init.BaudRate = 57600;
   huart7.Init.WordLength = UART_WORDLENGTH_8B;
   huart7.Init.StopBits = UART_STOPBITS_1;
   huart7.Init.Parity = UART_PARITY_NONE;
@@ -639,19 +642,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(RESET_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Wifi_RX_Pin Wifi_TX_Pin */
-  GPIO_InitStruct.Pin = Wifi_RX_Pin|Wifi_TX_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF6_UART12;
-  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
-
   /*Configure GPIO pin : RP_L_Pin */
   GPIO_InitStruct.Pin = RP_L_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(RP_L_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : Wifi_TXE10_Pin */
+  GPIO_InitStruct.Pin = Wifi_TXE10_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Alternate = GPIO_AF6_UART12;
+  HAL_GPIO_Init(Wifi_TXE10_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI0_IRQn, 5, 0);

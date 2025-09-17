@@ -14,16 +14,19 @@ extern osThreadId_t TestTaskHandle;
 extern osThreadId_t WifiManagerTaskHandle;
 extern osThreadId_t WifiReceiveTaskHandle;
 extern osThreadId_t PrintTaskHandle;
+extern _CarRunStatus_obj CarRunStatus_obj;
 
 void vInitTask(void *argument)
 {
+  CarRunStatus_obj.SetDirection = Forward; //小车预设运行方向为前进
+
   osThreadResume(PrintTaskHandle);
   osThreadResume(IntProcessTaskHandle); 
   osThreadResume(MotionCtrlTaskHandle); 
   osThreadResume(MotorFeedbackTaskHandle); 
   osThreadResume(RfidTaskHandle); 
   osThreadResume(SensorTaskHandle);
-  //osThreadResume(TestTaskHandle);
+  osThreadResume(TestTaskHandle);
   //osThreadResume(WifiManagerTaskHandle);
   //osThreadResume(WifiReceiveTaskHandle);
 

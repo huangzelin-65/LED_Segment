@@ -69,14 +69,16 @@ uint8_t msg;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-extern DMA_HandleTypeDef handle_GPDMA1_Channel5;
+extern DMA_HandleTypeDef handle_GPDMA1_Channel6;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel1;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel0;
+extern DMA_HandleTypeDef handle_GPDMA1_Channel5;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel4;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel3;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel2;
 extern UART_HandleTypeDef huart5;
 extern UART_HandleTypeDef huart7;
+extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart6;
 extern TIM_HandleTypeDef htim2;
 
@@ -86,6 +88,7 @@ extern osMessageQueueId_t xInterrupt_QueueHandle;
 extern osSemaphoreId_t xMotorTxSemHandle;
 extern osSemaphoreId_t xWifiTxSemHandle;
 extern osSemaphoreId_t xPrintSemHandle;
+extern osSemaphoreId_t xRfidRxSemHandle;
 
 /* USER CODE END EV */
 
@@ -437,6 +440,20 @@ void GPDMA1_Channel5_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles GPDMA1 Channel 6 global interrupt.
+  */
+void GPDMA1_Channel6_IRQHandler(void)
+{
+  /* USER CODE BEGIN GPDMA1_Channel6_IRQn 0 */
+
+  /* USER CODE END GPDMA1_Channel6_IRQn 0 */
+  HAL_DMA_IRQHandler(&handle_GPDMA1_Channel6);
+  /* USER CODE BEGIN GPDMA1_Channel6_IRQn 1 */
+
+  /* USER CODE END GPDMA1_Channel6_IRQn 1 */
+}
+
+/**
   * @brief This function handles TIM2 global interrupt.
   */
 void TIM2_IRQHandler(void)
@@ -448,6 +465,20 @@ void TIM2_IRQHandler(void)
   /* USER CODE BEGIN TIM2_IRQn 1 */
 
   /* USER CODE END TIM2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USART1 global interrupt.
+  */
+void USART1_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART1_IRQn 0 */
+
+  /* USER CODE END USART1_IRQn 0 */
+  HAL_UART_IRQHandler(&huart1);
+  /* USER CODE BEGIN USART1_IRQn 1 */
+
+  /* USER CODE END USART1_IRQn 1 */
 }
 
 /**
@@ -504,7 +535,12 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
   else if (huart->Instance == UART5) {
     //Rfid串口接收处理
     uint16_t dataLength = RFID_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart->hdmarx);
-    vRfid_RxEventCallback(dataLength);
+    //vRfid_RxEventCallback(dataLength);
+    if (dataLength > 0) 
+    {
+      osSemaphoreRelease(xRfidRxSemHandle);  // 释放信号量,允许读取RFID数据
+    }
+
   }
   else if (huart->Instance == USART6) {
     //Wifi串口接收处理
@@ -526,8 +562,9 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
   if (huart->Instance == USART1)
   {
-    // char* tx_data = (char*)huart->pTxBuffPtr;
-    // vPortFree(tx_data);
+    char* tx_data = (char*)huart->pTxBuffPtr;
+    vPortFree(tx_data);
+    osSemaphoreRelease(xPrintSemHandle);  // 释放信号量,允许下一次打印
   }
   else if (huart->Instance == USART6)
   {

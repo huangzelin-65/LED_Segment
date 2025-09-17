@@ -23,11 +23,13 @@
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
-extern DMA_HandleTypeDef handle_GPDMA1_Channel5;
+extern DMA_HandleTypeDef handle_GPDMA1_Channel6;
 
 extern DMA_HandleTypeDef handle_GPDMA1_Channel1;
 
 extern DMA_HandleTypeDef handle_GPDMA1_Channel0;
+
+extern DMA_HandleTypeDef handle_GPDMA1_Channel5;
 
 extern DMA_HandleTypeDef handle_GPDMA1_Channel4;
 
@@ -211,28 +213,28 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 
     /* UART5 DMA Init */
     /* GPDMA1_REQUEST_UART5_RX Init */
-    handle_GPDMA1_Channel5.Instance = GPDMA1_Channel5;
-    handle_GPDMA1_Channel5.Init.Request = GPDMA1_REQUEST_UART5_RX;
-    handle_GPDMA1_Channel5.Init.BlkHWRequest = DMA_BREQ_SINGLE_BURST;
-    handle_GPDMA1_Channel5.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    handle_GPDMA1_Channel5.Init.SrcInc = DMA_SINC_FIXED;
-    handle_GPDMA1_Channel5.Init.DestInc = DMA_DINC_INCREMENTED;
-    handle_GPDMA1_Channel5.Init.SrcDataWidth = DMA_SRC_DATAWIDTH_BYTE;
-    handle_GPDMA1_Channel5.Init.DestDataWidth = DMA_DEST_DATAWIDTH_BYTE;
-    handle_GPDMA1_Channel5.Init.Priority = DMA_LOW_PRIORITY_LOW_WEIGHT;
-    handle_GPDMA1_Channel5.Init.SrcBurstLength = 1;
-    handle_GPDMA1_Channel5.Init.DestBurstLength = 1;
-    handle_GPDMA1_Channel5.Init.TransferAllocatedPort = DMA_SRC_ALLOCATED_PORT0|DMA_DEST_ALLOCATED_PORT0;
-    handle_GPDMA1_Channel5.Init.TransferEventMode = DMA_TCEM_BLOCK_TRANSFER;
-    handle_GPDMA1_Channel5.Init.Mode = DMA_NORMAL;
-    if (HAL_DMA_Init(&handle_GPDMA1_Channel5) != HAL_OK)
+    handle_GPDMA1_Channel6.Instance = GPDMA1_Channel6;
+    handle_GPDMA1_Channel6.Init.Request = GPDMA1_REQUEST_UART5_RX;
+    handle_GPDMA1_Channel6.Init.BlkHWRequest = DMA_BREQ_SINGLE_BURST;
+    handle_GPDMA1_Channel6.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    handle_GPDMA1_Channel6.Init.SrcInc = DMA_SINC_FIXED;
+    handle_GPDMA1_Channel6.Init.DestInc = DMA_DINC_INCREMENTED;
+    handle_GPDMA1_Channel6.Init.SrcDataWidth = DMA_SRC_DATAWIDTH_BYTE;
+    handle_GPDMA1_Channel6.Init.DestDataWidth = DMA_DEST_DATAWIDTH_BYTE;
+    handle_GPDMA1_Channel6.Init.Priority = DMA_LOW_PRIORITY_LOW_WEIGHT;
+    handle_GPDMA1_Channel6.Init.SrcBurstLength = 1;
+    handle_GPDMA1_Channel6.Init.DestBurstLength = 1;
+    handle_GPDMA1_Channel6.Init.TransferAllocatedPort = DMA_SRC_ALLOCATED_PORT0|DMA_DEST_ALLOCATED_PORT0;
+    handle_GPDMA1_Channel6.Init.TransferEventMode = DMA_TCEM_BLOCK_TRANSFER;
+    handle_GPDMA1_Channel6.Init.Mode = DMA_NORMAL;
+    if (HAL_DMA_Init(&handle_GPDMA1_Channel6) != HAL_OK)
     {
       Error_Handler();
     }
 
-    __HAL_LINKDMA(huart, hdmarx, handle_GPDMA1_Channel5);
+    __HAL_LINKDMA(huart, hdmarx, handle_GPDMA1_Channel6);
 
-    if (HAL_DMA_ConfigChannelAttributes(&handle_GPDMA1_Channel5, DMA_CHANNEL_NPRIV) != HAL_OK)
+    if (HAL_DMA_ConfigChannelAttributes(&handle_GPDMA1_Channel6, DMA_CHANNEL_NPRIV) != HAL_OK)
     {
       Error_Handler();
     }
@@ -262,17 +264,17 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     /* Peripheral clock enable */
     __HAL_RCC_UART7_CLK_ENABLE();
 
-    __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOE_CLK_ENABLE();
     /**UART7 GPIO Configuration
-    PB4(NJTRST)     ------> UART7_TX
-    PB3(JTDO/TRACESWO)     ------> UART7_RX
+    PE8     ------> UART7_TX
+    PE7     ------> UART7_RX
     */
     GPIO_InitStruct.Pin = Motor_TX_Pin|Motor_RX_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF11_UART7;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    GPIO_InitStruct.Alternate = GPIO_AF7_UART7;
+    HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
     /* UART7 DMA Init */
     /* GPDMA1_REQUEST_UART7_TX Init */
@@ -374,6 +376,33 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     HAL_GPIO_Init(USART1_TX_GPIO_Port, &GPIO_InitStruct);
 
     /* USART1 DMA Init */
+    /* GPDMA1_REQUEST_USART1_TX Init */
+    handle_GPDMA1_Channel5.Instance = GPDMA1_Channel5;
+    handle_GPDMA1_Channel5.Init.Request = GPDMA1_REQUEST_USART1_TX;
+    handle_GPDMA1_Channel5.Init.BlkHWRequest = DMA_BREQ_SINGLE_BURST;
+    handle_GPDMA1_Channel5.Init.Direction = DMA_MEMORY_TO_PERIPH;
+    handle_GPDMA1_Channel5.Init.SrcInc = DMA_SINC_INCREMENTED;
+    handle_GPDMA1_Channel5.Init.DestInc = DMA_DINC_FIXED;
+    handle_GPDMA1_Channel5.Init.SrcDataWidth = DMA_SRC_DATAWIDTH_BYTE;
+    handle_GPDMA1_Channel5.Init.DestDataWidth = DMA_DEST_DATAWIDTH_BYTE;
+    handle_GPDMA1_Channel5.Init.Priority = DMA_LOW_PRIORITY_LOW_WEIGHT;
+    handle_GPDMA1_Channel5.Init.SrcBurstLength = 1;
+    handle_GPDMA1_Channel5.Init.DestBurstLength = 1;
+    handle_GPDMA1_Channel5.Init.TransferAllocatedPort = DMA_SRC_ALLOCATED_PORT0|DMA_DEST_ALLOCATED_PORT0;
+    handle_GPDMA1_Channel5.Init.TransferEventMode = DMA_TCEM_BLOCK_TRANSFER;
+    handle_GPDMA1_Channel5.Init.Mode = DMA_NORMAL;
+    if (HAL_DMA_Init(&handle_GPDMA1_Channel5) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    __HAL_LINKDMA(huart, hdmatx, handle_GPDMA1_Channel5);
+
+    if (HAL_DMA_ConfigChannelAttributes(&handle_GPDMA1_Channel5, DMA_CHANNEL_NPRIV) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
     /* GPDMA1_REQUEST_USART1_RX Init */
     handle_GPDMA1_Channel4.Instance = GPDMA1_Channel4;
     handle_GPDMA1_Channel4.Init.Request = GPDMA1_REQUEST_USART1_RX;
@@ -401,6 +430,9 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
       Error_Handler();
     }
 
+    /* USART1 interrupt Init */
+    HAL_NVIC_SetPriority(USART1_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(USART1_IRQn);
     /* USER CODE BEGIN USART1_MspInit 1 */
 
     /* USER CODE END USART1_MspInit 1 */
@@ -428,7 +460,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     PC7     ------> USART6_RX
     PC6     ------> USART6_TX
     */
-    GPIO_InitStruct.Pin = Motor_RXC7_Pin|Motor_TXC6_Pin;
+    GPIO_InitStruct.Pin = Wifi_RX_Pin|Wifi_TX_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -540,10 +572,10 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
     __HAL_RCC_UART7_CLK_DISABLE();
 
     /**UART7 GPIO Configuration
-    PB4(NJTRST)     ------> UART7_TX
-    PB3(JTDO/TRACESWO)     ------> UART7_RX
+    PE8     ------> UART7_TX
+    PE7     ------> UART7_RX
     */
-    HAL_GPIO_DeInit(GPIOB, Motor_TX_Pin|Motor_RX_Pin);
+    HAL_GPIO_DeInit(GPIOE, Motor_TX_Pin|Motor_RX_Pin);
 
     /* UART7 DMA DeInit */
     HAL_DMA_DeInit(huart->hdmatx);
@@ -570,7 +602,11 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
     HAL_GPIO_DeInit(GPIOA, USART1_RX_Pin|USART1_TX_Pin);
 
     /* USART1 DMA DeInit */
+    HAL_DMA_DeInit(huart->hdmatx);
     HAL_DMA_DeInit(huart->hdmarx);
+
+    /* USART1 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(USART1_IRQn);
     /* USER CODE BEGIN USART1_MspDeInit 1 */
 
     /* USER CODE END USART1_MspDeInit 1 */
@@ -587,7 +623,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
     PC7     ------> USART6_RX
     PC6     ------> USART6_TX
     */
-    HAL_GPIO_DeInit(GPIOC, Motor_RXC7_Pin|Motor_TXC6_Pin);
+    HAL_GPIO_DeInit(GPIOC, Wifi_RX_Pin|Wifi_TX_Pin);
 
     /* USART6 DMA DeInit */
     HAL_DMA_DeInit(huart->hdmatx);

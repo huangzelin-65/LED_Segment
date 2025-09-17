@@ -143,7 +143,7 @@ void vToggleSwitchStatusCheck(void)
     DEBUGINFO("motion_msg = ToggleStop\r\n");
   }
 
-  //发送拨动开关时事件
+  //发送拨动开关事件
   if(osMessageQueuePut(xSensor_QueueHandle, &sensor_msg, 0, pdMS_TO_TICKS(100)) != osOK)
   {
     DEBUGINFO("vToggleSwitchStatusCheck() send motion error\r\n");

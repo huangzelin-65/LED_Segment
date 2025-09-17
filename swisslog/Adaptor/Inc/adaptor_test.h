@@ -2,7 +2,7 @@
 #define ADAPTOR_INC_ADAPTOR_TEST_H_
 
 // 缓冲区大小
-#define TEST_RX_BUF_SIZE   128
+#define TEST_RX_BUF_SIZE   64
 
 // 数据帧结构体（包含数据和长度）
 typedef struct {

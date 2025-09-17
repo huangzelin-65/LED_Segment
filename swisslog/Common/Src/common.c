@@ -18,7 +18,7 @@
 
 
 
-extern QueueHandle_t xMotion_QueueHandle;
+extern osMessageQueueId_t xMotion_QueueHandle;
 extern PlcToCarData PlcToCarData_obj;
 extern CarToPlcData CarToPlcData_obj;
 extern _CarRunStatus_obj CarRunStatus_obj;
@@ -89,7 +89,6 @@ void vParseCommandToCar()
   }
 
   // 发送电机控制消息
-  //if(xQueueSend(xMotion_QueueHandle, &ucMotion_msg, pdMS_TO_TICKS(100)) != pdPASS)
   if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
   {
     DEBUGINFO("vParseCommandToCar() send motion msg error\r\n");

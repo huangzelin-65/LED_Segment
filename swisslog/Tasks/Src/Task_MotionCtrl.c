@@ -24,10 +24,8 @@ u8 MotorDmaBuffer[2][MOTOR_BUF_SIZE]={0};
 u8* motor_msg;
 u8 MotorDataLen = 0;
 
-extern osSemaphoreId_t MotorRxSemHandle;
-extern osMessageQueueId_t motor_msg_QueueHandle;
-
-extern QueueHandle_t xMotion_QueueHandle;
+extern osMessageQueueId_t xMotion_QueueHandle;
+extern osMessageQueueId_t xMotor_Rx_QueueHandle;
 extern CarToPlcData CarToPlcData_obj;
 extern _CarRunStatus_obj CarRunStatus_obj;
 extern _CarCheckFlag_obj CarCheckFlagobj;
@@ -73,7 +71,7 @@ void vMotionCtrlTask(void *argument)
               {
                 DEBUGINFO("remote Auto mode\r\n");
 
-                // 电机未使能运行（通过wifi指令下发）
+                // 未允许电机运行（通过wifi或串口指令下发允许）
                 if(CarRunStatus_obj.MotorEnable == MotorDisable)
                 {
                   DEBUGINFO("ReadyToRun\r\n");
@@ -82,20 +80,9 @@ void vMotionCtrlTask(void *argument)
                   vSendToWifiTX(temp, strlen((char *)temp));
                   break;
                 }
-                // 电机使能运行
+                // 已允许电机运行
                 else if(CarRunStatus_obj.MotorEnable == MotorEnable)
                 {
-                  // 预设值向前
-                  if(CarRunStatus_obj.SetDirection == Forward)
-                  {
-                    CarToPlcData_obj.bDire = Forward; //实际运行方向记录为向后
-                  }
-                  // 预设值向后
-                  else if(CarRunStatus_obj.SetDirection == Backward)
-                  {
-                    CarToPlcData_obj.bDire = Backward; //实际运行方向记录为向前
-                  }
-
                   // 电机按预设速度运行，方向不变
                   CarRunStatus_obj.IsCarRunning = CarRunning;
                   vMotorOps(CarToPlcData_obj.bDire, CarRunStatus_obj.SetSpeed);  
@@ -121,22 +108,17 @@ void vMotionCtrlTask(void *argument)
             else if(CarCheckFlagobj.ToggleSwtichPosition == ToggleBack)
             {
               DEBUGINFO("local Manual mode\r\n");
-              // 预设值向前
-              if(CarRunStatus_obj.SetDirection == Forward)
+
+              //reset按钮没有按下才允许电机运行
+              if(GPIO_READ(RESET) == GPIO_PIN_SET)
               {
-                CarToPlcData_obj.bDire = Backward; //实际运行方向记录为向后
-              }
-              // 预设值向后
-              else if(CarRunStatus_obj.SetDirection == Backward)
-              {
-                CarToPlcData_obj.bDire = Forward; //实际运行方向记录为向前
+                // 电机按普通速度运行（手动档下），方向相反
+                CarRunStatus_obj.IsCarRunning = CarRunning;
+                vMotorOps(CarToPlcData_obj.bDire, NormalSpeed); 
+                GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
+                DEBUGINFO("LED4 ON\r\n");
               }
 
-              // 电机按普通速度运行（手动档下），方向相反
-              CarRunStatus_obj.IsCarRunning = CarRunning;
-              vMotorOps(CarToPlcData_obj.bDire, NormalSpeed); 
-              GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
-              DEBUGINFO("LED4 ON\r\n");
             }
 
             break;
@@ -160,7 +142,7 @@ void vMotorFeedbackTask(void *argument)
   {
 
     // 等待DMA接收完成信号
-    if (osMessageQueueGet(xMotion_QueueHandle, ucMotor_Task_Rx_Buffer, NULL, osWaitForever) == osOK) 
+    if (osMessageQueueGet(xMotor_Rx_QueueHandle, ucMotor_Task_Rx_Buffer, NULL, osWaitForever) == osOK) 
     {
 
       DEBUGINFO("Motor received:%s, len:%d\r\n",ucMotor_Task_Rx_Buffer,strlen((char *)ucMotor_Task_Rx_Buffer));

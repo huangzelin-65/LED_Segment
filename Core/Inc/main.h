@@ -260,25 +260,21 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define Motor_TX_Pin GPIO_PIN_4
-#define Motor_TX_GPIO_Port GPIOB
-#define Motor_RX_Pin GPIO_PIN_3
-#define Motor_RX_GPIO_Port GPIOB
 #define BEEP_PWM_Pin GPIO_PIN_7
 #define BEEP_PWM_GPIO_Port GPIOB
 #define USART1_RX_Pin GPIO_PIN_10
 #define USART1_RX_GPIO_Port GPIOA
 #define USART1_TX_Pin GPIO_PIN_9
 #define USART1_TX_GPIO_Port GPIOA
-#define Motor_RXC7_Pin GPIO_PIN_7
-#define Motor_RXC7_GPIO_Port GPIOC
+#define Wifi_RX_Pin GPIO_PIN_7
+#define Wifi_RX_GPIO_Port GPIOC
 #define TOGGLE_FRONT_Pin GPIO_PIN_4
 #define TOGGLE_FRONT_GPIO_Port GPIOH
 #define TOGGLE_FRONT_EXTI_IRQn EXTI4_IRQn
 #define LED5_Pin GPIO_PIN_8
 #define LED5_GPIO_Port GPIOG
-#define Motor_TXC6_Pin GPIO_PIN_6
-#define Motor_TXC6_GPIO_Port GPIOC
+#define Wifi_TX_Pin GPIO_PIN_6
+#define Wifi_TX_GPIO_Port GPIOC
 #define LED3_Pin GPIO_PIN_7
 #define LED3_GPIO_Port GPIOG
 #define LED4_Pin GPIO_PIN_6
@@ -320,8 +316,8 @@ void Error_Handler(void);
 #define RESET_Pin GPIO_PIN_15
 #define RESET_GPIO_Port GPIOF
 #define RESET_EXTI_IRQn EXTI15_IRQn
-#define Wifi_RX_Pin GPIO_PIN_9
-#define Wifi_RX_GPIO_Port GPIOE
+#define Motor_TX_Pin GPIO_PIN_8
+#define Motor_TX_GPIO_Port GPIOE
 #define Rfid_RX_Pin GPIO_PIN_12
 #define Rfid_RX_GPIO_Port GPIOB
 #define Rfid_TX_Pin GPIO_PIN_13
@@ -329,8 +325,10 @@ void Error_Handler(void);
 #define RP_L_Pin GPIO_PIN_3
 #define RP_L_GPIO_Port GPIOA
 #define RP_L_EXTI_IRQn EXTI3_IRQn
-#define Wifi_TX_Pin GPIO_PIN_10
-#define Wifi_TX_GPIO_Port GPIOE
+#define Motor_RX_Pin GPIO_PIN_7
+#define Motor_RX_GPIO_Port GPIOE
+#define Wifi_TXE10_Pin GPIO_PIN_10
+#define Wifi_TXE10_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
 

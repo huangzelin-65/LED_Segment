@@ -38,6 +38,17 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+/* Definitions for xRfidRxSem */
+osSemaphoreId_t xRfidRxSemHandle;
+const osSemaphoreAttr_t xRfidRxSem_attributes = {
+  .name = "xRfidRxSem"
+};
+
+/* Definitions for xWifiReadySem */
+osSemaphoreId_t xWifiReadySemHandle;
+const osSemaphoreAttr_t xWifiReadySem_attributes = {
+  .name = "xWifiReadySem"
+};
 
 /* USER CODE END PD */
 
@@ -97,7 +108,7 @@ osThreadId_t TestTaskHandle;
 const osThreadAttr_t TestTask_attributes = {
   .name = "TestTask",
   .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 128 * 4
+  .stack_size = 256 * 4
 };
 /* Definitions for WifiManagerTask */
 osThreadId_t WifiManagerTaskHandle;
@@ -185,10 +196,10 @@ osSemaphoreId_t xWifiTxSemHandle;
 const osSemaphoreAttr_t xWifiTxSem_attributes = {
   .name = "xWifiTxSem"
 };
-/* Definitions for xWifiReadySem */
-osSemaphoreId_t xWifiReadySemHandle;
-const osSemaphoreAttr_t xWifiReadySem_attributes = {
-  .name = "xWifiReadySem"
+/* Definitions for xPrintSem */
+osSemaphoreId_t xPrintSemHandle;
+const osSemaphoreAttr_t xPrintSem_attributes = {
+  .name = "xPrintSem"
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -215,11 +226,17 @@ void MX_FREERTOS_Init(void) {
   /* creation of xWifiTxSem */
   xWifiTxSemHandle = osSemaphoreNew(1, 1, &xWifiTxSem_attributes);
 
-  /* creation of xWifiReadySem */
-  xWifiReadySemHandle = osSemaphoreNew(1, 1, &xWifiReadySem_attributes);
+  /* creation of xPrintSem */
+  xPrintSemHandle = osSemaphoreNew(1, 1, &xPrintSem_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
+  /* creation of xRfidRxSem */
+  xRfidRxSemHandle = osSemaphoreNew(1, 0, &xRfidRxSem_attributes);
+
+  /* creation of xWifiReadySem */
+  xWifiReadySemHandle = osSemaphoreNew(1, 0, &xWifiReadySem_attributes);
+
   /* USER CODE END RTOS_SEMAPHORES */
   /* creation of xResetButtonTimer */
   xResetButtonTimerHandle = osTimerNew(vResetButtonCallback, osTimerOnce, NULL, &xResetButtonTimer_attributes);
@@ -244,11 +261,11 @@ void MX_FREERTOS_Init(void) {
   /* creation of xMotor_Rx_Queue */
   xMotor_Rx_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xMotor_Rx_Queue_attributes);
   /* creation of xRfid_Rx_Queue */
-  xRfid_Rx_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xRfid_Rx_Queue_attributes);
+  xRfid_Rx_QueueHandle = osMessageQueueNew (2, sizeof(uint32_t), &xRfid_Rx_Queue_attributes);
   /* creation of xMotion_Queue */
   xMotion_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xMotion_Queue_attributes);
   /* creation of xPrint_Queue */
-  xPrint_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xPrint_Queue_attributes);
+  xPrint_QueueHandle = osMessageQueueNew (32, sizeof(uint32_t), &xPrint_Queue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */

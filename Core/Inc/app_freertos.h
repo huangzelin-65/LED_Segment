@@ -52,7 +52,8 @@ extern "C" {
 
 /* Exported macro -------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-
+extern osSemaphoreId_t xRfidRxSemHandle;
+extern osSemaphoreId_t xWifiReadySemHandle;
 /* USER CODE END EM */
 extern osThreadId_t InitTaskHandle;
 extern osThreadId_t IntProcessTaskHandle;
@@ -77,7 +78,7 @@ extern osMessageQueueId_t xMotion_QueueHandle;
 extern osMessageQueueId_t xPrint_QueueHandle;
 extern osSemaphoreId_t xMotorTxSemHandle;
 extern osSemaphoreId_t xWifiTxSemHandle;
-extern osSemaphoreId_t xWifiReadySemHandle;
+extern osSemaphoreId_t xPrintSemHandle;
 
 /* Exported function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */

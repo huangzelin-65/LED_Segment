@@ -144,18 +144,43 @@ void vSensorTask(void *argument)
           }
           break;
 
-        // 拨动开关向前
+        // 拨动开关向前（运行方向不变）
         case ToggleFront:
           // 设置为自动模式
           CarRunStatus_obj.AutoMode = Auto;
+
+          // 预设值向前
+          if(CarRunStatus_obj.SetDirection == Forward)
+          {
+            CarToPlcData_obj.bDire = Forward; //实际运行方向记录为向后
+          }
+          // 预设值向后
+          else if(CarRunStatus_obj.SetDirection == Backward)
+          {
+            CarToPlcData_obj.bDire = Backward; //实际运行方向记录为向前
+          }
+          
           // 通过sensor自检，判断是否可以运动，并跳转到运动控制任务
           vSensorStatusCheck(); 
           break;
 
-        // 拨动开关向后
+        // 拨动开关向后（运行方向相反）
         case ToggleBack:
           // 设置为手动模式
           CarRunStatus_obj.AutoMode = Manual;
+
+          // 预设值向前
+          if(CarRunStatus_obj.SetDirection == Forward)
+          {
+            CarToPlcData_obj.bDire = Backward; //实际运行方向记录为向后
+          }
+
+          // 预设值向后
+          else if(CarRunStatus_obj.SetDirection == Backward)
+          {
+            CarToPlcData_obj.bDire = Forward; //实际运行方向记录为向前
+          }
+
           // 通过sensor自检，判断是否可以运动，并跳转到运动控制任务
           vSensorStatusCheck(); 
           break;
@@ -188,7 +213,7 @@ void vSensorTask(void *argument)
             {
               DEBUGINFO("vSensorask() send motion msg error3\r\n");
             }
-            osTimerStart(xResetButtonTimerHandle, pdMS_TO_TICKS(ResetDuration));
+            osTimerStart(xResetButtonTimerHandle, pdMS_TO_TICKS(ResetDuration));// 回调vResetButtonCallback
           }
           // 按钮松开
           else

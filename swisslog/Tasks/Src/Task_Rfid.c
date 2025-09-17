@@ -27,13 +27,15 @@
 char pcCardNum[10] = {0};
 u8 ucRfidDataLen = 0;
 u8 ucMotion_msg;
+uint8_t ucRfid_Rx_Buffer[2][RFID_RX_BUF_SIZE];
+uint8_t ucRfid_current_buf_idx = 0;  // 当前使用的缓冲区索引
 
-
-extern QueueHandle_t xMotion_QueueHandle;
+extern osMessageQueueId_t xMotion_QueueHandle;
 extern CarToPlcData CarToPlcData_obj;
 extern _CarCheckFlag_obj CarCheckFlagobj;
 extern _CarRunStatus_obj CarRunStatus_obj;
 extern osMessageQueueId_t xRfid_Rx_QueueHandle;
+extern osSemaphoreId_t xRfidRxSemHandle;
 
 //获取9位卡号
 char* pcGetRfidCardNum(char *data, u32 RfidDataLen)
@@ -177,30 +179,34 @@ void vGetTagSpeed(char *data)
       {
         DEBUGINFO("vGetTagSpeed() send motion msg error\r\n");
       }
-
     }
-    
   }
-  
 }
+
 
 //任务入口函数
 void vRfidTask(void *argument)
 {
-  uint8_t ucRfid_Task_Rx_Buffer[RFID_RX_BUF_SIZE];
   
   //启动DMA接收
-  vRfid_Start_GPDMA_Receive();
+  vRfid_Start_GPDMA_Receive(ucRfid_Rx_Buffer[ucRfid_current_buf_idx]);
 
   while(1) {
     // 等待DMA接收完成信号
-    if (osMessageQueueGet(xRfid_Rx_QueueHandle, ucRfid_Task_Rx_Buffer, NULL, osWaitForever) == osOK) 
+    if (osSemaphoreAcquire(xRfidRxSemHandle, osWaitForever) == osOK)
     {
+      DEBUGINFO("ucRfid_current_buf_idx:%d\r\n",ucRfid_current_buf_idx);
+      DEBUGINFO("rfid received:%s, len:%d\r\n",ucRfid_Rx_Buffer[ucRfid_current_buf_idx],strlen((char *)ucRfid_Rx_Buffer[ucRfid_current_buf_idx]));
+      
+      uint8_t* temp_buffer = ucRfid_Rx_Buffer[ucRfid_current_buf_idx];
 
-      DEBUGINFO("rfid received:%s, len:%d\r\n",ucRfid_Task_Rx_Buffer,strlen((char *)ucRfid_Task_Rx_Buffer));
       // 解析RFID卡号
-      //strcpy(pcCardNum, pcGetRfidCardNum((char*)frame.data, frame.len));
-      char* pResult = pcGetRfidCardNum((char*)ucRfid_Task_Rx_Buffer, strlen((char *)ucRfid_Task_Rx_Buffer));
+      char* pResult = pcGetRfidCardNum((char*)temp_buffer, strlen((char *)temp_buffer));
+
+      // 切换缓冲区并重启接收
+      ucRfid_current_buf_idx ^= 1;
+      vRfid_Start_GPDMA_Receive(ucRfid_Rx_Buffer[ucRfid_current_buf_idx]);
+
       //判断卡号非空
       if (pResult != NULL)
       {
@@ -232,13 +238,8 @@ void vRfidTask(void *argument)
         memset(pcCardNum, 0, sizeof(pcCardNum));
       }
 
-
-      // 重启DMA接收(DMA循环模式下，重启后从缓冲区起始地址覆盖写入)
-      vRfid_Start_GPDMA_Receive();
     }
-
     
-
   }
 
 }
