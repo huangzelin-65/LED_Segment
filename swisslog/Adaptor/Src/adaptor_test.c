@@ -27,9 +27,13 @@ void vPrint_start_Transmit(uint8_t *rxData, uint16_t Size)
 
 // 启动Test串口的GPDMA接收
 void vTest_Start_GPDMA_Receive(uint8_t* ucTest_Rx_Buffer) {
-  // 启动DMA接收（空闲模式）
-  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, ucTest_Rx_Buffer, TEST_RX_BUF_SIZE);
-  __HAL_DMA_DISABLE_IT(huart1.hdmarx, DMA_IT_HT);
+  if(HAL_UARTEx_ReceiveToIdle_DMA(&huart1, ucTest_Rx_Buffer, TEST_RX_BUF_SIZE)!=HAL_OK)
+  {
+    // 启动DMA接收（空闲模式）
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart1, ucTest_Rx_Buffer, TEST_RX_BUF_SIZE);
+    __HAL_DMA_DISABLE_IT(huart1.hdmarx, DMA_IT_HT);
+  }
+
 }
 
 

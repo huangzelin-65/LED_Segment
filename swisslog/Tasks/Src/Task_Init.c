@@ -27,11 +27,9 @@ void vInitTask(void *argument)
   osThreadResume(RfidTaskHandle); 
   osThreadResume(SensorTaskHandle);
   osThreadResume(TestTaskHandle);
-  //osThreadResume(WifiManagerTaskHandle);
-  //osThreadResume(WifiReceiveTaskHandle);
+  osThreadResume(WifiManagerTaskHandle);
+  osThreadResume(WifiReceiveTaskHandle);
 
   DEBUGINFO("InitTask\r\n");
-  DEBUGINFO("InitTask1\r\n");
-  DEBUGINFO("InitTask2\r\n");
   osThreadExit();
 }

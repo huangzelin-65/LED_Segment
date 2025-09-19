@@ -196,7 +196,8 @@ void vRfidTask(void *argument)
     if (osSemaphoreAcquire(xRfidRxSemHandle, osWaitForever) == osOK)
     {
       DEBUGINFO("ucRfid_current_buf_idx:%d\r\n",ucRfid_current_buf_idx);
-      DEBUGINFO("rfid received:%s, len:%d\r\n",ucRfid_Rx_Buffer[ucRfid_current_buf_idx],strlen((char *)ucRfid_Rx_Buffer[ucRfid_current_buf_idx]));
+      DEBUGINFO("rfid received:%s, len:%d\r\n",ucRfid_Rx_Buffer[ucRfid_current_buf_idx],\
+        strlen((char *)ucRfid_Rx_Buffer[ucRfid_current_buf_idx]));
       
       uint8_t* temp_buffer = ucRfid_Rx_Buffer[ucRfid_current_buf_idx];
 

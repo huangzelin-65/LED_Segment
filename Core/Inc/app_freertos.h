@@ -55,6 +55,7 @@ extern "C" {
 extern osSemaphoreId_t xRfidRxSemHandle;
 extern osSemaphoreId_t xTestRxSemHandle;
 extern osSemaphoreId_t xWifiReadySemHandle;
+extern osSemaphoreId_t xWifiRxSemHandle;
 /* USER CODE END EM */
 extern osThreadId_t InitTaskHandle;
 extern osThreadId_t IntProcessTaskHandle;

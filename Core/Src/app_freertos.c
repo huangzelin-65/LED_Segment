@@ -57,6 +57,13 @@ const osSemaphoreAttr_t xWifiReadySem_attributes = {
   .name = "xWifiReadySem"
 };
 
+/* Definitions for xRfidRxSem */
+osSemaphoreId_t xWifiRxSemHandle;
+const osSemaphoreAttr_t xWifiRxSem_attributes = {
+  .name = "xWifiRxSem"
+};
+
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -243,10 +250,12 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of xTestRxSem */
   xTestRxSemHandle = osSemaphoreNew(1, 0, &xTestRxSem_attributes);
-  
 
   /* creation of xWifiReadySem */
   xWifiReadySemHandle = osSemaphoreNew(1, 0, &xWifiReadySem_attributes);
+
+    /* creation of xWifiReadySem */
+  xWifiRxSemHandle = osSemaphoreNew(1, 0, &xWifiRxSem_attributes);
 
   /* USER CODE END RTOS_SEMAPHORES */
   /* creation of xResetButtonTimer */

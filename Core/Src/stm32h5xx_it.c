@@ -90,6 +90,7 @@ extern osSemaphoreId_t xWifiTxSemHandle;
 extern osSemaphoreId_t xPrintSemHandle;
 extern osSemaphoreId_t xRfidRxSemHandle;
 extern osSemaphoreId_t xTestRxSemHandle;
+extern osSemaphoreId_t xWifiRxSemHandle;
 
 /* USER CODE END EV */
 
@@ -550,7 +551,11 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
   else if (huart->Instance == USART6) {
     //Wifi串口接收处理
     uint16_t dataLength = RFID_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart->hdmarx);
-    vWifi_RxEventCallback(dataLength);
+
+    if (dataLength > 0) 
+    {
+      osSemaphoreRelease(xWifiRxSemHandle);  // 释放信号量,允许读取wifi数据
+    }
   }
 
 }
