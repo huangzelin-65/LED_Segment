@@ -20,18 +20,20 @@
 
 // DMA缓冲区
 #define MOTOR_BUF_SIZE 16
-u8 MotorDmaBuffer[2][MOTOR_BUF_SIZE]={0};
-u8* motor_msg;
-u8 MotorDataLen = 0;
+uint8_t MotorDmaBuffer[2][MOTOR_BUF_SIZE]={0};
+uint8_t ucMotor_Task_Rx_Buffer[MOTOR_RX_BUF_SIZE];
+
+uint8_t* motor_msg;
+uint8_t MotionRecv_msg;
+uint8_t MotorDataLen = 0;
 
 extern osMessageQueueId_t xMotion_QueueHandle;
 extern osMessageQueueId_t xMotor_Rx_QueueHandle;
+extern osSemaphoreId_t xMotorRxSemHandle;
 extern CarToPlcData CarToPlcData_obj;
 extern _CarRunStatus_obj CarRunStatus_obj;
 extern _CarCheckFlag_obj CarCheckFlagobj;
 
-
-u8 MotionRecv_msg;
 
 void vCarRunStatusInit()
 {
@@ -132,23 +134,24 @@ void vMotionCtrlTask(void *argument)
 /* 电机反馈任务入口函数 */
 void vMotorFeedbackTask(void *argument)
 {
-  //Motor_Rx_Frame_t xMotor_Rx_Frame;
-  uint8_t ucMotor_Task_Rx_Buffer[MOTOR_RX_BUF_SIZE];
 
   //启动DMA接收
-  vMotor_Start_GPDMA_Receive();
+  vMotor_Start_GPDMA_Receive(ucMotor_Task_Rx_Buffer);
 
   while (1)
   {
 
     // 等待DMA接收完成信号
-    if (osMessageQueueGet(xMotor_Rx_QueueHandle, ucMotor_Task_Rx_Buffer, NULL, osWaitForever) == osOK) 
+    if (osSemaphoreAcquire(xMotorRxSemHandle, osWaitForever) == osOK)    
     {
 
-      DEBUGINFO("Motor received:%s, len:%d\r\n",ucMotor_Task_Rx_Buffer,strlen((char *)ucMotor_Task_Rx_Buffer));
-
+      DEBUGINFO("Motor received len:%d\r\n",strlen((char *)ucMotor_Task_Rx_Buffer));
+      for(uint8_t i=0;i<strlen((char *)ucMotor_Task_Rx_Buffer);i++)
+      {
+        safe_printf("%X ",ucMotor_Task_Rx_Buffer[i]);
+      }
       // 重启DMA接收(DMA循环模式下，重启后从缓冲区起始地址覆盖写入)
-      vMotor_Start_GPDMA_Receive();
+      vMotor_Start_GPDMA_Receive(ucMotor_Task_Rx_Buffer);
     }
   }
 }

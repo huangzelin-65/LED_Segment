@@ -9,6 +9,7 @@
 #include "motor_LD25B60G.h"
 #include "LogDebugInfo.h"
 #include "FreeRTOS.h"
+#include "cmsis_os2.h"
 #include "task.h"
 #include "adaptor_motor.h"
 
@@ -130,53 +131,53 @@ void vMotorRead(u8 Cmd)
 
 void vMotorTest()
 {
-	vTaskDelay(1000);
+	osDelay(1000);
 
   //电机正转
 	vMotorOps(MOTOR_FORWARD, MOTOR_SPEED_LOW);
-	vTaskDelay(100);
+	osDelay(500);
 	vMotorRead(MOTOR_GET_SPEED);
-	vTaskDelay(1000);
+	osDelay(1000);
 	vMotorOps(MOTOR_FORWARD, MOTOR_SPEED_NORMAL);
-	vTaskDelay(100);
+	osDelay(500);
 	vMotorRead(MOTOR_GET_SPEED);
-	vTaskDelay(1000);
+	osDelay(1000);
 	vMotorOps(MOTOR_FORWARD, MOTOR_SPEED_HIGH);
-	vTaskDelay(100);
+	osDelay(500);
 	vMotorRead(MOTOR_GET_SPEED);
-	vTaskDelay(1000);
+	osDelay(1000);
 
 	vMotorRead(MOTOR_GET_STATUS);
-	vTaskDelay(100);
+	osDelay(500);
 	vMotorRead(MOTOR_GET_ERROR);
-	vTaskDelay(100);
+	osDelay(500);
 
   //电机反转 
 	vMotorOps(MOTOR_BACKWARD, MOTOR_SPEED_LOW);
-	vTaskDelay(100);
+	osDelay(500);
 	vMotorRead(MOTOR_GET_SPEED);
-	vTaskDelay(1000);
+	osDelay(1000);
 	vMotorOps(MOTOR_BACKWARD, MOTOR_SPEED_NORMAL);
-	vTaskDelay(100);
+	osDelay(500);
 	vMotorRead(MOTOR_GET_SPEED);
-	vTaskDelay(1000);
+	osDelay(1000);
 	vMotorOps(MOTOR_BACKWARD, MOTOR_SPEED_HIGH);
-	vTaskDelay(100);
+	osDelay(500);
 	vMotorRead(MOTOR_GET_SPEED);
-	vTaskDelay(1000);
+	osDelay(1000);
 
 	vMotorRead(MOTOR_GET_STATUS);
-	vTaskDelay(100);
+	osDelay(500);
 	vMotorRead(MOTOR_GET_ERROR);
-	vTaskDelay(100);
+	osDelay(500);
 
   //电机停转 
 	vMotorOps(MOTOR_STOP, MOTOR_NO_SPEED);
-	vTaskDelay(1000);
+	osDelay(1000);
 	vMotorRead(MOTOR_GET_SPEED);
-	vTaskDelay(100);
+	osDelay(500);
 	vMotorRead(MOTOR_GET_STATUS);
-	vTaskDelay(100);
+	osDelay(500);
 	vMotorRead(MOTOR_GET_ERROR);
-	vTaskDelay(100);
+	osDelay(500);
 }

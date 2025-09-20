@@ -17,9 +17,8 @@ void vRfid_Start_GPDMA_Receive(uint8_t* ucRfid_Rx_Buffer) {
     DEBUGINFO("HAL_UARTEx_ReceiveToIdle_DMA() retry\r\n");
     // 启动DMA接收
     HAL_UARTEx_ReceiveToIdle_DMA(&huart5, ucRfid_Rx_Buffer, RFID_RX_BUF_SIZE);
-    __HAL_DMA_DISABLE_IT(huart5.hdmarx, DMA_IT_HT);
   }
-
+  __HAL_DMA_DISABLE_IT(huart5.hdmarx, DMA_IT_HT);
 }
 
 

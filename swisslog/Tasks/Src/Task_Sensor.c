@@ -59,15 +59,11 @@ void vSensorTask(void *argument)
   
   //蜂鸣器响0.5s
   vBeep_Control(ENABLE);
-  //osDelay(500);
-  //vTaskDelay(500);
+  osDelay(500);
   vBeep_Control(DISABLE);
 
-  //延时0.5s，让电机上电完成
-  //vTaskDelay(500);
-
   //电机测试
-  //vMotorTest();
+  vMotorTest();
 
   //开机状态自检
   vCarSelfCheck();
