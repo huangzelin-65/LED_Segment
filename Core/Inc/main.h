@@ -137,6 +137,17 @@ typedef enum
     MotorEnable = 1,
 }eMotorStatusType;
 
+//----------LED灯颜色枚举----------
+typedef enum
+{
+    WHITE = 0,
+    RED = 1,
+    GREEN = 2,
+    BLUE = 3,
+    YELLOW = 4,
+    LED_OFF = 5,
+}eLedColorType;
+
 
 //----------小车运行状态结构体------------------------------
 typedef struct
@@ -260,10 +271,30 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define Rfid_Box_TX_Pin GPIO_PIN_1
+#define Rfid_Box_TX_GPIO_Port GPIOE
+#define Rfid_Box_RX_Pin GPIO_PIN_0
+#define Rfid_Box_RX_GPIO_Port GPIOE
+#define EEPROM_SCL_Pin GPIO_PIN_8
+#define EEPROM_SCL_GPIO_Port GPIOB
+#define BOX_5V_Pin GPIO_PIN_4
+#define BOX_5V_GPIO_Port GPIOE
+#define ELOCK_EN1_Pin GPIO_PIN_5
+#define ELOCK_EN1_GPIO_Port GPIOE
+#define ELOCK2_STATUS_Pin GPIO_PIN_6
+#define ELOCK2_STATUS_GPIO_Port GPIOE
+#define EEPROM_SDA_Pin GPIO_PIN_9
+#define EEPROM_SDA_GPIO_Port GPIOB
 #define BEEP_PWM_Pin GPIO_PIN_7
 #define BEEP_PWM_GPIO_Port GPIOB
+#define NUMDISP_485_CTRL_Pin GPIO_PIN_13
+#define NUMDISP_485_CTRL_GPIO_Port GPIOC
+#define Sterilamp_EN_Pin GPIO_PIN_8
+#define Sterilamp_EN_GPIO_Port GPIOI
 #define USART1_RX_Pin GPIO_PIN_10
 #define USART1_RX_GPIO_Port GPIOA
+#define ELOCK_EN2_Pin GPIO_PIN_11
+#define ELOCK_EN2_GPIO_Port GPIOI
 #define USART1_TX_Pin GPIO_PIN_9
 #define USART1_TX_GPIO_Port GPIOA
 #define Wifi_RX_Pin GPIO_PIN_7
@@ -275,6 +306,10 @@ void Error_Handler(void);
 #define LED5_GPIO_Port GPIOG
 #define Wifi_TX_Pin GPIO_PIN_6
 #define Wifi_TX_GPIO_Port GPIOC
+#define NUMDISP_TX_Pin GPIO_PIN_3
+#define NUMDISP_TX_GPIO_Port GPIOF
+#define NUMDISP_RX_Pin GPIO_PIN_4
+#define NUMDISP_RX_GPIO_Port GPIOF
 #define LED3_Pin GPIO_PIN_7
 #define LED3_GPIO_Port GPIOG
 #define LED4_Pin GPIO_PIN_6
@@ -293,8 +328,10 @@ void Error_Handler(void);
 #define RC_H_Pin GPIO_PIN_10
 #define RC_H_GPIO_Port GPIOH
 #define RC_H_EXTI_IRQn EXTI10_IRQn
-#define MOTOR_RS485_CTRL_Pin GPIO_PIN_3
-#define MOTOR_RS485_CTRL_GPIO_Port GPIOC
+#define ELOCK1_STATUS_Pin GPIO_PIN_2
+#define ELOCK1_STATUS_GPIO_Port GPIOC
+#define MOTOR_485_CTRL_Pin GPIO_PIN_3
+#define MOTOR_485_CTRL_GPIO_Port GPIOC
 #define TOGGLE_BACK_Pin GPIO_PIN_1
 #define TOGGLE_BACK_GPIO_Port GPIOG
 #define TOGGLE_BACK_EXTI_IRQn EXTI1_IRQn
@@ -313,22 +350,26 @@ void Error_Handler(void);
 #define OUT_DIR_GPIO_Port GPIOD
 #define LED1_Pin GPIO_PIN_10
 #define LED1_GPIO_Port GPIOD
+#define LED_BOX_B_Pin GPIO_PIN_12
+#define LED_BOX_B_GPIO_Port GPIOF
 #define RESET_Pin GPIO_PIN_15
 #define RESET_GPIO_Port GPIOF
 #define RESET_EXTI_IRQn EXTI15_IRQn
 #define Motor_TX_Pin GPIO_PIN_8
 #define Motor_TX_GPIO_Port GPIOE
-#define Rfid_RX_Pin GPIO_PIN_12
-#define Rfid_RX_GPIO_Port GPIOB
-#define Rfid_TX_Pin GPIO_PIN_13
-#define Rfid_TX_GPIO_Port GPIOB
+#define Rfid_Car_RX_Pin GPIO_PIN_12
+#define Rfid_Car_RX_GPIO_Port GPIOB
+#define Rfid_Car_TX_Pin GPIO_PIN_13
+#define Rfid_Car_TX_GPIO_Port GPIOB
 #define RP_L_Pin GPIO_PIN_3
 #define RP_L_GPIO_Port GPIOA
 #define RP_L_EXTI_IRQn EXTI3_IRQn
+#define LED_BOX_R_Pin GPIO_PIN_1
+#define LED_BOX_R_GPIO_Port GPIOB
+#define LED_BOX_G_Pin GPIO_PIN_0
+#define LED_BOX_G_GPIO_Port GPIOB
 #define Motor_RX_Pin GPIO_PIN_7
 #define Motor_RX_GPIO_Port GPIOE
-#define Wifi_TXE10_Pin GPIO_PIN_10
-#define Wifi_TXE10_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
 

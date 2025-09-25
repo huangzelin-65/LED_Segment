@@ -26,7 +26,7 @@ void vTestTask(void *argument)
 {
   
   //启动DMA接收
-  vTest_Start_GPDMA_Receive(ucTest_Rx_Buffer);
+  vTest_Start_DMA_Receive(ucTest_Rx_Buffer);
 
   while (1)
   {
@@ -56,7 +56,7 @@ void vTestTask(void *argument)
       vParseCommandToCar();
 
       // 重启RX接收
-      vTest_Start_GPDMA_Receive(ucTest_Rx_Buffer);
+      vTest_Start_DMA_Receive(ucTest_Rx_Buffer);
     }
   }
 }

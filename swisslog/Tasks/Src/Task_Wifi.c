@@ -174,7 +174,7 @@ void vWifiReceiveTask(void *argument)
   if (osSemaphoreAcquire(xWifiReadySemHandle, osWaitForever) == osOK)
   {
     //启动DMA接收
-    vWifi_Start_GPDMA_Receive(ucWifi_Receive_Buffer[ucWifi_current_buf_idx]);
+    vWifi_Start_DMA_Receive(ucWifi_Receive_Buffer[ucWifi_current_buf_idx]);
 
     while(1) {
       // 等待DMA接收完成信号
@@ -204,7 +204,7 @@ void vWifiReceiveTask(void *argument)
 
         // 重启DMA接收(DMA循环模式下，重启后从缓冲区起始地址覆盖写入)
         ucWifi_current_buf_idx ^= 1;
-        vWifi_Start_GPDMA_Receive(ucWifi_Receive_Buffer[ucWifi_current_buf_idx]);
+        vWifi_Start_DMA_Receive(ucWifi_Receive_Buffer[ucWifi_current_buf_idx]);
       }
 
     }

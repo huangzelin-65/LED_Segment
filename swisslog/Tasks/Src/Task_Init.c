@@ -3,6 +3,7 @@
 #include "task.h"
 #include "cmsis_os2.h"
 #include "LogDebugInfo.h"
+#include "adaptor_eeprom.h"
 
 extern osThreadId_t InitTaskHandle;
 extern osThreadId_t IntProcessTaskHandle;
@@ -14,7 +15,10 @@ extern osThreadId_t TestTaskHandle;
 extern osThreadId_t WifiManagerTaskHandle;
 extern osThreadId_t WifiReceiveTaskHandle;
 extern osThreadId_t PrintTaskHandle;
+extern osThreadId_t BoxCtrlTaskHandle;
 extern _CarRunStatus_obj CarRunStatus_obj;
+
+
 
 void vInitTask(void *argument)
 {
@@ -27,9 +31,13 @@ void vInitTask(void *argument)
   osThreadResume(RfidTaskHandle); 
   osThreadResume(SensorTaskHandle);
   osThreadResume(TestTaskHandle);
-  osThreadResume(WifiManagerTaskHandle);
-  osThreadResume(WifiReceiveTaskHandle);
+  //osThreadResume(WifiManagerTaskHandle);
+  //osThreadResume(WifiReceiveTaskHandle);
+  osThreadResume(BoxCtrlTaskHandle);
 
   DEBUGINFO("InitTask\r\n");
+
+  vEepromTest();
+
   osThreadExit();
 }

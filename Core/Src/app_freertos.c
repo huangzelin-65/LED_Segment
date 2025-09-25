@@ -63,6 +63,12 @@ const osSemaphoreAttr_t xWifiRxSem_attributes = {
   .name = "xWifiRxSem"
 };
 
+/* Definitions for xMotorRxSem */
+osSemaphoreId_t xMotorRxSemHandle;
+const osSemaphoreAttr_t xMotorRxSem_attributes = {
+  .name = "xMotorRxSem"
+};
+
 
 /* USER CODE END PD */
 
@@ -145,6 +151,13 @@ const osThreadAttr_t PrintTask_attributes = {
   .priority = (osPriority_t) osPriorityBelowNormal7,
   .stack_size = 256 * 4
 };
+/* Definitions for BoxCtrlTask */
+osThreadId_t BoxCtrlTaskHandle;
+const osThreadAttr_t BoxCtrlTask_attributes = {
+  .name = "BoxCtrlTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
 /* Definitions for xResetButtonTimer */
 osTimerId_t xResetButtonTimerHandle;
 const osTimerAttr_t xResetButtonTimer_attributes = {
@@ -199,6 +212,11 @@ const osMessageQueueAttr_t xMotion_Queue_attributes = {
 osMessageQueueId_t xPrint_QueueHandle;
 const osMessageQueueAttr_t xPrint_Queue_attributes = {
   .name = "xPrint_Queue"
+};
+/* Definitions for xBox_Ctrl_Queue */
+osMessageQueueId_t xBox_Ctrl_QueueHandle;
+const osMessageQueueAttr_t xBox_Ctrl_Queue_attributes = {
+  .name = "xBox_Ctrl_Queue"
 };
 /* Definitions for xMotorTxSem */
 osSemaphoreId_t xMotorTxSemHandle;
@@ -257,6 +275,10 @@ void MX_FREERTOS_Init(void) {
     /* creation of xWifiReadySem */
   xWifiRxSemHandle = osSemaphoreNew(1, 0, &xWifiRxSem_attributes);
 
+  /* creation of xWifiReadySem */
+  xMotorRxSemHandle = osSemaphoreNew(1, 0, &xMotorRxSem_attributes);
+
+
   /* USER CODE END RTOS_SEMAPHORES */
   /* creation of xResetButtonTimer */
   xResetButtonTimerHandle = osTimerNew(vResetButtonCallback, osTimerOnce, NULL, &xResetButtonTimer_attributes);
@@ -286,6 +308,8 @@ void MX_FREERTOS_Init(void) {
   xMotion_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xMotion_Queue_attributes);
   /* creation of xPrint_Queue */
   xPrint_QueueHandle = osMessageQueueNew (32, sizeof(uint32_t), &xPrint_Queue_attributes);
+  /* creation of xBox_Ctrl_Queue */
+  xBox_Ctrl_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xBox_Ctrl_Queue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -330,6 +354,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of PrintTask */
   PrintTaskHandle = osThreadNew(vPrintTask, NULL, &PrintTask_attributes);
 
+  /* creation of BoxCtrlTask */
+  BoxCtrlTaskHandle = osThreadNew(vBoxCtrlTask, NULL, &BoxCtrlTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   
@@ -343,6 +370,8 @@ void MX_FREERTOS_Init(void) {
   osThreadSuspend(WifiManagerTaskHandle);
   osThreadSuspend(WifiReceiveTaskHandle);
   osThreadSuspend(PrintTaskHandle);
+  osThreadSuspend(BoxCtrlTaskHandle);
+  
 
   /* USER CODE END RTOS_THREADS */
 

@@ -13,6 +13,6 @@
 
 
 void vSendToMotor(uint8_t * CmdDataArr,uint8_t len); //发送数据到motor
-void vMotor_Start_GPDMA_Receive(uint8_t* ucMotor_Rx_Buffer);
+void vMotor_Start_DMA_Receive(uint8_t* ucMotor_Rx_Buffer);
 
 #endif /* ADAPTOR_INC_ADAPTOR_MOTOR_H_ */

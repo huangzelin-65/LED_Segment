@@ -189,7 +189,7 @@ void vRfidTask(void *argument)
 {
   
   //启动DMA接收
-  vRfid_Start_GPDMA_Receive(ucRfid_Rx_Buffer[ucRfid_current_buf_idx]);
+  vRfid_Start_DMA_Receive(ucRfid_Rx_Buffer[ucRfid_current_buf_idx]);
 
   while(1) {
     // 等待DMA接收完成信号
@@ -206,7 +206,7 @@ void vRfidTask(void *argument)
 
       // 切换缓冲区并重启接收
       ucRfid_current_buf_idx ^= 1;
-      vRfid_Start_GPDMA_Receive(ucRfid_Rx_Buffer[ucRfid_current_buf_idx]);
+      vRfid_Start_DMA_Receive(ucRfid_Rx_Buffer[ucRfid_current_buf_idx]);
 
       //判断卡号非空
       if (pResult != NULL)

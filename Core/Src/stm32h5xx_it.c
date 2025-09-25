@@ -69,17 +69,21 @@ uint8_t msg;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern I2C_HandleTypeDef hi2c1;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel6;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel1;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel0;
+extern DMA_HandleTypeDef handle_GPDMA2_Channel0;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel5;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel4;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel3;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel2;
 extern UART_HandleTypeDef huart5;
 extern UART_HandleTypeDef huart7;
+extern UART_HandleTypeDef huart8;
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart6;
+extern UART_HandleTypeDef huart11;
 extern TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN EV */
@@ -91,6 +95,7 @@ extern osSemaphoreId_t xPrintSemHandle;
 extern osSemaphoreId_t xRfidRxSemHandle;
 extern osSemaphoreId_t xTestRxSemHandle;
 extern osSemaphoreId_t xWifiRxSemHandle;
+extern osSemaphoreId_t xMotorRxSemHandle;
 
 /* USER CODE END EV */
 
@@ -470,6 +475,34 @@ void TIM2_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles I2C1 Event interrupt.
+  */
+void I2C1_EV_IRQHandler(void)
+{
+  /* USER CODE BEGIN I2C1_EV_IRQn 0 */
+
+  /* USER CODE END I2C1_EV_IRQn 0 */
+  HAL_I2C_EV_IRQHandler(&hi2c1);
+  /* USER CODE BEGIN I2C1_EV_IRQn 1 */
+
+  /* USER CODE END I2C1_EV_IRQn 1 */
+}
+
+/**
+  * @brief This function handles I2C1 Error interrupt.
+  */
+void I2C1_ER_IRQHandler(void)
+{
+  /* USER CODE BEGIN I2C1_ER_IRQn 0 */
+
+  /* USER CODE END I2C1_ER_IRQn 0 */
+  HAL_I2C_ER_IRQHandler(&hi2c1);
+  /* USER CODE BEGIN I2C1_ER_IRQn 1 */
+
+  /* USER CODE END I2C1_ER_IRQn 1 */
+}
+
+/**
   * @brief This function handles USART1 global interrupt.
   */
 void USART1_IRQHandler(void)
@@ -512,6 +545,34 @@ void USART6_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles USART11 global interrupt.
+  */
+void USART11_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART11_IRQn 0 */
+
+  /* USER CODE END USART11_IRQn 0 */
+  HAL_UART_IRQHandler(&huart11);
+  /* USER CODE BEGIN USART11_IRQn 1 */
+
+  /* USER CODE END USART11_IRQn 1 */
+}
+
+/**
+  * @brief This function handles GPDMA2 Channel 0 global interrupt.
+  */
+void GPDMA2_Channel0_IRQHandler(void)
+{
+  /* USER CODE BEGIN GPDMA2_Channel0_IRQn 0 */
+
+  /* USER CODE END GPDMA2_Channel0_IRQn 0 */
+  HAL_DMA_IRQHandler(&handle_GPDMA2_Channel0);
+  /* USER CODE BEGIN GPDMA2_Channel0_IRQn 1 */
+
+  /* USER CODE END GPDMA2_Channel0_IRQn 1 */
+}
+
+/**
   * @brief This function handles UART7 global interrupt.
   */
 void UART7_IRQHandler(void)
@@ -523,6 +584,20 @@ void UART7_IRQHandler(void)
   /* USER CODE BEGIN UART7_IRQn 1 */
 
   /* USER CODE END UART7_IRQn 1 */
+}
+
+/**
+  * @brief This function handles UART8 global interrupt.
+  */
+void UART8_IRQHandler(void)
+{
+  /* USER CODE BEGIN UART8_IRQn 0 */
+
+  /* USER CODE END UART8_IRQn 0 */
+  HAL_UART_IRQHandler(&huart8);
+  /* USER CODE BEGIN UART8_IRQn 1 */
+
+  /* USER CODE END UART8_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
@@ -555,6 +630,15 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     if (dataLength > 0) 
     {
       osSemaphoreRelease(xWifiRxSemHandle);  // 释放信号量,允许读取wifi数据
+    }
+  }
+  else if (huart->Instance == UART7)
+  {
+    //Wifi串口接收处理
+    uint16_t dataLength = RFID_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart->hdmarx);
+    if (dataLength > 0) 
+    {
+      osSemaphoreRelease(xMotorRxSemHandle);  // 释放信号量,允许读取motor数据
     }
   }
 

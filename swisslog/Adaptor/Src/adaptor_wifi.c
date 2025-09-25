@@ -28,7 +28,7 @@ extern osSemaphoreId_t xWifiRxSemHandle;
  *  @param ucWifi_Rx_Buffer WiFi接收缓冲区指针
  *  @note 如果启动DMA接收失败，将会重试一次。
  *************************************************/
-void vWifi_Start_GPDMA_Receive(uint8_t *ucWifi_Rx_Buffer)
+void vWifi_Start_DMA_Receive(uint8_t *ucWifi_Rx_Buffer)
 {
   // 启动DMA接收（空闲模式）
   if (HAL_UARTEx_ReceiveToIdle_DMA(&huart6, ucWifi_Rx_Buffer, WIFI_RX_BUF_SIZE) != HAL_OK)
@@ -95,7 +95,7 @@ HAL_StatusTypeDef at_send_command(const char *cmd, const char *expect, uint32_t 
   //Wifi_Rx_Frame_t frame;
   
   //启动DMA接收
-  vWifi_Start_GPDMA_Receive(ucAt_Respond_Buffer);
+  vWifi_Start_DMA_Receive(ucAt_Respond_Buffer);
   
   // 格式化并发送AT指令
   snprintf((char *)ucAt_Cmd_Buffer, WIFI_TX_BUF_SIZE, "%s\r\n", cmd);
@@ -119,14 +119,14 @@ HAL_StatusTypeDef at_send_command(const char *cmd, const char *expect, uint32_t 
       else
       {
         //启动DMA接收
-        vWifi_Start_GPDMA_Receive(ucAt_Respond_Buffer);
+        vWifi_Start_DMA_Receive(ucAt_Respond_Buffer);
       }
     }
   }
   
   //停止DMA获取
   vWifi_Stop_GPDMA_Receive();
-  //vWifi_Start_GPDMA_Receive(ucAt_Respond_Buffer);
+  //vWifi_Start_DMA_Receive(ucAt_Respond_Buffer);
   return ret;
 }
 

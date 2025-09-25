@@ -136,7 +136,7 @@ void vMotorFeedbackTask(void *argument)
 {
 
   //启动DMA接收
-  vMotor_Start_GPDMA_Receive(ucMotor_Task_Rx_Buffer);
+  vMotor_Start_DMA_Receive(ucMotor_Task_Rx_Buffer);
 
   while (1)
   {
@@ -151,7 +151,7 @@ void vMotorFeedbackTask(void *argument)
         safe_printf("%X ",ucMotor_Task_Rx_Buffer[i]);
       }
       // 重启DMA接收(DMA循环模式下，重启后从缓冲区起始地址覆盖写入)
-      vMotor_Start_GPDMA_Receive(ucMotor_Task_Rx_Buffer);
+      vMotor_Start_DMA_Receive(ucMotor_Task_Rx_Buffer);
     }
   }
 }

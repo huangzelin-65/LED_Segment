@@ -11,7 +11,7 @@ extern UART_HandleTypeDef huart5;
 extern osMessageQueueId_t xRfid_Rx_QueueHandle;
 
 
-void vRfid_Start_GPDMA_Receive(uint8_t* ucRfid_Rx_Buffer) {
+void vRfid_Start_DMA_Receive(uint8_t* ucRfid_Rx_Buffer) {
   if(HAL_UARTEx_ReceiveToIdle_DMA(&huart5, ucRfid_Rx_Buffer, RFID_RX_BUF_SIZE)!=HAL_OK)
   {
     DEBUGINFO("HAL_UARTEx_ReceiveToIdle_DMA() retry\r\n");
