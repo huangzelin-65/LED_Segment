@@ -4,14 +4,13 @@
  *  Created on: Jun 10, 2025
  *      Author: e3lijia25d
  */
-#include "../Inc/Task_Wifi.h"
-
 #include "main.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "cmsis_os2.h"
 #include <string.h>
 #include <stdio.h>
+#include "Task_Wifi.h"
 #include "LogDebugInfo.h"
 #include "adaptor_wifi.h"
 #include "common.h"
