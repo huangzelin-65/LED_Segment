@@ -52,7 +52,8 @@ extern "C" {
 
 /* Exported macro -------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-extern osSemaphoreId_t xRfidRxSemHandle;
+extern osSemaphoreId_t xCarRfidRxSemHandle;
+extern osSemaphoreId_t xBoxRfidRxSemHandle;
 extern osSemaphoreId_t xTestRxSemHandle;
 extern osSemaphoreId_t xWifiReadySemHandle;
 extern osSemaphoreId_t xWifiRxSemHandle;
@@ -62,16 +63,19 @@ extern osThreadId_t InitTaskHandle;
 extern osThreadId_t IntProcessTaskHandle;
 extern osThreadId_t MotionCtrlTaskHandle;
 extern osThreadId_t MotorFeedbackTaskHandle;
-extern osThreadId_t RfidTaskHandle;
+extern osThreadId_t CarRfidTaskHandle;
 extern osThreadId_t SensorTaskHandle;
 extern osThreadId_t TestTaskHandle;
 extern osThreadId_t WifiManagerTaskHandle;
 extern osThreadId_t WifiReceiveTaskHandle;
 extern osThreadId_t PrintTaskHandle;
 extern osThreadId_t BoxCtrlTaskHandle;
+extern osThreadId_t BoxRfidTaskHandle;
+extern osThreadId_t BoxRfidEventTaskHandle;
 extern osTimerId_t xResetButtonTimerHandle;
 extern osTimerId_t xSensorDebounceTimerHandle;
 extern osTimerId_t xToggleSwitchTimerHandle;
+extern osTimerId_t xBoxRfidLoginTimerHandle;
 extern osMessageQueueId_t xInterrupt_QueueHandle;
 extern osMessageQueueId_t xSensor_QueueHandle;
 extern osMessageQueueId_t xWifi_Rx_QueueHandle;
@@ -94,16 +98,19 @@ extern void vInitTask(void *argument);
 extern void vIntProcessTask(void *argument);
 extern void vMotionCtrlTask(void *argument);
 extern void vMotorFeedbackTask(void *argument);
-extern void vRfidTask(void *argument);
+extern void vCarRfidTask(void *argument);
 extern void vSensorTask(void *argument);
 extern void vTestTask(void *argument);
 extern void vWifiManagerTask(void *argument);
 extern void vWifiReceiveTask(void *argument);
 extern void vPrintTask(void *argument);
 extern void vBoxCtrlTask(void *argument);
+extern void vBoxRfidTask(void *argument);
+extern void vBoxRfidEventTask(void *argument);
 extern void vResetButtonCallback(void *argument);
 extern void vSensorDebounceCallback(void *argument);
 extern void vToggleSwitchCallback(void *argument);
+extern void vBoxRfidLoginTimerCallback(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 

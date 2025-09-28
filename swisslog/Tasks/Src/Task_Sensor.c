@@ -5,12 +5,13 @@
  *      Author: e3lijia25d
  */
 
+#include "../Inc/Task_Sensor.h"
+
 #include "FreeRTOS.h"
 #include "task.h"
 #include "main.h"
 #include "cmsis_os2.h"
 #include "queue.h"
-#include "Task_Sensor.h"
 #include <stdio.h>
 #include "sensors.h"
 #include "motor_LD25B60G.h"

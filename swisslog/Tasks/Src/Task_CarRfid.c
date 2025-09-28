@@ -27,15 +27,15 @@
 char pcCardNum[10] = {0};
 u8 ucRfidDataLen = 0;
 u8 ucMotion_msg;
-uint8_t ucRfid_Rx_Buffer[2][RFID_RX_BUF_SIZE];
-uint8_t ucRfid_current_buf_idx = 0;  // 当前使用的缓冲区索引
+uint8_t ucCarRfid_Rx_Buffer[2][CAR_RFID_RX_BUF_SIZE];
+uint8_t ucCarRfid_current_buf_idx = 0;  // 当前使用的缓冲区索引
 
 extern osMessageQueueId_t xMotion_QueueHandle;
 extern CarToPlcData CarToPlcData_obj;
 extern _CarCheckFlag_obj CarCheckFlagobj;
 extern _CarRunStatus_obj CarRunStatus_obj;
 extern osMessageQueueId_t xRfid_Rx_QueueHandle;
-extern osSemaphoreId_t xRfidRxSemHandle;
+extern osSemaphoreId_t xCarRfidRxSemHandle;
 
 //获取9位卡号
 char* pcGetRfidCardNum(char *data, u32 RfidDataLen)
@@ -185,28 +185,31 @@ void vGetTagSpeed(char *data)
 
 
 //任务入口函数
-void vRfidTask(void *argument)
+void vCarRfidTask(void *argument)
 {
+  uint32_t ucReciveLen = 0;
+  
   
   //启动DMA接收
-  vRfid_Start_DMA_Receive(ucRfid_Rx_Buffer[ucRfid_current_buf_idx]);
+  vCarRfid_Start_DMA_Receive(ucCarRfid_Rx_Buffer[ucCarRfid_current_buf_idx]);
 
   while(1) {
     // 等待DMA接收完成信号
-    if (osSemaphoreAcquire(xRfidRxSemHandle, osWaitForever) == osOK)
+    if (osSemaphoreAcquire(xCarRfidRxSemHandle, osWaitForever) == osOK)
     {
-      DEBUGINFO("ucRfid_current_buf_idx:%d\r\n",ucRfid_current_buf_idx);
-      DEBUGINFO("rfid received:%s, len:%d\r\n",ucRfid_Rx_Buffer[ucRfid_current_buf_idx],\
-        strlen((char *)ucRfid_Rx_Buffer[ucRfid_current_buf_idx]));
+      ucReciveLen = ulCarRfid_Get_DMA_Receive_Len();
+      DEBUGINFO("ucCarRfid_current_buf_idx:%d\r\n",ucCarRfid_current_buf_idx);
+      DEBUGINFO("rfid received:%s, len:%d\r\n",
+        ucCarRfid_Rx_Buffer[ucCarRfid_current_buf_idx],ucReciveLen);
       
-      uint8_t* temp_buffer = ucRfid_Rx_Buffer[ucRfid_current_buf_idx];
+      //uint8_t* temp_buffer = ucCarRfid_Rx_Buffer[ucCarRfid_current_buf_idx];
 
       // 解析RFID卡号
-      char* pResult = pcGetRfidCardNum((char*)temp_buffer, strlen((char *)temp_buffer));
+      char* pResult = pcGetRfidCardNum((char*)ucCarRfid_Rx_Buffer[ucCarRfid_current_buf_idx], ucReciveLen);
 
       // 切换缓冲区并重启接收
-      ucRfid_current_buf_idx ^= 1;
-      vRfid_Start_DMA_Receive(ucRfid_Rx_Buffer[ucRfid_current_buf_idx]);
+      ucCarRfid_current_buf_idx ^= 1;
+      vCarRfid_Start_DMA_Receive(ucCarRfid_Rx_Buffer[ucCarRfid_current_buf_idx]);
 
       //判断卡号非空
       if (pResult != NULL)

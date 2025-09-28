@@ -38,11 +38,18 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-/* Definitions for xRfidRxSem */
-osSemaphoreId_t xRfidRxSemHandle;
-const osSemaphoreAttr_t xRfidRxSem_attributes = {
-  .name = "xRfidRxSem"
+/* Definitions for xCarRfidRxSem */
+osSemaphoreId_t xCarRfidRxSemHandle;
+const osSemaphoreAttr_t xCarRfidRxSem_attributes = {
+  .name = "xCarRfidRxSem"
 };
+
+/* Definitions for xBoxRfidRxSem */
+osSemaphoreId_t xBoxRfidRxSemHandle;
+const osSemaphoreAttr_t xBoxRfidRxSem_attributes = {
+  .name = "xBoxRfidRxSem"
+};
+
 
 /* Definitions for xTestRxSem */
 osSemaphoreId_t xTestRxSemHandle;
@@ -57,7 +64,7 @@ const osSemaphoreAttr_t xWifiReadySem_attributes = {
   .name = "xWifiReadySem"
 };
 
-/* Definitions for xRfidRxSem */
+/* Definitions for xWifiRxSem */
 osSemaphoreId_t xWifiRxSemHandle;
 const osSemaphoreAttr_t xWifiRxSem_attributes = {
   .name = "xWifiRxSem"
@@ -109,10 +116,10 @@ const osThreadAttr_t MotorFeedbackTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 256 * 4
 };
-/* Definitions for RfidTask */
-osThreadId_t RfidTaskHandle;
-const osThreadAttr_t RfidTask_attributes = {
-  .name = "RfidTask",
+/* Definitions for CarRfidTask */
+osThreadId_t CarRfidTaskHandle;
+const osThreadAttr_t CarRfidTask_attributes = {
+  .name = "CarRfidTask",
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 256 * 4
 };
@@ -158,6 +165,20 @@ const osThreadAttr_t BoxCtrlTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 256 * 4
 };
+/* Definitions for BoxRfidTask */
+osThreadId_t BoxRfidTaskHandle;
+const osThreadAttr_t BoxRfidTask_attributes = {
+  .name = "BoxRfidTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
+/* Definitions for BoxRfidEventTask */
+osThreadId_t BoxRfidEventTaskHandle;
+const osThreadAttr_t BoxRfidEventTask_attributes = {
+  .name = "BoxRfidEventTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
 /* Definitions for xResetButtonTimer */
 osTimerId_t xResetButtonTimerHandle;
 const osTimerAttr_t xResetButtonTimer_attributes = {
@@ -172,6 +193,11 @@ const osTimerAttr_t xSensorDebounceTimer_attributes = {
 osTimerId_t xToggleSwitchTimerHandle;
 const osTimerAttr_t xToggleSwitchTimer_attributes = {
   .name = "xToggleSwitchTimer"
+};
+/* Definitions for xBoxRfidLoginTimer */
+osTimerId_t xBoxRfidLoginTimerHandle;
+const osTimerAttr_t xBoxRfidLoginTimer_attributes = {
+  .name = "xBoxRfidLoginTimer"
 };
 /* Definitions for xInterrupt_Queue */
 osMessageQueueId_t xInterrupt_QueueHandle;
@@ -263,8 +289,12 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
-  /* creation of xRfidRxSem */
-  xRfidRxSemHandle = osSemaphoreNew(1, 0, &xRfidRxSem_attributes);
+  /* creation of xCarRfidRxSem */
+  xCarRfidRxSemHandle = osSemaphoreNew(1, 0, &xCarRfidRxSem_attributes);
+
+  /* creation of xBoxRfidRxSem */
+  xBoxRfidRxSemHandle = osSemaphoreNew(1, 0, &xBoxRfidRxSem_attributes);
+  
 
   /* creation of xTestRxSem */
   xTestRxSemHandle = osSemaphoreNew(1, 0, &xTestRxSem_attributes);
@@ -288,6 +318,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of xToggleSwitchTimer */
   xToggleSwitchTimerHandle = osTimerNew(vToggleSwitchCallback, osTimerOnce, NULL, &xToggleSwitchTimer_attributes);
+
+  /* creation of xBoxRfidLoginTimer */
+  xBoxRfidLoginTimerHandle = osTimerNew(vBoxRfidLoginTimerCallback, osTimerOnce, NULL, &xBoxRfidLoginTimer_attributes);
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
@@ -336,8 +369,8 @@ void MX_FREERTOS_Init(void) {
   /* creation of MotorFeedbackTask */
   MotorFeedbackTaskHandle = osThreadNew(vMotorFeedbackTask, NULL, &MotorFeedbackTask_attributes);
 
-  /* creation of RfidTask */
-  RfidTaskHandle = osThreadNew(vRfidTask, NULL, &RfidTask_attributes);
+  /* creation of CarRfidTask */
+  CarRfidTaskHandle = osThreadNew(vCarRfidTask, NULL, &CarRfidTask_attributes);
 
   /* creation of SensorTask */
   SensorTaskHandle = osThreadNew(vSensorTask, NULL, &SensorTask_attributes);
@@ -357,6 +390,12 @@ void MX_FREERTOS_Init(void) {
   /* creation of BoxCtrlTask */
   BoxCtrlTaskHandle = osThreadNew(vBoxCtrlTask, NULL, &BoxCtrlTask_attributes);
 
+  /* creation of BoxRfidTask */
+  BoxRfidTaskHandle = osThreadNew(vBoxRfidTask, NULL, &BoxRfidTask_attributes);
+
+  /* creation of BoxRfidEventTask */
+  BoxRfidEventTaskHandle = osThreadNew(vBoxRfidEventTask, NULL, &BoxRfidEventTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   
@@ -364,13 +403,15 @@ void MX_FREERTOS_Init(void) {
   osThreadSuspend(IntProcessTaskHandle);
   osThreadSuspend(MotionCtrlTaskHandle);
   osThreadSuspend(MotorFeedbackTaskHandle);
-  osThreadSuspend(RfidTaskHandle);
+  osThreadSuspend(CarRfidTaskHandle);
   osThreadSuspend(SensorTaskHandle);
   osThreadSuspend(TestTaskHandle);
   osThreadSuspend(WifiManagerTaskHandle);
   osThreadSuspend(WifiReceiveTaskHandle);
   osThreadSuspend(PrintTaskHandle);
   osThreadSuspend(BoxCtrlTaskHandle);
+  osThreadSuspend(BoxRfidTaskHandle);
+  osThreadSuspend(BoxRfidEventTaskHandle);
   
 
   /* USER CODE END RTOS_THREADS */

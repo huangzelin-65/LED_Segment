@@ -5,7 +5,8 @@
  *      Author: e3lijia25d
  */
 
-#include "Task_MotionCtrl.h"
+#include "../Inc/Task_MotionCtrl.h"
+
 #include "FreeRTOS.h"
 #include "task.h"
 #include "main.h"
@@ -134,6 +135,7 @@ void vMotionCtrlTask(void *argument)
 /* 电机反馈任务入口函数 */
 void vMotorFeedbackTask(void *argument)
 {
+  uint32_t ucReciveLen = 0;
 
   //启动DMA接收
   vMotor_Start_DMA_Receive(ucMotor_Task_Rx_Buffer);
@@ -144,12 +146,14 @@ void vMotorFeedbackTask(void *argument)
     // 等待DMA接收完成信号
     if (osSemaphoreAcquire(xMotorRxSemHandle, osWaitForever) == osOK)    
     {
+      ucReciveLen = ulMotor_Get_DMA_Receive_Len();
 
-      DEBUGINFO("Motor received len:%d\r\n",strlen((char *)ucMotor_Task_Rx_Buffer));
-      for(uint8_t i=0;i<strlen((char *)ucMotor_Task_Rx_Buffer);i++)
+      DEBUGINFO("Motor received len:%d\r\n",ucReciveLen);
+      for(uint8_t i=0; i<ucReciveLen; i++)
       {
         safe_printf("%X ",ucMotor_Task_Rx_Buffer[i]);
       }
+      safe_printf("\r\n");
       // 重启DMA接收(DMA循环模式下，重启后从缓冲区起始地址覆盖写入)
       vMotor_Start_DMA_Receive(ucMotor_Task_Rx_Buffer);
     }

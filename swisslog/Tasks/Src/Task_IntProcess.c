@@ -5,7 +5,8 @@
  *      Author: e3lijia25d
  */
 
-#include "Task_IntProcess.h"
+#include "../Inc/Task_IntProcess.h"
+
 #include "FreeRTOS.h"
 #include "task.h"
 #include "main.h"

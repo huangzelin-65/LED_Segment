@@ -5,6 +5,19 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define EEP_ADD_CAR_STATION_STATUS    		10  // 1bytes
+#define EEP_ADD_CAR_NUMBER		    		12  // 2bytes
+#define EEP_ADD_EEPROM_NEED_INIT		    16  // 2bytes
+#define EEP_ADD_IDCARD_PASSWORD_NUM		  	20 //1 bytes
+#define EEP_ADD_IDCARD_PASSWORD	      	  	21 //60 bytes
+#define EEP_ADD_UVCLEAN_TIME_MINUTES	    100 //1bytes
+#define EEP_ADD_LAST_UVCLEAN_DATE	      	101 //rtc time+clean time bytes
+#define EEP_ADD_SEND_PASSWORD		      	120 //6 bytes
+#define EEP_ADD_IS_ENCRYED			      	130 //1 bytes
+#define EEP_ADD_EN_VIRTUAL_BUTTON			131 //1 bytes
+#define EEP_ADD_EN_IN_STATION_SENSOR		132 //1 bytes
+#define EEP_ADD_LAST_CORRECT_DATE	      	150 //CCORRECT time 6 bytes
+
 // 前向声明
 typedef struct M24C64_I2cOps M24C64_I2cOps;
 

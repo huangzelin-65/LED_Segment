@@ -35,4 +35,8 @@ void vTest_Start_DMA_Receive(uint8_t* ucTest_Rx_Buffer) {
   __HAL_DMA_DISABLE_IT(huart1.hdmarx, DMA_IT_HT);
 }
 
-
+uint32_t ulTest_Get_DMA_Receive_Len(void)
+{
+  uint32_t ulLen = TEST_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart1.hdmarx);
+  return ulLen;
+}

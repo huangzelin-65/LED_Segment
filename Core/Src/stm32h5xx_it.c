@@ -92,7 +92,8 @@ extern osMessageQueueId_t xInterrupt_QueueHandle;
 extern osSemaphoreId_t xMotorTxSemHandle;
 extern osSemaphoreId_t xWifiTxSemHandle;
 extern osSemaphoreId_t xPrintSemHandle;
-extern osSemaphoreId_t xRfidRxSemHandle;
+extern osSemaphoreId_t xCarRfidRxSemHandle;
+extern osSemaphoreId_t xBoxRfidRxSemHandle;
 extern osSemaphoreId_t xTestRxSemHandle;
 extern osSemaphoreId_t xWifiRxSemHandle;
 extern osSemaphoreId_t xMotorRxSemHandle;
@@ -606,7 +607,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
   if (huart->Instance == USART1)
   {
     //Test串口接收处理
-    uint16_t dataLength = RFID_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart->hdmarx);
+    uint16_t dataLength = ulTest_Get_DMA_Receive_Len();
 
     if (dataLength > 0) 
     {
@@ -614,18 +615,18 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     }
   }
   else if (huart->Instance == UART5) {
-    //Rfid串口接收处理
-    uint16_t dataLength = RFID_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart->hdmarx);
+    //Car Rfid串口接收处理
+    uint16_t dataLength = ulCarRfid_Get_DMA_Receive_Len();
 
     if (dataLength > 0) 
     {
-      osSemaphoreRelease(xRfidRxSemHandle);  // 释放信号量,允许读取RFID数据
+      osSemaphoreRelease(xCarRfidRxSemHandle);  // 释放信号量,允许读取RFID数据
     }
 
   }
   else if (huart->Instance == USART6) {
     //Wifi串口接收处理
-    uint16_t dataLength = RFID_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart->hdmarx);
+    uint16_t dataLength = ulWifi_Get_DMA_Receive_Len();
 
     if (dataLength > 0) 
     {
@@ -634,14 +635,23 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
   }
   else if (huart->Instance == UART7)
   {
-    //Wifi串口接收处理
-    uint16_t dataLength = RFID_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart->hdmarx);
+    //motor串口接收处理
+    uint16_t dataLength = ulMotor_Get_DMA_Receive_Len();
     if (dataLength > 0) 
     {
       osSemaphoreRelease(xMotorRxSemHandle);  // 释放信号量,允许读取motor数据
     }
   }
+  else if (huart->Instance == UART8) {
+    //Box Rfid串口接收处理
+    uint32_t dataLength = ulBoxRfid_Get_DMA_Receive_Len();
 
+    if (dataLength > 0) 
+    {
+      osSemaphoreRelease(xBoxRfidRxSemHandle);  // 释放信号量,允许读取RFID数据
+    }
+  }
+  
 }
 
 

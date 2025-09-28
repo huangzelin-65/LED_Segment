@@ -49,6 +49,12 @@ void vWifi_Stop_GPDMA_Receive(void)
   HAL_UART_DMAStop(&huart6);
 }
 
+uint32_t ulWifi_Get_DMA_Receive_Len(void)
+{
+  uint32_t ucLen = WIFI_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart6.hdmarx);
+  return ucLen;
+}
+
 
 /*********************************************************************
  * 向 Wi-Fi 发送数据

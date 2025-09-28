@@ -1,4 +1,5 @@
-#include "Task_Test.h"
+#include "../Inc/Task_Test.h"
+
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
@@ -30,23 +31,19 @@ void vTestTask(void *argument)
 
   while (1)
   {
+    uint32_t ucReciveLen = 0;
 
     // 等待RX接收完成十六进制信号
     if (osSemaphoreAcquire(xTestRxSemHandle, osWaitForever) == osOK)
     {
-      // DEBUGINFO("Test received:%s, len:%d\r\n",ucTest_Rx_Buffer,strlen((char *)ucTest_Rx_Buffer));
+      ucReciveLen = ulTest_Get_DMA_Receive_Len();
+      DEBUGINFO("Test received:%s, len:%d\r\n",ucTest_Rx_Buffer,ucReciveLen);
 
       // for (u8 i=0;i<strlen((char *)ucTest_Rx_Buffer);i++)
       // {
       //   DEBUGINFO("%X ",ucTest_Rx_Buffer[i]);
       // }
 
-      // PlcToCarData_obj.wSeq = ucTest_Receive_Buffer[1]<<8 | ucTest_Receive_Buffer[0]; // 序号
-      // PlcToCarData_obj.dwPlcNum = ucTest_Receive_Buffer[5]<<24 | ucTest_Receive_Buffer[4]<<16 | ucTest_Receive_Buffer[3]<<8 | ucTest_Receive_Buffer[2]; // PLC编号
-      // PlcToCarData_obj.wHeatBeat = ucTest_Receive_Buffer[BASE_COUNT+1]<<8 | ucTest_Receive_Buffer[BASE_COUNT]; // 心跳信号
-      // PlcToCarData_obj.wAlm = ucTest_Receive_Buffer[BASE_COUNT+3]<<8 | ucTest_Receive_Buffer[BASE_COUNT+2]; // 报警信号
-      // PlcToCarData_obj.wCtrl = ucTest_Receive_Buffer[BASE_COUNT+5]<<8 | ucTest_Receive_Buffer[BASE_COUNT+4]; // 控制信号
-      // PlcToCarData_obj.bDire = ucTest_Receive_Buffer[BASE_COUNT+30]; // 小车运行方向 1=正转 2=反转
 
       PlcToCarData_obj.wCtrl = ucTest_Rx_Buffer[1]<<8 | ucTest_Rx_Buffer[0]; // 控制信号
       PlcToCarData_obj.bDire = ucTest_Rx_Buffer[2]; // 小车运行方向 1=正转 2=反转

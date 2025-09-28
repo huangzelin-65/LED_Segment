@@ -4,13 +4,14 @@
  *  Created on: Jun 10, 2025
  *      Author: e3lijia25d
  */
+#include "../Inc/Task_Wifi.h"
+
 #include "main.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "cmsis_os2.h"
 #include <string.h>
 #include <stdio.h>
-#include "Task_Wifi.h"
 #include "LogDebugInfo.h"
 #include "adaptor_wifi.h"
 #include "common.h"
@@ -170,6 +171,7 @@ void vWifiManagerTask(void *argument)
 /* wifi接收任务入口函数 */
 void vWifiReceiveTask(void *argument)
 {
+  uint32_t ulReceiveLen = 0;
   
   if (osSemaphoreAcquire(xWifiReadySemHandle, osWaitForever) == osOK)
   {
@@ -182,11 +184,10 @@ void vWifiReceiveTask(void *argument)
       if (osSemaphoreAcquire(xWifiRxSemHandle, osWaitForever) == osOK)
       {
 
-        DEBUGINFO("wifi received:%s, len:%d\r\n",ucWifi_Receive_Buffer[ucWifi_current_buf_idx],\
-          strlen((char *)ucWifi_Receive_Buffer[ucWifi_current_buf_idx]));
+        ulReceiveLen = ulWifi_Get_DMA_Receive_Len();
+        DEBUGINFO("wifi received:%s, len:%d\r\n",ucWifi_Receive_Buffer[ucWifi_current_buf_idx], ulReceiveLen);
 
-        vSendToWifiTX(ucWifi_Receive_Buffer[ucWifi_current_buf_idx], \
-          strlen((char *)ucWifi_Receive_Buffer[ucWifi_current_buf_idx]));
+        vSendToWifiTX(ucWifi_Receive_Buffer[ucWifi_current_buf_idx], ulReceiveLen);
 
         // PlcToCarData_obj.wSeq = ucWifi_Receive_Buffer[1]<<8 | ucWifi_Receive_Buffer[0]; // 序号
         // PlcToCarData_obj.dwPlcNum = ucWifi_Receive_Buffer[5]<<24 | ucWifi_Receive_Buffer[4]<<16 | ucWifi_Receive_Buffer[3]<<8 | ucWifi_Receive_Buffer[2]; // PLC编号

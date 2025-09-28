@@ -33,6 +33,7 @@ typedef struct {
 // 函数声明
 void vWifi_Start_DMA_Receive(uint8_t* ucWifi_Rx_Buffer);
 void vWifi_Stop_GPDMA_Receive(void);
+uint32_t ulWifi_Get_DMA_Receive_Len(void);
 void vWifi_RxEventCallback(uint16_t dataLength);
 void vSendToWifiTX(uint8_t * CmdDataArr,uint8_t len); //发送数据到WIFI TX
 

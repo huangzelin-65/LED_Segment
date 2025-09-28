@@ -42,3 +42,10 @@ void vMotor_Start_DMA_Receive(uint8_t* ucMotor_Rx_Buffer) {
   // 禁用半传输中断(否则会产生两次中断)
   __HAL_DMA_DISABLE_IT(huart7.hdmarx, DMA_IT_HT);
 }
+
+uint32_t ulMotor_Get_DMA_Receive_Len(void)
+{
+  uint32_t ulLen = MOTOR_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart7.hdmarx);
+  return ulLen;
+}
+

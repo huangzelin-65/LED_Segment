@@ -9,15 +9,16 @@ extern osThreadId_t InitTaskHandle;
 extern osThreadId_t IntProcessTaskHandle;
 extern osThreadId_t MotionCtrlTaskHandle;
 extern osThreadId_t MotorFeedbackTaskHandle;
-extern osThreadId_t RfidTaskHandle;
+extern osThreadId_t CarRfidTaskHandle;
 extern osThreadId_t SensorTaskHandle;
 extern osThreadId_t TestTaskHandle;
 extern osThreadId_t WifiManagerTaskHandle;
 extern osThreadId_t WifiReceiveTaskHandle;
 extern osThreadId_t PrintTaskHandle;
 extern osThreadId_t BoxCtrlTaskHandle;
+extern osThreadId_t BoxRfidTaskHandle;
+extern osThreadId_t BoxRfidEventTaskHandle;
 extern _CarRunStatus_obj CarRunStatus_obj;
-
 
 
 void vInitTask(void *argument)
@@ -28,16 +29,18 @@ void vInitTask(void *argument)
   osThreadResume(IntProcessTaskHandle); 
   osThreadResume(MotionCtrlTaskHandle); 
   osThreadResume(MotorFeedbackTaskHandle); 
-  osThreadResume(RfidTaskHandle); 
+  osThreadResume(CarRfidTaskHandle); 
   osThreadResume(SensorTaskHandle);
   osThreadResume(TestTaskHandle);
   //osThreadResume(WifiManagerTaskHandle);
   //osThreadResume(WifiReceiveTaskHandle);
   osThreadResume(BoxCtrlTaskHandle);
+  osThreadResume(BoxRfidTaskHandle);
+  osThreadResume(BoxRfidEventTaskHandle);
 
   DEBUGINFO("InitTask\r\n");
 
-  vEepromTest();
+  //vEepromTest();
 
   osThreadExit();
 }
