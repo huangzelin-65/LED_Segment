@@ -15,13 +15,10 @@ extern osMessageQueueId_t xTest_Rx_QueueHandle;
 void vPrint_start_Transmit(uint8_t *rxData, uint16_t Size)
 {
   // 获取TX发送锁
-  //if (osSemaphoreAcquire(xPrintSemHandle, osWaitForever) == osOK) 
   if (osSemaphoreAcquire(xPrintSemHandle, pdMS_TO_TICKS(100)) == osOK) 
   {
     HAL_UART_Transmit_DMA(&huart1, rxData, Size);    // 启动DMA发送
   }
-  // HAL_UART_Transmit(&huart1, rxData, Size, HAL_MAX_DELAY);
-  // vPortFree(rxData);
 }
 
 

@@ -30,6 +30,7 @@
 #include "adaptor_wifi.h"
 #include "adaptor_rfid.h"
 #include "adaptor_test.h"
+#include "adaptor_HMI.h"
 #include "LogDebugInfo.h"
 #include "sensors.h"
 #include <stdbool.h>
@@ -78,11 +79,14 @@ extern DMA_HandleTypeDef handle_GPDMA1_Channel5;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel4;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel3;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel2;
+extern DMA_HandleTypeDef handle_GPDMA2_Channel2;
+extern DMA_HandleTypeDef handle_GPDMA2_Channel1;
 extern UART_HandleTypeDef huart5;
 extern UART_HandleTypeDef huart7;
 extern UART_HandleTypeDef huart8;
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart6;
+extern UART_HandleTypeDef huart10;
 extern UART_HandleTypeDef huart11;
 extern TIM_HandleTypeDef htim2;
 
@@ -97,6 +101,8 @@ extern osSemaphoreId_t xBoxRfidRxSemHandle;
 extern osSemaphoreId_t xTestRxSemHandle;
 extern osSemaphoreId_t xWifiRxSemHandle;
 extern osSemaphoreId_t xMotorRxSemHandle;
+extern osSemaphoreId_t xHmiRxSemHandle;
+extern osSemaphoreId_t xHMITxSemHandle;
 
 /* USER CODE END EV */
 
@@ -546,6 +552,20 @@ void USART6_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles USART10 global interrupt.
+  */
+void USART10_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART10_IRQn 0 */
+
+  /* USER CODE END USART10_IRQn 0 */
+  HAL_UART_IRQHandler(&huart10);
+  /* USER CODE BEGIN USART10_IRQn 1 */
+
+  /* USER CODE END USART10_IRQn 1 */
+}
+
+/**
   * @brief This function handles USART11 global interrupt.
   */
 void USART11_IRQHandler(void)
@@ -571,6 +591,34 @@ void GPDMA2_Channel0_IRQHandler(void)
   /* USER CODE BEGIN GPDMA2_Channel0_IRQn 1 */
 
   /* USER CODE END GPDMA2_Channel0_IRQn 1 */
+}
+
+/**
+  * @brief This function handles GPDMA2 Channel 1 global interrupt.
+  */
+void GPDMA2_Channel1_IRQHandler(void)
+{
+  /* USER CODE BEGIN GPDMA2_Channel1_IRQn 0 */
+
+  /* USER CODE END GPDMA2_Channel1_IRQn 0 */
+  HAL_DMA_IRQHandler(&handle_GPDMA2_Channel1);
+  /* USER CODE BEGIN GPDMA2_Channel1_IRQn 1 */
+
+  /* USER CODE END GPDMA2_Channel1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles GPDMA2 Channel 2 global interrupt.
+  */
+void GPDMA2_Channel2_IRQHandler(void)
+{
+  /* USER CODE BEGIN GPDMA2_Channel2_IRQn 0 */
+
+  /* USER CODE END GPDMA2_Channel2_IRQn 0 */
+  HAL_DMA_IRQHandler(&handle_GPDMA2_Channel2);
+  /* USER CODE BEGIN GPDMA2_Channel2_IRQn 1 */
+
+  /* USER CODE END GPDMA2_Channel2_IRQn 1 */
 }
 
 /**
@@ -651,7 +699,16 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
       osSemaphoreRelease(xBoxRfidRxSemHandle);  // 释放信号量,允许读取RFID数据
     }
   }
-  
+  else if (huart->Instance == USART10) {
+    //HMI串口接收处理
+    uint32_t dataLength = ulHMI_Get_DMA_Receive_Len();
+
+    if (dataLength > 0) 
+    {
+      osSemaphoreRelease(xHmiRxSemHandle);  // 释放信号量,允许读取HMI数据
+    }
+  }
+
 }
 
 
@@ -678,7 +735,11 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
   {
     Motor_RS485_RX_MODE(); // 发送完成切接收模式
     
-    osSemaphoreRelease(xMotorTxSemHandle);  // 释放信号量,允许下一次485发送
+    osSemaphoreRelease(xMotorTxSemHandle);  // 释放信号量,允许下一次485电机发送
+  }
+  else if (huart->Instance == USART10)
+  {
+    osSemaphoreRelease(xHMITxSemHandle);  // 释放信号量,允许下一次HMI发送
   }
 }
 

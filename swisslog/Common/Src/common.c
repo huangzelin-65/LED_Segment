@@ -19,52 +19,52 @@
 
 
 extern osMessageQueueId_t xMotion_QueueHandle;
-extern PlcToCarData PlcToCarData_obj;
-extern CarToPlcData CarToPlcData_obj;
+extern ServerToCarData ServerToCarData_obj;
+extern CarToServerData CarToServerData_obj;
 extern _CarRunStatus_obj CarRunStatus_obj;
-extern _CarCheckFlag_obj CarCheckFlagobj;
+extern _CarCheckFlag_obj CarCheckFlag_obj;
 
 void vParseCommandToCar()
 {
   u8 ucMotion_msg;
   
   // PLC下发设置前进(正转)
-  if(PlcToCarData_obj.bDire == Forward)
+  if(ServerToCarData_obj.ucDirection == Forward)
   {
     DEBUGINFO("auto Forward\r\n");
     CarRunStatus_obj.SetDirection = Forward; //小车预设运行方向为前进
   }
   // PLC下发设置后退(反转)
-  else if(PlcToCarData_obj.bDire == Backward)
+  else if(ServerToCarData_obj.ucDirection == Backward)
   {
     DEBUGINFO("auto Backward\r\n");
     CarRunStatus_obj.SetDirection = Backward; //小车预设运行方向为后退
   }
 
   //小车远程手动模式(拨动开关需要在自动档位下才能使用)
-  if(PlcToCarData_obj.wCtrl & 0x0001)
+  if(ServerToCarData_obj.wCtrl & 0x0001)
   {
     DEBUGINFO("manual mode\r\n");
     CarRunStatus_obj.AutoMode = Manual;
 
     //0x0002前进，0x0004后退
-    if(PlcToCarData_obj.wCtrl & 0x0002)
+    if(ServerToCarData_obj.wCtrl & 0x0002)
     {
       // 手动设置前进(正转)
       DEBUGINFO("manual Forward\r\n");
-      CarToPlcData_obj.bDire = Forward;
+      CarToServerData_obj.ucDirection = Forward;
     }
-    else if(PlcToCarData_obj.wCtrl & 0x0004)
+    else if(ServerToCarData_obj.wCtrl & 0x0004)
     {
       // 手动设置后退(反转)
       DEBUGINFO("manual Backward\r\n");
-      CarToPlcData_obj.bDire = Backward; //手动模式下直接设置实际运行方向为后退
+      CarToServerData_obj.ucDirection = Backward; //手动模式下直接设置实际运行方向为后退
     }
   }
 
   //小车远程自动模式 (拨动开关需要在自动档位下才能使用)
-  else if((PlcToCarData_obj.wCtrl & 0x0010) \
-    && (CarCheckFlagobj.ToggleSwtichPosition == ToggleFront))
+  else if((ServerToCarData_obj.wCtrl & 0x0010) \
+    && (CarCheckFlag_obj.ToggleSwtichPosition == ToggleFront))
   {
     DEBUGINFO("auto mode\r\n");
     CarRunStatus_obj.AutoMode = Auto;
@@ -76,7 +76,7 @@ void vParseCommandToCar()
   // }
   
   //判断启动/停止电机
-  if(PlcToCarData_obj.wCtrl & 0x0008) //使能运行位为1
+  if(ServerToCarData_obj.wCtrl & 0x0008) //使能运行位为1
   {
     //启动电机
     CarRunStatus_obj.MotorEnable = MotorEnable;

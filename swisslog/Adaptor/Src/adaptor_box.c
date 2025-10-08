@@ -26,7 +26,9 @@ void vSendToNumDisp(uint8_t * CmdDataArr,uint8_t len)
 int countTimes = 0;
 
 /**
-功能:去解锁
+锁操作：0：解锁，需要手动锁上
+锁状态GPIO读取：0：锁上状态，1：解锁状态
+锁状态判定：0：没上锁，1：上锁
 return 0:成功 1:失败
 */
 uint8_t ELock_unLock(void)
@@ -38,8 +40,8 @@ uint8_t ELock_unLock(void)
   GPIO_WRITE(ELOCK_EN1, GPIO_PIN_RESET);
   GPIO_WRITE(ELOCK_EN2, GPIO_PIN_RESET);
 
-  //锁上是低电平，解锁是高电平,两个都为高电平才算解锁成功，跳出循环
-  while(!(GPIO_READ(ELOCK1_STATUS) && GPIO_READ(ELOCK2_STATUS)))
+  //解锁是0, 两个状态都为0才算解锁成功，跳出循环
+  while(ELOCK1_LEVEL || ELOCK2_LEVEL)
   {
     count++;
     if(count>5){
@@ -52,28 +54,28 @@ uint8_t ELock_unLock(void)
 
   osDelay(10);
 
-  if(GPIO_READ(ELOCK1_STATUS) && GPIO_READ(ELOCK2_STATUS))
-  {
-    DEBUGINFO("unlock success\r\n");
-    return 0;
-  }
-  else
+  if(ELOCK1_LEVEL || ELOCK2_LEVEL)
   {
     DEBUGINFO("unlock fail\r\n");
     return 1;
+  }
+  else
+  {
+    DEBUGINFO("unlock success\r\n");
+    return 0;
   }
 
 }
 
 /*************************** 紫外线灯 *****************************/
-void vSterilamp_enable(void)
+void vUV_Clean_enable(void)
 {
-  GPIO_WRITE(Sterilamp_EN, GPIO_PIN_RESET);
+  GPIO_WRITE(UV_CLEAN_EN, GPIO_PIN_RESET);
 }
 
-void vSterilamp_disable(void)
+void vUV_Clean_disable(void)
 {
-  GPIO_WRITE(Sterilamp_EN, GPIO_PIN_SET);
+  GPIO_WRITE(UV_CLEAN_EN, GPIO_PIN_SET);
 }
 
 /*************************** RGB灯 *****************************/
@@ -86,42 +88,42 @@ void vRGB_LED(uint8_t ucColor)
       GPIO_WRITE(LED_BOX_R, GPIO_PIN_SET);
       GPIO_WRITE(LED_BOX_G, GPIO_PIN_SET);
       GPIO_WRITE(LED_BOX_B, GPIO_PIN_SET);
-      DEBUGINFO("BOX LED WHITE\r\n");
+      //DEBUGINFO("BOX LED WHITE\r\n");
       break;
 
     case RED:
       GPIO_WRITE(LED_BOX_R, GPIO_PIN_SET);
       GPIO_WRITE(LED_BOX_G, GPIO_PIN_RESET);
       GPIO_WRITE(LED_BOX_B, GPIO_PIN_RESET);
-      DEBUGINFO("BOX LED RED\r\n");
+      //DEBUGINFO("BOX LED RED\r\n");
       break;
     
     case GREEN:
       GPIO_WRITE(LED_BOX_R, GPIO_PIN_RESET);
       GPIO_WRITE(LED_BOX_G, GPIO_PIN_SET);
       GPIO_WRITE(LED_BOX_B, GPIO_PIN_RESET);
-      DEBUGINFO("BOX LED GREEN\r\n");
+      //DEBUGINFO("BOX LED GREEN\r\n");
       break;
 
     case BLUE:
       GPIO_WRITE(LED_BOX_R, GPIO_PIN_RESET);
       GPIO_WRITE(LED_BOX_G, GPIO_PIN_RESET);
       GPIO_WRITE(LED_BOX_B, GPIO_PIN_SET);
-      DEBUGINFO("BOX LED BLUE\r\n");
+      //DEBUGINFO("BOX LED BLUE\r\n");
       break;
 
     case YELLOW:
       GPIO_WRITE(LED_BOX_R, GPIO_PIN_SET);
       GPIO_WRITE(LED_BOX_G, GPIO_PIN_SET);
       GPIO_WRITE(LED_BOX_B, GPIO_PIN_RESET);
-      DEBUGINFO("BOX LED YELLOW\r\n");
+      //DEBUGINFO("BOX LED YELLOW\r\n");
       break;
     
     case LED_OFF:
       GPIO_WRITE(LED_BOX_R, GPIO_PIN_RESET);
       GPIO_WRITE(LED_BOX_G, GPIO_PIN_RESET);
       GPIO_WRITE(LED_BOX_B, GPIO_PIN_RESET);
-      DEBUGINFO("BOX LED OFF\r\n");
+      //DEBUGINFO("BOX LED OFF\r\n");
       break;
 
     default:
@@ -129,3 +131,12 @@ void vRGB_LED(uint8_t ucColor)
   }
 
 }
+
+/*************************** 车厢按键灯 *****************************/
+// void Button_LED_En(uint8_t Val)
+// {
+// 	if(Val==0)
+// 		GPIO_WRITE(LED_BUTTON, GPIO_PIN_RESET);
+// 	else
+// 		GPIO_WRITE(LED_BUTTON, GPIO_PIN_SET);
+// }

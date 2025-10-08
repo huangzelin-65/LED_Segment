@@ -52,9 +52,12 @@ extern EepromDevice eeprom_dev;
 
 // 适配层初始化与通用操作接口
 bool eeprom_adaptor_init(void* hi2c);
+
 bool eeprom_check_conn(void);
+
 bool eeprom_write_byte(uint16_t addr, uint8_t data);
 bool eeprom_read_byte(uint16_t addr, uint8_t* data);
+
 bool eeprom_write_buf(uint16_t addr, const uint8_t* data, uint16_t len);
 bool eeprom_read_buf(uint16_t addr, uint8_t* data, uint16_t len);
 

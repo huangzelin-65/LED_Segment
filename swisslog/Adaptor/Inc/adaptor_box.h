@@ -7,13 +7,18 @@ void vSendToNumDisp(uint8_t * CmdDataArr,uint8_t len);
 
 
 /*************************** Elock *****************************/
+//锁状态GPIO读取：0：锁上状态，1：解锁状态
+//锁状态判定：0：没上锁，1：上锁
+#define ELOCK1_LEVEL !(GPIO_READ(ELOCK1_STATUS))
+#define ELOCK2_LEVEL !(GPIO_READ(ELOCK2_STATUS))
+
 uint8_t ELock_unLock(void);
 
 
 
 /*************************** 紫外线灯 *****************************/
-void vSterilamp_enable(void);
-void vSterilamp_disable(void);
+void vUV_Clean_enable(void);
+void vUV_Clean_disable(void);
 
 
 /*************************** RGB LED *****************************/

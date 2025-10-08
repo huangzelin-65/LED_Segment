@@ -30,16 +30,16 @@ uint8_t MotorDataLen = 0;
 extern osMessageQueueId_t xMotion_QueueHandle;
 extern osMessageQueueId_t xMotor_Rx_QueueHandle;
 extern osSemaphoreId_t xMotorRxSemHandle;
-extern CarToPlcData CarToPlcData_obj;
+extern CarToServerData CarToServerData_obj;
 extern _CarRunStatus_obj CarRunStatus_obj;
-extern _CarCheckFlag_obj CarCheckFlagobj;
+extern _CarCheckFlag_obj CarCheckFlag_obj;
 
 
 void vCarRunStatusInit()
 {
   //初始化为正向正常速度运行
   CarRunStatus_obj.SetSpeed = NormalSpeed;
-  CarToPlcData_obj.bDire = Forward;
+  CarToServerData_obj.ucDirection = Forward;
   CarRunStatus_obj.MotorEnable = MotorDisable;
 }
 
@@ -66,7 +66,7 @@ void vMotionCtrlTask(void *argument)
           
           case CarRunning:
             // 拨动开关自动档
-            if(CarCheckFlagobj.ToggleSwtichPosition == ToggleFront)
+            if(CarCheckFlag_obj.ToggleSwtichPosition == ToggleFront)
             {
               // 远程自动模式
               if(CarRunStatus_obj.AutoMode == Auto)
@@ -99,7 +99,7 @@ void vMotionCtrlTask(void *argument)
                 DEBUGINFO("remote Manual mode\r\n");
                 // 电机按实际运行方向 和 普通速度运行（手动档下）
                 CarRunStatus_obj.IsCarRunning = CarRunning;
-                vMotorOps(CarToPlcData_obj.bDire, NormalSpeed);  
+                vMotorOps(CarToServerData_obj.ucDirection, NormalSpeed);  
                 GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
                 DEBUGINFO("LED4 ON\r\n");
               }
@@ -107,7 +107,7 @@ void vMotionCtrlTask(void *argument)
 
             }
             // 拨动开关手动档
-            else if(CarCheckFlagobj.ToggleSwtichPosition == ToggleBack)
+            else if(CarCheckFlag_obj.ToggleSwtichPosition == ToggleBack)
             {
               DEBUGINFO("local Manual mode\r\n");
 
@@ -116,7 +116,7 @@ void vMotionCtrlTask(void *argument)
               {
                 // 电机按普通速度运行（手动档下），方向相反
                 CarRunStatus_obj.IsCarRunning = CarRunning;
-                vMotorOps(CarToPlcData_obj.bDire, NormalSpeed); 
+                vMotorOps(CarToServerData_obj.ucDirection, NormalSpeed); 
                 GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
                 DEBUGINFO("LED4 ON\r\n");
               }

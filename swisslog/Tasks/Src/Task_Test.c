@@ -15,7 +15,7 @@ uint8_t ucTest_Rx_Buffer[TEST_RX_BUF_SIZE];
 uint8_t ucTest_current_buf_idx = 0;  // 当前使用的缓冲区索引
 
 extern UART_HandleTypeDef huart1;
-extern PlcToCarData PlcToCarData_obj;
+extern ServerToCarData ServerToCarData_obj;
 extern osMessageQueueId_t xTest_Rx_QueueHandle;
 extern osMessageQueueId_t xPrint_QueueHandle;
 extern osSemaphoreId_t xTestRxSemHandle;
@@ -44,10 +44,10 @@ void vTestTask(void *argument)
       // }
 
 
-      PlcToCarData_obj.wCtrl = ucTest_Rx_Buffer[1]<<8 | ucTest_Rx_Buffer[0]; // 控制信号
-      PlcToCarData_obj.bDire = ucTest_Rx_Buffer[2]; // 小车运行方向 1=正转 2=反转
+      ServerToCarData_obj.wCtrl = ucTest_Rx_Buffer[1]<<8 | ucTest_Rx_Buffer[0]; // 控制信号
+      ServerToCarData_obj.ucDirection = ucTest_Rx_Buffer[2]; // 小车运行方向 1=正转 2=反转
 
-      DEBUGINFO("wCtrl : %X, bDire : %X\r\n",PlcToCarData_obj.wCtrl,PlcToCarData_obj.bDire);
+      DEBUGINFO("wCtrl : %X, ucDirection : %X\r\n",ServerToCarData_obj.wCtrl,ServerToCarData_obj.ucDirection);
 
       vParseCommandToCar();
 

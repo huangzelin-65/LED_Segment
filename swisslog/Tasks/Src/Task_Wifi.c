@@ -25,7 +25,7 @@ uint8_t ucWifi_current_buf_idx = 0;  // 当前使用的缓冲区索引
 /* 外部资源声明 */
 extern osSemaphoreId_t WifiRxSemHandle;
 extern osSemaphoreId_t xWifiReadySemHandle;
-extern PlcToCarData PlcToCarData_obj;
+extern ServerToCarData ServerToCarData_obj;
 extern osMessageQueueId_t xWifi_Rx_QueueHandle;
 extern osSemaphoreId_t xWifiRxSemHandle;
 
@@ -188,17 +188,17 @@ void vWifiReceiveTask(void *argument)
 
         vSendToWifiTX(ucWifi_Receive_Buffer[ucWifi_current_buf_idx], ulReceiveLen);
 
-        // PlcToCarData_obj.wSeq = ucWifi_Receive_Buffer[1]<<8 | ucWifi_Receive_Buffer[0]; // 序号
-        // PlcToCarData_obj.dwPlcNum = ucWifi_Receive_Buffer[5]<<24 | ucWifi_Receive_Buffer[4]<<16 | ucWifi_Receive_Buffer[3]<<8 | ucWifi_Receive_Buffer[2]; // PLC编号
-        // PlcToCarData_obj.wHeatBeat = ucWifi_Receive_Buffer[CMD_BASE_COUNT+1]<<8 | ucWifi_Receive_Buffer[CMD_BASE_COUNT]; // 心跳信号
-        // PlcToCarData_obj.wAlm = ucWifi_Receive_Buffer[CMD_BASE_COUNT+3]<<8 | ucWifi_Receive_Buffer[CMD_BASE_COUNT+2]; // 报警信号
-        // PlcToCarData_obj.wCtrl = ucWifi_Receive_Buffer[CMD_BASE_COUNT+5]<<8 | ucWifi_Receive_Buffer[CMD_BASE_COUNT+4]; // 控制信号
-        // PlcToCarData_obj.bDire = ucWifi_Receive_Buffer[CMD_BASE_COUNT+30]; // 小车运行方向 1=正转 2=反转
+        // ServerToCarData_obj.wSeq = ucWifi_Receive_Buffer[1]<<8 | ucWifi_Receive_Buffer[0]; // 序号
+        // ServerToCarData_obj.dwPlcNum = ucWifi_Receive_Buffer[5]<<24 | ucWifi_Receive_Buffer[4]<<16 | ucWifi_Receive_Buffer[3]<<8 | ucWifi_Receive_Buffer[2]; // PLC编号
+        // ServerToCarData_obj.wHeatBeat = ucWifi_Receive_Buffer[CMD_BASE_COUNT+1]<<8 | ucWifi_Receive_Buffer[CMD_BASE_COUNT]; // 心跳信号
+        // ServerToCarData_obj.wAlm = ucWifi_Receive_Buffer[CMD_BASE_COUNT+3]<<8 | ucWifi_Receive_Buffer[CMD_BASE_COUNT+2]; // 报警信号
+        // ServerToCarData_obj.wCtrl = ucWifi_Receive_Buffer[CMD_BASE_COUNT+5]<<8 | ucWifi_Receive_Buffer[CMD_BASE_COUNT+4]; // 控制信号
+        // ServerToCarData_obj.ucDirection = ucWifi_Receive_Buffer[CMD_BASE_COUNT+30]; // 小车运行方向 1=正转 2=反转
 
-        PlcToCarData_obj.wCtrl = ucWifi_Receive_Buffer[ucWifi_current_buf_idx][1]<<8 \
+        ServerToCarData_obj.wCtrl = ucWifi_Receive_Buffer[ucWifi_current_buf_idx][1]<<8 \
                                 | ucWifi_Receive_Buffer[ucWifi_current_buf_idx][0]; // 控制信号
-        PlcToCarData_obj.bDire = ucWifi_Receive_Buffer[ucWifi_current_buf_idx][2]; // 小车运行方向 1=正转 2=反转
-        DEBUGINFO("wCtrl : %X\r\n",PlcToCarData_obj.wCtrl);
+        ServerToCarData_obj.ucDirection = ucWifi_Receive_Buffer[ucWifi_current_buf_idx][2]; // 小车运行方向 1=正转 2=反转
+        DEBUGINFO("wCtrl : %X\r\n",ServerToCarData_obj.wCtrl);
 
         vParseCommandToCar();
 

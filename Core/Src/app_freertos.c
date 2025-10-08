@@ -76,6 +76,11 @@ const osSemaphoreAttr_t xMotorRxSem_attributes = {
   .name = "xMotorRxSem"
 };
 
+/* Definitions for xHmiRxSem */
+osSemaphoreId_t xHmiRxSemHandle;
+const osSemaphoreAttr_t xHmiRxSem_attributes = {
+  .name = "xHmiRxSem"
+};
 
 /* USER CODE END PD */
 
@@ -92,7 +97,7 @@ const osSemaphoreAttr_t xMotorRxSem_attributes = {
 osThreadId_t InitTaskHandle;
 const osThreadAttr_t InitTask_attributes = {
   .name = "InitTask",
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityHigh,
   .stack_size = 256 * 4
 };
 /* Definitions for IntProcessTask */
@@ -179,6 +184,34 @@ const osThreadAttr_t BoxRfidEventTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 256 * 4
 };
+/* Definitions for HmiEventTask */
+osThreadId_t HmiEventTaskHandle;
+const osThreadAttr_t HmiEventTask_attributes = {
+  .name = "HmiEventTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
+/* Definitions for HmiSendTask */
+osThreadId_t HmiSendTaskHandle;
+const osThreadAttr_t HmiSendTask_attributes = {
+  .name = "HmiSendTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
+/* Definitions for HmiRecvTask */
+osThreadId_t HmiRecvTaskHandle;
+const osThreadAttr_t HmiRecvTask_attributes = {
+  .name = "HmiRecvTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
+/* Definitions for HmiWaitTask */
+osThreadId_t HmiWaitTaskHandle;
+const osThreadAttr_t HmiWaitTask_attributes = {
+  .name = "HmiWaitTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
 /* Definitions for xResetButtonTimer */
 osTimerId_t xResetButtonTimerHandle;
 const osTimerAttr_t xResetButtonTimer_attributes = {
@@ -198,6 +231,11 @@ const osTimerAttr_t xToggleSwitchTimer_attributes = {
 osTimerId_t xBoxRfidLoginTimerHandle;
 const osTimerAttr_t xBoxRfidLoginTimer_attributes = {
   .name = "xBoxRfidLoginTimer"
+};
+/* Definitions for xUVTimer */
+osTimerId_t xUVTimerHandle;
+const osTimerAttr_t xUVTimer_attributes = {
+  .name = "xUVTimer"
 };
 /* Definitions for xInterrupt_Queue */
 osMessageQueueId_t xInterrupt_QueueHandle;
@@ -244,6 +282,21 @@ osMessageQueueId_t xBox_Ctrl_QueueHandle;
 const osMessageQueueAttr_t xBox_Ctrl_Queue_attributes = {
   .name = "xBox_Ctrl_Queue"
 };
+/* Definitions for xUV_Queue */
+osMessageQueueId_t xUV_QueueHandle;
+const osMessageQueueAttr_t xUV_Queue_attributes = {
+  .name = "xUV_Queue"
+};
+/* Definitions for xHmi_Send_Queue */
+osMessageQueueId_t xHmi_Send_QueueHandle;
+const osMessageQueueAttr_t xHmi_Send_Queue_attributes = {
+  .name = "xHmi_Send_Queue"
+};
+/* Definitions for xHmi_Recv_Queue */
+osMessageQueueId_t xHmi_Recv_QueueHandle;
+const osMessageQueueAttr_t xHmi_Recv_Queue_attributes = {
+  .name = "xHmi_Recv_Queue"
+};
 /* Definitions for xMotorTxSem */
 osSemaphoreId_t xMotorTxSemHandle;
 const osSemaphoreAttr_t xMotorTxSem_attributes = {
@@ -258,6 +311,11 @@ const osSemaphoreAttr_t xWifiTxSem_attributes = {
 osSemaphoreId_t xPrintSemHandle;
 const osSemaphoreAttr_t xPrintSem_attributes = {
   .name = "xPrintSem"
+};
+/* Definitions for xHMITxSem */
+osSemaphoreId_t xHMITxSemHandle;
+const osSemaphoreAttr_t xHMITxSem_attributes = {
+  .name = "xHMITxSem"
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -287,6 +345,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of xPrintSem */
   xPrintSemHandle = osSemaphoreNew(1, 1, &xPrintSem_attributes);
 
+  /* creation of xHMITxSem */
+  xHMITxSemHandle = osSemaphoreNew(1, 1, &xHMITxSem_attributes);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
   /* creation of xCarRfidRxSem */
@@ -295,19 +356,20 @@ void MX_FREERTOS_Init(void) {
   /* creation of xBoxRfidRxSem */
   xBoxRfidRxSemHandle = osSemaphoreNew(1, 0, &xBoxRfidRxSem_attributes);
   
-
   /* creation of xTestRxSem */
   xTestRxSemHandle = osSemaphoreNew(1, 0, &xTestRxSem_attributes);
 
   /* creation of xWifiReadySem */
   xWifiReadySemHandle = osSemaphoreNew(1, 0, &xWifiReadySem_attributes);
 
-    /* creation of xWifiReadySem */
+  /* creation of xWifiReadySem */
   xWifiRxSemHandle = osSemaphoreNew(1, 0, &xWifiRxSem_attributes);
 
   /* creation of xWifiReadySem */
   xMotorRxSemHandle = osSemaphoreNew(1, 0, &xMotorRxSem_attributes);
 
+  /* creation of xBoxRfidRxSem */
+  xHmiRxSemHandle = osSemaphoreNew(1, 0, &xHmiRxSem_attributes);
 
   /* USER CODE END RTOS_SEMAPHORES */
   /* creation of xResetButtonTimer */
@@ -321,6 +383,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of xBoxRfidLoginTimer */
   xBoxRfidLoginTimerHandle = osTimerNew(vBoxRfidLoginTimerCallback, osTimerOnce, NULL, &xBoxRfidLoginTimer_attributes);
+
+  /* creation of xUVTimer */
+  xUVTimerHandle = osTimerNew(vUVTimerCallback, osTimerOnce, NULL, &xUVTimer_attributes);
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
@@ -343,6 +408,12 @@ void MX_FREERTOS_Init(void) {
   xPrint_QueueHandle = osMessageQueueNew (32, sizeof(uint32_t), &xPrint_Queue_attributes);
   /* creation of xBox_Ctrl_Queue */
   xBox_Ctrl_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xBox_Ctrl_Queue_attributes);
+  /* creation of xUV_Queue */
+  xUV_QueueHandle = osMessageQueueNew (2, sizeof(uint8_t), &xUV_Queue_attributes);
+  /* creation of xHmi_Send_Queue */
+  xHmi_Send_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xHmi_Send_Queue_attributes);
+  /* creation of xHmi_Recv_Queue */
+  xHmi_Recv_QueueHandle = osMessageQueueNew (5, sizeof(uint32_t), &xHmi_Recv_Queue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -396,6 +467,18 @@ void MX_FREERTOS_Init(void) {
   /* creation of BoxRfidEventTask */
   BoxRfidEventTaskHandle = osThreadNew(vBoxRfidEventTask, NULL, &BoxRfidEventTask_attributes);
 
+  /* creation of HmiEventTask */
+  HmiEventTaskHandle = osThreadNew(vHmiEventTask, NULL, &HmiEventTask_attributes);
+
+  /* creation of HmiSendTask */
+  HmiSendTaskHandle = osThreadNew(vHmiSendTask, NULL, &HmiSendTask_attributes);
+
+  /* creation of HmiRecvTask */
+  HmiRecvTaskHandle = osThreadNew(vHmiRecvTask, NULL, &HmiRecvTask_attributes);
+
+  /* creation of HmiWaitTask */
+  HmiWaitTaskHandle = osThreadNew(vHmiWaitTask, NULL, &HmiWaitTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   
@@ -412,6 +495,10 @@ void MX_FREERTOS_Init(void) {
   osThreadSuspend(BoxCtrlTaskHandle);
   osThreadSuspend(BoxRfidTaskHandle);
   osThreadSuspend(BoxRfidEventTaskHandle);
+  osThreadSuspend(HmiEventTaskHandle);
+  osThreadSuspend(HmiSendTaskHandle);
+  osThreadSuspend(HmiRecvTaskHandle);
+  osThreadSuspend(HmiWaitTaskHandle);
   
 
   /* USER CODE END RTOS_THREADS */

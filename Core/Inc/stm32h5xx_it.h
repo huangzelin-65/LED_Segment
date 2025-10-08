@@ -76,8 +76,11 @@ void I2C1_ER_IRQHandler(void);
 void USART1_IRQHandler(void);
 void UART5_IRQHandler(void);
 void USART6_IRQHandler(void);
+void USART10_IRQHandler(void);
 void USART11_IRQHandler(void);
 void GPDMA2_Channel0_IRQHandler(void);
+void GPDMA2_Channel1_IRQHandler(void);
+void GPDMA2_Channel2_IRQHandler(void);
 void UART7_IRQHandler(void);
 void UART8_IRQHandler(void);
 /* USER CODE BEGIN EFP */

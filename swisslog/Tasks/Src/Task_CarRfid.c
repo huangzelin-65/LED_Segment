@@ -31,8 +31,8 @@ uint8_t ucCarRfid_Rx_Buffer[2][CAR_RFID_RX_BUF_SIZE];
 uint8_t ucCarRfid_current_buf_idx = 0;  // 当前使用的缓冲区索引
 
 extern osMessageQueueId_t xMotion_QueueHandle;
-extern CarToPlcData CarToPlcData_obj;
-extern _CarCheckFlag_obj CarCheckFlagobj;
+extern CarToServerData CarToServerData_obj;
+extern _CarCheckFlag_obj CarCheckFlag_obj;
 extern _CarRunStatus_obj CarRunStatus_obj;
 extern osMessageQueueId_t xRfid_Rx_QueueHandle;
 extern osSemaphoreId_t xCarRfidRxSemHandle;
@@ -106,14 +106,14 @@ void vGetCarPosition(char *data)
   ulCurPos = strtoul(pcCurPos, NULL, 10); // 将字符串转换为无符号长整型数(10进制)
 
   // 跟上一次读取的位置比较，如果不相同，则更新当前位置
-  if(CarToPlcData_obj.dwCurPos != ulCurPos)
+  if(CarToServerData_obj.dwCurPos != ulCurPos)
   {
     // 记录上一次位置
-    CarToPlcData_obj.dwPrevPos = CarToPlcData_obj.dwCurPos; 
-    DEBUGINFO("dwPrevPos:%lu\r\n",CarToPlcData_obj.dwPrevPos);
+    CarToServerData_obj.dwPrevPos = CarToServerData_obj.dwCurPos; 
+    DEBUGINFO("dwPrevPos:%lu\r\n",CarToServerData_obj.dwPrevPos);
     // 更新当前位置
-    CarToPlcData_obj.dwCurPos = ulCurPos; 
-    DEBUGINFO("dwCurPos:%lu\r\n",CarToPlcData_obj.dwCurPos);
+    CarToServerData_obj.dwCurPos = ulCurPos; 
+    DEBUGINFO("dwCurPos:%lu\r\n",CarToServerData_obj.dwCurPos);
   }
 }
 
@@ -127,7 +127,7 @@ void vGetTagPosType(char *data)
   ucPosType = substring_to_uint(data, POS_TYPE_OFFSET, 2);
 
   // 更新位置类型
-  CarToPlcData_obj.bPosType = ucPosType;
+  CarToServerData_obj.ucPosType = ucPosType;
 
   pcPosType[1] = ucPosType/10; //位置类型高10位
   pcPosType[0] = ucPosType%10; //位置类型个位
@@ -138,7 +138,7 @@ void vGetTagPosType(char *data)
   {
     // 小车不在停止状态，且在自动模式下，才发指令停止电机
     if((CarRunStatus_obj.IsCarRunning != CarStop) \
-      && (CarCheckFlagobj.ToggleSwtichPosition == ToggleFront)
+      && (CarCheckFlag_obj.ToggleSwtichPosition == ToggleFront)
       && (CarRunStatus_obj.AutoMode == Auto))
     {
       ucMotion_msg = CarStop;
@@ -168,7 +168,7 @@ void vGetTagSpeed(char *data)
   if((pcSpeed[0]>=1) && (pcSpeed[0]<=3))
   {
     // 速度有变化时才更新
-    if(CarToPlcData_obj.bSpdMode != pcSpeed[0])
+    if(CarToServerData_obj.bSpdMode != pcSpeed[0])
     {
       // 更新预设速度模式
       CarRunStatus_obj.SetSpeed = pcSpeed[0]; 

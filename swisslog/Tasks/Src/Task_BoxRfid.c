@@ -9,6 +9,7 @@
 #include "adaptor_eeprom.h"
 #include "adaptor_box.h"
 #include "BoxRfidReader.h"
+#include "DwinHMI.h"
 
 #define 	MAX_CARD_PSWD 					10
 #define 	CARD_PSWD_BUF_LEN  				60
@@ -53,7 +54,7 @@ void RFID_Set_Logined(uint8_t level)
 		return;
 	}
 	DEBUGINFO("Box RFID Logined\n");
-	//HMI_CheckRFCard(level); // ljj临时注释掉
+	HMI_CheckRFCard(level); 
 	isLogin = level;
 }
 
@@ -73,15 +74,15 @@ uint8_t RFID_GetLoginStatus(void)
 	return isLogin;
 }
 
-// ljj临时注释掉
+
 /*
 获取登录状态
 */
 void RFID_Scan_Enable(uint8_t en)
 {
-	// if(HMI_Get_Instation_Setting()){ // ljj临时注释掉
+	if(HMI_Get_Instation_Setting()){ 
 		enScan = 1;//TODO if enable . can control the scan enable//20200605: always on 
-	// } // ljj临时注释掉
+	} 
  	
 	osTimerStop(xBoxRfidLoginTimerHandle);
 }
@@ -272,7 +273,7 @@ uint8_t RFID_GetTimeOut(void)
 void vBoxRfidLoginTimerCallback(void *argument)
 {
 	RFID_ResetLoginStatus();
-	//HMI_CheckRFCard(0); // ljj临时注释掉
+	HMI_CheckRFCard(0); 
 	rfidTimeout = 1;
 }
 

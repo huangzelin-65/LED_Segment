@@ -52,6 +52,7 @@ UART_HandleTypeDef huart7;
 UART_HandleTypeDef huart8;
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart6;
+UART_HandleTypeDef huart10;
 UART_HandleTypeDef huart11;
 DMA_HandleTypeDef handle_GPDMA1_Channel6;
 DMA_HandleTypeDef handle_GPDMA1_Channel1;
@@ -61,12 +62,14 @@ DMA_HandleTypeDef handle_GPDMA1_Channel5;
 DMA_HandleTypeDef handle_GPDMA1_Channel4;
 DMA_HandleTypeDef handle_GPDMA1_Channel3;
 DMA_HandleTypeDef handle_GPDMA1_Channel2;
+DMA_HandleTypeDef handle_GPDMA2_Channel2;
+DMA_HandleTypeDef handle_GPDMA2_Channel1;
 
 /* USER CODE BEGIN PV */
-PlcToCarData PlcToCarData_obj;
-CarToPlcData CarToPlcData_obj;
+ServerToCarData ServerToCarData_obj;
+CarToServerData CarToServerData_obj;
 _CarRunStatus_obj CarRunStatus_obj;
-_CarCheckFlag_obj CarCheckFlagobj;
+_CarCheckFlag_obj CarCheckFlag_obj;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -84,6 +87,7 @@ static void MX_TIM4_Init(void);
 static void MX_UART8_Init(void);
 static void MX_USART11_UART_Init(void);
 static void MX_I2C1_Init(void);
+static void MX_USART10_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -137,6 +141,7 @@ int main(void)
   MX_UART8_Init();
   MX_USART11_UART_Init();
   MX_I2C1_Init();
+  MX_USART10_UART_Init();
   /* USER CODE BEGIN 2 */
   eeprom_adaptor_init(&hi2c1);
   /* USER CODE END 2 */
@@ -276,6 +281,10 @@ static void MX_GPDMA2_Init(void)
   /* GPDMA2 interrupt Init */
     HAL_NVIC_SetPriority(GPDMA2_Channel0_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(GPDMA2_Channel0_IRQn);
+    HAL_NVIC_SetPriority(GPDMA2_Channel1_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(GPDMA2_Channel1_IRQn);
+    HAL_NVIC_SetPriority(GPDMA2_Channel2_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(GPDMA2_Channel2_IRQn);
 
   /* USER CODE BEGIN GPDMA2_Init 1 */
 
@@ -666,6 +675,54 @@ static void MX_USART6_UART_Init(void)
 }
 
 /**
+  * @brief USART10 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART10_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART10_Init 0 */
+
+  /* USER CODE END USART10_Init 0 */
+
+  /* USER CODE BEGIN USART10_Init 1 */
+
+  /* USER CODE END USART10_Init 1 */
+  huart10.Instance = USART10;
+  huart10.Init.BaudRate = 9600;
+  huart10.Init.WordLength = UART_WORDLENGTH_8B;
+  huart10.Init.StopBits = UART_STOPBITS_1;
+  huart10.Init.Parity = UART_PARITY_NONE;
+  huart10.Init.Mode = UART_MODE_TX_RX;
+  huart10.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart10.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart10.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart10.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+  huart10.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart10) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetTxFifoThreshold(&huart10, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetRxFifoThreshold(&huart10, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_DisableFifoMode(&huart10) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART10_Init 2 */
+
+  /* USER CODE END USART10_Init 2 */
+
+}
+
+/**
   * @brief USART11 Initialization Function
   * @param None
   * @retval None
@@ -743,7 +800,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(NUMDISP_485_CTRL_GPIO_Port, NUMDISP_485_CTRL_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOI, Sterilamp_EN_Pin|ELOCK_EN2_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOI, UV_CLEAN_EN_Pin|ELOCK_EN2_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOG, LED5_Pin|LED3_Pin|LED4_Pin|LED2_Pin, GPIO_PIN_RESET);
@@ -790,8 +847,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(NUMDISP_485_CTRL_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Sterilamp_EN_Pin ELOCK_EN2_Pin */
-  GPIO_InitStruct.Pin = Sterilamp_EN_Pin|ELOCK_EN2_Pin;
+  /*Configure GPIO pins : UV_CLEAN_EN_Pin ELOCK_EN2_Pin */
+  GPIO_InitStruct.Pin = UV_CLEAN_EN_Pin|ELOCK_EN2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

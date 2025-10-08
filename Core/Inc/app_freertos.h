@@ -58,6 +58,7 @@ extern osSemaphoreId_t xTestRxSemHandle;
 extern osSemaphoreId_t xWifiReadySemHandle;
 extern osSemaphoreId_t xWifiRxSemHandle;
 extern osSemaphoreId_t xMotorRxSemHandle;
+extern osSemaphoreId_t xHmiRxSemHandle;
 /* USER CODE END EM */
 extern osThreadId_t InitTaskHandle;
 extern osThreadId_t IntProcessTaskHandle;
@@ -72,10 +73,15 @@ extern osThreadId_t PrintTaskHandle;
 extern osThreadId_t BoxCtrlTaskHandle;
 extern osThreadId_t BoxRfidTaskHandle;
 extern osThreadId_t BoxRfidEventTaskHandle;
+extern osThreadId_t HmiEventTaskHandle;
+extern osThreadId_t HmiSendTaskHandle;
+extern osThreadId_t HmiRecvTaskHandle;
+extern osThreadId_t HmiWaitTaskHandle;
 extern osTimerId_t xResetButtonTimerHandle;
 extern osTimerId_t xSensorDebounceTimerHandle;
 extern osTimerId_t xToggleSwitchTimerHandle;
 extern osTimerId_t xBoxRfidLoginTimerHandle;
+extern osTimerId_t xUVTimerHandle;
 extern osMessageQueueId_t xInterrupt_QueueHandle;
 extern osMessageQueueId_t xSensor_QueueHandle;
 extern osMessageQueueId_t xWifi_Rx_QueueHandle;
@@ -85,9 +91,13 @@ extern osMessageQueueId_t xRfid_Rx_QueueHandle;
 extern osMessageQueueId_t xMotion_QueueHandle;
 extern osMessageQueueId_t xPrint_QueueHandle;
 extern osMessageQueueId_t xBox_Ctrl_QueueHandle;
+extern osMessageQueueId_t xUV_QueueHandle;
+extern osMessageQueueId_t xHmi_Send_QueueHandle;
+extern osMessageQueueId_t xHmi_Recv_QueueHandle;
 extern osSemaphoreId_t xMotorTxSemHandle;
 extern osSemaphoreId_t xWifiTxSemHandle;
 extern osSemaphoreId_t xPrintSemHandle;
+extern osSemaphoreId_t xHMITxSemHandle;
 
 /* Exported function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -107,10 +117,15 @@ extern void vPrintTask(void *argument);
 extern void vBoxCtrlTask(void *argument);
 extern void vBoxRfidTask(void *argument);
 extern void vBoxRfidEventTask(void *argument);
+extern void vHmiEventTask(void *argument);
+extern void vHmiSendTask(void *argument);
+extern void vHmiRecvTask(void *argument);
+extern void vHmiWaitTask(void *argument);
 extern void vResetButtonCallback(void *argument);
 extern void vSensorDebounceCallback(void *argument);
 extern void vToggleSwitchCallback(void *argument);
 extern void vBoxRfidLoginTimerCallback(void *argument);
+extern void vUVTimerCallback(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 

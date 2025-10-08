@@ -39,6 +39,10 @@ extern DMA_HandleTypeDef handle_GPDMA1_Channel3;
 
 extern DMA_HandleTypeDef handle_GPDMA1_Channel2;
 
+extern DMA_HandleTypeDef handle_GPDMA2_Channel2;
+
+extern DMA_HandleTypeDef handle_GPDMA2_Channel1;
+
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
 
@@ -682,6 +686,98 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 
     /* USER CODE END USART6_MspInit 1 */
   }
+  else if(huart->Instance==USART10)
+  {
+    /* USER CODE BEGIN USART10_MspInit 0 */
+
+    /* USER CODE END USART10_MspInit 0 */
+
+  /** Initializes the peripherals clock
+  */
+    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART10;
+    PeriphClkInitStruct.Usart10ClockSelection = RCC_USART10CLKSOURCE_PCLK1;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    /* Peripheral clock enable */
+    __HAL_RCC_USART10_CLK_ENABLE();
+
+    __HAL_RCC_GPIOE_CLK_ENABLE();
+    /**USART10 GPIO Configuration
+    PE3     ------> USART10_TX
+    PE2     ------> USART10_RX
+    */
+    GPIO_InitStruct.Pin = HMI_TX_Pin|HMI_RX_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF7_USART10;
+    HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+    /* USART10 DMA Init */
+    /* GPDMA2_REQUEST_USART10_TX Init */
+    handle_GPDMA2_Channel2.Instance = GPDMA2_Channel2;
+    handle_GPDMA2_Channel2.Init.Request = GPDMA2_REQUEST_USART10_TX;
+    handle_GPDMA2_Channel2.Init.BlkHWRequest = DMA_BREQ_SINGLE_BURST;
+    handle_GPDMA2_Channel2.Init.Direction = DMA_MEMORY_TO_PERIPH;
+    handle_GPDMA2_Channel2.Init.SrcInc = DMA_SINC_INCREMENTED;
+    handle_GPDMA2_Channel2.Init.DestInc = DMA_DINC_FIXED;
+    handle_GPDMA2_Channel2.Init.SrcDataWidth = DMA_SRC_DATAWIDTH_BYTE;
+    handle_GPDMA2_Channel2.Init.DestDataWidth = DMA_DEST_DATAWIDTH_BYTE;
+    handle_GPDMA2_Channel2.Init.Priority = DMA_LOW_PRIORITY_MID_WEIGHT;
+    handle_GPDMA2_Channel2.Init.SrcBurstLength = 1;
+    handle_GPDMA2_Channel2.Init.DestBurstLength = 1;
+    handle_GPDMA2_Channel2.Init.TransferAllocatedPort = DMA_SRC_ALLOCATED_PORT0|DMA_DEST_ALLOCATED_PORT0;
+    handle_GPDMA2_Channel2.Init.TransferEventMode = DMA_TCEM_BLOCK_TRANSFER;
+    handle_GPDMA2_Channel2.Init.Mode = DMA_NORMAL;
+    if (HAL_DMA_Init(&handle_GPDMA2_Channel2) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    __HAL_LINKDMA(huart, hdmatx, handle_GPDMA2_Channel2);
+
+    if (HAL_DMA_ConfigChannelAttributes(&handle_GPDMA2_Channel2, DMA_CHANNEL_NPRIV) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    /* GPDMA2_REQUEST_USART10_RX Init */
+    handle_GPDMA2_Channel1.Instance = GPDMA2_Channel1;
+    handle_GPDMA2_Channel1.Init.Request = GPDMA2_REQUEST_USART10_RX;
+    handle_GPDMA2_Channel1.Init.BlkHWRequest = DMA_BREQ_SINGLE_BURST;
+    handle_GPDMA2_Channel1.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    handle_GPDMA2_Channel1.Init.SrcInc = DMA_SINC_FIXED;
+    handle_GPDMA2_Channel1.Init.DestInc = DMA_DINC_INCREMENTED;
+    handle_GPDMA2_Channel1.Init.SrcDataWidth = DMA_SRC_DATAWIDTH_BYTE;
+    handle_GPDMA2_Channel1.Init.DestDataWidth = DMA_DEST_DATAWIDTH_BYTE;
+    handle_GPDMA2_Channel1.Init.Priority = DMA_LOW_PRIORITY_MID_WEIGHT;
+    handle_GPDMA2_Channel1.Init.SrcBurstLength = 1;
+    handle_GPDMA2_Channel1.Init.DestBurstLength = 1;
+    handle_GPDMA2_Channel1.Init.TransferAllocatedPort = DMA_SRC_ALLOCATED_PORT0|DMA_DEST_ALLOCATED_PORT0;
+    handle_GPDMA2_Channel1.Init.TransferEventMode = DMA_TCEM_BLOCK_TRANSFER;
+    handle_GPDMA2_Channel1.Init.Mode = DMA_NORMAL;
+    if (HAL_DMA_Init(&handle_GPDMA2_Channel1) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    __HAL_LINKDMA(huart, hdmarx, handle_GPDMA2_Channel1);
+
+    if (HAL_DMA_ConfigChannelAttributes(&handle_GPDMA2_Channel1, DMA_CHANNEL_NPRIV) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    /* USART10 interrupt Init */
+    HAL_NVIC_SetPriority(USART10_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(USART10_IRQn);
+    /* USER CODE BEGIN USART10_MspInit 1 */
+
+    /* USER CODE END USART10_MspInit 1 */
+  }
   else if(huart->Instance==USART11)
   {
     /* USER CODE BEGIN USART11_MspInit 0 */
@@ -847,6 +943,30 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
     /* USER CODE BEGIN USART6_MspDeInit 1 */
 
     /* USER CODE END USART6_MspDeInit 1 */
+  }
+  else if(huart->Instance==USART10)
+  {
+    /* USER CODE BEGIN USART10_MspDeInit 0 */
+
+    /* USER CODE END USART10_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_USART10_CLK_DISABLE();
+
+    /**USART10 GPIO Configuration
+    PE3     ------> USART10_TX
+    PE2     ------> USART10_RX
+    */
+    HAL_GPIO_DeInit(GPIOE, HMI_TX_Pin|HMI_RX_Pin);
+
+    /* USART10 DMA DeInit */
+    HAL_DMA_DeInit(huart->hdmatx);
+    HAL_DMA_DeInit(huart->hdmarx);
+
+    /* USART10 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(USART10_IRQn);
+    /* USER CODE BEGIN USART10_MspDeInit 1 */
+
+    /* USER CODE END USART10_MspDeInit 1 */
   }
   else if(huart->Instance==USART11)
   {

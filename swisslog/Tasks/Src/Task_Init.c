@@ -18,6 +18,10 @@ extern osThreadId_t PrintTaskHandle;
 extern osThreadId_t BoxCtrlTaskHandle;
 extern osThreadId_t BoxRfidTaskHandle;
 extern osThreadId_t BoxRfidEventTaskHandle;
+extern osThreadId_t HmiEventTaskHandle;
+extern osThreadId_t HmiSendTaskHandle;
+extern osThreadId_t HmiRecvTaskHandle;
+extern osThreadId_t HmiWaitTaskHandle;
 extern _CarRunStatus_obj CarRunStatus_obj;
 
 
@@ -37,6 +41,11 @@ void vInitTask(void *argument)
   osThreadResume(BoxCtrlTaskHandle);
   osThreadResume(BoxRfidTaskHandle);
   osThreadResume(BoxRfidEventTaskHandle);
+  osThreadResume(HmiEventTaskHandle);
+  osThreadResume(HmiSendTaskHandle);
+  osThreadResume(HmiRecvTaskHandle);
+  osThreadResume(HmiWaitTaskHandle);
+  
 
   DEBUGINFO("InitTask\r\n");
 
