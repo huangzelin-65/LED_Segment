@@ -50,8 +50,8 @@ void UserPswd_Set_Encry_Status(uint8_t flag){
 	if(isEncryed == flag)
 		return;
 	isEncryed = flag;	
-	eeprom_check_conn();	
-	eeprom_write_byte(EEP_ADD_IS_ENCRYED,isEncryed); 
+	bEeprom_Check_Conn();	
+	bEeprom_Write_Byte(EEP_ADD_IS_ENCRYED,isEncryed); 
 	
 }
 
@@ -64,13 +64,13 @@ void UserPswd_Clear_Encry(){
 }
 
 uint8_t UserPswd_Save_EncryToFlash(){
-	eeprom_check_conn();
-	eeprom_write_buf(EEP_ADD_SEND_PASSWORD,localEncryPasswd,MAX_PASSWD_LEN); 
+	bEeprom_Check_Conn();
+	bEeprom_Write_Buf(EEP_ADD_SEND_PASSWORD,localEncryPasswd,MAX_PASSWD_LEN); 
 	return 1;	
 }
 uint8_t UserPswd_Read_EncryFromFlash(){
-	eeprom_check_conn();	
-	eeprom_read_buf(EEP_ADD_SEND_PASSWORD,localEncryPasswd,MAX_PASSWD_LEN); 
+	bEeprom_Check_Conn();	
+	bEeprom_Read_Buf(EEP_ADD_SEND_PASSWORD,localEncryPasswd,MAX_PASSWD_LEN); 
 	localEncryCount = 0;
 	int i = 0;
 	for(i=0;i<MAX_PASSWD_LEN;i++){
@@ -81,8 +81,8 @@ uint8_t UserPswd_Read_EncryFromFlash(){
 			break;
 		}
 	}
-	eeprom_check_conn();	
-	eeprom_read_byte(EEP_ADD_IS_ENCRYED,&isEncryed); 
+	bEeprom_Check_Conn();	
+	bEeprom_Read_Byte(EEP_ADD_IS_ENCRYED,&isEncryed); 
 	DEBUGINFO("isEncryed=%d \r\n", isEncryed);
 	return 1;	
 }

@@ -51,15 +51,16 @@ struct M24C64_I2cOps {
 extern EepromDevice eeprom_dev;
 
 // 适配层初始化与通用操作接口
-bool eeprom_adaptor_init(void* hi2c);
+void vEeprom_Data_Init(void);
+bool bEeprom_Adaptor_Init(void* hi2c);
 
-bool eeprom_check_conn(void);
+bool bEeprom_Check_Conn(void);
 
-bool eeprom_write_byte(uint16_t addr, uint8_t data);
-bool eeprom_read_byte(uint16_t addr, uint8_t* data);
+bool bEeprom_Write_Byte(uint16_t addr, uint8_t data);
+bool bEeprom_Read_Byte(uint16_t addr, uint8_t* data);
 
-bool eeprom_write_buf(uint16_t addr, const uint8_t* data, uint16_t len);
-bool eeprom_read_buf(uint16_t addr, uint8_t* data, uint16_t len);
+bool bEeprom_Write_Buf(uint16_t addr, const uint8_t* data, uint16_t len);
+bool bEeprom_Read_Buf(uint16_t addr, uint8_t* data, uint16_t len);
 
 //测试用函数
 void vEepromTest(void);

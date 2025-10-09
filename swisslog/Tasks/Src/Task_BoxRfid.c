@@ -98,21 +98,21 @@ void RFID_Scan_Enable(uint8_t en)
 static void RFID_Update_CardPasswd(void)
 {
 	uint8_t num = 0;
-	if(eeprom_check_conn() == true)
+	if(bEeprom_Check_Conn() == true)
 	{
-		eeprom_read_byte(EEP_ADD_IDCARD_PASSWORD_NUM,&num);
+		bEeprom_Read_Byte(EEP_ADD_IDCARD_PASSWORD_NUM,&num);
 		if(num>10) {
 			CardPasswordNum=0;
 		}
 		else {
-			eeprom_read_buf(EEP_ADD_IDCARD_PASSWORD,CardPasswordBuf,num*6);
+			bEeprom_Read_Buf(EEP_ADD_IDCARD_PASSWORD,CardPasswordBuf,num*6);
 			CardPasswordNum = num;
 		}
 		DEBUGINFO("CardPasswordNum=%d\n",CardPasswordNum);
 	}
 	else
 	{
-		DEBUGINFO("eeprom_check_conn fail\n");
+		DEBUGINFO("bEeprom_Check_Conn fail\n");
 	}
 }
 
@@ -127,7 +127,7 @@ static void RFID_Update_CardPasswd(void)
  */
 uint8_t RFID_Write_CardPasswd(uint8_t *ucData)
 {
-	if(eeprom_check_conn() == true)
+	if(bEeprom_Check_Conn() == true)
 	{
 		if(CardPasswordNum>0) {
 			for(int i=0; i<CardPasswordNum; i++) {
@@ -137,20 +137,20 @@ uint8_t RFID_Write_CardPasswd(uint8_t *ucData)
 		}
 		if(CardPasswordNum<MAX_CARD_PSWD) {
 			if(CardPasswordNum>0)
-				eeprom_write_buf(EEP_ADD_IDCARD_PASSWORD+6,CardPasswordBuf,CardPasswordNum*6);
-			eeprom_write_buf(EEP_ADD_IDCARD_PASSWORD,ucData,6);
+				bEeprom_Write_Buf(EEP_ADD_IDCARD_PASSWORD+6,CardPasswordBuf,CardPasswordNum*6);
+			bEeprom_Write_Buf(EEP_ADD_IDCARD_PASSWORD,ucData,6);
 			CardPasswordNum++;
-			eeprom_read_byte(EEP_ADD_IDCARD_PASSWORD_NUM,&CardPasswordNum);
+			bEeprom_Read_Byte(EEP_ADD_IDCARD_PASSWORD_NUM,&CardPasswordNum);
 		}
 		else {
-			eeprom_write_buf(EEP_ADD_IDCARD_PASSWORD+6,CardPasswordBuf,(MAX_CARD_PSWD-1)*6);
-			eeprom_write_buf(EEP_ADD_IDCARD_PASSWORD,ucData,6);
+			bEeprom_Write_Buf(EEP_ADD_IDCARD_PASSWORD+6,CardPasswordBuf,(MAX_CARD_PSWD-1)*6);
+			bEeprom_Write_Buf(EEP_ADD_IDCARD_PASSWORD,ucData,6);
 		}
 		RFID_Update_CardPasswd();
 	}
 	else
 	{
-		DEBUGINFO("eeprom_check_conn fail\n");
+		DEBUGINFO("bEeprom_Check_Conn fail\n");
 	}
 
 	return 0;

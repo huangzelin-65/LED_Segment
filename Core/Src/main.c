@@ -143,7 +143,8 @@ int main(void)
   MX_I2C1_Init();
   MX_USART10_UART_Init();
   /* USER CODE BEGIN 2 */
-  eeprom_adaptor_init(&hi2c1);
+  bEeprom_Adaptor_Init(&hi2c1);
+
   /* USER CODE END 2 */
 
   /* Init scheduler */

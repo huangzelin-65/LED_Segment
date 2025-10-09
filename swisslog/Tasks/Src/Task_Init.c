@@ -45,10 +45,11 @@ void vInitTask(void *argument)
   osThreadResume(HmiSendTaskHandle);
   osThreadResume(HmiRecvTaskHandle);
   osThreadResume(HmiWaitTaskHandle);
-  
+
 
   DEBUGINFO("InitTask\r\n");
 
+  vEeprom_Data_Init();
   //vEepromTest();
 
   osThreadExit();

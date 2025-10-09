@@ -68,14 +68,14 @@ void UvClean_Save_Record(void){
 	if(cleanTime<UvTimeCnt) return;
 	memcpy(temp,saveStartTime,6);
 	temp[6] = cleanTime-UvTimeCnt;
-	eeprom_check_conn();
-	eeprom_write_buf(EEP_ADD_LAST_UVCLEAN_DATE,temp,7);
+	bEeprom_Check_Conn();
+	bEeprom_Write_Buf(EEP_ADD_LAST_UVCLEAN_DATE,temp,7);
 }
 
 void UvClean_Get_Record(uint8_t time[7]){
 	uint8_t temp[7];
-	eeprom_check_conn();
-	eeprom_read_buf(EEP_ADD_LAST_UVCLEAN_DATE,temp,7);
+	bEeprom_Check_Conn();
+	bEeprom_Read_Buf(EEP_ADD_LAST_UVCLEAN_DATE,temp,7);
 	memcpy(time,temp,7);	
 }
 

@@ -45,6 +45,7 @@ extern osSemaphoreId_t xHmiRxSemHandle;
 extern osMessageQueueId_t xHmi_Send_QueueHandle;
 extern osMessageQueueId_t xHmi_Recv_QueueHandle;
 
+// 接收来自HMI的串口数据
 void vHmiEventTask(void *argument)
 {
 	uint32_t ucReciveLen = 0;
@@ -68,7 +69,7 @@ void vHmiEventTask(void *argument)
 
       // 切换缓冲区并重启接收
       ucHMI_current_buf_idx ^= 1;
-      vBoxRfid_Start_DMA_Receive(ucHMI_Rx_Buffer[ucHMI_current_buf_idx]);
+      vHMI_Start_DMA_Receive(ucHMI_Rx_Buffer[ucHMI_current_buf_idx]);
 		}
 	}
 }
@@ -106,7 +107,7 @@ void vHmiSendTask(void *argument)
 void vHmiRecvTask(void *argument)
 {	
 	DwinMsgSt *recMsg = NULL;
-	DEBUGINFO("HMI_Rec_Deal_Task Start\n");
+	DEBUGINFO("HMI_Rec_Deal_Task Start\r\n");
 	while(1)
 	{
 		if(osMessageQueueGet(xHmi_Recv_QueueHandle, &recMsg, NULL, osWaitForever) != osOK)
@@ -115,18 +116,21 @@ void vHmiRecvTask(void *argument)
       DEBUGINFO("xQueueReceive failed");
 			continue;
 		}
-		DEBUGINFO("HMI_Rec_Deal_Task:%d",recMsg->cmd);
+		DEBUGINFO("Receive from HMI\r\n");
 
 		switch(recMsg->cmd) 
 		{
 		case DwinReadReg: 
+			DEBUGINFO("DwinReadReg\r\n");
 			switch((eDwinRegAdd)recMsg->data[0])
 			{
 				case addRegPic_Id:
+					DEBUGINFO("addRegPic_Id\r\n");
 					currentPage = (eDwinPage)recMsg->data[2];
 					break;
 
 				case addRegRTC:
+					DEBUGINFO("addRegRTC\r\n");
 					localRTCTime[0] = BCDToh10(recMsg->data[2]);
 					localRTCTime[1] = BCDToh10(recMsg->data[3]);
 					localRTCTime[2] = BCDToh10(recMsg->data[4]);
@@ -153,6 +157,7 @@ void vHmiRecvTask(void *argument)
 					}
 					break;
 				case addRegVersion:
+					DEBUGINFO("addRegVersion\r\n");
 					hmiVersion = recMsg->data[2];
 					startFinishedFlag = 1;
 					DEBUGINFO("startFinishedFlag = 1\r\n");
@@ -165,54 +170,69 @@ void vHmiRecvTask(void *argument)
 		break;
 		
 		case DwinReadValue:
+			DEBUGINFO("DwinReadValue\r\n");
 			switch((eDwinValueAdd)((recMsg->data[0]<<8)+ recMsg->data[1]))
 			{
 				case addButton:
+					DEBUGINFO("addButton\r\n");
 					//if(Car_Get_Station_Status() ==InStation){
 						HMI_Deal_HmiButtonCmd((eDwinButtonDef)((recMsg->data[3]<<8)+ recMsg->data[4]));	
 					//}
 					break;
 				case addCarNum:
+					DEBUGINFO("addCarNum\r\n");
 				case addSetCarNum:
+					DEBUGINFO("addSetCarNum\r\n");
 					carNum[0] = recMsg->data[3];
 					carNum[1] = recMsg->data[4];
-					eeprom_check_conn();
-					eeprom_write_buf(EEP_ADD_CAR_NUMBER,carNum,2);
+					bEeprom_Check_Conn();
+					bEeprom_Write_Buf(EEP_ADD_CAR_NUMBER,carNum,2);
 					NumDisp_SetNumber((uint16_t)(carNum[0]<<8)+carNum[1]);
 					break;
 				case addPasswdEy:
+					DEBUGINFO("addPasswdEy\r\n");
 					UserPswd_Add_Encry_Passwd(recMsg->data[4]);
 					HMI_Display_Text_EncrtPasswd();
 					break;
 				case addPasswdDy:
+					DEBUGINFO("addPasswdDy\r\n");
 					UserPswd_Add_Decry_Passwd(recMsg->data[4]);
 					HMI_Display_Text_DecryPasswd();
 					break;
 				case addPasswdSys:
+					DEBUGINFO("addPasswdSys\r\n");
 					UserPswd_Add_Sys_Passwd(recMsg->data[4]);
 					HMI_Display_Text_SysPasswd();
 				case addUvWorkTime:
+					DEBUGINFO("addUvWorkTime\r\n");
 					lastUvSetTime = recMsg->data[4];
 					break;
 				case addSetUvDefaultWorkTime:
+					DEBUGINFO("addSetUvDefaultWorkTime\r\n");
 					defaultUvSetTime = recMsg->data[4];
 					break;
 				case addSetDataYY :
+					DEBUGINFO("addSetDataYY\r\n");
 					setRTCTime[0]=recMsg->data[4];
 					break;
 				case addSetDataMM:
+					DEBUGINFO("addSetDataMM\r\n");
 					setRTCTime[1]=recMsg->data[4];
 					break;
 				case addSetDataDD:
+					DEBUGINFO("addSetDataDD\r\n");
 					setRTCTime[2]=recMsg->data[4];
 					break;
 				case addSetDataHH:
+					DEBUGINFO("addSetDataHH\r\n");
 					setRTCTime[3]=recMsg->data[4];
 					break;
 				case addSetDataMIN:
+					DEBUGINFO("addSetDataMIN\r\n");
 					setRTCTime[4]=recMsg->data[4];
 					break;
 				case addSetDataSS:
+					DEBUGINFO("addSetDataSS\r\n");
 					setRTCTime[5]=recMsg->data[4];
 					break;
 				default:
@@ -238,13 +258,14 @@ void vHmiWaitTask(void *argument)
 	startFinishedFlag = 0;
 	while(1)
 	{
+		DEBUGINFO("HMI_Wait_Task running\r\n");
 		sendSt = HMI_Malloc_DwinMsg(2);
 		sendSt->cmd = DwinReadReg;
 		sendSt->length = 3;
 		sendSt->data[0]=addRegVersion;
 		sendSt->data[1]=1;
 		HMI_Send_Msg_To_SendTask(sendSt);
-		osDelay(100);	
+		osDelay(200);	
 		if(startFinishedFlag == 1){
 			break;
 		}
@@ -252,32 +273,32 @@ void vHmiWaitTask(void *argument)
 
 	//START CHECK
 	//get id from eeprom,and send to hmi		
-	eeprom_check_conn();
-	eeprom_read_buf(EEP_ADD_CAR_NUMBER,carNum,2);//first read is error??
-	eeprom_read_buf(EEP_ADD_CAR_NUMBER,carNum,2);
+	bEeprom_Check_Conn();
+	bEeprom_Read_Buf(EEP_ADD_CAR_NUMBER,carNum,2);//first read is error??
+	bEeprom_Read_Buf(EEP_ADD_CAR_NUMBER,carNum,2);
 	NumDisp_SetNumber((uint16_t)(carNum[0]<<8)+carNum[1]);
 
 	//GET CURRENT POSTION
-	eeprom_check_conn();
+	bEeprom_Check_Conn();
 	CarStationStatus stationSt=Car_Get_Station_Status();
 	
 	UserPswd_Init();
 
-	eeprom_read_byte(EEP_ADD_UVCLEAN_TIME_MINUTES,&defaultUvSetTime);
+	bEeprom_Read_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,&defaultUvSetTime);
 	HMI_Update_DefaultUVTime_Req(defaultUvSetTime);//twice when first commu
 	lastUvSetTime = defaultUvSetTime;
 			
 
 	//get setting
-	eeprom_read_byte(EEP_ADD_EN_VIRTUAL_BUTTON,&currentVirtualButtonEn);
+	bEeprom_Read_Byte(EEP_ADD_EN_VIRTUAL_BUTTON,&currentVirtualButtonEn);
 	HMI_Update_VirtualBtSetting_Req(currentVirtualButtonEn);
 
-	eeprom_read_byte(EEP_ADD_EN_IN_STATION_SENSOR,&currentInStationEn);
+	bEeprom_Read_Byte(EEP_ADD_EN_IN_STATION_SENSOR,&currentInStationEn);
 	HMI_Update_InStationSetting_Req(currentInStationEn);
 
 
 	//get last correct time
-	eeprom_read_buf(EEP_ADD_LAST_CORRECT_DATE,lastCorrectDate,6);
+	bEeprom_Read_Buf(EEP_ADD_LAST_CORRECT_DATE,lastCorrectDate,6);
 	
 	if(stationSt == OutStation)
 	{

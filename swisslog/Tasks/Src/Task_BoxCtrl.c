@@ -49,8 +49,8 @@ void Car_Set_Station_Status(CarStationStatus value)
 		return;
 	}
 	mCarStationStatus=value;
-	eeprom_check_conn();
-	eeprom_write_byte(EEP_ADD_CAR_STATION_STATUS,value);
+	bEeprom_Check_Conn();
+	bEeprom_Write_Byte(EEP_ADD_CAR_STATION_STATUS,value);
 }
 
 /**
@@ -59,8 +59,8 @@ void Car_Set_Station_Status(CarStationStatus value)
 static CarStationStatus Car_Read_Station_Status(void)
 {
 	uint8_t result=0;
-	eeprom_check_conn();
-	eeprom_read_byte(EEP_ADD_CAR_STATION_STATUS,&result);	
+	bEeprom_Check_Conn();
+	bEeprom_Read_Byte(EEP_ADD_CAR_STATION_STATUS,&result);	
 	DEBUGINFO("result:%d\n",result);
 	return (CarStationStatus)result;
 }
@@ -73,6 +73,7 @@ uint8_t Button_Gpio_Press_Status(void)
 void Button_Gpio_Press_Set(uint8_t Val)
 {
 	 mButtonPress = Val;
+	 DEBUGINFO("mButtonPress:%d\n",mButtonPress);
 }
 
 void vBoxCtrlTask(void *argument)
@@ -107,7 +108,22 @@ void vBoxCtrlTask(void *argument)
 	uint8_t	elock1 = ELOCK1_LEVEL;//1:上锁 0:没上锁
 	uint8_t	elock2 = ELOCK2_LEVEL;//1:上锁 0:没上锁
 	uint8_t lockIcon = 2;
+
 	mCarStationStatus = Car_Read_Station_Status();
+	// car out检测
+	if( mCarStationStatus == OutStation ){
+		HMI_Set_RFCardPage();	// 发送命令切换到”请刷rfid卡“页面;
+	}
+	
+	// car in检测
+	// 如果虚拟按键没有设置currentInStationEn，则强制跳转到home页面
+	if( mCarStationStatus == InStation ){
+		if(HMI_Get_Instation_Setting() == 0){
+			HMI_Force_Home_Page();
+		}
+	}
+	
+
 	DEBUGINFO("start\n");
 
   while(1)
@@ -117,7 +133,7 @@ void vBoxCtrlTask(void *argument)
 		elock2 = ELOCK2_LEVEL;//1:上锁 0:没上锁
 
 		// car out检测
-		if( ServerToCarData_obj.xStationStatus == 1 ){
+		if( ServerToCarData_obj.xStationStatus == OutStation && mCarStationStatus == InStation){
 			if(mCarStationStatus==InStation){
 				Car_Set_Station_Status(OutStation);// 设置小车状态为OutStation
 			}
@@ -126,7 +142,7 @@ void vBoxCtrlTask(void *argument)
 		
 		// car in检测
 		// 如果虚拟按键没有设置currentInStationEn，则强制跳转到home页面
-		if( ServerToCarData_obj.xStationStatus == 0){
+		if( ServerToCarData_obj.xStationStatus == InStation && mCarStationStatus == OutStation){
 			if(HMI_Get_Instation_Setting() == 0){
 				HMI_Force_Home_Page();
 			}
