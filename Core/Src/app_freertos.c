@@ -405,7 +405,7 @@ void MX_FREERTOS_Init(void) {
   /* creation of xMotion_Queue */
   xMotion_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xMotion_Queue_attributes);
   /* creation of xPrint_Queue */
-  xPrint_QueueHandle = osMessageQueueNew (32, sizeof(uint32_t), &xPrint_Queue_attributes);
+  xPrint_QueueHandle = osMessageQueueNew (128, sizeof(uint32_t), &xPrint_Queue_attributes);
   /* creation of xBox_Ctrl_Queue */
   xBox_Ctrl_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xBox_Ctrl_Queue_attributes);
   /* creation of xUV_Queue */

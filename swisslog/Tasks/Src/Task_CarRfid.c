@@ -4,18 +4,20 @@
  *  Created on: Jun 10, 2025
  *      Author: e3lijia25d
  */
+#include <Common.h>
 #include "main.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "cmsis_os2.h"
 #include <string.h>
 #include <stdlib.h>
-#include "common.h"
+#include "Calculate.h"
 #include "motor_LD25B60G.h"
 #include "queue.h"
 #include "LogDebugInfo.h"
 #include "adaptor_rfid.h"
 #include "adaptor_wifi.h"
+#include "DwinHMI.h"
 
 
 #define CARD_NUM_LEN 9 // 9位卡号
@@ -98,7 +100,7 @@ char* pcGetRfidCardNum(char *data, u32 RfidDataLen)
 void vGetCarPosition(char *data)
 {
   char pcCurPos[6] = {0};
-  u32 ulCurPos = 0;
+  uint32_t ulCurPos = 0;
 
   // 通过标签编号获取小车当前位置
   strncpy(pcCurPos, data, POS_LEN);
@@ -114,6 +116,8 @@ void vGetCarPosition(char *data)
     // 更新当前位置
     CarToServerData_obj.dwCurPos = ulCurPos; 
     DEBUGINFO("dwCurPos:%lu\r\n",CarToServerData_obj.dwCurPos);
+
+    HMI_Update_CurLocationId_Req(ulCurPos);
   }
 }
 

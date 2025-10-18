@@ -11,15 +11,15 @@ extern osMessageQueueId_t xPrint_QueueHandle;
 
 extern UART_HandleTypeDef huart1;
 //普通打印函数
-void safe_printf(const char *format, ...) {
+void safe_printf_long(const char *format, ...) {
     va_list args;
     va_start(args, format);
-    char *buffer  = pvPortMalloc(LOG_LENGTH * sizeof(char));
-    int len = vsnprintf(buffer, LOG_LENGTH, format, args);
+    char *buffer  = pvPortMalloc(LOG_LENGTH_LONG * sizeof(char));
+    int len = vsnprintf(buffer, LOG_LENGTH_LONG, format, args);
     // 手动添加终止符
-    if (len >= LOG_LENGTH) {
-        buffer[LOG_LENGTH - 1] = '\0';
-        len = LOG_LENGTH - 1;
+    if (len >= LOG_LENGTH_LONG) {
+        buffer[LOG_LENGTH_LONG - 1] = '\0';
+        len = LOG_LENGTH_LONG - 1;
     }
     va_end(args);
 
@@ -27,6 +27,24 @@ void safe_printf(const char *format, ...) {
         xQueueSend(xPrint_QueueHandle, &buffer, pdMS_TO_TICKS(100));
     }
 }
+
+void safe_printf_single(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    char *buffer  = pvPortMalloc(LOG_LENGTH_SINGLE * sizeof(char));
+    int len = vsnprintf(buffer, LOG_LENGTH_SINGLE, format, args);
+    // 手动添加终止符
+    if (len >= LOG_LENGTH_SINGLE) {
+        buffer[LOG_LENGTH_SINGLE - 1] = '\0';
+        len = LOG_LENGTH_SINGLE - 1;
+    }
+    va_end(args);
+
+    if(xPrint_QueueHandle != NULL && len > 0) {
+        xQueueSend(xPrint_QueueHandle, &buffer, pdMS_TO_TICKS(100));
+    }
+}
+
 //中断中打印函数
 void safe_printf_isr(const char *format, ...) {
 
@@ -34,8 +52,8 @@ void safe_printf_isr(const char *format, ...) {
 
     va_list args;
     va_start(args, format);
-    char *buffer  = pvPortMalloc(LOG_LENGTH * sizeof(char));
-    int len = vsnprintf(buffer, LOG_LENGTH, format, args);
+    char *buffer  = pvPortMalloc(LOG_LENGTH_LONG * sizeof(char));
+    int len = vsnprintf(buffer, LOG_LENGTH_LONG, format, args);
     va_end(args);
 
     if(xPrint_QueueHandle != NULL && len > 0) {
@@ -50,8 +68,8 @@ void safe_printf_isr(const char *format, ...) {
 void safe_printf_all(const char *format, ...) {
     va_list args;
     va_start(args, format);
-    char *buffer  = pvPortMalloc(LOG_LENGTH * sizeof(char));
-    int len = vsnprintf(buffer, LOG_LENGTH, format, args);
+    char *buffer  = pvPortMalloc(LOG_LENGTH_LONG * sizeof(char));
+    int len = vsnprintf(buffer, LOG_LENGTH_LONG, format, args);
     va_end(args);
 
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
@@ -66,6 +84,17 @@ void safe_printf_all(const char *format, ...) {
 			xQueueSend(xPrint_QueueHandle, &buffer, portMAX_DELAY);//pdMS_TO_TICKS(100)
 		}
     }
+}
+
+
+void vPrint_Array(uint8_t *array, uint8_t len)
+{
+  uint8_t i;
+  for(i=0; i<len; i++)
+  {
+    safe_printf_single("%X ",array[i]);
+  }
+  safe_printf_single("\r\n");
 }
 
 

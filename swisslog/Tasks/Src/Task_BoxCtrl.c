@@ -78,11 +78,11 @@ void Button_Gpio_Press_Set(uint8_t Val)
 
 void vBoxCtrlTask(void *argument)
 {
-  // //初始化数码管显示
-  // NumDisp_Init();
+  //初始化数码管显示
+  NumDisp_Init();
 
   // //设置数码管显示的数字
-  // NumDisp_SetNumber((uint16_t)666);
+  // NumDisp_SetNumber((uint16_t)111);
   // NumDisp_BlueShan();
 
   // vUV_Clean_enable();
@@ -116,12 +116,10 @@ void vBoxCtrlTask(void *argument)
 	}
 	
 	// car in检测
-	// 如果虚拟按键没有设置currentInStationEn，则强制跳转到home页面
 	if( mCarStationStatus == InStation ){
-		if(HMI_Get_Instation_Setting() == 0){
-			HMI_Force_Home_Page();
-		}
+		HMI_Force_Home_Page();	// 强制跳转到home页面
 	}
+
 	
 
 	DEBUGINFO("start\n");
@@ -143,9 +141,7 @@ void vBoxCtrlTask(void *argument)
 		// car in检测
 		// 如果虚拟按键没有设置currentInStationEn，则强制跳转到home页面
 		if( ServerToCarData_obj.xStationStatus == InStation && mCarStationStatus == OutStation){
-			if(HMI_Get_Instation_Setting() == 0){
-				HMI_Force_Home_Page();
-			}
+			HMI_Force_Home_Page();
 		}
 
 		//新款车厢没有按钮
@@ -159,25 +155,7 @@ void vBoxCtrlTask(void *argument)
 		// 	Button_LED_En(0);
 		// }
 
-					
-		//check button
-		/*
-		if(Button_Gpio_Press_Status())
-		{		
-				if(!UvClean_IsRunning()&&
-						mCarStationStatus==InStation&&
-						(elock1||elock2) && 
-						HMI_Is_Button_En())
-				{		
-					DEBUGINFO("elock1=%d elock2=%d",elock1,elock2);
-					//delay_ms(350);
-					if(Elock_unLock()) 
-						DEBUGINFO("error: unlock fail\n");
-				}
-			Button_Gpio_Press_Set(0);
-		}
-		*/
-			
+
 		//check button
 		if(!UvClean_IsRunning()&&
 			mCarStationStatus==InStation&&

@@ -13,7 +13,7 @@
 #include "Task_Wifi.h"
 #include "LogDebugInfo.h"
 #include "adaptor_wifi.h"
-#include "common.h"
+#include "Common.h"
 
 
 uint8_t ucWifiDataLen = 0;
@@ -195,10 +195,9 @@ void vWifiReceiveTask(void *argument)
         // ServerToCarData_obj.wCtrl = ucWifi_Receive_Buffer[CMD_BASE_COUNT+5]<<8 | ucWifi_Receive_Buffer[CMD_BASE_COUNT+4]; // 控制信号
         // ServerToCarData_obj.ucDirection = ucWifi_Receive_Buffer[CMD_BASE_COUNT+30]; // 小车运行方向 1=正转 2=反转
 
-        ServerToCarData_obj.wCtrl = ucWifi_Receive_Buffer[ucWifi_current_buf_idx][1]<<8 \
-                                | ucWifi_Receive_Buffer[ucWifi_current_buf_idx][0]; // 控制信号
-        ServerToCarData_obj.ucDirection = ucWifi_Receive_Buffer[ucWifi_current_buf_idx][2]; // 小车运行方向 1=正转 2=反转
-        DEBUGINFO("wCtrl : %X\r\n",ServerToCarData_obj.wCtrl);
+        ServerToCarData_obj.ucDirection = ucWifi_Receive_Buffer[ucWifi_current_buf_idx][0]; // 小车运行方向 1=正转 2=反转
+        ServerToCarData_obj.wCtrl = ucWifi_Receive_Buffer[ucWifi_current_buf_idx][1]; // 控制信号
+        DEBUGINFO("ucDirection:%X ,wCtrl:%X \r\n",ServerToCarData_obj.wCtrl);
 
         vParseCommandToCar();
 

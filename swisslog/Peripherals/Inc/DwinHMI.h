@@ -55,7 +55,7 @@ typedef enum {
 }eDwinButtonDef;
 	
 
-//address define 
+//HMI屏幕上的变量地址
 typedef enum {
 	addButton = 0x0001,
 	addCarNum = 0x0002,
@@ -82,7 +82,7 @@ typedef enum {
 	addDirtyStatus = 0x002D,
 	addSetCarNum = 0x002E,
 	addCurLocationId = 0x0900,
-	addTextRunTime = 0x910,
+	addTextRunTime = 0x0910,
 	addTextEyWord = 0x1000,
 	addTextDyWord = 0x1100,
 	addTextLastUvRecoed = 0x1200,
@@ -95,6 +95,7 @@ typedef enum {
 typedef enum {
 	addRegVersion = 0x00,
 	addRegPic_Id = 0x04,
+	addRegRunTime = 0x0C,
 	addRegRTC = 0x20,
 	addRegKey = 0x4F,
 	addRegCorrect = 0xEA,
@@ -146,13 +147,13 @@ void HMI_Set_RFCardPage(void);
 void HMI_Force_Home_Page(void);
 
 void HMI_Get_Rtc();
-uint8_t HMI_Get_Instation_Setting(void);
 
 void HMI_Display_Text_Stm32Version();
 void HMI_Display_Text_HmiVersion();
 void HMI_Display_Text_EncrtPasswd();
 void HMI_Display_Text_DecryPasswd();
 void HMI_Display_Text_SysPasswd();
+void HMI_Display_Text_RunTime();
 
 void HMI_Update_DefaultUVTime_Req(uint8_t time);
 void _HMI_Update_CarNum_Req(uint8_t add, uint8_t carNum[2]);
@@ -162,6 +163,11 @@ void HMI_Update_CorrectStatus_Req(uint8_t status);
 void HMI_Update_VirtualBtSetting_Req(uint8_t status);
 void HMI_Update_InStationSetting_Req(uint8_t status);
 void HMI_Update_Default_Setting_Page_RtcTime_Req(uint8_t date[6]);
+void HMI_Update_SrcStation_Req(uint16_t StationNum);
+void HMI_Update_DestStation_Req(uint16_t StationNum);
+void HMI_Update_WifiSignalBars_Req(uint8_t WifiSignalBars);
+void HMI_Update_DirtyStatus_Req(uint8_t isDirty);
+void HMI_Update_CurLocationId_Req(uint32_t CurLocationId);
 
 void HMI_Check_Uv_Clean(uint8_t time);
 void HMI_CheckRFCard(uint8_t en);

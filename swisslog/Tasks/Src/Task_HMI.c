@@ -35,11 +35,14 @@ extern uint8_t carNum[2];
 extern uint8_t localRTCTime[6];//save as dec
 extern uint8_t setRTCTime[6];	//save as bcd
 extern uint8_t lastCorrectDate[6];//save as dec
+extern uint8_t HmiRunTimeBCD[4];//save as bcd
+extern uint8_t HmiRunTimeASCII[8];//save as ascii
+
 extern uint8_t lastUvSetTime;
 extern uint8_t defaultUvSetTime;
 extern uint8_t currentVirtualButtonEn;
-extern uint8_t currentInStationEn;
 extern uint8_t hmiEnButton;
+// extern uint8_t currentInStationEn;
 
 extern osSemaphoreId_t xHmiRxSemHandle;
 extern osMessageQueueId_t xHmi_Send_QueueHandle;
@@ -58,11 +61,7 @@ void vHmiEventTask(void *argument)
     {
 			ucReciveLen = ulHMI_Get_DMA_Receive_Len();
 			DEBUGINFO("HMI received len:%d ,data:",ucReciveLen);
-			for(uint8_t i=0;i<ucReciveLen;i++)
-      {
-        safe_printf("%X ",ucHMI_Rx_Buffer[ucHMI_current_buf_idx][i]);
-      }
-			safe_printf("\r\n");
+			vPrint_Array(ucHMI_Rx_Buffer[ucHMI_current_buf_idx], ucReciveLen);
 
 			// 处理接收到的数据
 			HMI_Usart_GetDataHandler(ucHMI_Rx_Buffer[ucHMI_current_buf_idx],ucReciveLen);
@@ -129,8 +128,22 @@ void vHmiRecvTask(void *argument)
 					currentPage = (eDwinPage)recMsg->data[2];
 					break;
 
+				case addRegRunTime:
+					// HmiRunTimeBCD[0] = BCDToh10(recMsg->data[2]);
+					// HmiRunTimeBCD[1] = BCDToh10(recMsg->data[3]);
+					// HmiRunTimeBCD[2] = BCDToh10(recMsg->data[4]);
+					// HmiRunTimeBCD[3] = BCDToh10(recMsg->data[5]);
+					HmiRunTimeBCD[0] = recMsg->data[2];
+					HmiRunTimeBCD[1] = recMsg->data[3];
+					HmiRunTimeBCD[2] = recMsg->data[4];
+					HmiRunTimeBCD[3] = recMsg->data[5];
+					
+					DEBUGINFO("addRegRunTime %d%d:%d:%d\r\n",HmiRunTimeBCD[0],HmiRunTimeBCD[1],HmiRunTimeBCD[2],HmiRunTimeBCD[3]);
+					break;
+
 				case addRegRTC:
 					DEBUGINFO("addRegRTC\r\n");
+					DEBUGINFO("localRTCTime %d %d %d %d %d %d\r\n",localRTCTime[0],localRTCTime[1],localRTCTime[2],localRTCTime[3],localRTCTime[4],localRTCTime[5]);
 					localRTCTime[0] = BCDToh10(recMsg->data[2]);
 					localRTCTime[1] = BCDToh10(recMsg->data[3]);
 					localRTCTime[2] = BCDToh10(recMsg->data[4]);
@@ -293,12 +306,25 @@ void vHmiWaitTask(void *argument)
 	bEeprom_Read_Byte(EEP_ADD_EN_VIRTUAL_BUTTON,&currentVirtualButtonEn);
 	HMI_Update_VirtualBtSetting_Req(currentVirtualButtonEn);
 
-	bEeprom_Read_Byte(EEP_ADD_EN_IN_STATION_SENSOR,&currentInStationEn);
-	HMI_Update_InStationSetting_Req(currentInStationEn);
+	// bEeprom_Read_Byte(EEP_ADD_EN_IN_STATION_SENSOR,&currentInStationEn);
+	// HMI_Update_InStationSetting_Req(currentInStationEn);
 
 
 	//get last correct time
 	bEeprom_Read_Buf(EEP_ADD_LAST_CORRECT_DATE,lastCorrectDate,6);
+
+	//***************临时设置*****************/
+	//设置wifi信号强度，0~4
+	HMI_Update_WifiSignalBars_Req(3);
+	//设置污车、洁车，0~1
+	HMI_Update_DirtyStatus_Req(1);
+	//设置当前位置，00000~99999
+	HMI_Update_CurLocationId_Req(00000);
+	//设置起始站点，000~999
+	HMI_Update_SrcStation_Req(111);
+	//设置目标站点，000~999
+	HMI_Update_DestStation_Req(666);
+
 	
 	if(stationSt == OutStation)
 	{

@@ -4,6 +4,7 @@
 #include "cmsis_os2.h"
 #include "LogDebugInfo.h"
 #include "adaptor_eeprom.h"
+#include "SystemTime.h"
 
 extern osThreadId_t InitTaskHandle;
 extern osThreadId_t IntProcessTaskHandle;
@@ -50,6 +51,7 @@ void vInitTask(void *argument)
   DEBUGINFO("InitTask\r\n");
 
   vEeprom_Data_Init();
+  time_tracker_init();
   //vEepromTest();
 
   osThreadExit();

@@ -74,7 +74,7 @@ uint8_t UserPswd_Read_EncryFromFlash(){
 	localEncryCount = 0;
 	int i = 0;
 	for(i=0;i<MAX_PASSWD_LEN;i++){
-		safe_printf("localEncryPasswd[%d]=%d \r\n", i, localEncryPasswd[i]);
+		DEBUGINFO("localEncryPasswd[%d]=%d \r\n", i, localEncryPasswd[i]);
 		if(localEncryPasswd[i]!=DEFAULT_PASSWD_CHAR){
 			localEncryCount++;
 		}else{

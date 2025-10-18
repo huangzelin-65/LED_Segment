@@ -1,6 +1,7 @@
+#include <Common.h>
 #include "main.h"
 #include "Calculate.h"
-
+#include <string.h>
 
 /**************计算CRC效验*************************/
 
@@ -119,3 +120,50 @@ uint8_t BCDToh10(uint8_t bHex)
    return bHex-temp;
 }
 
+
+
+/**
+ * 将字符串中指定开始位置和长度的子串转换为无符号整数
+ */
+uint32_t substring_to_uint(char* str, uint16_t start, uint16_t length) 
+{
+  uint32_t value = 0;
+  uint32_t digit = 0;
+  // 检查参数合法性
+  if (str == NULL) {
+      return CONVERT_NULL_PTR;
+  }
+  
+  size_t str_len = strlen(str);
+  if (start >= str_len) {
+      return CONVERT_INVALID_START;
+  }
+  
+  if (length == 0 || start + length > str_len) {
+      return CONVERT_INVALID_LENGTH;
+  }
+  
+  // 检查所有字符是否都是数字
+  for (size_t i = 0; i < length; i++) {
+      if (str[start + i] < '0' || str[start + i] > '9') {
+          return CONVERT_NON_DIGIT;
+      }
+  }
+  
+  // 转换为无符号整数
+  for (size_t i = 0; i < length; i++) {
+      // 检查溢出
+      if (value > UINT32_MAX / 10) {
+          return CONVERT_OVERFLOW;
+      }
+      value *= 10;
+      
+      digit = str[start + i] - '0';
+      if (value > UINT32_MAX - digit) {
+          return CONVERT_OVERFLOW;
+      }
+      value += digit;
+  }
+  
+  return value;
+}

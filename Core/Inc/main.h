@@ -206,7 +206,7 @@ typedef struct {
     uint32_t dwPlcNum;     // PLC编号（抓包分析该字段都是0x00000001猜测是PLC的编号）
     uint16_t wHeatBeat;    // 心跳信号
     uint16_t wAlm;         // 报警信号
-    uint16_t wCtrl;        // 控制信号
+    uint8_t wCtrl;        // 控制信号
     uint16_t wYear;        // 年
     uint8_t  bMonth;       // 月
     uint8_t  bDay;         // 日

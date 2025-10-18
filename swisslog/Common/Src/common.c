@@ -42,19 +42,19 @@ void vParseCommandToCar()
   }
 
   //小车远程手动模式(拨动开关需要在自动档位下才能使用)
-  if(ServerToCarData_obj.wCtrl & 0x0001)
+  if(ServerToCarData_obj.wCtrl & 0x01)
   {
     DEBUGINFO("manual mode\r\n");
     CarRunStatus_obj.AutoMode = Manual;
 
     //0x0002前进，0x0004后退
-    if(ServerToCarData_obj.wCtrl & 0x0002)
+    if(ServerToCarData_obj.wCtrl & 0x02)
     {
       // 手动设置前进(正转)
       DEBUGINFO("manual Forward\r\n");
       CarToServerData_obj.ucDirection = Forward;
     }
-    else if(ServerToCarData_obj.wCtrl & 0x0004)
+    else if(ServerToCarData_obj.wCtrl & 0x04)
     {
       // 手动设置后退(反转)
       DEBUGINFO("manual Backward\r\n");
@@ -63,7 +63,7 @@ void vParseCommandToCar()
   }
 
   //小车远程自动模式 (拨动开关需要在自动档位下才能使用)
-  else if((ServerToCarData_obj.wCtrl & 0x0010) \
+  else if((ServerToCarData_obj.wCtrl & 0x10) \
     && (CarCheckFlag_obj.ToggleSwtichPosition == ToggleFront))
   {
     DEBUGINFO("auto mode\r\n");
@@ -76,7 +76,7 @@ void vParseCommandToCar()
   // }
   
   //判断启动/停止电机
-  if(ServerToCarData_obj.wCtrl & 0x0008) //使能运行位为1
+  if(ServerToCarData_obj.wCtrl & 0x08) //使能运行位为1
   {
     //启动电机
     CarRunStatus_obj.MotorEnable = MotorEnable;
@@ -95,52 +95,6 @@ void vParseCommandToCar()
     DEBUGINFO("vParseCommandToCar() send motion msg error\r\n");
   }
 
-}
-
-/**
- * 将字符串中指定开始位置和长度的子串转换为无符号整数
- */
-u32 substring_to_uint(char* str, u16 start, u16 length) 
-{
-  u32 value = 0;
-  u32 digit = 0;
-  // 检查参数合法性
-  if (str == NULL) {
-      return CONVERT_NULL_PTR;
-  }
-  
-  size_t str_len = strlen(str);
-  if (start >= str_len) {
-      return CONVERT_INVALID_START;
-  }
-  
-  if (length == 0 || start + length > str_len) {
-      return CONVERT_INVALID_LENGTH;
-  }
-  
-  // 检查所有字符是否都是数字
-  for (size_t i = 0; i < length; i++) {
-      if (str[start + i] < '0' || str[start + i] > '9') {
-          return CONVERT_NON_DIGIT;
-      }
-  }
-  
-  // 转换为无符号整数
-  for (size_t i = 0; i < length; i++) {
-      // 检查溢出
-      if (value > UINT32_MAX / 10) {
-          return CONVERT_OVERFLOW;
-      }
-      value *= 10;
-      
-      digit = str[start + i] - '0';
-      if (value > UINT32_MAX - digit) {
-          return CONVERT_OVERFLOW;
-      }
-      value += digit;
-  }
-  
-  return value;
 }
 
 

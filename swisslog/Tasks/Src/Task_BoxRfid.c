@@ -10,6 +10,7 @@
 #include "adaptor_box.h"
 #include "BoxRfidReader.h"
 #include "DwinHMI.h"
+#include "Task_BoxCtrl.h"
 
 #define 	MAX_CARD_PSWD 					10
 #define 	CARD_PSWD_BUF_LEN  				60
@@ -80,9 +81,7 @@ uint8_t RFID_GetLoginStatus(void)
 */
 void RFID_Scan_Enable(uint8_t en)
 {
-	if(HMI_Get_Instation_Setting()){ 
-		enScan = 1;//TODO if enable . can control the scan enable//20200605: always on 
-	} 
+	enScan = 1;//TODO if enable . can control the scan enable//20200605: always on 
  	
 	osTimerStop(xBoxRfidLoginTimerHandle);
 }
@@ -299,11 +298,7 @@ void vBoxRfidTask(void *argument)
 	uint8_t level = 0;
 	while(1)
 	{
-//		if((Car_Get_Station_Status() ==InStation ||
-//			(!HMI_Get_Instation_Setting()))
-//			&& enScan >0)
-
-		if(enScan >0)
+		if((Car_Get_Station_Status() == InStation) && (enScan >0))
 		{
 		#ifdef RFCARD_MANUAL_READ
 			uint8_t result;
@@ -382,11 +377,8 @@ void vBoxRfidEventTask(void *argument)
 
 			ucReciveLen = ulBoxRfid_Get_DMA_Receive_Len();
 			DEBUGINFO("Box rfid received len:%d ,data:",ucReciveLen);
-			for(uint8_t i=0;i<ucReciveLen;i++)
-      {
-        safe_printf("%X ",ucBoxRfid_Rx_Buffer[ucBoxRfid_current_buf_idx][i]);
-      }
-			safe_printf("\r\n");
+			vPrint_Array(ucBoxRfid_Rx_Buffer[ucBoxRfid_current_buf_idx],ucReciveLen);
+			
 
 			// 处理接收到的数据
 			vBoxRfid_ReceiveDataHandler(ucBoxRfid_Rx_Buffer[ucBoxRfid_current_buf_idx],ucReciveLen);

@@ -12,7 +12,9 @@ extern osSemaphoreId_t xHMITxSemHandle;
 
 void vSendToHMI(uint8_t * CmdDataArr,uint8_t len)
 {
-  DEBUGINFO("send len = %d\r\n",len);
+  DEBUGINFO("send len = %d ,data:",len);
+  vPrint_Array(CmdDataArr,len);
+
 	// 获取HMI发送锁
   if (osSemaphoreAcquire(xHMITxSemHandle, osWaitForever) == osOK) 
   {
@@ -20,7 +22,7 @@ void vSendToHMI(uint8_t * CmdDataArr,uint8_t len)
     taskENTER_CRITICAL(); // 进入临界区
     HAL_UART_Transmit_DMA(&huart10, CmdDataArr, len);    // 启动DMA发送
     taskEXIT_CRITICAL(); // 退出临界区
-    DEBUGINFO("send finish \r\n");
+    //DEBUGINFO("send finish \r\n");
   }
 }
 

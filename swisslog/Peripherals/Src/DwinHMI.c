@@ -14,6 +14,7 @@
 #include "UserPasswd.h"
 #include "UV_Clean.h"
 #include "Calculate.h"
+#include "SystemTime.h"
 
 
 
@@ -48,11 +49,16 @@ uint8_t carNum[2] = {0,0};
 uint8_t localRTCTime[6]={0,0,0,0,0,0};//save as dec
 uint8_t setRTCTime[6]={0,0,0,0,0,0};	//save as bcd
 uint8_t lastCorrectDate[6] = {0,0,0,0,0,0};//save as dec
+uint8_t HmiRunTimeBCD[4] = {0,0,0,0};//save as bcd
+uint8_t RunTimeHoursASCII[5] = {0};   // 4字节ASCII + 终止符
+uint8_t RunTimeMinutesASCII[3] = {0}; // 2字节ASCII + 终止符
+uint8_t RunTimeSecondsASCII[3] = {0}; // 2字节ASCII + 终止符
+
 uint8_t lastUvSetTime = 0;
 uint8_t defaultUvSetTime = 0;
-uint8_t currentVirtualButtonEn = 0;
-uint8_t currentInStationEn = 0;
+uint8_t currentVirtualButtonEn = 0; // 使能虚拟按钮(勾选或取消勾选)
 uint8_t hmiEnButton = 1;
+// uint8_t currentInStationEn = 0; // 使能进站信号按钮(用于提醒PLC小车已进站，TK2.1可去掉)
 
 
 /***********************************base function***************************************/
@@ -228,9 +234,22 @@ void HMI_Get_Rtc(){
 	HMI_Send_Msg_To_SendTask(sendSt);
 }
 
-uint8_t HMI_Get_Instation_Setting(void){
-	return currentInStationEn;
+void HMI_Get_Runtime(){
+	DEBUGINFO("cmd:DwinReadReg data[0]:addRegRunTime data[1]:4\r\n");
+// 5A A5 03 81 0C 04 CRC  
+//4BYTES,hh hh,mm,ss
+	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(2);
+	sendSt->cmd = DwinReadReg;
+	sendSt->length = 3;
+	sendSt->data[0]=addRegRunTime;
+	sendSt->data[1]=4;
+	HMI_Send_Msg_To_SendTask(sendSt);
 }
+
+// // 获取是否勾选使能进站信号按钮
+// uint8_t HMI_Get_Instation_Setting(void){
+// 	return currentInStationEn;
+// }
 
 
 void HMI_Display_Text_Stm32Version(){
@@ -263,9 +282,9 @@ void HMI_Display_Text_Stm32Version(){
 /*****************************local function***************************************/
 void HMI_Display_Text_HmiVersion(){
 	DEBUGINFO("\r\n");
-	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(18);
+	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(20);
 	sendSt->cmd = DwinWriteValue;
-	sendSt->length = 19;
+	sendSt->length = 21;
 	sendSt->data[0]=(addTextHmiVersion & 0xff00) >> 8;
 	sendSt->data[1]=addTextHmiVersion & 0xff;
 
@@ -278,13 +297,15 @@ void HMI_Display_Text_HmiVersion(){
 	sendSt->data[8]=0;
 	sendSt->data[9]=0x20;
 	sendSt->data[10]=0;
-	sendSt->data[11]='0';
+	sendSt->data[11]='2';
 	sendSt->data[12]=0;
 	sendSt->data[13]='.';
 	sendSt->data[14]=0;
-	sendSt->data[15]='8';
+	sendSt->data[15]='1';
 	sendSt->data[16]=0;
-	sendSt->data[17]='3';
+	sendSt->data[17]='.';
+	sendSt->data[18]=0;
+	sendSt->data[19]='0';
 	HMI_Send_Msg_To_SendTask(sendSt);
 }
 
@@ -417,11 +438,30 @@ void HMI_Display_Text_RunTime(){
 	DEBUGINFO("\r\n");
 	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(38);
 	sendSt->cmd = DwinWriteValue;
-	sendSt->length = 39;
+	sendSt->length = 23;
 	sendSt->data[0]=(addTextRunTime & 0xff00) >> 8;
 	sendSt->data[1]=addTextRunTime & 0xff;
 
-	//TODO
+	sendSt->data[2]=0;
+	sendSt->data[3]=RunTimeHoursASCII[0];
+	sendSt->data[4]=0;
+	sendSt->data[5]=RunTimeHoursASCII[1];
+	sendSt->data[6]=0;
+	sendSt->data[7]=RunTimeHoursASCII[2];
+	sendSt->data[8]=0;
+	sendSt->data[9]=RunTimeHoursASCII[3];
+	sendSt->data[10]=0;
+	sendSt->data[11]=0x3A; // ':'
+	sendSt->data[12]=0;
+	sendSt->data[13]=RunTimeMinutesASCII[0];
+	sendSt->data[14]=0;
+	sendSt->data[15]=RunTimeMinutesASCII[1];
+	sendSt->data[16]=0;
+	sendSt->data[17]=0x3A; // ':'
+	sendSt->data[18]=0;
+	sendSt->data[19]=RunTimeSecondsASCII[0];
+	sendSt->data[20]=0;
+	sendSt->data[21]=RunTimeSecondsASCII[1];
 
 	HMI_Send_Msg_To_SendTask(sendSt);
 }
@@ -448,27 +488,27 @@ void HMI_Clear_Decry_Password(void){
 }
 */
 
-void HMI_Update_SrcStation_Req(uint8_t StationNum[2]){
-	DEBUGINFO("\r\n");
+void HMI_Update_SrcStation_Req(uint16_t StationNum){
+	DEBUGINFO("StationNum = %d\r\n",StationNum);
 	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(4);
 	sendSt->cmd = DwinWriteValue;
 	sendSt->length = 5;
 	sendSt->data[0]=0;
 	sendSt->data[1]=addSrcStationNum;
-	sendSt->data[2] = StationNum[0];
-	sendSt->data[3] = StationNum[1];
+	sendSt->data[2] = (StationNum & 0xff00) >> 8;
+	sendSt->data[3] = StationNum & 0xff;
 	HMI_Send_Msg_To_SendTask(sendSt);
 }
 
-void HMI_Update_DestStation_Req(uint8_t StationNum[2]){
-	DEBUGINFO("\r\n");
+void HMI_Update_DestStation_Req(uint16_t StationNum){
+	DEBUGINFO("StationNum = %d\r\n",StationNum);
 	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(4);
 	sendSt->cmd = DwinWriteValue;
 	sendSt->length = 5;
 	sendSt->data[0]=0;
 	sendSt->data[1]=addDestStationNum;
-	sendSt->data[2] = StationNum[0];
-	sendSt->data[3] = StationNum[1];
+	sendSt->data[2] = (StationNum & 0xff00) >> 8;
+	sendSt->data[3] = StationNum & 0xff;
 	HMI_Send_Msg_To_SendTask(sendSt);
 }
 
@@ -498,7 +538,7 @@ void HMI_Update_DirtyStatus_Req(uint8_t isDirty){
 }
 
 void HMI_Update_CurLocationId_Req(uint32_t CurLocationId){
-	DEBUGINFO("\r\n");
+	DEBUGINFO("CurLocationId = %d\r\n",CurLocationId);
 	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(6);
 	sendSt->cmd = DwinWriteValue;
 	sendSt->length  = 7;
@@ -618,7 +658,6 @@ void HMI_Update_VirtualBtSetting_Req(uint8_t status){
 
 void HMI_Update_InStationSetting_Req(uint8_t status){
 	DEBUGINFO("cmd:DwinWriteValue data[1]=addInStationEnableDisplay status:%d\r\n",status);
-	DEBUGINFO("addInStationEnableDisplay");
 	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(4);
 	sendSt->cmd = DwinWriteValue;
 	sendSt->length = 5;
@@ -632,7 +671,7 @@ void HMI_Update_InStationSetting_Req(uint8_t status){
 
 //yy为16进制，一般是hmi申请调整自己的时间
 void HMI_Update_Rtc(uint8_t date[6]){
-	DEBUGINFO("cmd:DwinWriteReg data[1]=addRegRTC date[0]:%x,date[1]:%x,date[2]:%x,date[3]:%x,date[4]:%x,date[5]:%x\r\n",date[0],date[1],date[2],date[3],date[4],date[5]);
+	DEBUGINFO("cmd:DwinWriteReg data[1]=addRegRTC date:%d,%d,%d,%d,%d,%d\r\n",date[0],date[1],date[2],date[3],date[4],date[5]);
 	// 5A A5 0A 80 1F 51 ,13 11 08 00 18 56 00
 	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(9);
 	sendSt->cmd = DwinWriteReg;
@@ -650,7 +689,7 @@ void HMI_Update_Rtc(uint8_t date[6]){
 }
 
 void HMI_Update_Default_Setting_Page_RtcTime_Req(uint8_t date[6]){
-	DEBUGINFO("cmd:DwinWriteValue data[1]=addSetDataYY date[0]:%x,date[1]:%x,date[2]:%x,date[3]:%x,date[4]:%x,date[5]:%x\r\n",date[0],date[1],date[2],date[3],date[4],date[5]);
+	DEBUGINFO("cmd:DwinWriteValue data[1]=addSetDataYY date:%d,%d,%d,%d,%d,%d\r\n",date[0],date[1],date[2],date[3],date[4],date[5]);
 	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(14);
 	sendSt->cmd = DwinWriteValue;
 	sendSt->length = 15;
@@ -695,7 +734,8 @@ void HMI_CheckRFCard(uint8_t en){
 	DEBUGINFO("HMI_CheckRFCard en:%d\r\n",en);
 	if(en>0	){
 		if(en!=0x35){
-			if(Car_Get_Station_Status() !=InStation &&HMI_Get_Instation_Setting()){
+			if(Car_Get_Station_Status() !=InStation)
+			{
 				return;
 			}		
 		}
@@ -724,12 +764,11 @@ void HMI_CheckRFCard(uint8_t en){
 			
 		}
 		else{
-			//if(Car_Get_Station_Status() ==InStation ||(!HMI_Get_Instation_Setting())){
-				if(currentPage == pgRfCard || currentPage == pgRfCardWithOutPasswd){
-					UserPswd_Clear_Decry(); 
-					HMI_Display_Text_DecryPasswd();
-					HMI_Change_Page(pgDecrypt);
-				}
+			if(currentPage == pgRfCard || currentPage == pgRfCardWithOutPasswd){
+				UserPswd_Clear_Decry(); 
+				HMI_Display_Text_DecryPasswd();
+				HMI_Change_Page(pgDecrypt);
+			}
 			//}		
 		}	
 	}
@@ -759,7 +798,7 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 
 	switch(button){
 		case btToEncryptPage:
-			DEBUGINFO("btToEncryptPage");
+			DEBUGINFO("btToEncryptPage\r\n");
 			//clear old password
 			UserPswd_Clear_Encry();
 			UserPswd_Clear_Decry();	
@@ -769,7 +808,7 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 			break;
 		
 		case btToUVPage:
-			DEBUGINFO("btToUVPage");
+			DEBUGINFO("btToUVPage\r\n");
 			lastUvSetTime = defaultUvSetTime;
 			HMI_Update_UVTime_Req(defaultUvSetTime);
 			UvClean_Get_Record(temp);
@@ -780,22 +819,28 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 			break;
 		
 		case btToSettingPage:
-		DEBUGINFO("btToSettingPage");
+		DEBUGINFO("btToSettingPage\r\n");
+			System_Get_RunTime_Ascii(RunTimeHoursASCII,RunTimeMinutesASCII,RunTimeSecondsASCII);
+			HMI_Display_Text_RunTime();
+			//osDelay(50);
 			HMI_Get_Rtc();
 			actFlag = rtcForSetting;
 			break;
 
 		case btToSettingPageWithPasswd:
-			DEBUGINFO("btToSettingPageWithPasswd");
+			DEBUGINFO("btToSettingPageWithPasswd\r\n");
 			UserPswd_Clear_Sys();
 			HMI_Display_Text_DecryPasswd();
 			HMI_Change_Page(pgSysPassWd);
 			break;
 
 		case btSysPasswdConfirm:
-			DEBUGINFO("btSysPasswdConfirm");
+			DEBUGINFO("btSysPasswdConfirm\r\n");
 			if(UserPswd_Check_SysPasswd() > 0)
 			{
+				System_Get_RunTime_Ascii(RunTimeHoursASCII,RunTimeMinutesASCII,RunTimeSecondsASCII);
+				HMI_Display_Text_RunTime();
+				//osDelay(50);
 				HMI_Get_Rtc();
 				actFlag = rtcForSetting;
 			}
@@ -808,7 +853,7 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 		//	break;	
 		
 		case btEncryptReq:
-			DEBUGINFO("btEncryptReq");
+			DEBUGINFO("btEncryptReq\r\n");
 			if((!ELOCK1_LEVEL)&&(!ELOCK2_LEVEL)){
 				HMI_Change_Page(pgWarningDoorIsOpenPd);
 			}else{
@@ -821,7 +866,7 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 			break;
 			
 		case btDecryptReq:
-			DEBUGINFO("btDecryptReq");
+			DEBUGINFO("btDecryptReq\r\n");
 			//check the password is correct?
 			if(UserPswd_Check_Passwd()>0){			
 				RFID_Scan_Enable(0);
@@ -843,7 +888,7 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 			break;
 			
 		case btStartUv:
-			DEBUGINFO("btStartUv");
+			DEBUGINFO("btStartUv\r\n");
 			if(lastUvSetTime == 0){
 				break;
 			}
@@ -858,7 +903,7 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 			break;
 			
 		case btStopUv:
-			DEBUGINFO("btStopUv");
+			DEBUGINFO("btStopUv\r\n");
 			//stop uv clean
 			UvClean_Stop();
 			UvClean_Save_Record();
@@ -866,19 +911,19 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 			break;
 			
 		case btConfirmUv:
-			DEBUGINFO("btConfirmUv");
+			DEBUGINFO("btConfirmUv\r\n");
 			HMI_Change_Page(pgHome);
 			break;
 		
 		case btChangeSetting:
-			DEBUGINFO("btChangeSetting");
+			DEBUGINFO("btChangeSetting\r\n");
 			//save the setting to eeprom and update local
 			bEeprom_Check_Conn();
 			bEeprom_Write_Byte(EEP_ADD_EN_VIRTUAL_BUTTON,currentVirtualButtonEn);
 			HMI_Update_VirtualBtSetting_Req(currentVirtualButtonEn);
 				
-			bEeprom_Write_Byte(EEP_ADD_EN_IN_STATION_SENSOR,currentInStationEn);
-			HMI_Update_InStationSetting_Req(currentInStationEn);
+			// bEeprom_Write_Byte(EEP_ADD_EN_IN_STATION_SENSOR,currentInStationEn);
+			// HMI_Update_InStationSetting_Req(currentInStationEn);
 				
 			bEeprom_Write_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,defaultUvSetTime);
 			HMI_Update_DefaultUVTime_Req(defaultUvSetTime);
@@ -894,13 +939,13 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 			break;
 			
 		case btBackToHome:
-			DEBUGINFO("btBackToHome");
+			DEBUGINFO("btBackToHome\r\n");
 			if(currentPage == pgSetting){
 				bEeprom_Read_Byte(EEP_ADD_EN_VIRTUAL_BUTTON,&currentVirtualButtonEn);
 				HMI_Update_VirtualBtSetting_Req(currentVirtualButtonEn);
 				
-				bEeprom_Read_Byte(EEP_ADD_EN_IN_STATION_SENSOR,&currentInStationEn);
-				HMI_Update_InStationSetting_Req(currentInStationEn);
+				// bEeprom_Read_Byte(EEP_ADD_EN_IN_STATION_SENSOR,&currentInStationEn);
+				// HMI_Update_InStationSetting_Req(currentInStationEn);
 
 				bEeprom_Read_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,&defaultUvSetTime);
 				HMI_Update_DefaultUVTime_Req(defaultUvSetTime);//twice when first commu
@@ -912,41 +957,44 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 			break;
 		
 		case btBackToRfPg:
-			DEBUGINFO("btBackToRfPg");
+			DEBUGINFO("btBackToRfPg\r\n");
 			HMI_Show_Rf_Page();
 			break;		
 		case btWrongPswdConfirm:
-			DEBUGINFO("btWrongPswdConfirm");
+			DEBUGINFO("btWrongPswdConfirm\r\n");
 			HMI_Change_Page(lastPage);
 			break;	
 		
 		case btDoorIsOpenPdConfirm:
-			DEBUGINFO("btDoorIsOpenPdConfirm");
+			DEBUGINFO("btDoorIsOpenPdConfirm\r\n");
 			HMI_Change_Page(pgEncrypt);
 			break;
 		
 		case btDoorIsOpenUvConfirm:
-			DEBUGINFO("btDoorIsOpenUvConfirm");
+			DEBUGINFO("btDoorIsOpenUvConfirm\r\n");
 			HMI_Change_Page(pgUvStart);
 			break;
 		
 		//the same function like rfcard scan(user level)
 		case btVirtualRfCard:
-			DEBUGINFO("btVirtualRfCard");
+			DEBUGINFO("btVirtualRfCard\r\n");
 			if(currentVirtualButtonEn >0){
-				if((currentInStationEn == 0)||(Car_Get_Station_Status() ==InStation)){
+				// if((currentInStationEn == 0)||(Car_Get_Station_Status() ==InStation))
+				if(Car_Get_Station_Status() ==InStation)
+				{
 					HMI_CheckRFCard(1);
 				}
 			}
 			break;
 		case btVirtualUnlock:
-			DEBUGINFO("btVirtualUnlock");
+			DEBUGINFO("btVirtualUnlock\r\n");
 			if(currentVirtualButtonEn >0){
 				Button_Gpio_Press_Set(1);
 			}
 			break;
 		case btVirtualBtChangeSetting:
-			DEBUGINFO("btVirtualBtChangeSetting");
+			//使能虚拟按钮(勾选或取消勾选)
+			DEBUGINFO("btVirtualBtChangeSetting\r\n");
 			if(currentVirtualButtonEn >0){
 				currentVirtualButtonEn = 0;
 			}else{
@@ -954,21 +1002,21 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 			}
 			HMI_Update_VirtualBtSetting_Req(currentVirtualButtonEn);
 			break;	
-		case btInStationChangeSetting:
-			DEBUGINFO("btInStationChangeSetting");
-			if(currentInStationEn >0){
-				currentInStationEn = 0;
-				DEBUGINFO("currentInStationEn = 0\n");
-			}else{
-				currentInStationEn = 1;
-				DEBUGINFO("currentInStationEn = 1\n");
-			}
-			HMI_Update_InStationSetting_Req(currentInStationEn);
-
-			break;
+		// case btInStationChangeSetting:
+		// 	//使能进站信号按钮(勾选或取消勾选)
+		// 	DEBUGINFO("btInStationChangeSetting\r\n");
+		// 	if(currentInStationEn >0){
+		// 		currentInStationEn = 0;
+		// 		DEBUGINFO("currentInStationEn = 0\r\n");
+		// 	}else{
+		// 		currentInStationEn = 1;
+		// 		DEBUGINFO("currentInStationEn = 1\r\n");
+		// 	}
+		// 	HMI_Update_InStationSetting_Req(currentInStationEn);
+		// 	break;
 
 		case btTPCorrectReq:
-			DEBUGINFO("btTPCorrectReq");
+			DEBUGINFO("btTPCorrectReq\r\n");
 			HMI_TPCal_Triger();
 			HMI_Get_Rtc();
 			actFlag = rtcForCorrect;

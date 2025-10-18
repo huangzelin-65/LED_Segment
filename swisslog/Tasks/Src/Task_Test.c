@@ -6,7 +6,7 @@
 #include <string.h>
 #include "motor_LD25B60G.h"
 #include "LogDebugInfo.h"
-#include "common.h"
+#include "Common.h"
 #include "adaptor_test.h"
 
 #define BASE_COUNT 6

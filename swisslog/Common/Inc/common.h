@@ -10,6 +10,7 @@
 
 #include "main.h"
 
+
 // 转换状态枚举
 typedef enum {
     CONVERT_SUCCESS,        // 转换成功
@@ -19,8 +20,6 @@ typedef enum {
     CONVERT_NON_DIGIT,      // 包含非数字字符
     CONVERT_OVERFLOW        // 数值溢出
 } ConvertStatus;
-
-u32 substring_to_uint(char* str, u16 start, u16 length);
 
 void vParseCommandToCar();
 
