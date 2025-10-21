@@ -33,9 +33,8 @@ uint8_t ucCarRfid_Rx_Buffer[2][CAR_RFID_RX_BUF_SIZE];
 uint8_t ucCarRfid_current_buf_idx = 0;  // 当前使用的缓冲区索引
 
 extern osMessageQueueId_t xMotion_QueueHandle;
-extern CarToServerData CarToServerData_obj;
-extern _CarCheckFlag_obj CarCheckFlag_obj;
-extern _CarRunStatus_obj CarRunStatus_obj;
+extern CarToServerData_t CarToServerData;
+extern CarStatus_t CarStatus;
 extern osMessageQueueId_t xRfid_Rx_QueueHandle;
 extern osSemaphoreId_t xCarRfidRxSemHandle;
 
@@ -108,14 +107,14 @@ void vGetCarPosition(char *data)
   ulCurPos = strtoul(pcCurPos, NULL, 10); // 将字符串转换为无符号长整型数(10进制)
 
   // 跟上一次读取的位置比较，如果不相同，则更新当前位置
-  if(CarToServerData_obj.dwCurPos != ulCurPos)
+  if(CarToServerData.dwCurPos != ulCurPos)
   {
     // 记录上一次位置
-    CarToServerData_obj.dwPrevPos = CarToServerData_obj.dwCurPos; 
-    DEBUGINFO("dwPrevPos:%lu\r\n",CarToServerData_obj.dwPrevPos);
+    CarToServerData.dwPrevPos = CarToServerData.dwCurPos; 
+    DEBUGINFO("dwPrevPos:%lu\r\n",CarToServerData.dwPrevPos);
     // 更新当前位置
-    CarToServerData_obj.dwCurPos = ulCurPos; 
-    DEBUGINFO("dwCurPos:%lu\r\n",CarToServerData_obj.dwCurPos);
+    CarToServerData.dwCurPos = ulCurPos; 
+    DEBUGINFO("dwCurPos:%lu\r\n",CarToServerData.dwCurPos);
 
     HMI_Update_CurLocationId_Req(ulCurPos);
   }
@@ -131,7 +130,7 @@ void vGetTagPosType(char *data)
   ucPosType = substring_to_uint(data, POS_TYPE_OFFSET, 2);
 
   // 更新位置类型
-  CarToServerData_obj.ucPosType = ucPosType;
+  CarToServerData.ucPosType = ucPosType;
 
   pcPosType[1] = ucPosType/10; //位置类型高10位
   pcPosType[0] = ucPosType%10; //位置类型个位
@@ -141,9 +140,9 @@ void vGetTagPosType(char *data)
   if((pcPosType[1] == 0) || (pcPosType[1] == 1))
   {
     // 小车不在停止状态，且在自动模式下，才发指令停止电机
-    if((CarRunStatus_obj.IsCarRunning != CarStop) \
-      && (CarCheckFlag_obj.ToggleSwtichPosition == ToggleFront)
-      && (CarRunStatus_obj.AutoMode == Auto))
+    if((CarStatus.xIsCarRunning != CarStop) \
+      && (CarStatus.ToggleSwtichPosition == ToggleFront)
+      && (CarStatus.xAutoMode == Auto))
     {
       ucMotion_msg = CarStop;
       if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
@@ -172,10 +171,10 @@ void vGetTagSpeed(char *data)
   if((pcSpeed[0]>=1) && (pcSpeed[0]<=3))
   {
     // 速度有变化时才更新
-    if(CarToServerData_obj.bSpdMode != pcSpeed[0])
+    if(CarStatus.xRealSpeed != pcSpeed[0])
     {
       // 更新预设速度模式
-      CarRunStatus_obj.SetSpeed = pcSpeed[0]; 
+      CarStatus.xSetSpeed = pcSpeed[0]; 
 
       ucMotion_msg = CarRunning;
       //if(xQueueSend(xMotion_QueueHandle, &ucMotion_msg, pdMS_TO_TICKS(100)) != pdPASS)

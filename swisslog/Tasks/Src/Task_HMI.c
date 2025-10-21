@@ -348,11 +348,8 @@ void vHmiWaitTask(void *argument)
 	}
 	HMI_Update_CarNum_Req(carNum);
 
-	if(Car_Get_Elock_Status()==Lock){
-		HMI_Update_LockStatus_Req(1);
-	}else{
-		HMI_Update_LockStatus_Req(0);
-	}
+	vBoxELockStatusCheck();
+	
 	HMI_Display_Text_Stm32Version();
 	HMI_Display_Text_HmiVersion();
 	HMI_Get_Rtc();

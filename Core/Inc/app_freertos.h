@@ -77,11 +77,13 @@ extern osThreadId_t HmiEventTaskHandle;
 extern osThreadId_t HmiSendTaskHandle;
 extern osThreadId_t HmiRecvTaskHandle;
 extern osThreadId_t HmiWaitTaskHandle;
+extern osThreadId_t BoxLEDTaskHandle;
 extern osTimerId_t xResetButtonTimerHandle;
 extern osTimerId_t xSensorDebounceTimerHandle;
 extern osTimerId_t xToggleSwitchTimerHandle;
 extern osTimerId_t xBoxRfidLoginTimerHandle;
 extern osTimerId_t xUVTimerHandle;
+extern osTimerId_t xBoxELockDebounceTimerHandle;
 extern osMessageQueueId_t xInterrupt_QueueHandle;
 extern osMessageQueueId_t xSensor_QueueHandle;
 extern osMessageQueueId_t xWifi_Rx_QueueHandle;
@@ -121,11 +123,13 @@ extern void vHmiEventTask(void *argument);
 extern void vHmiSendTask(void *argument);
 extern void vHmiRecvTask(void *argument);
 extern void vHmiWaitTask(void *argument);
+extern void vBoxLEDTask(void *argument);
 extern void vResetButtonCallback(void *argument);
 extern void vSensorDebounceCallback(void *argument);
 extern void vToggleSwitchCallback(void *argument);
 extern void vBoxRfidLoginTimerCallback(void *argument);
 extern void vUVTimerCallback(void *argument);
+extern void vBoxELockDebounceCallback(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 

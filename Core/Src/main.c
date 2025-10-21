@@ -66,10 +66,9 @@ DMA_HandleTypeDef handle_GPDMA2_Channel2;
 DMA_HandleTypeDef handle_GPDMA2_Channel1;
 
 /* USER CODE BEGIN PV */
-ServerToCarData ServerToCarData_obj;
-CarToServerData CarToServerData_obj;
-_CarRunStatus_obj CarRunStatus_obj;
-_CarCheckFlag_obj CarCheckFlag_obj;
+ServerToCarData_t ServerToCarData;
+CarToServerData_t CarToServerData;
+CarStatus_t CarStatus;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -837,7 +836,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : ELOCK2_STATUS_Pin */
   GPIO_InitStruct.Pin = ELOCK2_STATUS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(ELOCK2_STATUS_GPIO_Port, &GPIO_InitStruct);
 
@@ -882,7 +881,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : ELOCK1_STATUS_Pin */
   GPIO_InitStruct.Pin = ELOCK1_STATUS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(ELOCK1_STATUS_GPIO_Port, &GPIO_InitStruct);
 
@@ -959,6 +958,9 @@ static void MX_GPIO_Init(void)
   HAL_NVIC_SetPriority(EXTI1_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(EXTI1_IRQn);
 
+  HAL_NVIC_SetPriority(EXTI2_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+
   HAL_NVIC_SetPriority(EXTI3_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 
@@ -967,6 +969,9 @@ static void MX_GPIO_Init(void)
 
   HAL_NVIC_SetPriority(EXTI5_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(EXTI5_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI6_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI6_IRQn);
 
   HAL_NVIC_SetPriority(EXTI9_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(EXTI9_IRQn);

@@ -7,14 +7,14 @@
 
 
 extern osMessageQueueId_t xSensor_QueueHandle;
-extern _CarCheckFlag_obj CarCheckFlag_obj;
-extern CarToServerData CarToServerData_obj;
+extern CarStatus_t CarStatus;
+extern CarToServerData_t CarToServerData;
 
 /**
  * 传感器状态检查函数
  *
  * 该函数负责读取并检查各个传感器的状态，包括前碰撞、后碰撞、前近距离和后近距离传感器。
- * 根据传感器状态，更新CarCheckFlag_obj结构体中的相应状态标志。
+ * 根据传感器状态，更新CarStatus结构体中的相应状态标志。
  * 如果任何一个传感器触发或释放，发送SensorEvent消息到motion_Queue。
  */
 void vSensorStatusCheck(void)
@@ -52,43 +52,43 @@ void vSensorStatusCheck(void)
 
   if ((FC_H_value == GPIO_PIN_RESET)&&(FC_L_value == GPIO_PIN_SET)) //FC Trigger
   {
-    CarCheckFlag_obj.FrontCrashStatus = SensorTrigger;
-    CarToServerData_obj.wSta |= 1 << 4;
+    CarStatus.FrontCrashStatus = SensorTrigger;
+    CarToServerData.wSta |= 1 << 4;
   }
   if ((FC_H_value == GPIO_PIN_SET)&&(FC_L_value == GPIO_PIN_RESET)) //FC Release
   {
-    CarCheckFlag_obj.FrontCrashStatus = SensorRelease;
-    CarToServerData_obj.wSta &= ~(1 << 4);
+    CarStatus.FrontCrashStatus = SensorRelease;
+    CarToServerData.wSta &= ~(1 << 4);
   }
   if ((RC_H_value == GPIO_PIN_RESET)&&(RC_L_value == GPIO_PIN_SET)) //RC Trigger
   {
-    CarCheckFlag_obj.RearCrashStatus = SensorTrigger;
-    CarToServerData_obj.wSta |= 1 << 5;
+    CarStatus.RearCrashStatus = SensorTrigger;
+    CarToServerData.wSta |= 1 << 5;
   }
   if ((RC_H_value == GPIO_PIN_SET)&&(RC_L_value == GPIO_PIN_RESET)) //RC Release
   {
-    CarCheckFlag_obj.RearCrashStatus = SensorRelease;
-    CarToServerData_obj.wSta &= ~(1 << 5);
+    CarStatus.RearCrashStatus = SensorRelease;
+    CarToServerData.wSta &= ~(1 << 5);
   }
   if ((FP_H_value == GPIO_PIN_RESET)&&(FP_L_value == GPIO_PIN_SET)) //FP Trigger
   {
-    CarCheckFlag_obj.FrontProxStatus = SensorTrigger;
-    CarToServerData_obj.wSta |= 1 << 2;
+    CarStatus.FrontProxStatus = SensorTrigger;
+    CarToServerData.wSta |= 1 << 2;
   }
   if ((FP_H_value == GPIO_PIN_SET)&&(FP_L_value == GPIO_PIN_RESET)) //FP Release
   {
-    CarCheckFlag_obj.FrontProxStatus = SensorRelease;
-    CarToServerData_obj.wSta &= ~(1 << 2);
+    CarStatus.FrontProxStatus = SensorRelease;
+    CarToServerData.wSta &= ~(1 << 2);
   }
   if ((RP_H_value == GPIO_PIN_RESET)&&(RP_L_value == GPIO_PIN_SET)) //RP Trigger
   {
-    CarCheckFlag_obj.RearProxStatus = SensorTrigger;
-    CarToServerData_obj.wSta |= 1 << 3;
+    CarStatus.RearProxStatus = SensorTrigger;
+    CarToServerData.wSta |= 1 << 3;
   }
   if ((RP_H_value == GPIO_PIN_SET)&&(RP_L_value == GPIO_PIN_RESET)) //RP Release
   {
-    CarCheckFlag_obj.RearProxStatus = SensorRelease;
-    CarToServerData_obj.wSta &= ~(1 << 3);
+    CarStatus.RearProxStatus = SensorRelease;
+    CarToServerData.wSta &= ~(1 << 3);
   }
 
   // 发送消息到xSensor_Queue
@@ -96,15 +96,16 @@ void vSensorStatusCheck(void)
   //DEBUGINFO("send Event to Sensor_Queue\r\n");
   if(osMessageQueuePut(xSensor_QueueHandle, &sensor_msg, 0, pdMS_TO_TICKS(100)) != osOK)
   {
-      DEBUGINFO("vSensorStatusCheck() send motion error 1\r\n");
+      DEBUGINFO("send motion error 1\r\n");
   }
 
 }
 
+
 /**
  * 拨动开关状态检查函数
  *
- * 该函数用于检查MOVE_FRONT和MOVE_BACK电平的状态，根据状态设置motion_msg和CarCheckFlag_obj.ToggleSwtichPosition的值。
+ * 该函数用于检查MOVE_FRONT和MOVE_BACK电平的状态，根据状态设置motion_msg和CarStatus.ToggleSwtichPosition的值。
  *
  * @note 该函数会发送拨动开关时事件到motion_QueueHandle队列中。
  *
@@ -116,6 +117,7 @@ void vToggleSwitchStatusCheck(void)
   volatile uint8_t TOGGLE_BACK_value;
   uint8_t sensor_msg;
 
+  //低电平有效
   // 读MOVE_FRONT电平
   TOGGLE_FRONT_value = GPIO_READ(TOGGLE_FRONT);
   // 读MOVE_BACK电平
@@ -125,31 +127,31 @@ void vToggleSwitchStatusCheck(void)
   if((TOGGLE_FRONT_value == GPIO_PIN_RESET)&&(TOGGLE_BACK_value == GPIO_PIN_SET))
   {
     sensor_msg = ToggleFront;
-    CarCheckFlag_obj.ToggleSwtichPosition = ToggleFront;
+    CarStatus.ToggleSwtichPosition = ToggleFront;
     DEBUGINFO("motion_msg = ToggleFront\r\n");
   }
   //拨动开关拨向后
   else if((TOGGLE_FRONT_value == GPIO_PIN_SET)&&(TOGGLE_BACK_value == GPIO_PIN_RESET))
   {
     sensor_msg = ToggleBack;
-    CarCheckFlag_obj.ToggleSwtichPosition = ToggleBack;
+    CarStatus.ToggleSwtichPosition = ToggleBack;
     DEBUGINFO("motion_msg = ToggleBack\r\n");
   }
   //拨动开关拨向停止(中间挡位)
   else if(TOGGLE_FRONT_value == GPIO_PIN_SET && TOGGLE_BACK_value == GPIO_PIN_SET)
   {
     sensor_msg = ToggleStop;
-    CarCheckFlag_obj.ToggleSwtichPosition = ToggleStop;
+    CarStatus.ToggleSwtichPosition = ToggleStop;
     DEBUGINFO("motion_msg = ToggleStop\r\n");
   }
 
   //发送拨动开关事件
   if(osMessageQueuePut(xSensor_QueueHandle, &sensor_msg, 0, pdMS_TO_TICKS(100)) != osOK)
   {
-    DEBUGINFO("vToggleSwitchStatusCheck() send motion error\r\n");
+    DEBUGINFO("send motion error\r\n");
   }
-
 }
+
 
 /**
  * 重置LED状态检查函数
@@ -174,7 +176,8 @@ void vResetLedStatusCheck(void)
   }
 }
 
-
+/******************************* GPIO防抖回调 *************************/
+//传感器防抖回调
 void vSensorDebounceCallback(void *argument)
 {
   uint8_t msg;
@@ -182,23 +185,32 @@ void vSensorDebounceCallback(void *argument)
   osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
 }
 
+//拨动开关防抖回调
 void vToggleSwitchCallback(void *argument)
 {
   uint8_t msg;
   msg = ToggleDebounce;
   osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
-  
 }
 
+//车厢电子锁防抖回调
+void vBoxELockDebounceCallback(void *argument)
+{
+  uint8_t msg;
+  msg = BoxELockDebounce;
+  osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
+}
+
+//reset按钮防抖回调
 void vResetButtonCallback(void *argument)
 {
   u8 sensor_msg;
   if(GPIO_READ(RESET) == GPIO_PIN_RESET)
   {
     sensor_msg = Reset;
-  if(osMessageQueuePut(xSensor_QueueHandle, &sensor_msg, 0, pdMS_TO_TICKS(100)) != osOK)
+    if(osMessageQueuePut(xSensor_QueueHandle, &sensor_msg, 0, pdMS_TO_TICKS(100)) != osOK)
     {
-      DEBUGINFO("ResetButtonCallback() send sensor msg error\r\n");
+      DEBUGINFO("send msg error\r\n");
     }
   }
 }

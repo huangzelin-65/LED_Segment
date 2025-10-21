@@ -23,12 +23,15 @@ extern osThreadId_t HmiEventTaskHandle;
 extern osThreadId_t HmiSendTaskHandle;
 extern osThreadId_t HmiRecvTaskHandle;
 extern osThreadId_t HmiWaitTaskHandle;
-extern _CarRunStatus_obj CarRunStatus_obj;
+extern osThreadId_t BoxLEDTaskHandle;
+
+
+extern CarStatus_t CarStatus;
 
 
 void vInitTask(void *argument)
 {
-  CarRunStatus_obj.SetDirection = Forward; //小车预设运行方向为前进
+  CarStatus.xSetDirection = Forward; //小车预设运行方向为前进
 
   osThreadResume(PrintTaskHandle);
   osThreadResume(IntProcessTaskHandle); 
@@ -46,6 +49,7 @@ void vInitTask(void *argument)
   osThreadResume(HmiSendTaskHandle);
   osThreadResume(HmiRecvTaskHandle);
   osThreadResume(HmiWaitTaskHandle);
+  osThreadResume(BoxLEDTaskHandle);
 
 
   DEBUGINFO("InitTask\r\n");

@@ -26,6 +26,7 @@
 
 extern osMessageQueueId_t xHmi_Send_QueueHandle;
 extern osMessageQueueId_t xHmi_Recv_QueueHandle;
+extern osMessageQueueId_t xBox_Ctrl_QueueHandle;
 
 /***********************************loacal variable***************************************/
 static uint8_t revDataLen = 0;
@@ -133,7 +134,15 @@ uint8_t HMI_Is_Button_En(void)
 }
 
 /*****************************local function***************************************/
-
+// HMI屏幕上解锁按键被按下
+void HMI_Unlock_Button_Press()
+{
+	eBoxCtrlType box_msg;
+	box_msg = BoxElockOps;
+	if(osMessageQueuePut(xBox_Ctrl_QueueHandle, &box_msg, 0, 0)!= osOK) {
+		DEBUGINFO("Uv clean msg send failed!");
+	}
+}
 
 void HMI_KeyBoard_Ctrl(eDwinKeyCtrlValue key){
 	DEBUGINFO("cmd:DwinWriteReg data[0]:addRegKey data[1]:%d\r\n",key);
@@ -754,10 +763,10 @@ void HMI_CheckRFCard(uint8_t en){
 					HMI_Change_Page(pgHome);
 				}
 				hmiEnButton = 1;
-				Button_Gpio_Press_Set(1);	
+				HMI_Unlock_Button_Press();	
 			}else{
 				if(!UvClean_IsRunning()){
-					Button_Gpio_Press_Set(1);
+					HMI_Unlock_Button_Press();
 				}
 			}
 
@@ -880,7 +889,7 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 					HMI_Change_Page(pgHome);			
 				}
 				hmiEnButton = 1;
-				Button_Gpio_Press_Set(1);
+				HMI_Unlock_Button_Press();
 			}
 			else{
 				HMI_Change_Page(pgErrorPasswd);
@@ -989,7 +998,7 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 		case btVirtualUnlock:
 			DEBUGINFO("btVirtualUnlock\r\n");
 			if(currentVirtualButtonEn >0){
-				Button_Gpio_Press_Set(1);
+				HMI_Unlock_Button_Press();
 			}
 			break;
 		case btVirtualBtChangeSetting:

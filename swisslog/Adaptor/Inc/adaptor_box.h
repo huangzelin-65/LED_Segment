@@ -13,7 +13,7 @@ void vSendToNumDisp(uint8_t * CmdDataArr,uint8_t len);
 #define ELOCK2_LEVEL !(GPIO_READ(ELOCK2_STATUS))
 
 uint8_t ELock_unLock(void);
-
+void vBoxELockStatusCheck(void);
 
 
 /*************************** 紫外线灯 *****************************/

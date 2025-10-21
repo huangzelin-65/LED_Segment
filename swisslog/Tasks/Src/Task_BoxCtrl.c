@@ -17,21 +17,10 @@
 //小车在站状态
 static CarStationStatus mCarStationStatus=InStation;
 
-//锁状态
-static ELockStatus mNowLockStatus = Lock;
-static uint8_t mOldElock1 = 255;
-static uint8_t mOldElock2 = 255;
+extern CarStatus_t CarStatus;
+extern ServerToCarData_t ServerToCarData;
+extern osMessageQueueId_t xBox_Ctrl_QueueHandle;
 
-//按键状态
-static uint8_t mButtonPress = 0;
-
-extern _CarRunStatus_obj CarRunStatus_obj;
-extern _CarCheckFlag_obj CarCheckFlag_obj;
-extern ServerToCarData ServerToCarData_obj;
-
-ELockStatus Car_Get_Elock_Status(void){
-	return mNowLockStatus;
-}
 
 /**
 外部获取进站状态
@@ -48,7 +37,8 @@ void Car_Set_Station_Status(CarStationStatus value)
 	if(mCarStationStatus == value){
 		return;
 	}
-	mCarStationStatus=value;
+	mCarStationStatus = value;
+	CarStatus.xStationStatus = value; // 更新全局变量的在站状态
 	bEeprom_Check_Conn();
 	bEeprom_Write_Byte(EEP_ADD_CAR_STATION_STATUS,value);
 }
@@ -58,26 +48,20 @@ void Car_Set_Station_Status(CarStationStatus value)
 */
 static CarStationStatus Car_Read_Station_Status(void)
 {
-	uint8_t result=0;
+	uint8_t result = 0;
 	bEeprom_Check_Conn();
 	bEeprom_Read_Byte(EEP_ADD_CAR_STATION_STATUS,&result);	
+	CarStatus.xStationStatus = result; // 更新全局变量的在站状态
 	DEBUGINFO("result:%d\n",result);
 	return (CarStationStatus)result;
 }
 
-uint8_t Button_Gpio_Press_Status(void)
-{
-	return mButtonPress;
-}
 
-void Button_Gpio_Press_Set(uint8_t Val)
-{
-	 mButtonPress = Val;
-	 DEBUGINFO("mButtonPress:%d\n",mButtonPress);
-}
 
 void vBoxCtrlTask(void *argument)
 {
+  eBoxCtrlType box_msg;
+
   //初始化数码管显示
   NumDisp_Init();
 
@@ -101,15 +85,8 @@ void vBoxCtrlTask(void *argument)
   // osDelay(2000);
   // vRGB_LED(LED_OFF);
 
-  uint16_t Counter = 0;
-	
-	Button_Gpio_Press_Set(0);
-
-	uint8_t	elock1 = ELOCK1_LEVEL;//1:上锁 0:没上锁
-	uint8_t	elock2 = ELOCK2_LEVEL;//1:上锁 0:没上锁
-	uint8_t lockIcon = 2;
-
 	mCarStationStatus = Car_Read_Station_Status();
+
 	// car out检测
 	if( mCarStationStatus == OutStation ){
 		HMI_Set_RFCardPage();	// 发送命令切换到”请刷rfid卡“页面;
@@ -120,102 +97,86 @@ void vBoxCtrlTask(void *argument)
 		HMI_Force_Home_Page();	// 强制跳转到home页面
 	}
 
-	
-
 	DEBUGINFO("start\n");
 
   while(1)
   {
-		// elock control
-		elock1 = ELOCK1_LEVEL;//1:上锁 0:没上锁 
-		elock2 = ELOCK2_LEVEL;//1:上锁 0:没上锁
-
-		// car out检测
-		if( ServerToCarData_obj.xStationStatus == OutStation && mCarStationStatus == InStation){
-			if(mCarStationStatus==InStation){
-				Car_Set_Station_Status(OutStation);// 设置小车状态为OutStation
-			}
-			HMI_Set_RFCardPage();	// 发送命令切换到”请刷rfid卡“页面;
-		}
-		
-		// car in检测
-		// 如果虚拟按键没有设置currentInStationEn，则强制跳转到home页面
-		if( ServerToCarData_obj.xStationStatus == InStation && mCarStationStatus == OutStation){
-			HMI_Force_Home_Page();
-		}
-
-		//新款车厢没有按钮
-		// if(!UvClean_IsRunning()&&
-		// 	mCarStationStatus==InStation&&
-		// 	HMI_Is_Button_En())
-		// {
-		// 	Button_LED_En(1);		
-		// }
-		// else{
-		// 	Button_LED_En(0);
-		// }
-
-
-		//check button
-		if(!UvClean_IsRunning()&&
-			mCarStationStatus==InStation&&
-			(elock1||elock2) && 
-			Button_Gpio_Press_Status()&&
-			HMI_Is_Button_En())
-		{		
-			DEBUGINFO("elock1=%d elock2=%d",elock1,elock2);
-			//delay_ms(350);
-			if(ELock_unLock()) 
-			{
-				DEBUGINFO("error: unlock fail\n");
-			}
-
-			Button_Gpio_Press_Set(0);
-		}
-		
-			
-	  //check lock
-	  // 轮询电子锁状态是否发生变化
-		if(elock1!= mOldElock1 || elock2!= mOldElock2)
+		if(osMessageQueueGet(xBox_Ctrl_QueueHandle, &box_msg, NULL, osWaitForever) == osOK)
 		{
-			// 锁上
-			if(elock1||elock2){
-				CarCheckFlag_obj.BoxLocked = 1; //车厢锁上
-				DEBUGINFO("Box Locked\n");
-				mNowLockStatus=Lock;
-				HMI_Update_LockStatus_Req(1); // 发送电子锁的状态到LCD(HMI)
-			}else{
-				// 未锁上
-				// 如果在消毒时，则停止消毒，跳转到消毒停止页面，记录已消毒的时间
-				CarCheckFlag_obj.BoxLocked = 0; //车厢未锁上
-				if(UvClean_IsRunning()){
-					UvClean_Stop(); 
-					UvClean_Save_Record();
-					HMI_Change_Page(pgWarningUvCleanCanceled);
-				}
-				DEBUGINFO("Box UnLock\n");
-				mNowLockStatus=Open;
-				HMI_Update_LockStatus_Req(0); // 发送电子锁的状态到LCD(HMI)
-			}
-			mOldElock1 = elock1;
-			mOldElock2 = elock2;
+			switch (box_msg)
+			{
+				case BoxElockOps:
+					if( !UvClean_IsRunning()&&
+						( mCarStationStatus == InStation ) && 
+						( CarStatus.xBoxLocked == Locked ) && 
+						HMI_Is_Button_En()) // 检测HMI是否允许按键操作
+					{		
+						//delay_ms(350);
+						ELock_unLock();
+					}
+					break;
+
+				case UpdateStationStatus:
+					// car out检测
+					if( ServerToCarData.xStationStatus == OutStation && mCarStationStatus == InStation){
+						DEBUGINFO("OutStation\n");
+						Car_Set_Station_Status(OutStation);// 设置小车状态为OutStation
+						HMI_Set_RFCardPage();	// 发送命令切换到”请刷rfid卡“页面;
+					}
+					
+					// car in检测
+					if( ServerToCarData.xStationStatus == InStation && mCarStationStatus == OutStation){
+						DEBUGINFO("InStation\n");
+						Car_Set_Station_Status(InStation);// 设置小车状态为InStation
+						HMI_Force_Home_Page(); 					// 跳转到home页面
+					}
+					break;
+
+				case UpdateBoxLockStatus:
+					if(CarStatus.xBoxLocked == Locked)
+					{
+						// 锁上
+						DEBUGINFO("Locked\n");
+						HMI_Update_LockStatus_Req(1); // 发送电子锁的状态到LCD(HMI)
+					} else {
+						// 解锁
+						DEBUGINFO("UnLock\n");
+						// 如果在消毒时，则停止消毒，跳转到消毒停止页面，记录已消毒的时间
+						if(UvClean_IsRunning()){
+							UvClean_Stop(); 
+							UvClean_Save_Record();
+							HMI_Change_Page(pgWarningUvCleanCanceled);
+						}
+						HMI_Update_LockStatus_Req(0); // 发送电子锁的状态到LCD(HMI)
+					}
+					break;
+
+				case UpdateUVCleanStatus:
+					//消毒结束，保存本次消毒开始的rtc时间 + 消毒时长
+					if(!CarStatus.ucUVTimeRemain)
+					{
+						UvClean_Save_Record();
+					}
+					//推送UV清洁时间到HMI
+					HMI_Check_Uv_Clean(CarStatus.ucUVTimeRemain);
+					DEBUGINFO("UVTimeRemain:%d\n",CarStatus.ucUVTimeRemain);
+					break;
+
+				default:
+					break;
+			} 
 		}
 
-		if(Counter%5 == 0)
-		{		
-			if(elock1==1 || elock2==1)
-			{
-				if(lockIcon != 1){
-					HMI_Update_LockStatus_Req(1);
-					lockIcon = 1;
-				}
-			}else{
-				if(lockIcon != 0){
-					HMI_Update_LockStatus_Req(0);
-					lockIcon = 0;
-				}
-			}
-		}
+	}
+}
+
+
+void vBoxLEDTask(void *argument)
+{
+  uint16_t Counter = 0;
+
+	while(1)
+	{
 		//light control
 		/*
 		1、消毒中，黄灯
@@ -226,28 +187,33 @@ void vBoxCtrlTask(void *argument)
 		*/
 		if(UvClean_IsRunning()){
 			vRGB_LED(YELLOW);
-		}else if(mCarStationStatus==InStation){	
-			if(mNowLockStatus==Lock){
-				if(Counter%FENZI==0){
+		}else if(mCarStationStatus == InStation){	
+			// 小车进站
+			if(CarStatus.xBoxLocked == Locked){
+				// 车厢锁上
+				if(Counter%FENZI == 0){
 					vRGB_LED(LED_OFF);
-				}else if(Counter%FENZI==FENMU){
+				}else if(Counter%FENZI == FENMU){
 					vRGB_LED(BLUE);
 				}
 			}else{
+				// 车厢解锁
 				if(Counter%FENZI==0){
 					vRGB_LED(RED);
-				}else if(Counter%FENZI==FENMU){
+				}else if(Counter%FENZI == FENMU){
 					vRGB_LED(BLUE);
 				}
 			}
 		}else{
-			
-			if(mNowLockStatus==Lock){
+			// 小车出站
+			if(CarStatus.xBoxLocked == Locked){
+				// 车厢锁上
 				vRGB_LED(BLUE);
 			}else{
-				if(Counter%FENZI==0){
+				// 车厢解锁
+				if(Counter%FENZI == 0){
 					vRGB_LED(RED);
-				}else if(Counter%FENZI==FENMU){
+				}else if(Counter%FENZI == FENMU){
 					vRGB_LED(BLUE);
 				}
 			}
@@ -262,27 +228,4 @@ void vBoxCtrlTask(void *argument)
 		Counter++;
 		osDelay(100);
 	}
-}
-
-extern osMessageQueueId_t xUV_QueueHandle;
-
-void vUVCleanTask(void *argument)
-{
-    uint8_t msg = 0;
-
-    while(1)
-    {
-      if(osMessageQueueGet(xUV_QueueHandle, &msg, NULL, osWaitForever) == osOK)
-      {
-        //处理数据
-        if(!msg)
-        {
-            UvClean_Save_Record();
-        }
-        //推送UV清洁时间到HMI
-        HMI_Check_Uv_Clean(msg);
-        DEBUGINFO("xiaoDuTimer:%d\n",msg);
-
-      }
-    }
 }

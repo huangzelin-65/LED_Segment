@@ -19,9 +19,8 @@
 
 extern QueueHandle_t xMotion_QueueHandle;
 extern QueueHandle_t xSensor_QueueHandle;
-extern _CarCheckFlag_obj CarCheckFlag_obj;
-extern _CarRunStatus_obj CarRunStatus_obj;
-extern CarToServerData CarToServerData_obj;
+extern CarStatus_t CarStatus;
+extern CarToServerData_t CarToServerData;
 extern osTimerId_t xResetButtonTimerHandle;
 extern u8 Beep_enable;
 
@@ -79,12 +78,12 @@ void vSensorTask(void *argument)
         case SensorEvent:
           //向前运动时
           {
-            if(CarToServerData_obj.ucDirection == Forward)
+            if(CarStatus.xRealDirection == Forward)
             {
               DEBUGINFO("Forward\r\n");
               //运动方向上其中一个传感器触发即可触发
-              if (((CarCheckFlag_obj.FrontCrashStatus == SensorTrigger) \
-                || (CarCheckFlag_obj.FrontProxStatus == SensorTrigger)))
+              if (((CarStatus.FrontCrashStatus == SensorTrigger) \
+                || (CarStatus.FrontProxStatus == SensorTrigger)))
               {
                 GPIO_WRITE(LED1, GPIO_PIN_SET); // 使能LED1
                 DEBUGINFO("sensors Trigger\r\n");
@@ -94,8 +93,8 @@ void vSensorTask(void *argument)
                 ucMotion_msg = CarStop;
               }
               //运动方向上其中全部传感器释放即可释放
-              if ((CarCheckFlag_obj.FrontCrashStatus == SensorRelease) \
-                && (CarCheckFlag_obj.FrontProxStatus == SensorRelease))
+              if ((CarStatus.FrontCrashStatus == SensorRelease) \
+                && (CarStatus.FrontProxStatus == SensorRelease))
               {
                 GPIO_WRITE(LED1, GPIO_PIN_RESET); // 关闭LED1
                 DEBUGINFO("sensors release\r\n");
@@ -106,12 +105,12 @@ void vSensorTask(void *argument)
               }
             }
             //向后运动时
-            else if(CarToServerData_obj.ucDirection == Backward)
+            else if(CarStatus.xRealDirection == Backward)
             {
               DEBUGINFO("Backward\r\n");
               //运动方向上其中一个传感器触发即可触发
-              if (((CarCheckFlag_obj.RearCrashStatus == SensorTrigger) \
-                || (CarCheckFlag_obj.RearProxStatus == SensorTrigger)))
+              if (((CarStatus.RearCrashStatus == SensorTrigger) \
+                || (CarStatus.RearProxStatus == SensorTrigger)))
               {
                 GPIO_WRITE(LED1, GPIO_PIN_SET); // 使能LED1
                 DEBUGINFO("sensors Trigger\r\n");
@@ -121,8 +120,8 @@ void vSensorTask(void *argument)
                 ucMotion_msg = CarStop;
               }
               //运动方向上其中全部传感器释放即可释放
-              if ((CarCheckFlag_obj.RearCrashStatus == SensorRelease) \
-                && (CarCheckFlag_obj.RearProxStatus == SensorRelease))
+              if ((CarStatus.RearCrashStatus == SensorRelease) \
+                && (CarStatus.RearProxStatus == SensorRelease))
               {
                 GPIO_WRITE(LED1, GPIO_PIN_RESET); // 关闭LED1
                 DEBUGINFO("sensors release\r\n");
@@ -143,17 +142,17 @@ void vSensorTask(void *argument)
         // 拨动开关向前（运行方向不变）
         case ToggleFront:
           // 设置为自动模式
-          CarRunStatus_obj.AutoMode = Auto;
+          CarStatus.xAutoMode = Auto;
 
           // 预设值向前
-          if(CarRunStatus_obj.SetDirection == Forward)
+          if(CarStatus.xSetDirection == Forward)
           {
-            CarToServerData_obj.ucDirection = Forward; //实际运行方向记录为向后
+            CarStatus.xRealDirection = Forward; //实际运行方向记录为向后
           }
           // 预设值向后
-          else if(CarRunStatus_obj.SetDirection == Backward)
+          else if(CarStatus.xSetDirection == Backward)
           {
-            CarToServerData_obj.ucDirection = Backward; //实际运行方向记录为向前
+            CarStatus.xRealDirection = Backward; //实际运行方向记录为向前
           }
           
           // 通过sensor自检，判断是否可以运动，并跳转到运动控制任务
@@ -163,18 +162,18 @@ void vSensorTask(void *argument)
         // 拨动开关向后（运行方向相反）
         case ToggleBack:
           // 设置为手动模式
-          CarRunStatus_obj.AutoMode = Manual;
+          CarStatus.xAutoMode = Manual;
 
           // 预设值向前
-          if(CarRunStatus_obj.SetDirection == Forward)
+          if(CarStatus.xSetDirection == Forward)
           {
-            CarToServerData_obj.ucDirection = Backward; //实际运行方向记录为向后
+            CarStatus.xRealDirection = Backward; //实际运行方向记录为向后
           }
 
           // 预设值向后
-          else if(CarRunStatus_obj.SetDirection == Backward)
+          else if(CarStatus.xSetDirection == Backward)
           {
-            CarToServerData_obj.ucDirection = Forward; //实际运行方向记录为向前
+            CarStatus.xRealDirection = Forward; //实际运行方向记录为向前
           }
 
           // 通过sensor自检，判断是否可以运动，并跳转到运动控制任务
@@ -184,7 +183,7 @@ void vSensorTask(void *argument)
 
         // 拨动开关停止
         case ToggleStop:
-          CarRunStatus_obj.AutoMode = Manual;
+          CarStatus.xAutoMode = Manual;
           // 停止电机
           ucMotion_msg = CarStop;
           //if(xQueueSend(xMotion_QueueHandle, &ucMotion_msg, pdMS_TO_TICKS(100)) != pdPASS)

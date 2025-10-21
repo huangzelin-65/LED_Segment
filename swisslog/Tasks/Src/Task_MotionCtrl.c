@@ -30,17 +30,16 @@ uint8_t MotorDataLen = 0;
 extern osMessageQueueId_t xMotion_QueueHandle;
 extern osMessageQueueId_t xMotor_Rx_QueueHandle;
 extern osSemaphoreId_t xMotorRxSemHandle;
-extern CarToServerData CarToServerData_obj;
-extern _CarRunStatus_obj CarRunStatus_obj;
-extern _CarCheckFlag_obj CarCheckFlag_obj;
+extern CarToServerData_t CarToServerData;
+extern CarStatus_t CarStatus;
 
 
 void vCarRunStatusInit()
 {
   //初始化为正向正常速度运行
-  CarRunStatus_obj.SetSpeed = NormalSpeed;
-  CarToServerData_obj.ucDirection = Forward;
-  CarRunStatus_obj.MotorEnable = MotorDisable;
+  CarStatus.xSetSpeed = NormalSpeed;
+  CarStatus.xRealDirection = Forward;
+  CarStatus.xMotorEnable = MotorDisable;
 }
 
 void vMotionCtrlTask(void *argument)
@@ -56,9 +55,9 @@ void vMotionCtrlTask(void *argument)
         switch(MotionRecv_msg)
         {
           case CarStop:
-            //CarRunStatus_obj.RealDirection = NoDirection; //清除方向记录
-            CarRunStatus_obj.MotorEnable = MotorDisable; //电机使能状态清除
-            CarRunStatus_obj.IsCarRunning = CarStop; //小车状态记录为停止
+            //CarStatus.RealDirection = NoDirection; //清除方向记录
+            CarStatus.xMotorEnable = MotorDisable; //电机使能状态清除
+            CarStatus.xIsCarRunning = CarStop; //小车状态记录为停止
             vMotorOps(NoDirection, ZeroSpeed);  // 电机停止
             GPIO_WRITE(LED4, GPIO_PIN_RESET); // 关闭LED4
             DEBUGINFO("disable LED4 \r\n");
@@ -66,40 +65,40 @@ void vMotionCtrlTask(void *argument)
           
           case CarRunning:
             // 拨动开关自动档
-            if(CarCheckFlag_obj.ToggleSwtichPosition == ToggleFront)
+            if(CarStatus.ToggleSwtichPosition == ToggleFront)
             {
               // 远程自动模式
-              if(CarRunStatus_obj.AutoMode == Auto)
+              if(CarStatus.xAutoMode == Auto)
               {
                 DEBUGINFO("remote Auto mode\r\n");
 
                 // 未允许电机运行（通过wifi或串口指令下发允许）
-                if(CarRunStatus_obj.MotorEnable == MotorDisable)
+                if(CarStatus.xMotorEnable == MotorDisable)
                 {
                   DEBUGINFO("ReadyToRun\r\n");
-                  CarRunStatus_obj.IsCarRunning = CarReadyToRun;
+                  CarStatus.xIsCarRunning = CarReadyToRun;
                   u8 temp[] = "MotionCtrl: ReadyToRun\r\n";
                   vSendToWifiTX(temp, strlen((char *)temp));
                   break;
                 }
                 // 已允许电机运行
-                else if(CarRunStatus_obj.MotorEnable == MotorEnable)
+                else if(CarStatus.xMotorEnable == MotorEnable)
                 {
                   // 电机按预设运行方向 和 预设速度运行
-                  CarRunStatus_obj.IsCarRunning = CarRunning;
-                  vMotorOps(CarRunStatus_obj.SetDirection, CarRunStatus_obj.SetSpeed);  
+                  CarStatus.xIsCarRunning = CarRunning;
+                  vMotorOps(CarStatus.xSetDirection, CarStatus.xSetSpeed);  
                   GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
                   DEBUGINFO("LED4 ON\r\n");
                 }
 
               }
               // 远程手动模式
-              else if(CarRunStatus_obj.AutoMode == Manual)
+              else if(CarStatus.xAutoMode == Manual)
               {
                 DEBUGINFO("remote Manual mode\r\n");
                 // 电机按实际运行方向 和 普通速度运行（手动档下）
-                CarRunStatus_obj.IsCarRunning = CarRunning;
-                vMotorOps(CarToServerData_obj.ucDirection, NormalSpeed);  
+                CarStatus.xIsCarRunning = CarRunning;
+                vMotorOps(CarStatus.xRealDirection, NormalSpeed);  
                 GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
                 DEBUGINFO("LED4 ON\r\n");
               }
@@ -107,7 +106,7 @@ void vMotionCtrlTask(void *argument)
 
             }
             // 拨动开关手动档
-            else if(CarCheckFlag_obj.ToggleSwtichPosition == ToggleBack)
+            else if(CarStatus.ToggleSwtichPosition == ToggleBack)
             {
               DEBUGINFO("local Manual mode\r\n");
 
@@ -115,8 +114,8 @@ void vMotionCtrlTask(void *argument)
               if(GPIO_READ(RESET) == GPIO_PIN_SET)
               {
                 // 电机按普通速度运行（手动档下），方向相反
-                CarRunStatus_obj.IsCarRunning = CarRunning;
-                vMotorOps(CarToServerData_obj.ucDirection, NormalSpeed); 
+                CarStatus.xIsCarRunning = CarRunning;
+                vMotorOps(CarStatus.xRealDirection, NormalSpeed); 
                 GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
                 DEBUGINFO("LED4 ON\r\n");
               }

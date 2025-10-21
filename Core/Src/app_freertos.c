@@ -160,7 +160,7 @@ const osThreadAttr_t WifiReceiveTask_attributes = {
 osThreadId_t PrintTaskHandle;
 const osThreadAttr_t PrintTask_attributes = {
   .name = "PrintTask",
-  .priority = (osPriority_t) osPriorityBelowNormal7,
+  .priority = (osPriority_t) osPriorityAboveNormal,
   .stack_size = 256 * 4
 };
 /* Definitions for BoxCtrlTask */
@@ -212,6 +212,13 @@ const osThreadAttr_t HmiWaitTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 256 * 4
 };
+/* Definitions for BoxLEDTask */
+osThreadId_t BoxLEDTaskHandle;
+const osThreadAttr_t BoxLEDTask_attributes = {
+  .name = "BoxLEDTask",
+  .priority = (osPriority_t) osPriorityBelowNormal,
+  .stack_size = 128 * 4
+};
 /* Definitions for xResetButtonTimer */
 osTimerId_t xResetButtonTimerHandle;
 const osTimerAttr_t xResetButtonTimer_attributes = {
@@ -236,6 +243,11 @@ const osTimerAttr_t xBoxRfidLoginTimer_attributes = {
 osTimerId_t xUVTimerHandle;
 const osTimerAttr_t xUVTimer_attributes = {
   .name = "xUVTimer"
+};
+/* Definitions for xBoxELockDebounceTimer */
+osTimerId_t xBoxELockDebounceTimerHandle;
+const osTimerAttr_t xBoxELockDebounceTimer_attributes = {
+  .name = "xBoxELockDebounceTimer"
 };
 /* Definitions for xInterrupt_Queue */
 osMessageQueueId_t xInterrupt_QueueHandle;
@@ -387,6 +399,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of xUVTimer */
   xUVTimerHandle = osTimerNew(vUVTimerCallback, osTimerOnce, NULL, &xUVTimer_attributes);
 
+  /* creation of xBoxELockDebounceTimer */
+  xBoxELockDebounceTimerHandle = osTimerNew(vBoxELockDebounceCallback, osTimerOnce, NULL, &xBoxELockDebounceTimer_attributes);
+
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
@@ -479,6 +494,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of HmiWaitTask */
   HmiWaitTaskHandle = osThreadNew(vHmiWaitTask, NULL, &HmiWaitTask_attributes);
 
+  /* creation of BoxLEDTask */
+  BoxLEDTaskHandle = osThreadNew(vBoxLEDTask, NULL, &BoxLEDTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   
@@ -499,6 +517,7 @@ void MX_FREERTOS_Init(void) {
   osThreadSuspend(HmiSendTaskHandle);
   osThreadSuspend(HmiRecvTaskHandle);
   osThreadSuspend(HmiWaitTaskHandle);
+  osThreadSuspend(BoxLEDTaskHandle);
   
 
   /* USER CODE END RTOS_THREADS */

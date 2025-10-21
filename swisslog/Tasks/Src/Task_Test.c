@@ -15,7 +15,7 @@ uint8_t ucTest_Rx_Buffer[TEST_RX_BUF_SIZE];
 uint8_t ucTest_current_buf_idx = 0;  // 当前使用的缓冲区索引
 
 extern UART_HandleTypeDef huart1;
-extern ServerToCarData ServerToCarData_obj;
+extern ServerToCarData_t ServerToCarData;
 extern osMessageQueueId_t xTest_Rx_QueueHandle;
 extern osMessageQueueId_t xPrint_QueueHandle;
 extern osSemaphoreId_t xTestRxSemHandle;
@@ -36,7 +36,8 @@ void vTestTask(void *argument)
     if (osSemaphoreAcquire(xTestRxSemHandle, osWaitForever) == osOK)
     {
       ucReciveLen = ulTest_Get_DMA_Receive_Len();
-      DEBUGINFO("Test received:%s, len:%d\r\n",ucTest_Rx_Buffer,ucReciveLen);
+      DEBUGINFO("Test received len:%d\r\n",ucReciveLen);
+      vPrint_Array(ucTest_Rx_Buffer, ucReciveLen);
 
       // for (u8 i=0;i<strlen((char *)ucTest_Rx_Buffer);i++)
       // {
@@ -44,10 +45,13 @@ void vTestTask(void *argument)
       // }
 
 
-      ServerToCarData_obj.wCtrl = ucTest_Rx_Buffer[1]<<8 | ucTest_Rx_Buffer[0]; // 控制信号
-      ServerToCarData_obj.ucDirection = ucTest_Rx_Buffer[2]; // 小车运行方向 1=正转 2=反转
+      // ServerToCarData.wCtrl = ucTest_Rx_Buffer[1]<<8 | ucTest_Rx_Buffer[0]; // 控制信号
+      // ServerToCarData.ucDirection = ucTest_Rx_Buffer[2]; // 小车运行方向 1=正转 2=反转
 
-      DEBUGINFO("wCtrl : %X, ucDirection : %X\r\n",ServerToCarData_obj.wCtrl,ServerToCarData_obj.ucDirection);
+      ServerToCarData.ucDirection = ucTest_Rx_Buffer[0]; // 小车运行方向 1=正转 2=反转
+      ServerToCarData.wCtrl = ucTest_Rx_Buffer[1]; // 控制信号
+      ServerToCarData.xStationStatus = ucTest_Rx_Buffer[2]; // 到站状态
+      DEBUGINFO("wCtrl : %X, ucDirection : %X\r\n",ServerToCarData.wCtrl,ServerToCarData.ucDirection);
 
       vParseCommandToCar();
 

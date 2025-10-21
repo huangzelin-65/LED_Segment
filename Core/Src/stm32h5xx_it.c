@@ -235,6 +235,21 @@ void EXTI1_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles EXTI Line2 interrupt.
+  */
+void EXTI2_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI2_IRQn 0 */
+
+  /* USER CODE END EXTI2_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(ELOCK1_STATUS_Pin);
+  /* USER CODE BEGIN EXTI2_IRQn 1 */
+  msg = BoxELock; // 车厢电子锁
+  osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
+  /* USER CODE END EXTI2_IRQn 1 */
+}
+
+/**
   * @brief This function handles EXTI Line3 interrupt.
   */
 void EXTI3_IRQHandler(void)
@@ -277,6 +292,21 @@ void EXTI5_IRQHandler(void)
   msg = FrontCrashSensor; // 前碰撞传感器
   osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
   /* USER CODE END EXTI5_IRQn 1 */
+}
+
+/**
+  * @brief This function handles EXTI Line6 interrupt.
+  */
+void EXTI6_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI6_IRQn 0 */
+
+  /* USER CODE END EXTI6_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(ELOCK2_STATUS_Pin);
+  /* USER CODE BEGIN EXTI6_IRQn 1 */
+  msg = BoxELock; // 车厢电子锁
+  osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
+  /* USER CODE END EXTI6_IRQn 1 */
 }
 
 /**

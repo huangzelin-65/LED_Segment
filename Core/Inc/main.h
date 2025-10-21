@@ -77,15 +77,17 @@ typedef enum {
 	FrontProxSensor,  //前距离传感器
 	RearProxSensor,   //后距离传感器
     ToggleSwitch,     //拨动开关
+    BoxELock,         //车厢电子锁
     ResetButton,      //复位按钮
     SensorDebounce,   //传感器防抖
     ToggleDebounce,   //拨动开关防抖
+    BoxELockDebounce, //车厢电子锁防抖
 }eInterruptType;
 
 //----------小车在站状态枚举----------
 typedef enum {
-  	InStation=0,
-   	OutStation
+  	InStation = 0,
+   	OutStation = 1,
 }CarStationStatus;
 
 //----------小车动作类型枚举----------
@@ -153,38 +155,51 @@ typedef enum
     LED_OFF = 5,
 }eLedColorType;
 
+//----------锁状态枚举----------
+typedef enum
+{
+    UnLock = 0,
+    Locked = 1,
+}eLockStatusType;
 
-//----------小车运行状态结构体------------------------------
+//----------车厢控制枚举----------
+typedef enum
+{
+    BoxElockOps,           // 车厢电子锁操作(解锁)
+    UpdateStationStatus,   // 更新车厢在站状态
+    UpdateBoxLockStatus,   // 更新车厢电子锁状态
+    UpdateUVCleanStatus,   // 更新车厢紫外线清洁状态
+}eBoxCtrlType;
+
+//----------小车状态结构体------------------------------
 typedef struct
 {
-    u8 SetDirection;				//小车设置方向记录 0:Stop/1.Forward/2:Backward    
-    //u8 RealDirection;				//小车实际方向记录 0:Stop/1.Forward/2:Backward     --使用CarToServerData_obj.ucDirection代替RealDirection
-    u8 SetSpeed;					//小车设置速度记录 0:停止/1:低速/2:额定速度/3:高速  
-    //u8 RealSpeed;					//小车实际速度记录 0:停止/1:低速/2:额定速度/3:高速  --使用CarToServerData_obj.bSpdMode代替RealSpeed
-    u8 AutoMode;                    //自动模式标志 0:Manual/1:Auto
-    u8 IsCarRunning;                 //小车运行状态 0:CarStop/1:CarReadyToRun/2:CarRunning
-    u8 MotorEnable;                  //电机使能标志 0:MotorDisable/1:MotorEnable
-    u16 CarID;	  					//小车车号
-    u16 Destination;				//小车目的地
-} _CarRunStatus_obj;
+    eDirectionType xSetDirection;			// 小车设置方向记录 0:Stop/1.Forward/2:Backward    
+    eDirectionType xRealDirection;		    // 小车实际方向记录 0:Stop/1.Forward/2:Backward  
+    eSpeedType xSetSpeed;					// 小车设置速度记录 0:停止/1:低速/2:额定速度/3:高速  
+    eSpeedType xRealSpeed;				// 小车实际速度记录 0:停止/1:低速/2:额定速度/3:高速  --使用CarToServerData.ucSpdMode代替RealSpeed
+    eAutoModeType xAutoMode;                   // 自动模式标志 0:Manual/1:Auto
+    eCarRunningStatusType xIsCarRunning;       // 小车运行状态 0:CarStop/1:CarReadyToRun/2:CarRunning
+    eMotorStatusType xMotorEnable;             // 电机使能标志 0:MotorDisable/1:MotorEnable
+    uint16_t CarID;	  					// 小车车号
+    uint16_t Destination;				// 小车目的地
+    CarStationStatus xStationStatus;    // 小车当前在站状态 0：InStation 1：OutStation
 
-
-//----------小车检测标志结构体------------------------------
-typedef struct
-{
-    u8 ToggleSwtichPosition;		//拨码开关位置 MoveStop:停车/MoveFront:前进/MoveBack:后退
-    u8 FrontProxStatus;			    //前距离传感器状态 SensorRelease:未检测/SensorTrigger:检测到
-    u8 FrontCrashStatus;			//前碰撞开关状态 SensorRelease:未检测/SensorTrigger:检测到
-    u8 RearProxStatus;			    //后距离传感器状态 SensorRelease:未检测/SensorTrigger:检测到
-    u8 RearCrashStatus;   			//后碰撞开关状态 SensorRelease:未检测/SensorTrigger:检测到
-    u8 BoxLocked;				    //车厢是否锁上 0:未锁上/1:已锁上
-    u8 MotorStatus;   				//马达运行状态 0:正常/1:异常
-    u8 MotorOverloadNum;            //电机过载次数
-    u16 SumAverage;					//电流方均值
-    u16 MaxSpeed;					//最大速度
-    u16 MaxCurrent;					//最大电流
-
-} _CarCheckFlag_obj;
+    eSensorMotiontType ToggleSwtichPosition;	// 拨码开关位置 ToggleStop:停车/ToggleFront:前进/ToggleBack:后退
+    eSensorMotiontType FrontProxStatus;			// 前距离传感器状态 SensorRelease:未检测/SensorTrigger:检测到
+    eSensorMotiontType FrontCrashStatus;		// 前碰撞开关状态 SensorRelease:未检测/SensorTrigger:检测到
+    eSensorMotiontType RearProxStatus;			// 后距离传感器状态 SensorRelease:未检测/SensorTrigger:检测到
+    eSensorMotiontType RearCrashStatus;   		// 后碰撞开关状态 SensorRelease:未检测/SensorTrigger:检测到
+    eLockStatusType xBoxELockStatus1;           // 车厢电子锁1状态 UnLock:未锁上/Locked:已锁上
+    eLockStatusType xBoxELockStatus2;           // 车厢电子锁2状态 UnLock:未锁上/Locked:已锁上
+    eLockStatusType xBoxLocked;		            // 车厢是否锁上 UnLock:未锁上/Locked:已锁上
+    uint8_t ucUVTimeRemain;                     // 剩余消毒时间
+    uint8_t MotorStatus;   				        // 马达运行状态 0:正常/1:异常
+    uint8_t MotorOverloadNum;                   // 电机过载次数
+    uint16_t SumAverage;				        // 电流方均值
+    uint16_t MaxSpeed;					        // 最大速度
+    uint16_t MaxCurrent;				        // 最大电流
+} CarStatus_t;
 
 
 
@@ -224,8 +239,8 @@ typedef struct {
     uint8_t  bSpare28;     // 备用
     uint8_t  bType;        // 小车类型：1=洁车 2=污车
     uint8_t  ucDirection;  // 小车运行方向1=正转 2=反转
-    CarStationStatus xStationStatus; // 小车当前在状态 0：InStation 1：OutStation
-} ServerToCarData;
+    CarStationStatus xStationStatus; // 小车当前在站状态 0：InStation 1：OutStation
+} ServerToCarData_t;
 
 typedef struct {
     uint16_t wSeq;          // 序号
@@ -233,8 +248,7 @@ typedef struct {
     uint16_t wAlm;          // 报警信息
     uint16_t wSta;          // 状态信息
     uint8_t bID;            // 小车编号
-    uint8_t bSpare7;        // 备用
-    uint8_t bSpdMode;       // 小车速度模式：1=·速度1，2=速度2，3=速度3
+    uint8_t ucSpdMode;       // 小车速度模式：1=·速度1，2=速度2，3=速度3
     uint8_t bRTimM;         // 小车运行总时间（分钟）
     uint16_t wRTimH;        // 小车运行总时间（小时）
     uint32_t dwCurPos;      // 小车当前位置地址编号0-99999
@@ -249,7 +263,7 @@ typedef struct {
     uint8_t ucDirection;    // 小车运行方向1=正转 2=反转，手动运行时不修改此变量
     uint32_t dwVersion;     // 小车固件版本号
     uint8_t  bSpare[4];     // 备用36~39
-} CarToServerData;
+} CarToServerData_t;
 
 #pragma pack(pop)
 
@@ -291,6 +305,7 @@ void Error_Handler(void);
 #define ELOCK_EN1_GPIO_Port GPIOE
 #define ELOCK2_STATUS_Pin GPIO_PIN_6
 #define ELOCK2_STATUS_GPIO_Port GPIOE
+#define ELOCK2_STATUS_EXTI_IRQn EXTI6_IRQn
 #define EEPROM_SDA_Pin GPIO_PIN_9
 #define EEPROM_SDA_GPIO_Port GPIOB
 #define BEEP_PWM_Pin GPIO_PIN_7
@@ -338,6 +353,7 @@ void Error_Handler(void);
 #define RC_H_EXTI_IRQn EXTI10_IRQn
 #define ELOCK1_STATUS_Pin GPIO_PIN_2
 #define ELOCK1_STATUS_GPIO_Port GPIOC
+#define ELOCK1_STATUS_EXTI_IRQn EXTI2_IRQn
 #define MOTOR_485_CTRL_Pin GPIO_PIN_3
 #define MOTOR_485_CTRL_GPIO_Port GPIOC
 #define TOGGLE_BACK_Pin GPIO_PIN_1
@@ -395,10 +411,10 @@ void Error_Handler(void);
     HAL_GPIO_WritePin(pin##_GPIO_Port, pin##_Pin, state)
 
 #define CIP_HEADER_TOTAL_SIZE (sizeof(uint16_t) + sizeof(CIPHeader) + sizeof(CipSeqAddrData) + sizeof(CIPHeader))
-#define CIP_CAR_TO_PLC_DATA_SIZE (CIP_HEADER_TOTAL_SIZE + sizeof(CarToServerData))
-#define CIP_PLC_TO_CAR_DATA_SIZE (CIP_HEADER_TOTAL_SIZE + sizeof(ServerToCarData))
-#define CAR_TO_PLC_DATA_SIZE sizeof(CarToServerData) //先不加协议头
-#define PLC_TO_CAR_DATA_SIZE sizeof(ServerToCarData) //先不加协议头
+#define CIP_CAR_TO_PLC_DATA_SIZE (CIP_HEADER_TOTAL_SIZE + sizeof(CarToServerData_t))
+#define CIP_PLC_TO_CAR_DATA_SIZE (CIP_HEADER_TOTAL_SIZE + sizeof(ServerToCarData_t))
+#define CAR_TO_PLC_DATA_SIZE sizeof(CarToServerData_t) //先不加协议头
+#define PLC_TO_CAR_DATA_SIZE sizeof(ServerToCarData_t) //先不加协议头
 #define TEMP_SIZE 12
     
 /* USER CODE END Private defines */

@@ -13,16 +13,20 @@
 #include "queue.h"
 #include <stdio.h>
 #include "sensors.h"
+#include "adaptor_box.h"
 #include "LogDebugInfo.h"
 
 extern osMessageQueueId_t xInterrupt_QueueHandle;
 //extern osMessageQueueId_t motion_QueueHandle;
 extern QueueHandle_t xSensor_QueueHandle;
+
 extern osTimerId_t xSensorDebounceTimerHandle;
 extern osTimerId_t xToggleSwitchTimerHandle;
+extern osTimerId_t xBoxELockDebounceTimerHandle;
 
 volatile uint8_t SensorDebounce_flag;
 volatile uint8_t ToggleDebounce_flag;
+volatile uint8_t BoxELockDebounce_flag;
 
 
 void vIntProcessTask(void *argument)
@@ -32,6 +36,7 @@ void vIntProcessTask(void *argument)
 
   SensorDebounce_flag = 0;
   ToggleDebounce_flag = 0;
+  BoxELockDebounce_flag = 0;
 
   while(1)
   {
@@ -65,6 +70,15 @@ void vIntProcessTask(void *argument)
             ToggleDebounce_flag = 1;  // 置位标志
           }
           break;
+
+        case BoxELock:
+          //车厢电子锁检测防重入
+          if (BoxELockDebounce_flag == 0) {
+            //防抖20ms
+            osTimerStart(xBoxELockDebounceTimerHandle, pdMS_TO_TICKS(DebounceTime));
+            BoxELockDebounce_flag = 1;  // 置位标志
+          }
+          break;
         
         case ResetButton:
           sensor_msg = ResetButtonTrigger;
@@ -83,6 +97,12 @@ void vIntProcessTask(void *argument)
           ToggleDebounce_flag = 0;
           vToggleSwitchStatusCheck();   //检测开关状态
           break;
+        
+        case BoxELockDebounce:
+          BoxELockDebounce_flag = 0;
+          vBoxELockStatusCheck(); //检测车厢锁状态
+          break;
+
         default:
           break;
       }

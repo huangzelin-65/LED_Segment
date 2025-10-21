@@ -5,6 +5,8 @@
 #include "adaptor_box.h"
 #include "LogDebugInfo.h"
 
+extern CarStatus_t CarStatus;
+extern osMessageQueueId_t xBox_Ctrl_QueueHandle;
 
 /*************************** NumDisp *****************************/
 extern UART_HandleTypeDef huart11;
@@ -64,7 +66,58 @@ uint8_t ELock_unLock(void)
     DEBUGINFO("unlock success\r\n");
     return 0;
   }
+}
 
+//检测车厢电子锁状态
+void vBoxELockStatusCheck(void)
+{
+
+  volatile uint8_t BOX_ELOCK1_value;
+  volatile uint8_t BOX_ELOCK2_value;
+  eBoxCtrlType box_msg;
+
+  //锁上是低电平，解锁是高电平
+  // 读BOX_ELOCK1电平
+  BOX_ELOCK1_value = GPIO_READ(ELOCK1_STATUS);
+  // 读BOX_ELOCK2电平
+  BOX_ELOCK2_value = GPIO_READ(ELOCK2_STATUS);
+
+  if(BOX_ELOCK1_value == GPIO_PIN_RESET)
+  {
+    CarStatus.xBoxELockStatus1 = Locked;
+    DEBUGINFO("xBoxELockStatus1 = Locked\r\n");
+  } else {
+    CarStatus.xBoxELockStatus1 = UnLock;
+    DEBUGINFO("xBoxELockStatus1 = UnLock\r\n");
+  }
+
+  if(BOX_ELOCK2_value == GPIO_PIN_RESET)
+  {
+    CarStatus.xBoxELockStatus2 = Locked;
+    DEBUGINFO("xBoxELockStatus2 = Locked\r\n");
+  } else {
+    CarStatus.xBoxELockStatus2 = UnLock;
+    DEBUGINFO("xBoxELockStatus2 = UnLock\r\n");
+  }
+
+  if((CarStatus.xBoxELockStatus1 == Locked) || (CarStatus.xBoxELockStatus2 == Locked))
+  {
+    // 锁上
+    CarStatus.xBoxLocked = Locked;
+    DEBUGINFO("xBoxLocked = Locked\r\n");
+  } else {
+    // 解锁
+    CarStatus.xBoxLocked = UnLock;
+    DEBUGINFO("xBoxLocked = UnLock\r\n");
+  }
+
+  box_msg = UpdateBoxLockStatus;
+
+    //发送电子锁事件
+  if(osMessageQueuePut(xBox_Ctrl_QueueHandle, &box_msg, 0, pdMS_TO_TICKS(100)) != osOK)
+  {
+    DEBUGINFO("send box_msg error\r\n");
+  }
 }
 
 /*************************** 紫外线灯 *****************************/

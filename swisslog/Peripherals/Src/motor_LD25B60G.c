@@ -14,7 +14,7 @@
 #include "adaptor_motor.h"
 
 
-extern CarToServerData CarToServerData_obj;
+extern CarStatus_t CarStatus;
 
 u8 MotorStopCmd[8]= {0x01,0x06,0x10,0x04,0x00,0x00,0xCC,0xCB}; //电机停止发送命令
 
@@ -41,28 +41,28 @@ void vMotorOps(u8 Direction, u8 Speed)
 		case NoDirection:
 			DEBUGINFO("MOTOR_STOP\r\n");
 			vSendToMotor(MotorStopCmd,8);
-			CarToServerData_obj.bSpdMode = ZeroSpeed; //实际速度记录为0
+			CarStatus.xRealSpeed = ZeroSpeed; //实际速度记录为0
 			break;
 
 		case Forward:
-			//CarToServerData_obj.ucDirection = MOTOR_FORWARD; //记录为正转
+			//CarStatus.xRealDirection = MOTOR_FORWARD; //记录为正转
 			//判断速度
 			switch (Speed)
 			{
 				case LowSpeed:
 					vSendToMotor(MotorCCWCmd_100Speed,8);
 					DEBUGINFO("MOTOR_FORWARD, LowSpeed\r\n");
-					CarToServerData_obj.bSpdMode = LowSpeed;
+					CarStatus.xRealSpeed = LowSpeed;
 					break;
 				case NormalSpeed:
 					vSendToMotor(MotorCCWCmd_500Speed,8);
 					DEBUGINFO("MOTOR_FORWARD, NormalSpeed\r\n");
-					CarToServerData_obj.bSpdMode = NormalSpeed;
+					CarStatus.xRealSpeed = NormalSpeed;
 					break;
 				case HighSpeed:
 					vSendToMotor(MotorCCWCmd_1000Speed,8);
 					DEBUGINFO("MOTOR_FORWARD, HighSpeed\r\n");
-					CarToServerData_obj.bSpdMode = HighSpeed;
+					CarStatus.xRealSpeed = HighSpeed;
 					break;
 				default:
 					break;
@@ -70,24 +70,24 @@ void vMotorOps(u8 Direction, u8 Speed)
 			break;
 		
 		case Backward:
-			//CarToServerData_obj.ucDirection = MOTOR_BACKWARD; //记录为反转
+			//CarStatus.xRealDirection = MOTOR_BACKWARD; //记录为反转
 			//判断速度
 			switch (Speed)
 			{
 				case LowSpeed:
 					vSendToMotor(MotorCWCmd_100Speed,8);
 					DEBUGINFO("MOTOR_BACKWARD, LowSpeed\r\n");
-					CarToServerData_obj.bSpdMode = LowSpeed;
+					CarStatus.xRealSpeed = LowSpeed;
 					break;
 				case NormalSpeed:
 					vSendToMotor(MotorCWCmd_500Speed,8);
 					DEBUGINFO("MOTOR_BACKWARD, NormalSpeed\r\n");
-					CarToServerData_obj.bSpdMode = NormalSpeed;
+					CarStatus.xRealSpeed = NormalSpeed;
 					break;
 				case HighSpeed:
 					vSendToMotor(MotorCWCmd_1000Speed,8);
 					DEBUGINFO("MOTOR_BACKWARD, HighSpeed\r\n");
-					CarToServerData_obj.bSpdMode = HighSpeed;
+					CarStatus.xRealSpeed = HighSpeed;
 					break;
 				default:
 					break;
