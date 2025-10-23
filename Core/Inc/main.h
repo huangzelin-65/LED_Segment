@@ -166,6 +166,7 @@ typedef enum
 typedef enum
 {
     BoxElockOps,           // 车厢电子锁操作(解锁)
+    RfidLoginTimeout,      // 车厢RFID登录超时
     UpdateStationStatus,   // 更新车厢在站状态
     UpdateBoxLockStatus,   // 更新车厢电子锁状态
     UpdateUVCleanStatus,   // 更新车厢紫外线清洁状态

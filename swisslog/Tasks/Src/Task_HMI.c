@@ -278,7 +278,7 @@ void vHmiWaitTask(void *argument)
 		sendSt->data[0]=addRegVersion;
 		sendSt->data[1]=1;
 		HMI_Send_Msg_To_SendTask(sendSt);
-		osDelay(200);	
+		osDelay(pdMS_TO_TICKS(200));	
 		if(startFinishedFlag == 1){
 			break;
 		}

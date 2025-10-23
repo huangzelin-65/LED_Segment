@@ -38,7 +38,7 @@ static HAL_StatusTypeDef wb502a_init(void)
   DEBUGINFO("wifi init\r\n");
 
   //等待模块启动
-  osDelay(1000);
+  osDelay(pdMS_TO_TICKS(1000));
 
   //退出透传模式步骤1
   at_send_command("+++", "a", 500);
@@ -46,7 +46,7 @@ static HAL_StatusTypeDef wb502a_init(void)
   at_send_command("a", "+ok", 500);
 
   // 退出透传后需要时间保存参数到flash
-  osDelay(1000);
+  osDelay(pdMS_TO_TICKS(1000));
 
   // //查看透传模式
   // if (at_send_command("AT+TPMODE", "OK", 10000) != HAL_OK) 
@@ -61,7 +61,7 @@ static HAL_StatusTypeDef wb502a_init(void)
   }
 
   // 模块复位后需要一定时间启动
-  osDelay(2000);
+  osDelay(pdMS_TO_TICKS(2000));
 
 
 
@@ -152,7 +152,7 @@ void vWifiManagerTask(void *argument)
   while (wb502a_init() != HAL_OK) 
   {
      // 初始化失败重试
-       osDelay(1000);
+       osDelay(pdMS_TO_TICKS(1000));
        DEBUGINFO("wifi retry!\r\n");
   }
   
@@ -162,7 +162,7 @@ void vWifiManagerTask(void *argument)
   // 连接成功后进入状态监测
   while (1)
   {
-	  osDelay(2000);
+	  osDelay(pdMS_TO_TICKS(2000));
   }
 }
     

@@ -44,6 +44,7 @@ uint8_t ucBoxRfid_current_buf_idx = 0;  // 当前使用的缓冲区索引
 
 extern osTimerId_t xBoxRfidLoginTimerHandle;
 extern osSemaphoreId_t xBoxRfidRxSemHandle;
+extern osMessageQueueId_t xBox_Ctrl_QueueHandle;
 
 
 /**
@@ -65,7 +66,7 @@ void RFID_Set_Logined(uint8_t level)
 void RFID_ResetLoginStatus(void)
 {
 	DEBUGINFO("RFID_ResetLoginStatus\n");
-	isLogin=0;
+	isLogin = 0;
 }
 /*
 获取登录状态
@@ -184,36 +185,14 @@ void RFID_Print_CardPasswd(void)
 */
 static void RFID_Start_Loginin_Timer(void)
 {
+	DEBUGINFO("RFID_Start_Loginin_Timer\n");
 	//统计刷卡成功后是否超时
 	osTimerStop(xBoxRfidLoginTimerHandle);
 	rfidTimeout = 0;
-	osTimerStart(xBoxRfidLoginTimerHandle, pdMS_TO_TICKS(1000*30));
+	osTimerStart(xBoxRfidLoginTimerHandle, pdMS_TO_TICKS(1000*5));
 }
 
-#if 0
-//uint8_t idCardpasswordLen =0;
-/*
-密码验证及处理
-*/
-static int RFID_CheckCardPswd(uint8_t mode,uint8_t block,uint8_t *BufferPassword)
-{
-	int result=0;
-	if((result=M5_Auth(mode, block, BufferPassword))==0)
-	{	
-		//DEBUGINFO("M5_Auth succss\n");
-		RFID_Start_Loginin_Timer();
-		RFID_Set_Logined(1);
-		M5_Beep(2);
-		//osDelay(100);
-		//if(M5_FindCard(0x26)==0&&M5_Anticoll()==0&&M5_SelectCard()==0)
-		//{
-			M5_Halt();
-			osDelay(100);//TODO DELETE
-		//}
-	}	
-	return result;
-}
-#endif
+
 
 /**
  * 检查用户权限等级。
@@ -239,6 +218,7 @@ static uint8_t RFID_CheckUserLevel(uint8_t *temp)
 	}
 
 	if(result == 1){
+		DEBUGINFO("admin:%X\n",temp[6]);
 		return temp[6];
 	}
 
@@ -251,6 +231,7 @@ static uint8_t RFID_CheckUserLevel(uint8_t *temp)
 	}
 	
 	if(result == 1){
+		DEBUGINFO("user:%X\n",temp[6]);
 		return temp[6];
 	}
 	
@@ -271,9 +252,11 @@ uint8_t RFID_GetTimeOut(void)
 */
 void vBoxRfidLoginTimerCallback(void *argument)
 {
-	RFID_ResetLoginStatus();
-	HMI_CheckRFCard(0); 
 	rfidTimeout = 1;
+
+	// 发送车厢RFID登录超时消息
+	eBoxCtrlType box_msg = RfidLoginTimeout;
+	osMessageQueuePut(xBox_Ctrl_QueueHandle, &box_msg, 0, pdMS_TO_TICKS(100));
 }
 
 /**
@@ -283,11 +266,11 @@ void vBoxRfidTask(void *argument)
 {
 	RFID_Update_CardPasswd();
 
-	osDelay(1000);
+	osDelay(pdMS_TO_TICKS(1000));
 	M5_Beep(1); 
-	osDelay(500);
+	osDelay(pdMS_TO_TICKS(500));
 #ifdef RFCARD_MANUAL_READ	
-	while(M5_ReadWriteMode()!=0) osDelay(500);
+	while(M5_ReadWriteMode()!=0) osDelay(pdMS_TO_TICKS(500));
 #else
 	M5_ReadOnlyMode8(userBlock,localPasswd,16);
 #endif
@@ -334,7 +317,7 @@ void vBoxRfidTask(void *argument)
 						RFID_Start_Loginin_Timer();
 						RFID_Set_Logined(level);
 						M5_Beep(1); 
-						osDelay(500);
+						osDelay(pdMS_TO_TICKS(500));
 					if((result=M5_FindCard(0x26))!=0 )
 						continue;
 			
@@ -359,7 +342,7 @@ void vBoxRfidTask(void *argument)
 			#endif
 		}
 		
-		osDelay(500);
+		osDelay(pdMS_TO_TICKS(500));
 	}
 }
 

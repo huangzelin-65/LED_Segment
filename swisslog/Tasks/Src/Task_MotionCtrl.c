@@ -50,9 +50,9 @@ void vMotionCtrlTask(void *argument)
 
   while (1)
     {
-      if (osMessageQueueGet(xMotion_QueueHandle, &MotionRecv_msg, NULL, osWaitForever) == osOK) 
+      if ( osMessageQueueGet(xMotion_QueueHandle, &MotionRecv_msg, NULL, osWaitForever) == osOK ) 
       {
-        switch(MotionRecv_msg)
+        switch( MotionRecv_msg )
         {
           case CarStop:
             //CarStatus.RealDirection = NoDirection; //清除方向记录
@@ -65,35 +65,41 @@ void vMotionCtrlTask(void *argument)
           
           case CarRunning:
             // 拨动开关自动档
-            if(CarStatus.ToggleSwtichPosition == ToggleFront)
+            if( CarStatus.ToggleSwtichPosition == ToggleFront )
             {
               // 远程自动模式
               if(CarStatus.xAutoMode == Auto)
               {
                 DEBUGINFO("remote Auto mode\r\n");
 
-                // 未允许电机运行（通过wifi或串口指令下发允许）
-                if(CarStatus.xMotorEnable == MotorDisable)
+                //车厢锁上才能发车
+                if( CarStatus.xBoxLocked == Locked )
                 {
-                  DEBUGINFO("ReadyToRun\r\n");
-                  CarStatus.xIsCarRunning = CarReadyToRun;
-                  u8 temp[] = "MotionCtrl: ReadyToRun\r\n";
-                  vSendToWifiTX(temp, strlen((char *)temp));
-                  break;
+                   // 未允许电机运行（通过wifi或串口指令下发允许）
+                  if( CarStatus.xMotorEnable == MotorDisable )
+                  {
+                    DEBUGINFO("ReadyToRun\r\n");
+                    CarStatus.xIsCarRunning = CarReadyToRun;
+                    u8 temp[] = "MotionCtrl: ReadyToRun\r\n";
+                    vSendToWifiTX(temp, strlen((char *)temp));
+                    break;
+                  }
+                  // 已允许电机运行
+                  else if( CarStatus.xMotorEnable == MotorEnable )
+                  {
+                    // 电机按预设运行方向 和 预设速度运行
+                    CarStatus.xIsCarRunning = CarRunning;
+                    vMotorOps(CarStatus.xSetDirection, CarStatus.xSetSpeed);  
+                    GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
+                    DEBUGINFO("LED4 ON\r\n");
+                  }
+                } else {
+                  DEBUGINFO("Can't Run!! Box not Locked!!\r\n");
                 }
-                // 已允许电机运行
-                else if(CarStatus.xMotorEnable == MotorEnable)
-                {
-                  // 电机按预设运行方向 和 预设速度运行
-                  CarStatus.xIsCarRunning = CarRunning;
-                  vMotorOps(CarStatus.xSetDirection, CarStatus.xSetSpeed);  
-                  GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
-                  DEBUGINFO("LED4 ON\r\n");
-                }
-
               }
+
               // 远程手动模式
-              else if(CarStatus.xAutoMode == Manual)
+              else if( CarStatus.xAutoMode == Manual )
               {
                 DEBUGINFO("remote Manual mode\r\n");
                 // 电机按实际运行方向 和 普通速度运行（手动档下）
@@ -106,12 +112,12 @@ void vMotionCtrlTask(void *argument)
 
             }
             // 拨动开关手动档
-            else if(CarStatus.ToggleSwtichPosition == ToggleBack)
+            else if( CarStatus.ToggleSwtichPosition == ToggleBack )
             {
               DEBUGINFO("local Manual mode\r\n");
 
               //reset按钮没有按下才允许电机运行
-              if(GPIO_READ(RESET) == GPIO_PIN_SET)
+              if( GPIO_READ(RESET) == GPIO_PIN_SET )
               {
                 // 电机按普通速度运行（手动档下），方向相反
                 CarStatus.xIsCarRunning = CarRunning;

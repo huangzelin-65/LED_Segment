@@ -39,7 +39,7 @@ uint8_t UvClean_IsRunning(void)
 **/
 void UvClean_Start(uint8_t timeMin,uint8_t startTime[6])
 {
-	osDelay(200);
+	osDelay(pdMS_TO_TICKS(200));
 	if(timeMin == 0)
 		timeMin = 5;
 	if(uvCleanRunning==0){

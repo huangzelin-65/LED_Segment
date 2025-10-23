@@ -147,7 +147,7 @@ void vGetTagPosType(char *data)
       ucMotion_msg = CarStop;
       if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
       {
-        DEBUGINFO("vGetTagPosType() send motion msg error\r\n");
+        DEBUGINFO("send motion msg error\r\n");
       }
     }
 
@@ -177,10 +177,9 @@ void vGetTagSpeed(char *data)
       CarStatus.xSetSpeed = pcSpeed[0]; 
 
       ucMotion_msg = CarRunning;
-      //if(xQueueSend(xMotion_QueueHandle, &ucMotion_msg, pdMS_TO_TICKS(100)) != pdPASS)
       if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
       {
-        DEBUGINFO("vGetTagSpeed() send motion msg error\r\n");
+        DEBUGINFO("send motion msg error\r\n");
       }
     }
   }
@@ -202,8 +201,8 @@ void vCarRfidTask(void *argument)
     {
       ucReciveLen = ulCarRfid_Get_DMA_Receive_Len();
       DEBUGINFO("ucCarRfid_current_buf_idx:%d\r\n",ucCarRfid_current_buf_idx);
-      DEBUGINFO("rfid received:%s, len:%d\r\n",
-        ucCarRfid_Rx_Buffer[ucCarRfid_current_buf_idx],ucReciveLen);
+      DEBUGINFO("rfid received len:%d\r\n",ucReciveLen);
+      vPrint_Array(ucCarRfid_Rx_Buffer[ucCarRfid_current_buf_idx], ucReciveLen);
       
       //uint8_t* temp_buffer = ucCarRfid_Rx_Buffer[ucCarRfid_current_buf_idx];
 

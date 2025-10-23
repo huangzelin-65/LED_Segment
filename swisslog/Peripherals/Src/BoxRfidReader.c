@@ -156,6 +156,8 @@ uint8_t M5_ReadWriteMode(void)
 {
 	uint32_t i;
 	uint8_t sendBuf[16];
+
+	DEBUGINFO("\r\n");
 	
 	sendBuf[0]=0xAA;//STX1;
 	sendBuf[1]=0XBB;//STX2;
@@ -180,7 +182,7 @@ uint8_t M5_ReadWriteMode(void)
 			return g_cReceBuf[6];
 		}
 		//i--;
-		osDelay(1);
+		osDelay(pdMS_TO_TICKS(1));
 	}
 	g_bReceOk=0; 
 	  
@@ -251,7 +253,7 @@ uint8_t M5_ReadOnlyMode8(uint8_t block,uint8_t passwd[6],uint8_t bitNum)
 			return g_cReceBuf[6];
 		}
 		//i--;
-		osDelay(1);
+		osDelay(pdMS_TO_TICKS(1));
 	}
 	g_bReceOk=0; 
 	
@@ -290,7 +292,7 @@ uint8_t M5_Beep(uint16_t time)
 			return g_cReceBuf[6];
 		}
 		i--;
-		osDelay(1);
+		osDelay(pdMS_TO_TICKS(1));
 	}
 	g_bReceOk=0; 
 	  
@@ -302,6 +304,8 @@ uint8_t M5_FindCard(uint8_t mode)
 {
 	uint32_t i;
 	uint8_t sendBuf[16];
+
+	DEBUGINFO("\r\n");
 	
 	sendBuf[0]=0xAA;//STX1;
 	sendBuf[1]=0XBB;//STX2;
@@ -325,7 +329,7 @@ uint8_t M5_FindCard(uint8_t mode)
 			g_bReceOk=0;
 			return g_cReceBuf[6];
 		}
-		osDelay(1);
+		osDelay(pdMS_TO_TICKS(1));
 		i--;
 	}
 	g_bReceOk=0; 
@@ -338,6 +342,8 @@ uint8_t M5_Anticoll(void)
 {
 	uint32_t i;
 	uint8_t sendBuf[16];
+
+	DEBUGINFO("\r\n");
 	
 	sendBuf[0]=0xAA;
 	sendBuf[1]=0XBB;
@@ -370,7 +376,7 @@ uint8_t M5_Anticoll(void)
 			g_bReceOk=0;
 			return g_cReceBuf[6];
 		}
-		osDelay(1);		
+		osDelay(pdMS_TO_TICKS(1));		
 		i--;		
 	}
 		g_bReceOk=0; 
@@ -383,6 +389,8 @@ uint8_t M5_SelectCard(void)
 {
 	uint32_t i,SendLen;
 	uint8_t sendBuf[24];
+
+	DEBUGINFO("\r\n");
 	
 	sendBuf[0]=0xAA;
 	sendBuf[1]=0XBB;
@@ -416,7 +424,7 @@ uint8_t M5_SelectCard(void)
 			g_bReceOk=0;
 			return g_cReceBuf[6];
 		}
-		osDelay(1); 	
+		osDelay(pdMS_TO_TICKS(1)); 	
 		i--;				
 	}
 	g_bReceOk=0;
@@ -431,6 +439,8 @@ uint8_t M5_Auth(uint8_t mode,uint8_t block,uint8_t *BufferPassword)
 	uint32_t i,y,SendLen;
 	uint8_t BCC=0;
 	uint8_t sendBuf[48];
+
+	DEBUGINFO("\r\n");
 	
 	sendBuf[0]=0xAA;
 	sendBuf[1]=0XBB;//STX;
@@ -474,7 +484,7 @@ uint8_t M5_Auth(uint8_t mode,uint8_t block,uint8_t *BufferPassword)
 			g_bReceOk=0;
 			return g_cReceBuf[6];
 		}
-		osDelay(1); 
+		osDelay(pdMS_TO_TICKS(1)); 
 		i--;				
 	}
 	g_bReceOk=0; 
@@ -487,7 +497,8 @@ uint8_t M5_Halt(void)
 {
 	uint32_t i;
 	uint8_t sendBuf[10];
-	//DEBUGINFO("M5_Halt\n");
+	DEBUGINFO("M5_Halt\n");
+
 	sendBuf[0]=0xAA;//STX1;
 	sendBuf[1]=0XBB;//STX2;
 	sendBuf[2]=0x05;
@@ -510,7 +521,7 @@ uint8_t M5_Halt(void)
 			g_bReceOk=0;
 			return g_cReceBuf[6];	
 		}
-		osDelay(1);		
+		osDelay(pdMS_TO_TICKS(1));		
 		i--;				
 	}
 	g_bReceOk=0;
@@ -524,6 +535,9 @@ uint8_t M5_Easy_Read(uint8_t block,uint8_t pswdType,uint8_t *BufferPassword,uint
 	uint32_t i;
 	uint8_t sendBuf[18];
 	uint8_t sendLen=17;
+
+	DEBUGINFO("\r\n");
+
 	sendBuf[0]=0xAA;
 	sendBuf[1]=0XBB;
 	sendBuf[2]=0x0D;
@@ -560,7 +574,7 @@ uint8_t M5_Easy_Read(uint8_t block,uint8_t pswdType,uint8_t *BufferPassword,uint
 			memcpy(readBuf,g_cReceBuf+7,16);
 			return g_cReceBuf[6];
 		}
-		osDelay(1);			
+		osDelay(pdMS_TO_TICKS(1));			
 	}
 	g_bReceOk=0;
 	i--;		
@@ -574,6 +588,9 @@ uint8_t M5_Easy_Write(uint8_t block,uint8_t pswdType,uint8_t *BufferPassword,uin
 	uint32_t i;
 	uint8_t sendBuf[34];
 	uint8_t sendLen=33;
+
+	DEBUGINFO("\r\n");
+
 	sendBuf[0]=0xAA;
 	sendBuf[1]=0XBB;
 	sendBuf[2]=0x1D;
@@ -610,7 +627,7 @@ uint8_t M5_Easy_Write(uint8_t block,uint8_t pswdType,uint8_t *BufferPassword,uin
 			g_bReceOk=0;
 			return g_cReceBuf[6];
 		}
-		osDelay(1);		
+		osDelay(pdMS_TO_TICKS(1));		
 		i--;				
 	}
 	g_bReceOk=0;
@@ -649,7 +666,7 @@ uint8_t M5_WaitCard(uint8_t *readBuf)
 			memcpy(readBuf,g_cReceBuf+1,16);
 			return 1;
 		}
-		osDelay(1);			
+		osDelay(pdMS_TO_TICKS(10));			
 	}
 	g_bReceOk=0;
 		

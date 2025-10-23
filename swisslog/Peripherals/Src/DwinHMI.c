@@ -738,6 +738,7 @@ void HMI_Check_Uv_Clean(uint8_t time){
 		HMI_Change_Page(pgUvFinished);
 	}
 }
+
 //open for rfid clean task
 void HMI_CheckRFCard(uint8_t en){
 	DEBUGINFO("HMI_CheckRFCard en:%d\r\n",en);
@@ -748,6 +749,7 @@ void HMI_CheckRFCard(uint8_t en){
 				return;
 			}		
 		}
+		// 密码状态检查（未加密/空密码/管理员权限）
 		if(UserPswd_Get_Encry_Status() == 0||(UserPswd_Get_Encry_Len() == 0 )|| en == 0x35){	
 				
 			if(currentPage == pgRfCard || currentPage == pgRfCardWithOutPasswd ||currentPage==pgDecrypt){
@@ -772,16 +774,17 @@ void HMI_CheckRFCard(uint8_t en){
 
 			
 		}
+		// 密码状态检查（已加密 && 非空密码 && 非管理员权限）
 		else{
 			if(currentPage == pgRfCard || currentPage == pgRfCardWithOutPasswd){
 				UserPswd_Clear_Decry(); 
 				HMI_Display_Text_DecryPasswd();
 				HMI_Change_Page(pgDecrypt);
 			}
-			//}		
 		}	
 	}
-	else{
+	// en=0 时的处理
+	else {
 		if(currentPage == pgDecrypt){
 			HMI_KeyBoard_Ctrl(keyCtrlCloseBoard);
 			HMI_Show_Rf_Page();
@@ -831,7 +834,7 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 		DEBUGINFO("btToSettingPage\r\n");
 			System_Get_RunTime_Ascii(RunTimeHoursASCII,RunTimeMinutesASCII,RunTimeSecondsASCII);
 			HMI_Display_Text_RunTime();
-			//osDelay(50);
+			//osDelay(pdMS_TO_TICKS(50));
 			HMI_Get_Rtc();
 			actFlag = rtcForSetting;
 			break;
@@ -849,7 +852,7 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 			{
 				System_Get_RunTime_Ascii(RunTimeHoursASCII,RunTimeMinutesASCII,RunTimeSecondsASCII);
 				HMI_Display_Text_RunTime();
-				//osDelay(50);
+				//osDelay(pdMS_TO_TICKS(50));
 				HMI_Get_Rtc();
 				actFlag = rtcForSetting;
 			}

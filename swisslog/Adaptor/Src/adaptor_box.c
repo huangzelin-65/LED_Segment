@@ -49,12 +49,12 @@ uint8_t ELock_unLock(void)
     if(count>5){
       break;
     }
-    osDelay(10);
+    osDelay(pdMS_TO_TICKS(10));
   }
   GPIO_WRITE(ELOCK_EN1, GPIO_PIN_SET);
   GPIO_WRITE(ELOCK_EN2, GPIO_PIN_SET);
 
-  osDelay(10);
+  osDelay(pdMS_TO_TICKS(10));
 
   if(ELOCK1_LEVEL || ELOCK2_LEVEL)
   {

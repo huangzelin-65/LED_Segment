@@ -29,9 +29,10 @@ extern CarStatus_t CarStatus;
 
 void vParseCommandToCar()
 {
-  //************************电机控制命令解析*************************** 
   u8 ucMotion_msg;
   
+  //*******************************电机控制命令解析****************************** 
+  //**********************方向解析********************
   // PLC下发设置前进(正转)
   if(ServerToCarData.ucDirection == Forward)
   {
@@ -45,6 +46,8 @@ void vParseCommandToCar()
     CarStatus.xSetDirection = Backward; //小车预设运行方向为后退
   }
 
+
+  //***********************动作解析*********************
   //小车远程手动模式(拨动开关需要在自动档位下才能使用)
   if(ServerToCarData.wCtrl & 0x01)
   {
@@ -67,26 +70,31 @@ void vParseCommandToCar()
   }
 
   //小车远程自动模式 (拨动开关需要在自动档位下才能使用)
-  else if((ServerToCarData.wCtrl & 0x10) \
-    && (CarStatus.ToggleSwtichPosition == ToggleFront))
+  else if ((ServerToCarData.wCtrl & 0x10) && 
+    (CarStatus.ToggleSwtichPosition == ToggleFront))
   {
     DEBUGINFO("auto mode\r\n");
     CarStatus.xAutoMode = Auto;
   }
-  // 无效命令
-  // else
-  // {
-  //   DEBUGINFO("Invalid commond\r\n");
-  // }
+
   
   //判断启动/停止电机
-  if(ServerToCarData.wCtrl & 0x08) //使能运行位为1
+  if( ServerToCarData.wCtrl & 0x08 ) //使能运行位为1
   {
-    //启动电机
-    CarStatus.xMotorEnable = MotorEnable;
-    ucMotion_msg = CarRunning;
+    //车厢锁上且未到站才能发车
+    if( CarStatus.xBoxLocked == Locked && ServerToCarData.xStationStatus == OutStation )
+    {
+      //启动电机
+      CarStatus.xMotorEnable = MotorEnable;
+      ucMotion_msg = CarRunning;
+    } else {
+      // 停止电机
+      CarStatus.xMotorEnable = MotorDisable;
+      ucMotion_msg = CarStop;
+      DEBUGINFO("Can't Run!! check Box LockStatus or StationStatus!!\r\n");
+    }
   }
-  else
+  else //使能运行位为0
   {
     // 停止电机
     CarStatus.xMotorEnable = MotorDisable;
@@ -99,7 +107,8 @@ void vParseCommandToCar()
     DEBUGINFO("send motion msg error\r\n");
   }
 
-  //****************************小车到站状态解析*****************************
+
+  //*********************************小车到站状态解析**********************************
   if(ServerToCarData.xStationStatus != Car_Get_Station_Status())
   {
     // 发送进出站消息

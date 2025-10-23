@@ -58,7 +58,7 @@ void vSensorTask(void *argument)
   
   // //蜂鸣器响0.5s
   // vBeep_Control(ENABLE);
-  // osDelay(1000);
+  // osDelay(pdMS_TO_TICKS(1000));
   // vBeep_Control(DISABLE);
 
   //电机测试
@@ -74,7 +74,7 @@ void vSensorTask(void *argument)
     {
       switch (ucSensorRecv_msg)
       {
-        //传感器事件
+        //*************************** 传感器事件 ***************************
         case SensorEvent:
           //向前运动时
           {
@@ -132,14 +132,14 @@ void vSensorTask(void *argument)
               }
             }
           }
-          //if(xQueueSend(xMotion_QueueHandle, &ucMotion_msg, pdMS_TO_TICKS(100)) != pdPASS)
           if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
           {
-            DEBUGINFO("vSensorask() send motion msg error1\r\n");
+            DEBUGINFO("SensorEvent send motion msg error\r\n");
           }
           break;
 
-        // 拨动开关向前（运行方向不变）
+
+        //*************************** 拨动开关向前（运行方向不变） ***********************
         case ToggleFront:
           // 设置为自动模式
           CarStatus.xAutoMode = Auto;
@@ -159,7 +159,8 @@ void vSensorTask(void *argument)
           vSensorStatusCheck(); 
           break;
 
-        // 拨动开关向后（运行方向相反）
+
+        //**************************** 拨动开关向后（运行方向相反）*********************
         case ToggleBack:
           // 设置为手动模式
           CarStatus.xAutoMode = Manual;
@@ -181,19 +182,19 @@ void vSensorTask(void *argument)
           break;
 
 
-        // 拨动开关停止
+        //********************************* 拨动开关停止 ******************************
         case ToggleStop:
           CarStatus.xAutoMode = Manual;
           // 停止电机
           ucMotion_msg = CarStop;
-          //if(xQueueSend(xMotion_QueueHandle, &ucMotion_msg, pdMS_TO_TICKS(100)) != pdPASS)
           if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
           {
-            DEBUGINFO("vSensorask() send motion msg error2\r\n");
+            DEBUGINFO("ToggleStop send motion msg error\r\n");
           }
           break;
 
-        // 复位按钮触发
+
+        //******************************* 复位按钮触发 ******************************
         case ResetButtonTrigger:
           // 按钮按下
           if(GPIO_READ(RESET) == GPIO_PIN_RESET)
@@ -203,10 +204,9 @@ void vSensorTask(void *argument)
 
             // 请求停止电机
             ucMotion_msg = CarStop;
-            //if(xQueueSend(xMotion_QueueHandle, &ucMotion_msg, pdMS_TO_TICKS(100)) != pdPASS)
             if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
             {
-              DEBUGINFO("vSensorask() send motion msg error3\r\n");
+              DEBUGINFO("send motion msg error3\r\n");
             }
             osTimerStart(xResetButtonTimerHandle, pdMS_TO_TICKS(ResetDuration));// 回调vResetButtonCallback
           }
@@ -218,7 +218,8 @@ void vSensorTask(void *argument)
           }
           break;
         
-        // 开始复位（复位按钮持续触发1秒）
+
+        //*********************** 开始复位（复位按钮持续触发1秒） **********************
         case Reset:
           DEBUGINFO("SystemReset\r\n");
           NVIC_SystemReset();

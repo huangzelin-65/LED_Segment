@@ -2,5 +2,6 @@
 #define TASKS_INC_TASK_BOXRFID_H_
 
 void RFID_Scan_Enable(uint8_t en);
+void RFID_ResetLoginStatus(void);
 
 #endif /* TASKS_INC_TASK_BOXRFID_H_ */

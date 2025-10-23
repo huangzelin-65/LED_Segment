@@ -131,53 +131,53 @@ void vMotorRead(u8 Cmd)
 
 void vMotorTest()
 {
-	osDelay(1000);
+	osDelay(pdMS_TO_TICKS(1000));
 
   //电机正转
 	vMotorOps(MOTOR_FORWARD, MOTOR_SPEED_LOW);
-	osDelay(500);
+	osDelay(pdMS_TO_TICKS(500));
 	vMotorRead(MOTOR_GET_SPEED);
-	osDelay(1000);
+	osDelay(pdMS_TO_TICKS(1000));
 	vMotorOps(MOTOR_FORWARD, MOTOR_SPEED_NORMAL);
-	osDelay(500);
+	osDelay(pdMS_TO_TICKS(500));
 	vMotorRead(MOTOR_GET_SPEED);
-	osDelay(1000);
+	osDelay(pdMS_TO_TICKS(1000));
 	vMotorOps(MOTOR_FORWARD, MOTOR_SPEED_HIGH);
-	osDelay(500);
+	osDelay(pdMS_TO_TICKS(500));
 	vMotorRead(MOTOR_GET_SPEED);
-	osDelay(1000);
+	osDelay(pdMS_TO_TICKS(1000));
 
 	vMotorRead(MOTOR_GET_STATUS);
-	osDelay(500);
+	osDelay(pdMS_TO_TICKS(500));
 	vMotorRead(MOTOR_GET_ERROR);
-	osDelay(500);
+	osDelay(pdMS_TO_TICKS(500));
 
   //电机反转 
 	vMotorOps(MOTOR_BACKWARD, MOTOR_SPEED_LOW);
-	osDelay(500);
+	osDelay(pdMS_TO_TICKS(500));
 	vMotorRead(MOTOR_GET_SPEED);
-	osDelay(1000);
+	osDelay(pdMS_TO_TICKS(1000));
 	vMotorOps(MOTOR_BACKWARD, MOTOR_SPEED_NORMAL);
-	osDelay(500);
+	osDelay(pdMS_TO_TICKS(500));
 	vMotorRead(MOTOR_GET_SPEED);
-	osDelay(1000);
+	osDelay(pdMS_TO_TICKS(1000));
 	vMotorOps(MOTOR_BACKWARD, MOTOR_SPEED_HIGH);
-	osDelay(500);
+	osDelay(pdMS_TO_TICKS(500));
 	vMotorRead(MOTOR_GET_SPEED);
-	osDelay(1000);
+	osDelay(pdMS_TO_TICKS(1000));
 
 	vMotorRead(MOTOR_GET_STATUS);
-	osDelay(500);
+	osDelay(pdMS_TO_TICKS(500));
 	vMotorRead(MOTOR_GET_ERROR);
-	osDelay(500);
+	osDelay(pdMS_TO_TICKS(500));
 
   //电机停转 
 	vMotorOps(MOTOR_STOP, MOTOR_NO_SPEED);
-	osDelay(1000);
+	osDelay(pdMS_TO_TICKS(1000));
 	vMotorRead(MOTOR_GET_SPEED);
-	osDelay(500);
+	osDelay(pdMS_TO_TICKS(500));
 	vMotorRead(MOTOR_GET_STATUS);
-	osDelay(500);
+	osDelay(pdMS_TO_TICKS(500));
 	vMotorRead(MOTOR_GET_ERROR);
-	osDelay(500);
+	osDelay(pdMS_TO_TICKS(500));
 }

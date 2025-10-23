@@ -34,6 +34,7 @@ CarStationStatus Car_Get_Station_Status(void){
 */
 void Car_Set_Station_Status(CarStationStatus value)
 {
+	DEBUGINFO("%d\n",value);
 	if(mCarStationStatus == value){
 		return;
 	}
@@ -70,19 +71,19 @@ void vBoxCtrlTask(void *argument)
   // NumDisp_BlueShan();
 
   // vUV_Clean_enable();
-  // osDelay(2000);
+  // osDelay(pdMS_TO_TICKS(2000));
   // vUV_Clean_disable();
 
   // vRGB_LED(RED)
-  // osDelay(2000);
+  // osDelay(pdMS_TO_TICKS(2000));
   // vRGB_LED(GREEN);
-  // osDelay(2000);
+  // osDelay(pdMS_TO_TICKS(2000));
   // vRGB_LED(BLUE);
-  // osDelay(2000);
+  // osDelay(pdMS_TO_TICKS(2000));
   // vRGB_LED(YELLOW);
-  // osDelay(2000);
+  // osDelay(pdMS_TO_TICKS(2000));
   // vRGB_LED(WHITE);
-  // osDelay(2000);
+  // osDelay(pdMS_TO_TICKS(2000));
   // vRGB_LED(LED_OFF);
 
 	mCarStationStatus = Car_Read_Station_Status();
@@ -105,6 +106,7 @@ void vBoxCtrlTask(void *argument)
 		{
 			switch (box_msg)
 			{
+				//*********************************** 车厢电子锁操作 **************************************
 				case BoxElockOps:
 					if( !UvClean_IsRunning()&&
 						( mCarStationStatus == InStation ) && 
@@ -116,24 +118,42 @@ void vBoxCtrlTask(void *argument)
 					}
 					break;
 
+
+				//*********************************** 车厢RFID登录超时 **************************************
+				case RfidLoginTimeout:
+					RFID_ResetLoginStatus();
+					HMI_CheckRFCard(0); 
+					break;
+
+
+				//*********************************** 更新进出站状态 **************************************
 				case UpdateStationStatus:
 					// car out检测
-					if( ServerToCarData.xStationStatus == OutStation && mCarStationStatus == InStation){
-						DEBUGINFO("OutStation\n");
-						Car_Set_Station_Status(OutStation);// 设置小车状态为OutStation
-						HMI_Set_RFCardPage();	// 发送命令切换到”请刷rfid卡“页面;
+					if(( ServerToCarData.xStationStatus == OutStation ) && ( mCarStationStatus == InStation ) )
+					{
+						if( CarStatus.xBoxLocked == Locked )
+						{
+							DEBUGINFO("OutStation\n");
+							Car_Set_Station_Status(OutStation);// 设置小车状态为OutStation
+							HMI_Set_RFCardPage();	// 发送命令切换到”请刷rfid卡“页面;
+						} else {
+              DEBUGINFO("Can't Set OutStation!! Box not Locked!!\r\n");
+            }
 					}
 					
 					// car in检测
-					if( ServerToCarData.xStationStatus == InStation && mCarStationStatus == OutStation){
+					if( (ServerToCarData.xStationStatus == InStation) && (mCarStationStatus == OutStation) )
+					{
 						DEBUGINFO("InStation\n");
 						Car_Set_Station_Status(InStation);// 设置小车状态为InStation
 						HMI_Force_Home_Page(); 					// 跳转到home页面
 					}
 					break;
 
+
+				//*********************************** 更新电子锁状态 **************************************
 				case UpdateBoxLockStatus:
-					if(CarStatus.xBoxLocked == Locked)
+					if( CarStatus.xBoxLocked == Locked )
 					{
 						// 锁上
 						DEBUGINFO("Locked\n");
@@ -150,10 +170,12 @@ void vBoxCtrlTask(void *argument)
 						HMI_Update_LockStatus_Req(0); // 发送电子锁的状态到LCD(HMI)
 					}
 					break;
+				
 
+				//*********************************** 更新UV消毒状态 **************************************
 				case UpdateUVCleanStatus:
 					//消毒结束，保存本次消毒开始的rtc时间 + 消毒时长
-					if(!CarStatus.ucUVTimeRemain)
+					if( !CarStatus.ucUVTimeRemain )
 					{
 						UvClean_Save_Record();
 					}
@@ -226,6 +248,6 @@ void vBoxLEDTask(void *argument)
 		// 	LED_SYS_ON();
 		// }
 		Counter++;
-		osDelay(100);
+		osDelay(pdMS_TO_TICKS(100));
 	}
 }
