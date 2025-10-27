@@ -43,6 +43,7 @@ void vMotor_Start_DMA_Receive(uint8_t* ucMotor_Rx_Buffer) {
   __HAL_DMA_DISABLE_IT(huart7.hdmarx, DMA_IT_HT);
 }
 
+// 获取当前DMA接收的数据长度
 uint32_t ulMotor_Get_DMA_Receive_Len(void)
 {
   uint32_t ulLen = MOTOR_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart7.hdmarx);

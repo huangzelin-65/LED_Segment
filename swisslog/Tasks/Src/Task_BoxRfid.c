@@ -42,6 +42,7 @@ uint8_t CardPasswordNum = 0;//全局变量 IDcard的密码个数
 uint8_t ucBoxRfid_Rx_Buffer[2][BOX_RFID_RX_BUF_SIZE]; // 接收缓冲区
 uint8_t ucBoxRfid_current_buf_idx = 0;  // 当前使用的缓冲区索引
 
+extern CarStatus_t CarStatus;
 extern osTimerId_t xBoxRfidLoginTimerHandle;
 extern osSemaphoreId_t xBoxRfidRxSemHandle;
 extern osMessageQueueId_t xBox_Ctrl_QueueHandle;
@@ -83,7 +84,7 @@ uint8_t RFID_GetLoginStatus(void)
 void RFID_Scan_Enable(uint8_t en)
 {
 	enScan = 1;//TODO if enable . can control the scan enable//20200605: always on 
- 	
+ 	//enScan = en;
 	osTimerStop(xBoxRfidLoginTimerHandle);
 }
 
@@ -281,9 +282,10 @@ void vBoxRfidTask(void *argument)
 	uint8_t level = 0;
 	while(1)
 	{
-		if((Car_Get_Station_Status() == InStation) && (enScan >0))
+		//if((Car_Get_Station_Status() == InStation) && (enScan >0))
+		if( (CarStatus.xIsCarRunning != CarRunning) && (enScan >0) )// 车辆运行中不能刷卡开箱
 		{
-		#ifdef RFCARD_MANUAL_READ
+			#ifdef RFCARD_MANUAL_READ
 			uint8_t result;
 	
 			//读取卡号和卡的类型
@@ -332,6 +334,7 @@ void vBoxRfidTask(void *argument)
 				}
 			}				
 			#else
+			//DEBUGINFO("Car not Running");
 			if(M5_WaitCard(temp)){
 				level = 0;
 				level = RFID_CheckUserLevel(temp);	
@@ -342,7 +345,8 @@ void vBoxRfidTask(void *argument)
 			#endif
 		}
 		
-		osDelay(pdMS_TO_TICKS(500));
+		//osDelay(pdMS_TO_TICKS(500));
+		osDelay(pdMS_TO_TICKS(1000));
 	}
 }
 
@@ -362,9 +366,12 @@ void vBoxRfidEventTask(void *argument)
 			DEBUGINFO("Box rfid received len:%d ,data:",ucReciveLen);
 			vPrint_Array(ucBoxRfid_Rx_Buffer[ucBoxRfid_current_buf_idx],ucReciveLen);
 			
-
-			// 处理接收到的数据
-			vBoxRfid_ReceiveDataHandler(ucBoxRfid_Rx_Buffer[ucBoxRfid_current_buf_idx],ucReciveLen);
+			if(CarStatus.xIsCarRunning != CarRunning)
+			{
+				// 处理接收到的数据
+				vBoxRfid_ReceiveDataHandler(ucBoxRfid_Rx_Buffer[ucBoxRfid_current_buf_idx],ucReciveLen);
+			}
+			
 
       // 切换缓冲区并重启接收
       ucBoxRfid_current_buf_idx ^= 1;

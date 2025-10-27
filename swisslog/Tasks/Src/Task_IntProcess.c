@@ -43,7 +43,7 @@ void vIntProcessTask(void *argument)
     //if (xQueueReceive(xInterrupt_QueueHandle, &IntProcessRecv_msg, portMAX_DELAY) == pdPASS) 
     if (osMessageQueueGet(xInterrupt_QueueHandle, &IntProcessRecv_msg, NULL, osWaitForever) == osOK) 
     {
-      DEBUGINFO("IntProcessRecv_msg = %d \r\n",IntProcessRecv_msg);
+      //DEBUGINFO("IntProcessRecv_msg = %d \r\n",IntProcessRecv_msg);
       switch(IntProcessRecv_msg)
       {
         // 判断 前碰撞传感器 是否触发或释放

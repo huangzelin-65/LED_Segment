@@ -74,6 +74,7 @@ static void vBoxRfid_DealReciveCmd(uint8_t etx)
 			g_bReceOk  = 1;
 			g_cCommand = (g_cReceBuf[5]<<8) + g_cReceBuf[4];
 			g_bReceAA  = 0;
+			DEBUGINFO("g_bReceOk = %d\r\n",g_bReceOk);
 		}
 	}
 
@@ -128,6 +129,7 @@ static void vBoxRfid_DealReciveData(uint8_t etx)
 		{   
 			g_bReceOk  = 1;
 			g_bReceAA  = 0;
+			DEBUGINFO("g_bReceOk = %d\r\n",g_bReceOk);
 		}
 	}
 
@@ -656,21 +658,23 @@ uint8_t M5_Easy_ChangePswd(uint8_t block,uint8_t pswdType,uint8_t *oldPassword,u
  */
 uint8_t M5_WaitCard(uint8_t *readBuf) 
 {
-	g_bReceOk=0;	
+	//g_bReceOk=0;	
 	uint32_t i=WAIT_TIME;
 	while(i)
 	{
 		if(g_bReceOk==1)
 		{
+			DEBUGINFO("g_bReceOk=1\r\n");
 			g_bReceOk=0;
 			memcpy(readBuf,g_cReceBuf+1,16);
 			return 1;
 		}
-		osDelay(pdMS_TO_TICKS(10));			
+		i--;
+		osDelay(pdMS_TO_TICKS(1));			
 	}
 	g_bReceOk=0;
 		
-	return 1;		
+	return 0;		
 }
 
 
