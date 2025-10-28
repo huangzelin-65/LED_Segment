@@ -88,6 +88,31 @@ void RFID_Scan_Enable(uint8_t en)
 	osTimerStop(xBoxRfidLoginTimerHandle);
 }
 
+
+void RFID_Print_CardPasswd(void)
+{
+	//uint8_t i = 0;
+	if(CardPasswordNum==0) {
+		DEBUGINFO("use default passwd:FF FF FF FF FF FF\n");
+	}
+	else {
+			DEBUGINFO("total password=%d\n",CardPasswordNum);
+	
+			for(int i =0;i<CardPasswordNum;i++){
+
+				DEBUGINFO("No.%d :%2X %2X %2X %2X %2X %2X\n",i+1,
+					CardPasswordBuf[i*6],
+					CardPasswordBuf[i*6+1],
+					CardPasswordBuf[i*6+2],
+					CardPasswordBuf[i*6+3],
+					CardPasswordBuf[i*6+4],
+					CardPasswordBuf[i*6+5]);
+			}
+			DEBUGINFO("Print end.\n");
+	}
+}
+
+
 /**
  * 更新卡密码信息。
  *
@@ -110,6 +135,8 @@ static void RFID_Update_CardPasswd(void)
 			CardPasswordNum = num;
 		}
 		DEBUGINFO("CardPasswordNum=%d\n",CardPasswordNum);
+		RFID_Print_CardPasswd();
+
 	}
 	else
 	{
@@ -141,7 +168,7 @@ uint8_t RFID_Write_CardPasswd(uint8_t *ucData)
 				bEeprom_Write_Buf(EEP_ADD_IDCARD_PASSWORD+6,CardPasswordBuf,CardPasswordNum*6);
 			bEeprom_Write_Buf(EEP_ADD_IDCARD_PASSWORD,ucData,6);
 			CardPasswordNum++;
-			bEeprom_Read_Byte(EEP_ADD_IDCARD_PASSWORD_NUM,&CardPasswordNum);
+			bEeprom_Write_Byte(EEP_ADD_IDCARD_PASSWORD_NUM,CardPasswordNum);
 		}
 		else {
 			bEeprom_Write_Buf(EEP_ADD_IDCARD_PASSWORD+6,CardPasswordBuf,(MAX_CARD_PSWD-1)*6);
@@ -157,29 +184,6 @@ uint8_t RFID_Write_CardPasswd(uint8_t *ucData)
 	return 0;
 }
 
-
-void RFID_Print_CardPasswd(void)
-{
-	//uint8_t i = 0;
-	if(CardPasswordNum==0) {
-		DEBUGINFO("use default passwd:FF FF FF FF FF FF\n");
-	}
-	else {
-			DEBUGINFO("total password=%d\n",CardPasswordNum);
-	
-			for(int i =0;i<CardPasswordNum;i++){
-
-				DEBUGINFO("No.%d :%2X %2X %2X %2X %2X %2X\n",i+1,
-					CardPasswordBuf[i*6],
-					CardPasswordBuf[i*6+1],
-					CardPasswordBuf[i*6+2],
-					CardPasswordBuf[i*6+3],
-					CardPasswordBuf[i*6+4],
-					CardPasswordBuf[i*6+5]);
-			}
-			DEBUGINFO("Print end.\n");
-	}
-}
 
 /*
 刷卡后的有效时间
