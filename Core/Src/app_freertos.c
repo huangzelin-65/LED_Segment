@@ -97,14 +97,14 @@ const osSemaphoreAttr_t xHmiRxSem_attributes = {
 osThreadId_t InitTaskHandle;
 const osThreadAttr_t InitTask_attributes = {
   .name = "InitTask",
-  .priority = (osPriority_t) osPriorityHigh,
+  .priority = (osPriority_t) osPriorityRealtime,
   .stack_size = 256 * 4
 };
 /* Definitions for IntProcessTask */
 osThreadId_t IntProcessTaskHandle;
 const osThreadAttr_t IntProcessTask_attributes = {
   .name = "IntProcessTask",
-  .priority = (osPriority_t) osPriorityAboveNormal,
+  .priority = (osPriority_t) osPriorityHigh,
   .stack_size = 256 * 4
 };
 /* Definitions for MotionCtrlTask */

@@ -79,6 +79,7 @@ typedef enum {
     ToggleSwitch,     //拨动开关
     BoxELock,         //车厢电子锁
     ResetButton,      //复位按钮
+    LowVoltageDetect, //低电压检测
     SensorDebounce,   //传感器防抖
     ToggleDebounce,   //拨动开关防抖
     BoxELockDebounce, //车厢电子锁防抖
@@ -300,6 +301,9 @@ void Error_Handler(void);
 #define Rfid_Box_RX_GPIO_Port GPIOE
 #define EEPROM_SCL_Pin GPIO_PIN_8
 #define EEPROM_SCL_GPIO_Port GPIOB
+#define LOW_VOLTAGE_DET_Pin GPIO_PIN_14
+#define LOW_VOLTAGE_DET_GPIO_Port GPIOG
+#define LOW_VOLTAGE_DET_EXTI_IRQn EXTI14_IRQn
 #define BOX_5V_Pin GPIO_PIN_4
 #define BOX_5V_GPIO_Port GPIOE
 #define ELOCK_EN1_Pin GPIO_PIN_5

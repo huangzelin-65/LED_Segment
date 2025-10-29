@@ -28,6 +28,16 @@ volatile uint8_t SensorDebounce_flag;
 volatile uint8_t ToggleDebounce_flag;
 volatile uint8_t BoxELockDebounce_flag;
 
+void LowVoltageDetect_Test(void)
+{
+  uint16_t i = 0;
+  while (1)
+  {
+    DEBUGINFO("%d\r\n",i);
+    i++;
+    osDelay(pdMS_TO_TICKS(100));
+  }
+}
 
 void vIntProcessTask(void *argument)
 {
@@ -78,6 +88,12 @@ void vIntProcessTask(void *argument)
             osTimerStart(xBoxELockDebounceTimerHandle, pdMS_TO_TICKS(DebounceTime));
             BoxELockDebounce_flag = 1;  // 置位标志
           }
+          break;
+        
+        case LowVoltageDetect:
+          //车厢电子锁检测防重入
+          DEBUGINFO("LowVoltageDetect\r\n");
+          LowVoltageDetect_Test();
           break;
         
         case ResetButton:

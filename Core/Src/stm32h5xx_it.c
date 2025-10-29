@@ -45,7 +45,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 BaseType_t xHigherPriorityTaskWoken;
-uint8_t msg;
+eInterruptType msg;
 
 /* USER CODE END PD */
 
@@ -382,6 +382,21 @@ void EXTI13_IRQHandler(void)
   msg = RearProxSensor; // 后距离传感器
   osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
   /* USER CODE END EXTI13_IRQn 1 */
+}
+
+/**
+  * @brief This function handles EXTI Line14 interrupt.
+  */
+void EXTI14_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI14_IRQn 0 */
+
+  /* USER CODE END EXTI14_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(LOW_VOLTAGE_DET_Pin);
+  /* USER CODE BEGIN EXTI14_IRQn 1 */
+  msg = LowVoltageDetect; // 低电压检测
+  osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
+  /* USER CODE END EXTI14_IRQn 1 */
 }
 
 /**

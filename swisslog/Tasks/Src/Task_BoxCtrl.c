@@ -6,6 +6,7 @@
 #include "NumDisplay.h"
 #include "adaptor_box.h"
 #include "Task_BoxCtrl.h"
+#include "Task_BoxRfid.h"
 #include "adaptor_eeprom.h"
 #include "DwinHMI.h"
 #include "UV_Clean.h"
