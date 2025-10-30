@@ -96,6 +96,7 @@ typedef enum {
   SensorEvent,          //小车传感器变化
   SensorTrigger,        //小车传感器触发
   SensorRelease,        //小车传感器释放
+  SensorError,          //小车传感器异常
   ToggleFront,          //拨动开关拨向前
   ToggleBack,           //拨动开关拨向后
   ToggleStop,           //拨动开关拨向停止
@@ -347,7 +348,6 @@ void Error_Handler(void);
 #define FC_L_EXTI_IRQn EXTI12_IRQn
 #define FC_H_Pin GPIO_PIN_5
 #define FC_H_GPIO_Port GPIOG
-#define FC_H_EXTI_IRQn EXTI5_IRQn
 #define LED2_Pin GPIO_PIN_4
 #define LED2_GPIO_Port GPIOG
 #define FP_H_Pin GPIO_PIN_11
@@ -374,7 +374,6 @@ void Error_Handler(void);
 #define RP_H_EXTI_IRQn EXTI13_IRQn
 #define FP_L_Pin GPIO_PIN_0
 #define FP_L_GPIO_Port GPIOG
-#define FP_L_EXTI_IRQn EXTI0_IRQn
 #define OUT_DIR_Pin GPIO_PIN_11
 #define OUT_DIR_GPIO_Port GPIOD
 #define LED1_Pin GPIO_PIN_10

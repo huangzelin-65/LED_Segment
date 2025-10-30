@@ -50,45 +50,72 @@ void vSensorStatusCheck(void)
   DEBUGINFO("FC_H = %d, FC_L = %d, RC_H = %d, RC_L = %d,\r\n",FC_H_value,FC_L_value,RC_H_value,RC_L_value);
   DEBUGINFO("FP_H = %d, FP_L = %d, RP_H = %d, RP_L = %d,\r\n",FP_H_value,FP_L_value,RP_H_value,RP_L_value);
 
+  // 判断 前碰撞传感器 是否触发、释放、异常
   if ((FC_H_value == GPIO_PIN_RESET)&&(FC_L_value == GPIO_PIN_SET)) //FC Trigger
   {
     CarStatus.FrontCrashStatus = SensorTrigger;
-    CarToServerData.wSta |= 1 << 4;
+    // CarToServerData.wSta |= 1 << 4;
   }
   if ((FC_H_value == GPIO_PIN_SET)&&(FC_L_value == GPIO_PIN_RESET)) //FC Release
   {
     CarStatus.FrontCrashStatus = SensorRelease;
-    CarToServerData.wSta &= ~(1 << 4);
+    // CarToServerData.wSta &= ~(1 << 4);
   }
+  if(((FC_H_value == GPIO_PIN_SET)&&(FC_L_value == GPIO_PIN_SET)) || 
+    ((FC_H_value == GPIO_PIN_RESET)&&(FC_L_value == GPIO_PIN_RESET)))
+  {
+    CarStatus.FrontCrashStatus = SensorError;
+  }
+
+  // 判断 后碰撞传感器 是否触发、释放、异常
   if ((RC_H_value == GPIO_PIN_RESET)&&(RC_L_value == GPIO_PIN_SET)) //RC Trigger
   {
     CarStatus.RearCrashStatus = SensorTrigger;
-    CarToServerData.wSta |= 1 << 5;
+    // CarToServerData.wSta |= 1 << 5;
   }
   if ((RC_H_value == GPIO_PIN_SET)&&(RC_L_value == GPIO_PIN_RESET)) //RC Release
   {
     CarStatus.RearCrashStatus = SensorRelease;
-    CarToServerData.wSta &= ~(1 << 5);
+    // CarToServerData.wSta &= ~(1 << 5);
   }
+  if(((RC_H_value == GPIO_PIN_SET)&&(RC_L_value == GPIO_PIN_SET)) ||
+    ((RC_H_value == GPIO_PIN_RESET)&&(RC_L_value == GPIO_PIN_RESET)))
+  {
+    CarStatus.RearCrashStatus = SensorError;
+  }
+
+  // 判断 前距离传感器 是否触发、释放、异常
   if ((FP_H_value == GPIO_PIN_RESET)&&(FP_L_value == GPIO_PIN_SET)) //FP Trigger
   {
     CarStatus.FrontProxStatus = SensorTrigger;
-    CarToServerData.wSta |= 1 << 2;
+    // CarToServerData.wSta |= 1 << 2;
   }
   if ((FP_H_value == GPIO_PIN_SET)&&(FP_L_value == GPIO_PIN_RESET)) //FP Release
   {
     CarStatus.FrontProxStatus = SensorRelease;
-    CarToServerData.wSta &= ~(1 << 2);
+    // CarToServerData.wSta &= ~(1 << 2);
   }
+  if(((FP_H_value == GPIO_PIN_SET)&&(FP_L_value == GPIO_PIN_SET)) ||
+    ((FP_H_value == GPIO_PIN_RESET)&&(FP_L_value == GPIO_PIN_RESET)))
+  {
+    CarStatus.FrontProxStatus = SensorError;
+  }
+
+  // 判断 后距离传感器 是否触发、释放、异常
   if ((RP_H_value == GPIO_PIN_RESET)&&(RP_L_value == GPIO_PIN_SET)) //RP Trigger
   {
     CarStatus.RearProxStatus = SensorTrigger;
-    CarToServerData.wSta |= 1 << 3;
+    // CarToServerData.wSta |= 1 << 3;
   }
   if ((RP_H_value == GPIO_PIN_SET)&&(RP_L_value == GPIO_PIN_RESET)) //RP Release
   {
     CarStatus.RearProxStatus = SensorRelease;
-    CarToServerData.wSta &= ~(1 << 3);
+    // CarToServerData.wSta &= ~(1 << 3);
+  }
+  if(((RP_H_value == GPIO_PIN_SET)&&(RP_L_value == GPIO_PIN_SET)) ||
+    ((RP_H_value == GPIO_PIN_RESET)&&(RP_L_value == GPIO_PIN_RESET)))
+  {
+    CarStatus.RearProxStatus = SensorError;
   }
 
   // 发送消息到xSensor_Queue

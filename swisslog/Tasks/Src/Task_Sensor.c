@@ -81,6 +81,19 @@ void vSensorTask(void *argument)
             if(CarStatus.xRealDirection == Forward)
             {
               DEBUGINFO("Forward\r\n");
+              
+              // 传感器异常
+              if(((CarStatus.FrontCrashStatus == SensorError) \
+                || (CarStatus.FrontProxStatus == SensorError)))
+              {
+                GPIO_WRITE(LED1, GPIO_PIN_SET); // 使能LED1
+                DEBUGINFO("sensors Error\r\n");
+                DEBUGINFO("enable LED1\r\n");
+
+                //请求停止电机
+                ucMotion_msg = CarStop;
+              }
+
               //运动方向上其中一个传感器触发即可触发
               if (((CarStatus.FrontCrashStatus == SensorTrigger) \
                 || (CarStatus.FrontProxStatus == SensorTrigger)))
@@ -108,6 +121,19 @@ void vSensorTask(void *argument)
             else if(CarStatus.xRealDirection == Backward)
             {
               DEBUGINFO("Backward\r\n");
+
+              // 传感器异常
+              if(((CarStatus.RearCrashStatus == SensorError) \
+                || (CarStatus.RearProxStatus == SensorError)))
+              {
+                GPIO_WRITE(LED1, GPIO_PIN_SET); // 使能LED1
+                DEBUGINFO("sensors Error\r\n");
+                DEBUGINFO("enable LED1\r\n");
+
+                //请求停止电机
+                ucMotion_msg = CarStop;
+              }
+
               //运动方向上其中一个传感器触发即可触发
               if (((CarStatus.RearCrashStatus == SensorTrigger) \
                 || (CarStatus.RearProxStatus == SensorTrigger)))

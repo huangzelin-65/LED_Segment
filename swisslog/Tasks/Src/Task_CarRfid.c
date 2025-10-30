@@ -201,8 +201,9 @@ void vCarRfidTask(void *argument)
     {
       ucReciveLen = ulCarRfid_Get_DMA_Receive_Len();
       DEBUGINFO("ucCarRfid_current_buf_idx:%d\r\n",ucCarRfid_current_buf_idx);
-      DEBUGINFO("rfid received len:%d\r\n",ucReciveLen);
-      vPrint_Array(ucCarRfid_Rx_Buffer[ucCarRfid_current_buf_idx], ucReciveLen);
+      DEBUGINFO("rfid received len:%d,data:%s\r\n",ucReciveLen,ucCarRfid_Rx_Buffer[ucCarRfid_current_buf_idx]);
+      //DEBUGINFO("rfid received len:%d\r\n",ucReciveLen);
+      //vPrint_Array(ucCarRfid_Rx_Buffer[ucCarRfid_current_buf_idx], ucReciveLen);
       
       //uint8_t* temp_buffer = ucCarRfid_Rx_Buffer[ucCarRfid_current_buf_idx];
 
