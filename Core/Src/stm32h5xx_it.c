@@ -78,6 +78,8 @@ extern DMA_HandleTypeDef handle_GPDMA2_Channel0;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel5;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel4;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel3;
+extern DMA_NodeTypeDef Node_GPDMA1_Channel2;
+extern DMA_QListTypeDef List_GPDMA1_Channel2;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel2;
 extern DMA_HandleTypeDef handle_GPDMA2_Channel2;
 extern DMA_HandleTypeDef handle_GPDMA2_Channel1;
@@ -689,12 +691,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
   }
   else if (huart->Instance == USART6) {
     //Wifi串口接收处理
-    uint16_t dataLength = ulWifi_Get_DMA_Receive_Len();
-
-    if (dataLength > 0) 
-    {
-      osSemaphoreRelease(xWifiRxSemHandle);  // 释放信号量,允许读取wifi数据
-    }
+    Wifi_ReceiveData(Size);
   }
   else if (huart->Instance == UART7)
   {
@@ -744,7 +741,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
   }
   else if (huart->Instance == USART6)
   {
-    osSemaphoreRelease(xWifiTxSemHandle);  // 释放信号量,允许下一次wifi发送
+
   }
   else if (huart->Instance == UART7)
   {

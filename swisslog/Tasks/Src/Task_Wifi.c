@@ -14,155 +14,20 @@
 #include "LogDebugInfo.h"
 #include "adaptor_wifi.h"
 #include "Common.h"
+#include <stdbool.h>
+#include "queue.h"
 
-
-uint8_t ucWifiDataLen = 0;
-
-// 双缓冲区（防止处理期间数据被覆盖）
-uint8_t ucWifi_Receive_Buffer[2][WIFI_RX_BUF_SIZE];
-uint8_t ucWifi_current_buf_idx = 0;  // 当前使用的缓冲区索引
-
-/* 外部资源声明 */
-extern osSemaphoreId_t WifiRxSemHandle;
-extern osSemaphoreId_t xWifiReadySemHandle;
-extern ServerToCarData_t ServerToCarData;
-extern osMessageQueueId_t xWifi_Rx_QueueHandle;
-extern osSemaphoreId_t xWifiRxSemHandle;
-
-
-/* 初始化WB502A模块 */
-static HAL_StatusTypeDef wb502a_init(void) 
-{
-  char wifi_cmd[WIFI_TX_BUF_SIZE];
-
-  DEBUGINFO("wifi init\r\n");
-
-  //等待模块启动
-  osDelay(pdMS_TO_TICKS(1000));
-
-  //退出透传模式步骤1
-  at_send_command("+++", "a", 500);
-  //退出透传模式步骤2
-  at_send_command("a", "+ok", 500);
-
-  // 退出透传后需要时间保存参数到flash
-  osDelay(pdMS_TO_TICKS(1000));
-
-  // //查看透传模式
-  // if (at_send_command("AT+TPMODE", "OK", 10000) != HAL_OK) 
-  // {
-  //   return HAL_ERROR;
-  // }
-
-  //复位模块
-  if (at_send_command("AT+RESET", "OK", 10000) != HAL_OK) 
-  {
-    return HAL_ERROR;
-  }
-
-  // 模块复位后需要一定时间启动
-  osDelay(pdMS_TO_TICKS(2000));
-
-
-
-  // 检查模块是否响应
-  if (at_send_command("AT", "OK", 2000) != HAL_OK) 
-  {
-    return HAL_ERROR;
-  }
-
-
-  //设置模式为STA模式
-  if (at_send_command("AT+ROLE=1", "OK", 2000) != HAL_OK) 
-  {
-    return HAL_ERROR;
-  }
-
-
-  // 设置静态IP
-  snprintf(wifi_cmd, WIFI_TX_BUF_SIZE, "AT+SIP=%s", WIFI_STATIC_IP);
-  if (at_send_command(wifi_cmd, "OK", 2000) != HAL_OK) 
-  {
-    return HAL_ERROR;
-  }
-
-
-  // 设置网关
-  snprintf(wifi_cmd, WIFI_TX_BUF_SIZE, "AT+GW=%s", WIFI_GATEWAY);
-  if (at_send_command(wifi_cmd, "OK", 2000) != HAL_OK) 
-  {
-    return HAL_ERROR;
-  }
-
-
-  // 设置掩码
-  snprintf(wifi_cmd, WIFI_TX_BUF_SIZE, "AT+MASK=%s", WIFI_NETMASK);
-  if (at_send_command(wifi_cmd, "OK", 2000) != HAL_OK) 
-  {
-    return HAL_ERROR;
-  }
-
-
-  // 关闭DHCP
-  if (at_send_command("AT+DHCP=0", "OK", 2000) != HAL_OK) 
-  {
-    return HAL_ERROR;
-  }
-
-
-  // 连接到指定AP
-  if (wb502a_connect_ap() != HAL_OK) 
-  {
-    return HAL_ERROR;
-  }
-
-
-  // 确认静态IP地址
-  if (wb502a_check_ip(WIFI_STATIC_IP) != HAL_OK) 
-  {
-    return HAL_ERROR;
-  }
-
-  
-  //设置客户端socket
-  snprintf(wifi_cmd, WIFI_TX_BUF_SIZE, "AT+SOCKET=1,%s,%s", WIFI_SERVER_IP, WIFI_SERVER_PORT);
-  if (at_send_command(wifi_cmd, "OK", 2000) != HAL_OK) 
-  {
-    return HAL_ERROR;
-  }
-
-  //进入透传模式
-  if (at_send_command("AT+TPMODE=1", "OK", 2000) != HAL_OK) 
-  {
-    return HAL_ERROR;
-  }
-
-
-  return HAL_OK;
-}
-
-
-
+extern osMessageQueueId_t xWifi_Parse_QueueHandle;
 /* WiFi管理任务入口函数 */
 void vWifiManagerTask(void *argument)
 {
   DEBUGINFO("vWifiManagerTask\r\n");
-  
-  // 初始化WiFi模块
-  while (wb502a_init() != HAL_OK) 
-  {
-     // 初始化失败重试
-       osDelay(pdMS_TO_TICKS(1000));
-       DEBUGINFO("wifi retry!\r\n");
-  }
-  
-  
-  osSemaphoreRelease(xWifiReadySemHandle);  // 释放信号量启动WifiReceive任务
-
-  // 连接成功后进入状态监测
+  osDelay(pdMS_TO_TICKS(3000));//wifi模块上电需要等待3秒才可以发送命令
+  Wifi_ConnectStart();
   while (1)
   {
-	  osDelay(pdMS_TO_TICKS(2000));
+    Wifi_ConnectProcess();
+	  osDelay(pdMS_TO_TICKS(100));
   }
 }
     
@@ -170,45 +35,55 @@ void vWifiManagerTask(void *argument)
 /* wifi接收任务入口函数 */
 void vWifiReceiveTask(void *argument)
 {
-  uint32_t ulReceiveLen = 0;
-  
-  if (osSemaphoreAcquire(xWifiReadySemHandle, osWaitForever) == osOK)
+  DEBUGINFO("vWifiReceiveTask\r\n");
+  uint8_t read_buffer[WIFI_RX_BUF_SIZE];
+  WifiParseData_t *wifi_data = NULL;
+  Wifi_ReceiveInit();//启动串口空闲中断，DMA接收数据
+  while (1)
   {
-    //启动DMA接收
-    vWifi_Start_DMA_Receive(ucWifi_Receive_Buffer[ucWifi_current_buf_idx]);
+      //等待接收串口的数据
+      if(xQueueReceive(xWifi_Parse_QueueHandle, &wifi_data, portMAX_DELAY) == pdTRUE) {
+        int dataLength = 0;
+        bool parse_rbuf = false;
 
-    while(1) {
-      // 等待DMA接收完成信号
-      //if (osMessageQueueGet(xWifi_Rx_QueueHandle,ucWifi_Receive_Buffer, NULL, osWaitForever) == osOK)
-      if (osSemaphoreAcquire(xWifiRxSemHandle, osWaitForever) == osOK)
-      {
+        memset(read_buffer,0,sizeof(read_buffer));
 
-        ulReceiveLen = ulWifi_Get_DMA_Receive_Len();
-        DEBUGINFO("wifi received:%s, len:%d\r\n",ucWifi_Receive_Buffer[ucWifi_current_buf_idx], ulReceiveLen);
+        //当last_read_id与Size相等时，代表没有数据更新，此时不解析数据
+        if(wifi_data->last_read_id < wifi_data->size)
+        {
+          for(int i = wifi_data->last_read_id;i < wifi_data->size;i++)
+          {
+            read_buffer[i - wifi_data->last_read_id] = wifi_data->rx_buffer[i];
+            dataLength++;
+          }
+          DEBUGINFO("read_buffer 1:%s\n",read_buffer);
+          parse_rbuf = true;
+        }
+        else if(wifi_data->last_read_id > wifi_data->size)
+        {
+          int j = 0;
+          for(int i = wifi_data->last_read_id;i < sizeof(wifi_data->rx_buffer);i++)
+          {
+            read_buffer[i - wifi_data->last_read_id] = wifi_data->rx_buffer[i];
+            j++;
+            dataLength++;
+          }
+          for(int i = 0;i < wifi_data->size;i++)
+          {
+            read_buffer[j + i] = wifi_data->rx_buffer[i];
+            dataLength++;
+          } 
+          DEBUGINFO("read_buffer 2:%s\n",read_buffer);
+          parse_rbuf = true;      
+        }
 
-        vSendToWifiTX(ucWifi_Receive_Buffer[ucWifi_current_buf_idx], ulReceiveLen);
-
-        // ServerToCarData.wSeq = ucWifi_Receive_Buffer[1]<<8 | ucWifi_Receive_Buffer[0]; // 序号
-        // ServerToCarData.dwPlcNum = ucWifi_Receive_Buffer[5]<<24 | ucWifi_Receive_Buffer[4]<<16 | ucWifi_Receive_Buffer[3]<<8 | ucWifi_Receive_Buffer[2]; // PLC编号
-        // ServerToCarData.wHeatBeat = ucWifi_Receive_Buffer[CMD_BASE_COUNT+1]<<8 | ucWifi_Receive_Buffer[CMD_BASE_COUNT]; // 心跳信号
-        // ServerToCarData.wAlm = ucWifi_Receive_Buffer[CMD_BASE_COUNT+3]<<8 | ucWifi_Receive_Buffer[CMD_BASE_COUNT+2]; // 报警信号
-        // ServerToCarData.wCtrl = ucWifi_Receive_Buffer[CMD_BASE_COUNT+5]<<8 | ucWifi_Receive_Buffer[CMD_BASE_COUNT+4]; // 控制信号
-        // ServerToCarData.ucDirection = ucWifi_Receive_Buffer[CMD_BASE_COUNT+30]; // 小车运行方向 1=正转 2=反转
-
-        ServerToCarData.ucDirection = ucWifi_Receive_Buffer[ucWifi_current_buf_idx][0]; // 小车运行方向 1=正转 2=反转
-        ServerToCarData.wCtrl = ucWifi_Receive_Buffer[ucWifi_current_buf_idx][1]; // 控制信号
-        ServerToCarData.xStationStatus = ucWifi_Receive_Buffer[ucWifi_current_buf_idx][2]; // 到站状态
-        DEBUGINFO("ucDirection:%X ,wCtrl:%X \r\n",ServerToCarData.wCtrl);
-
-        vParseCommandToCar();
-
-        // 重启DMA接收(DMA循环模式下，重启后从缓冲区起始地址覆盖写入)
-        ucWifi_current_buf_idx ^= 1;
-        vWifi_Start_DMA_Receive(ucWifi_Receive_Buffer[ucWifi_current_buf_idx]);
+        if(parse_rbuf)
+        {
+          Wifi_ConnectAck(read_buffer,dataLength);
+        }  
+        vPortFree(wifi_data);       
       }
-
-    }
-  }
+  } 
 }
 
 

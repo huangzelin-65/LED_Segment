@@ -6,55 +6,231 @@
 #include <stdio.h>
 #include "adaptor_wifi.h"
 #include "LogDebugInfo.h"
+#include "queue.h"
 
-
-/* AT指令缓冲区与状态定义 */
-uint8_t ucAt_Cmd_Buffer[WIFI_TX_BUF_SIZE];
-uint8_t ucAt_Respond_Buffer[WIFI_RX_BUF_SIZE];
-uint8_t ucWifi_Respond_Buffer[WIFI_RX_BUF_SIZE];
-uint16_t resp_length = 0;
-
-
-// 外部声明
-extern UART_HandleTypeDef huart6;
-extern osMessageQueueId_t xWifi_Rx_QueueHandle;
 extern osSemaphoreId_t xWifiTxSemHandle;
-extern osSemaphoreId_t xWifiRxSemHandle;
+extern osMessageQueueId_t xWifi_Parse_QueueHandle;
+extern UART_HandleTypeDef huart6;
+extern DMA_HandleTypeDef handle_GPDMA1_Channel2;
+char Wifi_SendBuffer[WIFI_TX_BUF_SIZE];//wifi数据发送的buffer
+uint8_t Wifi_ReceiveBuffer[WIFI_RX_BUF_SIZE];//保存wifi数据，必要时需要加大长度
+WifiState_t wifi_state = WIFI_IDLE;//连接wifi的步骤状态
+WifiResult_t wifi_result = WIFI_ERROR;//连接wifi的步骤结果
+uint16_t wifi_last_read_id = 0;//wifi数据解析的最后一个位置
+WifiResult_t wifi_connect_state = WIFI_ERROR;//wifi是否成功连接到热点
 
-
-/**************************************************
- * 启动WiFi的GPDMA接收功能（空闲模式）。
- *
- *  @param ucWifi_Rx_Buffer WiFi接收缓冲区指针
- *  @note 如果启动DMA接收失败，将会重试一次。
- *************************************************/
-void vWifi_Start_DMA_Receive(uint8_t *ucWifi_Rx_Buffer)
+HAL_StatusTypeDef Wifi_SendATCmd(const char *cmd,int32_t timeout_ms)
 {
-  // 启动DMA接收（空闲模式）
-  if (HAL_UARTEx_ReceiveToIdle_DMA(&huart6, ucWifi_Rx_Buffer, WIFI_RX_BUF_SIZE) != HAL_OK)
-  {
-    DEBUGINFO("HAL_UARTEx_ReceiveToIdle_DMA() retry\r\n");
-    //若启动DMA接收失败，再启动一次
-    HAL_UARTEx_ReceiveToIdle_DMA(&huart6, ucWifi_Rx_Buffer, WIFI_RX_BUF_SIZE);
-  }
-  __HAL_DMA_DISABLE_IT(huart6.hdmarx, DMA_IT_HT);
+  HAL_StatusTypeDef status;
+
+  uint16_t len = snprintf(Wifi_SendBuffer, sizeof(Wifi_SendBuffer), "%s\r\n", cmd);
+
+  status = HAL_UART_Transmit(&huart6, (uint8_t*)Wifi_SendBuffer, len, timeout_ms);
+
+  DEBUGINFO("cmd 6:%s",Wifi_SendBuffer);
+
+  return status;
 }
 
-
-/*********************************
- * 停止Wi-Fi GPDMA接收。
- *********************************/
-void vWifi_Stop_GPDMA_Receive(void)
+//启动串口空闲中断，关闭DMA半传输中断和传输完成中断，只响应串口空闲完成中断；
+void Wifi_ReceiveInit(void)
 {
-  HAL_UART_DMAStop(&huart6);
+    HAL_StatusTypeDef status;
+    status = HAL_UARTEx_ReceiveToIdle_DMA(&huart6, Wifi_ReceiveBuffer, WIFI_RX_BUF_SIZE);
+    if(status == HAL_OK)
+    {
+      DEBUGINFO("HAL_UARTEx_ReceiveToIdle_DMA huart6 OK");
+      __HAL_DMA_DISABLE_IT(&handle_GPDMA1_Channel2, DMA_IT_HT);
+      __HAL_DMA_DISABLE_IT(&handle_GPDMA1_Channel2, DMA_IT_TC); 
+    }
 }
-
-uint32_t ulWifi_Get_DMA_Receive_Len(void)
+//从中断中发送队列，线程中中获取队列，并解析数据
+void Wifi_ParseDataStart(uint8_t *rx_buffer,uint16_t last_read_id,uint16_t size)
 {
-  uint32_t ucLen = WIFI_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart6.hdmarx);
-  return ucLen;
+    WifiParseData_t *wifi_data = pvPortMalloc(sizeof(WifiParseData_t));
+    wifi_data->last_read_id = last_read_id;
+    wifi_data->size = size;
+    wifi_data->rx_buffer = rx_buffer;
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    if (xQueueSendFromISR(xWifi_Parse_QueueHandle, &wifi_data, &xHigherPriorityTaskWoken) == pdPASS) {
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // 必要时切换任务
+    }    
 }
-
+//接收中断中调用，处理wifi接收的数据
+void Wifi_ReceiveData(uint16_t Size)
+{
+    printf("Wifi_ReceiveData\n");
+    Wifi_ParseDataStart(Wifi_ReceiveBuffer,wifi_last_read_id,Size);
+    wifi_last_read_id = Size;
+}
+//调用此结果，判断此时wifi是否正常连接
+bool Wifi_IsConnected(void)
+{
+    if(wifi_connect_state == WIFI_OK)
+    {
+      return true;
+    }
+    return false;
+}
+//启动状态机，开始连接wifi,一般需要wifi上电之后的3秒，才能启动连接wifi
+void Wifi_ConnectStart(void)
+{
+    DEBUGINFO("Wifi_ConnectStart\n");
+    wifi_result = WIFI_OK;
+    wifi_state = WIFI_AT;
+}
+//线程中运行wifi连接过程，发送命令，等待结果回复，再进行下一步，直到返回成功；
+void Wifi_ConnectProcess(void)
+{  
+    static int wait_cnt = 0;
+    //wifi等待命令结果
+    if(wifi_result != WIFI_OK)
+    {
+        // if(wifi_state != WIFI_IDLE)DEBUGINFO("wait wifi_result,cur state:%d",wifi_state);
+        if((wifi_state - 1) == WIFI_AT)//如果没有回复AT,则代表是透传模式，需要退出
+        {
+            wifi_state = WIFI_TPMODE_EXIT_1;
+        }
+        else
+        {
+            return;
+        }
+    }
+    //wifi状态机执行完毕
+    if(wifi_state > WIFI_END)
+    {  
+        wifi_state = WIFI_IDLE;
+    }   
+    //wifi状态切换打印  
+    static WifiState_t wifi_pre_state = WIFI_IDLE;
+    if(wifi_state != wifi_pre_state)
+    {
+        wifi_pre_state = wifi_state;
+        DEBUGINFO("wifi_state:%d\n",wifi_state);
+        memset(Wifi_SendBuffer,0,sizeof(Wifi_SendBuffer));
+    }
+    switch (wifi_state)
+    {
+    case WIFI_AT:
+        {
+            Wifi_SendATCmd("AT",2000);
+        }
+        break; 
+    case WIFI_TPMODE_EXIT_1:
+        {
+            Wifi_SendATCmd("+++",2000);
+        }
+        break; 
+    case WIFI_TPMODE_EXIT_2:
+        {
+            Wifi_SendATCmd("a",2000);
+        }
+        break;                 
+    case WIFI_CHECK_CONNET:
+        {
+            Wifi_SendATCmd("AT+LIP",2000);
+        }
+        break;         
+    case WIFI_SET_CONNECT:
+        {
+            snprintf(Wifi_SendBuffer, WIFI_TX_BUF_SIZE, "AT+RAP=%s,%s", WIFI_SSID,WIFI_PSW);
+            Wifi_SendATCmd(Wifi_SendBuffer,2000);             
+        }
+        break;
+    case WIFI_TO_MQTT:
+        {
+            wait_cnt++;
+            if(wait_cnt > 3)
+            {
+                wait_cnt = 0;
+                wifi_state = WIFI_IDLE;
+                // mqtt_connect();
+            }    
+        }   
+        break;                                        
+    default:
+        if(wifi_state != WIFI_IDLE)DEBUGINFO("error wifi_state:%d",wifi_state);
+        break;
+    }
+    if(wifi_state != WIFI_IDLE && wifi_state != WIFI_TO_MQTT)
+    {
+        wifi_state++; 
+        wifi_result = WIFI_ERROR;
+    }     
+}
+//wifi模块连接路由过程中，ack的校验
+void Wifi_ConnectAck(uint8_t* rbuf,int len)
+{
+    if(wifi_state <= WIFI_AT) 
+    {
+        return;
+    }
+    printf("wifi_state:%d\n",wifi_state);      
+    switch(wifi_state - 1)
+    {
+        case WIFI_AT:
+        {
+            char target_mqtt_str[] = "OK";
+            char *result = strstr((char *)rbuf, target_mqtt_str);
+            if (result != NULL) {
+                printf("WIFI_AT ok\n");    
+                wifi_result = WIFI_OK;
+                wifi_state = WIFI_CHECK_CONNET;    
+            }            
+        }
+        break;  
+        case WIFI_TPMODE_EXIT_1:
+        {
+            char target_mqtt_str[] = "a";
+            char *result = strstr((char *)rbuf, target_mqtt_str);
+            if (result != NULL) {
+                printf("WIFI_TPMODE_EXIT_1 ok\n");    
+                wifi_result = WIFI_OK;     
+            }            
+        }
+        break;
+        case WIFI_TPMODE_EXIT_2:
+        {
+            char target_mqtt_str[] = "+ok";
+            char *result = strstr((char *)rbuf, target_mqtt_str);
+            if (result != NULL) {
+                printf("WIFI_TPMODE_EXIT_2 ok\n");    
+                wifi_result = WIFI_OK;     
+            }            
+        }
+        break;                
+        case WIFI_CHECK_CONNET:
+        {
+            char target_mqtt_str[] = WIFI_CHECK_IP;
+            char *result = strstr((char *)rbuf, target_mqtt_str);
+            if (result != NULL) {
+                printf("WIFI_CHECK_CONNET ok\n");   
+                wifi_result = WIFI_OK; 
+                wifi_connect_state = WIFI_OK; 
+                wifi_state = WIFI_TO_MQTT;     
+            } 
+            else
+            {
+                printf("WIFI_CHECK_CONNET to WIFI_SET_CONNECT\n");
+                wifi_result = WIFI_OK;  
+            }           
+        }
+        break;              
+        case WIFI_SET_CONNECT:
+        {
+            char target_mqtt_str[] = "WIFI_CONNECT";
+            char *result = strstr((char *)rbuf, target_mqtt_str);
+            if (result != NULL) {
+                printf("WIFI_SET_CONNECT ok\n");     
+                wifi_result = WIFI_OK;
+                wifi_connect_state = WIFI_OK;     
+            }           
+        }
+        break;                    
+        default:if(wifi_state != WIFI_IDLE)printf("error wifi_state:%d",wifi_state);
+        break;        
+    }
+}
 
 /*********************************************************************
  * 向 Wi-Fi 发送数据
@@ -82,73 +258,4 @@ void vSendToWifiTX(uint8_t *ucCmdDataArr, uint8_t len)
 
     DEBUGINFO("wifi send:%s", ucCmdDataArr);
   }
-}
-
-/*****************************************************************
- * 发送一个AT命令到WiFi模块，并等待指定的时间内收到预期的响应。
- *
- *   @param cmd        要发送的AT命令。
- *   @param expect     预期的响应字符串。
- *   @param timeout_ms 等待响应的超时时间（毫秒）。
- *
- *   @return 如果收到预期的响应，返回HAL_OK；否则返回HAL_ERROR。
- ******************************************************************/
-HAL_StatusTypeDef at_send_command(const char *cmd, const char *expect, uint32_t timeout_ms)
-{
-  uint32_t start_tick = osKernelGetTickCount();
-  uint32_t rsp_timeout = 100;  // 每次等待回复的超时时间（ms）
-  HAL_StatusTypeDef ret = HAL_ERROR;
-  //Wifi_Rx_Frame_t frame;
-  
-  //启动DMA接收
-  vWifi_Start_DMA_Receive(ucAt_Respond_Buffer);
-  
-  // 格式化并发送AT指令
-  snprintf((char *)ucAt_Cmd_Buffer, WIFI_TX_BUF_SIZE, "%s\r\n", cmd);
-  vSendToWifiTX(ucAt_Cmd_Buffer, strlen((char *)ucAt_Cmd_Buffer));
-
-  
-  // 超时时间内循环等待响应
-  while ((osKernelGetTickCount() - start_tick) < timeout_ms) 
-  {
-    
-    // 等待响应, 检查信号量
-    if (osSemaphoreAcquire(xWifiRxSemHandle, rsp_timeout) == osOK)
-    {
-      DEBUGINFO("wifi received:%s\r\n",ucAt_Respond_Buffer);
-      // 检查收到回复是否包含预期字段
-      ret = (strstr((char *)ucAt_Respond_Buffer, expect) != NULL) ? HAL_OK : HAL_ERROR;
-      if(ret == HAL_OK)
-      {
-        break;
-      }
-      else
-      {
-        //启动DMA接收
-        vWifi_Start_DMA_Receive(ucAt_Respond_Buffer);
-      }
-    }
-  }
-  
-  //停止DMA获取
-  vWifi_Stop_GPDMA_Receive();
-  //vWifi_Start_DMA_Receive(ucAt_Respond_Buffer);
-  return ret;
-}
-
-/* 连接到指定AP */
-HAL_StatusTypeDef wb502a_connect_ap(void) 
-{
-  char conn_cmd[WIFI_TX_BUF_SIZE];
-  snprintf(conn_cmd, WIFI_TX_BUF_SIZE, "AT+RAP=%s,%s",WIFI_SSID, WIFI_PASSWORD);
-  // 连接WiFi可能需要较长时间，设置15秒超时
-  return at_send_command(conn_cmd, "+EVENT:WIFI_CONNECT", 30000);
-}
-
-/* 确认静态IP地址 */
-HAL_StatusTypeDef wb502a_check_ip(const char *ip_addr) 
-{
-  char expect_str[WIFI_TX_BUF_SIZE];
-  snprintf(expect_str, WIFI_TX_BUF_SIZE, "\r\n+LIP=%s",ip_addr);
-  return at_send_command("AT+LIP", expect_str, 2000);
 }

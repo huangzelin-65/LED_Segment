@@ -154,7 +154,7 @@ osThreadId_t WifiReceiveTaskHandle;
 const osThreadAttr_t WifiReceiveTask_attributes = {
   .name = "WifiReceiveTask",
   .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 128 * 4
+  .stack_size = 1024 * 4
 };
 /* Definitions for PrintTask */
 osThreadId_t PrintTaskHandle;
@@ -309,6 +309,11 @@ osMessageQueueId_t xHmi_Recv_QueueHandle;
 const osMessageQueueAttr_t xHmi_Recv_Queue_attributes = {
   .name = "xHmi_Recv_Queue"
 };
+/* Definitions for xWifi_Parse_Queue */
+osMessageQueueId_t xWifi_Parse_QueueHandle;
+const osMessageQueueAttr_t xWifi_Parse_Queue_attributes = {
+  .name = "xWifi_Parse_Queue"
+};
 /* Definitions for xMotorTxSem */
 osSemaphoreId_t xMotorTxSemHandle;
 const osSemaphoreAttr_t xMotorTxSem_attributes = {
@@ -429,6 +434,8 @@ void MX_FREERTOS_Init(void) {
   xHmi_Send_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xHmi_Send_Queue_attributes);
   /* creation of xHmi_Recv_Queue */
   xHmi_Recv_QueueHandle = osMessageQueueNew (5, sizeof(uint32_t), &xHmi_Recv_Queue_attributes);
+  /* creation of xWifi_Parse_Queue */
+  xWifi_Parse_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xWifi_Parse_Queue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -440,7 +447,7 @@ void MX_FREERTOS_Init(void) {
   vQueueAddToRegistry(xRfid_Rx_QueueHandle, "Rfid_Rx_Queue");
   vQueueAddToRegistry(xMotion_QueueHandle, "Motion_Queue");
   vQueueAddToRegistry(xPrint_QueueHandle, "Print_Queue");
-
+  vQueueAddToRegistry(xWifi_Parse_QueueHandle, "Wifi_Parse_Queue");
 
   /* USER CODE END RTOS_QUEUES */
   /* creation of InitTask */
