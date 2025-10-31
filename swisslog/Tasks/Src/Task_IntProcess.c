@@ -23,10 +23,13 @@ extern QueueHandle_t xSensor_QueueHandle;
 extern osTimerId_t xSensorDebounceTimerHandle;
 extern osTimerId_t xToggleSwitchTimerHandle;
 extern osTimerId_t xBoxELockDebounceTimerHandle;
+extern osTimerId_t xServiceJoystickDebounceTimerHandle;
 
 volatile uint8_t SensorDebounce_flag;
 volatile uint8_t ToggleDebounce_flag;
 volatile uint8_t BoxELockDebounce_flag;
+volatile uint8_t ServiceJoystickDebounce_flag;
+
 
 void LowVoltageDetect_Test(void)
 {
@@ -47,6 +50,7 @@ void vIntProcessTask(void *argument)
   SensorDebounce_flag = 0;
   ToggleDebounce_flag = 0;
   BoxELockDebounce_flag = 0;
+  ServiceJoystickDebounce_flag = 0;
 
   while(1)
   {
@@ -95,6 +99,15 @@ void vIntProcessTask(void *argument)
           DEBUGINFO("LowVoltageDetect\r\n");
           LowVoltageDetect_Test();
           break;
+
+        case ServiceJoystick:
+          //维修控杆检测防重入
+          if (ServiceJoystickDebounce_flag == 0) {
+            //防抖20ms
+            osTimerStart(xServiceJoystickDebounceTimerHandle, pdMS_TO_TICKS(DebounceTime));
+            ServiceJoystickDebounce_flag = 1;  // 置位标志
+          }
+          break;
         
         case ResetButton:
           sensor_msg = ResetButtonTrigger;
@@ -116,8 +129,14 @@ void vIntProcessTask(void *argument)
         
         case BoxELockDebounce:
           BoxELockDebounce_flag = 0;
-          vBoxELockStatusCheck(); //检测车厢锁状态
+          vBoxELockStatusCheck();       //检测车厢锁状态
           break;
+
+        case ServiceJoystickDebounce:
+          ServiceJoystickDebounce_flag = 0;
+          vServiceJoystickStatusCheck();   //检测维修控杆状态
+          break;
+
 
         default:
           break;

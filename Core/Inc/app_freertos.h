@@ -84,6 +84,7 @@ extern osTimerId_t xToggleSwitchTimerHandle;
 extern osTimerId_t xBoxRfidLoginTimerHandle;
 extern osTimerId_t xUVTimerHandle;
 extern osTimerId_t xBoxELockDebounceTimerHandle;
+extern osTimerId_t xServiceJoystickDebounceTimerHandle;
 extern osMessageQueueId_t xInterrupt_QueueHandle;
 extern osMessageQueueId_t xSensor_QueueHandle;
 extern osMessageQueueId_t xWifi_Rx_QueueHandle;
@@ -131,6 +132,7 @@ extern void vToggleSwitchCallback(void *argument);
 extern void vBoxRfidLoginTimerCallback(void *argument);
 extern void vUVTimerCallback(void *argument);
 extern void vBoxELockDebounceCallback(void *argument);
+extern void vServiceJoystickCallback(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 

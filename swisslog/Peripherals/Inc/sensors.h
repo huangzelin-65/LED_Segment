@@ -19,6 +19,7 @@
 void vSensorStatusCheck(void);
 void vToggleSwitchStatusCheck(void);
 void vResetLedStatusCheck(void);
+void vServiceJoystickStatusCheck(void);
 
 void vSensorDebounceCallback(void *argument);
 void vToggleSwitchCallback(void *argument);

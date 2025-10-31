@@ -72,17 +72,19 @@ typedef __I uint8_t vuc8;   /*!< Read Only */
 
 //----------中断类型枚举----------
 typedef enum {
-	FrontCrashSensor, //前碰撞传感器
-	RearCrashSensor,  //后碰撞传感器
-	FrontProxSensor,  //前距离传感器
-	RearProxSensor,   //后距离传感器
-    ToggleSwitch,     //拨动开关
-    BoxELock,         //车厢电子锁
-    ResetButton,      //复位按钮
-    LowVoltageDetect, //低电压检测
-    SensorDebounce,   //传感器防抖
-    ToggleDebounce,   //拨动开关防抖
-    BoxELockDebounce, //车厢电子锁防抖
+	FrontCrashSensor,       //前碰撞传感器
+	RearCrashSensor,        //后碰撞传感器
+	FrontProxSensor,        //前距离传感器
+	RearProxSensor,         //后距离传感器
+    ToggleSwitch,           //拨动开关
+    BoxELock,               //车厢电子锁
+    ResetButton,            //复位按钮
+    LowVoltageDetect,       //低电压检测
+    ServiceJoystick,            //维修模式
+    SensorDebounce,         //传感器防抖
+    ToggleDebounce,         //拨动开关防抖
+    BoxELockDebounce,       //车厢电子锁防抖
+    ServiceJoystickDebounce,    //维修模式防抖
 }eInterruptType;
 
 //----------小车在站状态枚举----------
@@ -100,6 +102,9 @@ typedef enum {
   ToggleFront,          //拨动开关拨向前
   ToggleBack,           //拨动开关拨向后
   ToggleStop,           //拨动开关拨向停止
+  ServiceFront,         //维修模式拨向前
+  ServiceBack,          //维修模式拨向后
+  ServiceStop,          //维修模式拨向停止
   ResetButtonTrigger,   //小车复位按钮触发
   Reset,                //小车复位
 }eSensorMotiontType; 
@@ -189,6 +194,7 @@ typedef struct
     CarStationStatus xStationStatus;    // 小车当前在站状态 0：InStation 1：OutStation
 
     eSensorMotiontType ToggleSwtichPosition;	// 拨码开关位置 ToggleStop:停车/ToggleFront:前进/ToggleBack:后退
+    eSensorMotiontType ServiceJoystickPosition; // 维修控杆位置 ServiceStop:停车/ServiceFront:前进/ServiceBack:后退
     eSensorMotiontType FrontProxStatus;			// 前距离传感器状态 SensorRelease:未检测/SensorTrigger:检测到
     eSensorMotiontType FrontCrashStatus;		// 前碰撞开关状态 SensorRelease:未检测/SensorTrigger:检测到
     eSensorMotiontType RearProxStatus;			// 后距离传感器状态 SensorRelease:未检测/SensorTrigger:检测到
@@ -328,6 +334,8 @@ void Error_Handler(void);
 #define USART1_TX_GPIO_Port GPIOA
 #define Wifi_RX_Pin GPIO_PIN_7
 #define Wifi_RX_GPIO_Port GPIOC
+#define LED_RESET_Pin GPIO_PIN_2
+#define LED_RESET_GPIO_Port GPIOF
 #define TOGGLE_FRONT_Pin GPIO_PIN_4
 #define TOGGLE_FRONT_GPIO_Port GPIOH
 #define TOGGLE_FRONT_EXTI_IRQn EXTI4_IRQn
@@ -343,6 +351,9 @@ void Error_Handler(void);
 #define LED3_GPIO_Port GPIOG
 #define LED4_Pin GPIO_PIN_6
 #define LED4_GPIO_Port GPIOG
+#define SERVICE_FRONT_Pin GPIO_PIN_5
+#define SERVICE_FRONT_GPIO_Port GPIOF
+#define SERVICE_FRONT_EXTI_IRQn EXTI5_IRQn
 #define FC_L_Pin GPIO_PIN_12
 #define FC_L_GPIO_Port GPIOH
 #define FC_L_EXTI_IRQn EXTI12_IRQn
@@ -367,8 +378,9 @@ void Error_Handler(void);
 #define RC_L_Pin GPIO_PIN_9
 #define RC_L_GPIO_Port GPIOH
 #define RC_L_EXTI_IRQn EXTI9_IRQn
-#define LED_RESET_Pin GPIO_PIN_0
-#define LED_RESET_GPIO_Port GPIOA
+#define SERVICE_BACK_Pin GPIO_PIN_0
+#define SERVICE_BACK_GPIO_Port GPIOA
+#define SERVICE_BACK_EXTI_IRQn EXTI0_IRQn
 #define RP_H_Pin GPIO_PIN_13
 #define RP_H_GPIO_Port GPIOF
 #define RP_H_EXTI_IRQn EXTI13_IRQn

@@ -150,14 +150,14 @@ void vToggleSwitchStatusCheck(void)
   // 读MOVE_BACK电平
   TOGGLE_BACK_value = GPIO_READ(TOGGLE_BACK);
 
-  //拨动开关拨向前
+  //拨动开关拨向前(自动挡)
   if((TOGGLE_FRONT_value == GPIO_PIN_RESET)&&(TOGGLE_BACK_value == GPIO_PIN_SET))
   {
     sensor_msg = ToggleFront;
     CarStatus.ToggleSwtichPosition = ToggleFront;
     DEBUGINFO("motion_msg = ToggleFront\r\n");
   }
-  //拨动开关拨向后
+  //拨动开关拨向后(手动挡)
   else if((TOGGLE_FRONT_value == GPIO_PIN_SET)&&(TOGGLE_BACK_value == GPIO_PIN_RESET))
   {
     sensor_msg = ToggleBack;
@@ -179,6 +179,47 @@ void vToggleSwitchStatusCheck(void)
   }
 }
 
+// 维修控杆状态检查函数
+void vServiceJoystickStatusCheck(void)
+{
+  volatile uint8_t SERVICE_FRONT_value;
+  volatile uint8_t SERVICE_BACK_value;
+  uint8_t sensor_msg;
+
+  //低电平有效
+  // 读MOVE_FRONT电平
+  SERVICE_FRONT_value = GPIO_READ(SERVICE_FRONT);
+  // 读MOVE_BACK电平
+  SERVICE_BACK_value = GPIO_READ(SERVICE_BACK);
+
+  // 维修控杆拨向前(自动挡)
+  if((SERVICE_FRONT_value == GPIO_PIN_RESET) && (SERVICE_BACK_value == GPIO_PIN_SET))
+  {
+    sensor_msg = ServiceFront;
+    CarStatus.ServiceJoystickPosition = ServiceFront;
+    DEBUGINFO("motion_msg = ServiceFront\r\n");
+  }
+  // 维修控杆拨向后(手动挡)
+  else if((SERVICE_FRONT_value == GPIO_PIN_SET)&&(SERVICE_BACK_value == GPIO_PIN_RESET))
+  {
+    sensor_msg = ServiceBack;
+    CarStatus.ServiceJoystickPosition = ServiceBack;
+    DEBUGINFO("motion_msg = ServiceBack\r\n");
+  }
+  // 维修控杆拨向停止(中间挡位)
+  else if(SERVICE_FRONT_value == GPIO_PIN_SET && SERVICE_BACK_value == GPIO_PIN_SET)
+  {
+    sensor_msg = ServiceStop;
+    CarStatus.ServiceJoystickPosition = ServiceStop;
+    DEBUGINFO("motion_msg = ServiceStop\r\n");
+  }
+
+  // 发送维修控杆事件
+  if(osMessageQueuePut(xSensor_QueueHandle, &sensor_msg, 0, pdMS_TO_TICKS(100)) != osOK)
+  {
+    DEBUGINFO("send motion error\r\n");
+  }
+}
 
 /**
  * 重置LED状态检查函数
@@ -203,6 +244,8 @@ void vResetLedStatusCheck(void)
   }
 }
 
+
+
 /******************************* GPIO防抖回调 *************************/
 //传感器防抖回调
 void vSensorDebounceCallback(void *argument)
@@ -225,6 +268,14 @@ void vBoxELockDebounceCallback(void *argument)
 {
   uint8_t msg;
   msg = BoxELockDebounce;
+  osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
+}
+
+//拨动开关防抖回调
+void vServiceJoystickCallback(void *argument)
+{
+  uint8_t msg;
+  msg = ServiceJoystickDebounce;
   osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
 }
 

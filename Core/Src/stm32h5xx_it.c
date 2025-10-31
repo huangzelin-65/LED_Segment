@@ -207,6 +207,22 @@ void DebugMon_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles EXTI Line0 interrupt.
+  */
+void EXTI0_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI0_IRQn 0 */
+
+  /* USER CODE END EXTI0_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(SERVICE_BACK_Pin);
+  /* USER CODE BEGIN EXTI0_IRQn 1 */
+
+  msg = ServiceJoystick; // 维修控杆
+  osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
+  /* USER CODE END EXTI0_IRQn 1 */
+}
+
+/**
   * @brief This function handles EXTI Line1 interrupt.
   */
 void EXTI1_IRQHandler(void)
@@ -264,6 +280,21 @@ void EXTI4_IRQHandler(void)
   msg = ToggleSwitch; // 拨动开关
   osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
   /* USER CODE END EXTI4_IRQn 1 */
+}
+
+/**
+  * @brief This function handles EXTI Line5 interrupt.
+  */
+void EXTI5_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI5_IRQn 0 */
+
+  /* USER CODE END EXTI5_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(SERVICE_FRONT_Pin);
+  /* USER CODE BEGIN EXTI5_IRQn 1 */
+  msg = ServiceJoystick; // 维修控杆
+  osMessageQueuePut(xInterrupt_QueueHandle, &msg, 0, 0);
+  /* USER CODE END EXTI5_IRQn 1 */
 }
 
 /**

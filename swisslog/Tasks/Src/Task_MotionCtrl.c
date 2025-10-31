@@ -119,9 +119,9 @@ void vMotionCtrlTask(void *argument)
               //reset按钮没有按下才允许电机运行
               if( GPIO_READ(RESET) == GPIO_PIN_SET )
               {
-                // 电机按普通速度运行（手动档下），方向相反
+                // 电机按最低速度运行（手动档下）
                 CarStatus.xIsCarRunning = CarRunning;
-                vMotorOps(CarStatus.xRealDirection, NormalSpeed); 
+                vMotorOps(CarStatus.xRealDirection, LowSpeed); 
                 GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
                 DEBUGINFO("LED4 ON\r\n");
               }

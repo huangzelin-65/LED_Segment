@@ -5,6 +5,7 @@
 #include "LogDebugInfo.h"
 #include "adaptor_eeprom.h"
 #include "SystemTime.h"
+#include "stm32h5xx_hal.h"
 
 extern osThreadId_t InitTaskHandle;
 extern osThreadId_t IntProcessTaskHandle;
@@ -57,6 +58,19 @@ void vInitTask(void *argument)
   vEeprom_Data_Init();
   time_tracker_init();
   //vEepromTest();
+
+  // uint32_t uid0, uid1, uid2;
+    
+  // // 读取芯片UID
+  // uid0 = HAL_GetUIDw0();
+  // uid1 = HAL_GetUIDw1();
+  // uid2 = HAL_GetUIDw2();
+
+  // // 处理或输出UID（例如通过串口打印）
+  // DEBUGINFO("STM32H563 Chip ID:\r\n");
+  // DEBUGINFO("UID0: 0x%08X\r\n", uid0);
+  // DEBUGINFO("UID1: 0x%08X\r\n", uid1);
+  // DEBUGINFO("UID2: 0x%08X\r\n", uid2);
 
   osThreadExit();
 }

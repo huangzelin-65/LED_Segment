@@ -173,12 +173,12 @@ void vSensorTask(void *argument)
           // 预设值向前
           if(CarStatus.xSetDirection == Forward)
           {
-            CarStatus.xRealDirection = Forward; //实际运行方向记录为向后
+            CarStatus.xRealDirection = Forward; //实际运行方向记录为向前
           }
           // 预设值向后
           else if(CarStatus.xSetDirection == Backward)
           {
-            CarStatus.xRealDirection = Backward; //实际运行方向记录为向前
+            CarStatus.xRealDirection = Backward; //实际运行方向记录为向后
           }
           
           // 通过sensor自检，判断是否可以运动，并跳转到运动控制任务
@@ -188,6 +188,8 @@ void vSensorTask(void *argument)
 
         //**************************** 拨动开关向后（运行方向相反）*********************
         case ToggleBack:
+/******************** TK1.0的手动模式为反方向运动 *********************
+
           // 设置为手动模式
           CarStatus.xAutoMode = Manual;
 
@@ -205,6 +207,9 @@ void vSensorTask(void *argument)
 
           // 通过sensor自检，判断是否可以运动，并跳转到运动控制任务
           vSensorStatusCheck(); 
+
+***************** TK2.0以后的手动模式改为维修拨杆点动模式 ******************/
+
           break;
 
 
@@ -216,6 +221,34 @@ void vSensorTask(void *argument)
           if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
           {
             DEBUGINFO("ToggleStop send motion msg error\r\n");
+          }
+          break;
+
+        //*********************************** 维修控杆向前 ********************************
+        case ServiceFront:
+          CarStatus.xRealDirection = Forward; //实际运行方向记录为向前
+
+          // 通过sensor自检，判断是否可以运动，并跳转到运动控制任务
+          vSensorStatusCheck(); 
+          break;
+        
+
+        //************************************ 维修控杆向后 ********************************
+        case ServiceBack:
+          CarStatus.xRealDirection = Backward; //实际运行方向记录为向后
+          
+          // 通过sensor自检，判断是否可以运动，并跳转到运动控制任务
+          vSensorStatusCheck(); 
+          break;
+
+
+        //************************************ 维修控杆停止 ********************************
+        case ServiceStop:
+          // 停止电机
+          ucMotion_msg = CarStop;
+          if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
+          {
+            DEBUGINFO("ServiceStop send motion msg error\r\n");
           }
           break;
 

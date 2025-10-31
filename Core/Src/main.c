@@ -869,19 +869,16 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOI, UV_CLEAN_EN_Pin|ELOCK_EN2_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOF, LED_RESET_Pin|LED_BOX_B_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOG, LED5_Pin|LED3_Pin|LED4_Pin|LED2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(MOTOR_485_CTRL_GPIO_Port, MOTOR_485_CTRL_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_RESET_GPIO_Port, LED_RESET_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, OUT_DIR_Pin|LED1_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_BOX_B_GPIO_Port, LED_BOX_B_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LED_BOX_R_Pin|LED_BOX_G_Pin, GPIO_PIN_RESET);
@@ -926,6 +923,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOI, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : LED_RESET_Pin LED_BOX_B_Pin */
+  GPIO_InitStruct.Pin = LED_RESET_Pin|LED_BOX_B_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+
   /*Configure GPIO pins : TOGGLE_FRONT_Pin FC_L_Pin FP_H_Pin */
   GPIO_InitStruct.Pin = TOGGLE_FRONT_Pin|FC_L_Pin|FP_H_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
@@ -938,6 +942,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : SERVICE_FRONT_Pin RP_H_Pin */
+  GPIO_InitStruct.Pin = SERVICE_FRONT_Pin|RP_H_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
   /*Configure GPIO pins : FC_H_Pin FP_L_Pin */
   GPIO_InitStruct.Pin = FC_H_Pin|FP_L_Pin;
@@ -970,18 +980,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(TOGGLE_BACK_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : LED_RESET_Pin */
-  GPIO_InitStruct.Pin = LED_RESET_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LED_RESET_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : RP_H_Pin */
-  GPIO_InitStruct.Pin = RP_H_Pin;
+  /*Configure GPIO pins : SERVICE_BACK_Pin RP_L_Pin */
+  GPIO_InitStruct.Pin = SERVICE_BACK_Pin|RP_L_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(RP_H_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : OUT_DIR_Pin */
   GPIO_InitStruct.Pin = OUT_DIR_Pin;
@@ -997,24 +1000,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : LED_BOX_B_Pin */
-  GPIO_InitStruct.Pin = LED_BOX_B_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LED_BOX_B_GPIO_Port, &GPIO_InitStruct);
-
   /*Configure GPIO pin : RESET_Pin */
   GPIO_InitStruct.Pin = RESET_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(RESET_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : RP_L_Pin */
-  GPIO_InitStruct.Pin = RP_L_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(RP_L_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LED_BOX_R_Pin LED_BOX_G_Pin */
   GPIO_InitStruct.Pin = LED_BOX_R_Pin|LED_BOX_G_Pin;
@@ -1024,6 +1014,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
   HAL_NVIC_SetPriority(EXTI1_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(EXTI1_IRQn);
 
@@ -1035,6 +1028,9 @@ static void MX_GPIO_Init(void)
 
   HAL_NVIC_SetPriority(EXTI4_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI5_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI5_IRQn);
 
   HAL_NVIC_SetPriority(EXTI6_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(EXTI6_IRQn);

@@ -249,6 +249,11 @@ osTimerId_t xBoxELockDebounceTimerHandle;
 const osTimerAttr_t xBoxELockDebounceTimer_attributes = {
   .name = "xBoxELockDebounceTimer"
 };
+/* Definitions for xServiceJoystickDebounceTimer */
+osTimerId_t xServiceJoystickDebounceTimerHandle;
+const osTimerAttr_t xServiceJoystickDebounceTimer_attributes = {
+  .name = "xServiceJoystickDebounceTimer"
+};
 /* Definitions for xInterrupt_Queue */
 osMessageQueueId_t xInterrupt_QueueHandle;
 const osMessageQueueAttr_t xInterrupt_Queue_attributes = {
@@ -406,6 +411,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of xBoxELockDebounceTimer */
   xBoxELockDebounceTimerHandle = osTimerNew(vBoxELockDebounceCallback, osTimerOnce, NULL, &xBoxELockDebounceTimer_attributes);
+
+  /* creation of xServiceJoystickDebounceTimer */
+  xServiceJoystickDebounceTimerHandle = osTimerNew(vServiceJoystickCallback, osTimerOnce, NULL, &xServiceJoystickDebounceTimer_attributes);
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
