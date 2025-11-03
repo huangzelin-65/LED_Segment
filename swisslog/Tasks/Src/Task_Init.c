@@ -5,7 +5,8 @@
 #include "LogDebugInfo.h"
 #include "adaptor_eeprom.h"
 #include "SystemTime.h"
-#include "stm32h5xx_hal.h"
+#include "Task_BoxCtrl.h"
+
 
 extern osThreadId_t InitTaskHandle;
 extern osThreadId_t IntProcessTaskHandle;
@@ -57,6 +58,9 @@ void vInitTask(void *argument)
 
   vEeprom_Data_Init();
   time_tracker_init();
+
+  //Car_Set_Station_Status(InStation);// 设置小车状态为InStation
+  
   //vEepromTest();
 
   // uint32_t uid0, uid1, uid2;

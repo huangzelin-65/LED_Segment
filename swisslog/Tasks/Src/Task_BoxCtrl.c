@@ -105,10 +105,13 @@ void vBoxCtrlTask(void *argument)
   {
 		if(osMessageQueueGet(xBox_Ctrl_QueueHandle, &box_msg, NULL, osWaitForever) == osOK)
 		{
+			DEBUGINFO("box_msg = %d\r\n",box_msg);
 			switch (box_msg)
 			{
 				//*********************************** 车厢电子锁操作 **************************************
 				case BoxElockOps:
+					DEBUGINFO("UvClean_IsRunning=%d, mCarStationStatus=%d, xBoxLocked=%d, HMI_Is_Button_En=%d\r\n",
+						UvClean_IsRunning(),mCarStationStatus,CarStatus.xBoxLocked,HMI_Is_Button_En());
 					if( !UvClean_IsRunning()&&
 						( mCarStationStatus == InStation ) && 
 						( CarStatus.xBoxLocked == Locked ) && 
@@ -129,12 +132,15 @@ void vBoxCtrlTask(void *argument)
 
 				//*********************************** 更新进出站状态 **************************************
 				case UpdateStationStatus:
+
+					DEBUGINFO("ServerToCarData.xStationStatus=%d, mCarStationStatus=%d\r\n",ServerToCarData.xStationStatus,mCarStationStatus);
+
 					// car out检测
 					if(( ServerToCarData.xStationStatus == OutStation ) && ( mCarStationStatus == InStation ) )
 					{
 						if( CarStatus.xBoxLocked == Locked )
 						{
-							DEBUGINFO("OutStation\n");
+							DEBUGINFO("Update to OutStation\r\n");
 							Car_Set_Station_Status(OutStation);// 设置小车状态为OutStation
 							HMI_Set_RFCardPage();	// 发送命令切换到”请刷rfid卡“页面;
 						} else {
@@ -145,7 +151,7 @@ void vBoxCtrlTask(void *argument)
 					// car in检测
 					if( (ServerToCarData.xStationStatus == InStation) && (mCarStationStatus == OutStation) )
 					{
-						DEBUGINFO("InStation\n");
+						DEBUGINFO("Update to InStation\r\n");
 						Car_Set_Station_Status(InStation);// 设置小车状态为InStation
 						HMI_Force_Home_Page(); 					// 跳转到home页面
 					}

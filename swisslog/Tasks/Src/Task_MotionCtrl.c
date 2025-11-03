@@ -52,6 +52,7 @@ void vMotionCtrlTask(void *argument)
     {
       if ( osMessageQueueGet(xMotion_QueueHandle, &MotionRecv_msg, NULL, osWaitForever) == osOK ) 
       {
+        DEBUGINFO("osMessageQueueGet:%d\r\n",MotionRecv_msg);
         switch( MotionRecv_msg )
         {
           case CarStop:
@@ -64,6 +65,7 @@ void vMotionCtrlTask(void *argument)
             break;
           
           case CarRunning:
+            DEBUGINFO("CarStatus.xAutoMode:%d, CarStatus.xMotorEnable:%d\r\n",CarStatus.xAutoMode, CarStatus.xMotorEnable);
             // 拨动开关自动档
             if( CarStatus.ToggleSwtichPosition == ToggleFront )
             {
@@ -81,7 +83,7 @@ void vMotionCtrlTask(void *argument)
                     DEBUGINFO("ReadyToRun\r\n");
                     CarStatus.xIsCarRunning = CarReadyToRun;
                     u8 temp[] = "MotionCtrl: ReadyToRun\r\n";
-                    vSendToWifiTX(temp, strlen((char *)temp));
+                    //vSendToWifiTX(temp, strlen((char *)temp));
                     break;
                   }
                   // 已允许电机运行

@@ -138,6 +138,7 @@ uint8_t HMI_Is_Button_En(void)
 void HMI_Unlock_Button_Press()
 {
 	eBoxCtrlType box_msg;
+	DEBUGINFO("box_msg = BoxElockOps");
 	box_msg = BoxElockOps;
 	if(osMessageQueuePut(xBox_Ctrl_QueueHandle, &box_msg, 0, 0)!= osOK) {
 		DEBUGINFO("Uv clean msg send failed!");

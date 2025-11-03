@@ -27,7 +27,7 @@
 
 /**
 	MiddleWare name : wolfSSL.I-CUBE-wolfMQTT.1.19.2
-	MiddleWare fileName : ./wolfSSL.I-CUBE-wolfMQTT_conf.h
+	MiddleWare fileName : wolfSSL.I-CUBE-wolfMQTT_conf.h
 	MiddleWare version :
 */
 /*---------- WOLFMQTT_CONF_FREERTOS -----------*/
