@@ -20,8 +20,7 @@ typedef enum
     WIFI_TPMODE_EXIT_1,
     WIFI_TPMODE_EXIT_2,
     WIFI_CHECK_CONNET, 
-    WIFI_SET_CONNECT, 
-    WIFI_TO_MQTT,   
+    WIFI_SET_CONNECT,    
     WIFI_END,
 } WifiState_t;
 

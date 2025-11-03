@@ -82,7 +82,6 @@ void Wifi_ConnectStart(void)
 //线程中运行wifi连接过程，发送命令，等待结果回复，再进行下一步，直到返回成功；
 void Wifi_ConnectProcess(void)
 {  
-    static int wait_cnt = 0;
     //wifi等待命令结果
     if(wifi_result != WIFI_OK)
     {
@@ -137,22 +136,16 @@ void Wifi_ConnectProcess(void)
             Wifi_SendATCmd(Wifi_SendBuffer,2000);             
         }
         break;
-    case WIFI_TO_MQTT:
+    case WIFI_END:
         {
-            wait_cnt++;
-            if(wait_cnt > 3)
-            {
-                wait_cnt = 0;
-                wifi_state = WIFI_IDLE;
-                // mqtt_connect();
-            }    
+          wifi_state = WIFI_IDLE;
         }   
         break;                                        
     default:
         if(wifi_state != WIFI_IDLE)DEBUGINFO("error wifi_state:%d",wifi_state);
         break;
     }
-    if(wifi_state != WIFI_IDLE && wifi_state != WIFI_TO_MQTT)
+    if(wifi_state != WIFI_IDLE && wifi_state != WIFI_END)
     {
         wifi_state++; 
         wifi_result = WIFI_ERROR;
@@ -207,7 +200,7 @@ void Wifi_ConnectAck(uint8_t* rbuf,int len)
                 printf("WIFI_CHECK_CONNET ok\n");   
                 wifi_result = WIFI_OK; 
                 wifi_connect_state = WIFI_OK; 
-                wifi_state = WIFI_TO_MQTT;     
+                wifi_state = WIFI_END;     
             } 
             else
             {
