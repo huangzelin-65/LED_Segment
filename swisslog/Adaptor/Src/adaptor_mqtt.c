@@ -54,13 +54,14 @@ int mqtt_isConnected = 0;//mqtt连接状态
 extern osMessageQueueId_t xMqttManagerQueueHandle;//
 
 //发送消息给线程，处理相关消息类型，指定处理内容
-void Mqtt_SendMsg(MqttMsgType_t msg)
+void Mqtt_SendMsg(MqttMsgType_t msg,char *data)
 {
     if(xMqttManagerQueueHandle != NULL)
     {
-        MqttMsgType_t *temp_msg = pvPortMalloc(sizeof(MqttMsgType_t));
-        *temp_msg = msg;
-        if (xQueueSend(xMqttManagerQueueHandle, &temp_msg, portMAX_DELAY) == pdPASS) 
+        MqttMsgdata_t *msg_data = pvPortMalloc(sizeof(MqttMsgdata_t));
+        msg_data->type = msg;
+        msg_data->data = data;
+        if (xQueueSend(xMqttManagerQueueHandle, &msg_data, portMAX_DELAY) == pdPASS) 
         {
             DEBUGINFO("msg :%d",msg);
         } 

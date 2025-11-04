@@ -31,7 +31,7 @@ void vWifiManagerTask(void *argument)
     Wifi_ConnectProcess();
     if(Wifi_IsChanged())//通知mqtt任务，wifi状态发送变化
     {
-        Mqtt_SendMsg(MQTT_MSG_WIFI_CHANGE);
+        Mqtt_SendMsg(MQTT_MSG_WIFI_CHANGE,NULL);
     }
 	  osDelay(pdMS_TO_TICKS(100));
   }

@@ -23,9 +23,9 @@ void vMqttManagerTask(void *argument)
     {
         if(xQueueReceive(xMqttManagerQueueHandle, &manage_data, portMAX_DELAY) == pdTRUE)
         {
-            MqttMsgType_t *msg = (MqttMsgType_t *)manage_data;
-            DEBUGINFO("msg:%d",msg);
-            switch(*msg)
+            MqttMsgdata_t *msg = (MqttMsgdata_t *)manage_data;
+            DEBUGINFO("msg type:%d",msg->type);
+            switch(msg->type)
             {
                 case MQTT_MSG_WIFI_CHANGE:
                 {
@@ -37,8 +37,13 @@ void vMqttManagerTask(void *argument)
                     }
                 }
                 break;
+                case MQTT_MSG_HEARTBEAT:
+                {
+
+                }
                 default:break;
             }
+            vPortFree(manage_data);
         }
     }
 }
