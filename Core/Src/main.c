@@ -943,9 +943,9 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SERVICE_FRONT_Pin RP_H_Pin */
-  GPIO_InitStruct.Pin = SERVICE_FRONT_Pin|RP_H_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  /*Configure GPIO pins : SERVICE_FRONT_Pin RESET_Pin */
+  GPIO_InitStruct.Pin = SERVICE_FRONT_Pin|RESET_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
@@ -980,11 +980,17 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(TOGGLE_BACK_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SERVICE_BACK_Pin RP_L_Pin */
-  GPIO_InitStruct.Pin = SERVICE_BACK_Pin|RP_L_Pin;
+  /*Configure GPIO pin : SERVICE_BACK_Pin */
+  GPIO_InitStruct.Pin = SERVICE_BACK_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(SERVICE_BACK_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : RP_H_Pin */
+  GPIO_InitStruct.Pin = RP_H_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(RP_H_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : OUT_DIR_Pin */
   GPIO_InitStruct.Pin = OUT_DIR_Pin;
@@ -1000,11 +1006,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : RESET_Pin */
-  GPIO_InitStruct.Pin = RESET_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  /*Configure GPIO pin : RP_L_Pin */
+  GPIO_InitStruct.Pin = RP_L_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(RESET_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(RP_L_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LED_BOX_R_Pin LED_BOX_G_Pin */
   GPIO_InitStruct.Pin = LED_BOX_R_Pin|LED_BOX_G_Pin;

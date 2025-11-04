@@ -29,6 +29,7 @@ static uint8_t Check_Fisrt_Boot()
 }
 
 static void Update_Fisrt_Boot(void){
+  //uint8_t bootTime[2] = {0x00,0x00};
 	uint8_t bootTime[2] = {0x51,0x4d};
 
 	bEeprom_Check_Conn();
@@ -41,7 +42,7 @@ void vEeprom_Data_Init(void)
 	//uint8_t temp2[8]={0x01,0x01,0x01,0x01};
 	uint8_t defaultUv = 10;
 
-	if(0==Check_Fisrt_Boot()){
+	if(0 == Check_Fisrt_Boot()){
     DEBUGINFO("Fisrt Boot\r\n");
 		//write card password
 		bEeprom_Write_Byte(EEP_ADD_IS_ENCRYED,temp[0]); 

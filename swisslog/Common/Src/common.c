@@ -75,6 +75,7 @@ void vParseCommandToCar()
   {
     DEBUGINFO("auto mode\r\n");
     CarStatus.xAutoMode = Auto;
+    CarStatus.xRealDirection = CarStatus.xSetDirection; // 自动模式下直接设置实际运行方向为预设方向
   }
 
   
@@ -102,6 +103,7 @@ void vParseCommandToCar()
   }
 
   // 发送电机控制消息
+  DEBUGINFO("send motion msg:%d\r\n",ucMotion_msg);
   if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
   {
     DEBUGINFO("send motion msg error\r\n");
