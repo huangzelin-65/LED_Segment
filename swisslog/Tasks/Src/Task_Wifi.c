@@ -16,6 +16,7 @@
 #include "Common.h"
 #include <stdbool.h>
 #include "queue.h"
+#include "adaptor_mqtt.h"
 
 extern osMessageQueueId_t xWifi_Parse_QueueHandle;
 /* WiFi管理任务入口函数 */
@@ -80,6 +81,7 @@ void vWifiReceiveTask(void *argument)
         if(parse_rbuf)
         {
           Wifi_ConnectAck(read_buffer,dataLength);
+          Mqtt_ParseData(read_buffer,dataLength);
         }  
         vPortFree(wifi_data);       
       }

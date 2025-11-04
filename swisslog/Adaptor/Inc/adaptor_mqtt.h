@@ -23,6 +23,8 @@ extern MqttNet mNetwork;//网络结构体
 extern MqttClient mClient;//mqtt客户端
 extern int mqtt_isConnected;
 
+
 int MqttInit(void);
+void Mqtt_ParseData(uint8_t* rbuf,int len);
 
 #endif

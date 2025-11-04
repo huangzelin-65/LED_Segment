@@ -45,6 +45,7 @@ void Wifi_ConnectStart(void);
 void Wifi_ConnectProcess(void);
 void Wifi_ConnectAck(uint8_t* rbuf,int len);
 bool Wifi_IsConnected(void);
+bool Wifi_IsChanged(void);
 void vSendToWifiTX(uint8_t * CmdDataArr,uint8_t len); //发送数据到WIFI TX
 
 

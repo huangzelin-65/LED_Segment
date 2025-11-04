@@ -72,6 +72,18 @@ bool Wifi_IsConnected(void)
     }
     return false;
 }
+//判断wifi状态是否发生变化
+bool Wifi_IsChanged(void)
+{
+    static WifiResult_t wifi_temp_connect_state = WIFI_ERROR;
+    if(wifi_temp_connect_state != wifi_connect_state)
+    {
+        DEBUGINFO("Wifi_IsChanged %d",wifi_connect_state);
+        wifi_temp_connect_state = wifi_connect_state;
+        return true;
+    }
+    return false;
+}
 //启动状态机，开始连接wifi,一般需要wifi上电之后的3秒，才能启动连接wifi
 void Wifi_ConnectStart(void)
 {
