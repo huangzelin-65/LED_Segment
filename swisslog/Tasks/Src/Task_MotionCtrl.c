@@ -82,7 +82,7 @@ void vMotionCtrlTask(void *argument)
                   {
                     DEBUGINFO("ReadyToRun\r\n");
                     CarStatus.xIsCarRunning = CarReadyToRun;
-                    u8 temp[] = "MotionCtrl: ReadyToRun\r\n";
+                    //u8 temp[] = "MotionCtrl: ReadyToRun\r\n";
                     //vSendToWifiTX(temp, strlen((char *)temp));
                     break;
                   }
@@ -118,16 +118,19 @@ void vMotionCtrlTask(void *argument)
             {
               DEBUGINFO("local Manual mode\r\n");
 
-              //reset按钮没有按下才允许电机运行
+              // reset按钮没有按下才允许电机运行
               if( GPIO_READ(RESET) == GPIO_PIN_SET )
               {
-                // 电机按最低速度运行（手动档下）
-                CarStatus.xIsCarRunning = CarRunning;
-                vMotorOps(CarStatus.xRealDirection, LowSpeed); 
-                GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
-                DEBUGINFO("LED4 ON\r\n");
+                // 维修控杆触发才允许电机运行
+                if( CarStatus.ServiceJoystickPosition == ServiceFront || CarStatus.ServiceJoystickPosition == ServiceBack )
+                {
+                  // 电机按最低速度运行（手动档下）
+                  CarStatus.xIsCarRunning = CarRunning;
+                  vMotorOps(CarStatus.xRealDirection, LowSpeed); 
+                  GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
+                  DEBUGINFO("LED4 ON\r\n");
+                }
               }
-
             }
 
             break;
