@@ -433,12 +433,6 @@ int MqttInit(void)
     }
     DEBUGINFO("MQTT Subscribe Success: Topic %s, QoS %d",MQTT_SUB_TOPIC_NAME, MQTT_QOS);
 
-
-    // memset(&mqtt_attributes, 0x0, sizeof(osThreadAttr_t));
-    // mqtt_attributes.name = "mqtt_thread";
-    // mqtt_attributes.stack_size = MQTT_THREAD_STACK_SIZE;
-    // mqtt_attributes.priority = osPriorityLow;
-    // osThreadNew(mqtt_thread, &mqttObj, &mqtt_attributes);
     return rc;
 exit:
     if (rc != MQTT_CODE_SUCCESS) {

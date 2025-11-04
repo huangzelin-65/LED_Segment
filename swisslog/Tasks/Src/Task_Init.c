@@ -26,7 +26,8 @@ extern osThreadId_t HmiSendTaskHandle;
 extern osThreadId_t HmiRecvTaskHandle;
 extern osThreadId_t HmiWaitTaskHandle;
 extern osThreadId_t BoxLEDTaskHandle;
-
+extern osThreadId_t MqttManagerTaskHandle;
+extern osThreadId_t MqttReceiveTaskHandle;
 
 extern CarStatus_t CarStatus;
 
@@ -42,8 +43,8 @@ void vInitTask(void *argument)
   osThreadResume(CarRfidTaskHandle); 
   osThreadResume(SensorTaskHandle);
   osThreadResume(TestTaskHandle);
-  //osThreadResume(WifiManagerTaskHandle);
-  //osThreadResume(WifiReceiveTaskHandle);
+  // osThreadResume(WifiManagerTaskHandle);
+  // osThreadResume(WifiReceiveTaskHandle);
   osThreadResume(BoxCtrlTaskHandle);
   osThreadResume(BoxRfidTaskHandle);
   osThreadResume(BoxRfidEventTaskHandle);
@@ -52,7 +53,8 @@ void vInitTask(void *argument)
   osThreadResume(HmiRecvTaskHandle);
   osThreadResume(HmiWaitTaskHandle);
   osThreadResume(BoxLEDTaskHandle);
-
+  // osThreadResume(MqttManagerTaskHandle);
+  // osThreadResume(MqttReceiveTaskHandle); 
 
   DEBUGINFO("InitTask\r\n");
 
