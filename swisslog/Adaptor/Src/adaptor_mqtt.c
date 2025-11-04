@@ -7,14 +7,12 @@
 #include "adaptor_mqtt.h"
 #include "LogDebugInfo.h"
 #include "queue.h"
-#include "wolfmqtt/mqtt_client.h"
 #include "stm32h5xx_hal.h"
 
 #define MQTT_WIFI              //开启此宏，mqtt数据通过WiFi模块tcp功能发送
 #define MQTT_HOST              "192.168.1.10" 
 #define MQTT_QOS               MQTT_QOS_0
 #define MQTT_KEEP_ALIVE_SEC    60
-#define MQTT_CMD_TIMEOUT_MS    30000
 #define MQTT_CON_TIMEOUT_MS    5000
 #define MQTT_CLIENT_ID         "WolfMQTTClientSimple"
 #define MQTT_TOPIC_NAME        "bcss/v1/slhc/st_1/state"
@@ -52,6 +50,7 @@ MqttNet mNetwork;//网络结构体
 MqttClient mClient;//mqtt客户端
 int mSockFd = INVALID_SOCKET_FD;
 char mqtt_readbuffer[MQTT_RX_BUF_SIZE];
+int mqtt_isConnected = 0;//mqtt连接状态
 
 HAL_StatusTypeDef Mqtt_SendATCmd(const char *cmd,int32_t timeout_ms)
 {

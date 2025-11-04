@@ -98,6 +98,7 @@ extern osMessageQueueId_t xUV_QueueHandle;
 extern osMessageQueueId_t xHmi_Send_QueueHandle;
 extern osMessageQueueId_t xHmi_Recv_QueueHandle;
 extern osMessageQueueId_t xWifi_Parse_QueueHandle;
+extern osMessageQueueId_t xMqttManagerQueueHandle;
 extern osSemaphoreId_t xMotorTxSemHandle;
 extern osSemaphoreId_t xWifiTxSemHandle;
 extern osSemaphoreId_t xPrintSemHandle;

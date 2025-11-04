@@ -319,6 +319,11 @@ osMessageQueueId_t xWifi_Parse_QueueHandle;
 const osMessageQueueAttr_t xWifi_Parse_Queue_attributes = {
   .name = "xWifi_Parse_Queue"
 };
+/* Definitions for xMqttManagerQueue */
+osMessageQueueId_t xMqttManagerQueueHandle;
+const osMessageQueueAttr_t xMqttManagerQueue_attributes = {
+  .name = "xMqttManagerQueue"
+};
 /* Definitions for xMotorTxSem */
 osSemaphoreId_t xMotorTxSemHandle;
 const osSemaphoreAttr_t xMotorTxSem_attributes = {
@@ -444,6 +449,8 @@ void MX_FREERTOS_Init(void) {
   xHmi_Recv_QueueHandle = osMessageQueueNew (5, sizeof(uint32_t), &xHmi_Recv_Queue_attributes);
   /* creation of xWifi_Parse_Queue */
   xWifi_Parse_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xWifi_Parse_Queue_attributes);
+  /* creation of xMqttManagerQueue */
+  xMqttManagerQueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xMqttManagerQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
