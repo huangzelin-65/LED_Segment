@@ -233,6 +233,20 @@ const osThreadAttr_t MqttReceiveTask_attributes = {
   .priority = (osPriority_t) osPriorityLow,
   .stack_size = 512 * 4
 };
+/* Definitions for RobotManagerTask */
+osThreadId_t RobotManagerTaskHandle;
+const osThreadAttr_t RobotManagerTask_attributes = {
+  .name = "RobotManagerTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
+/* Definitions for RobotReceiveTask */
+osThreadId_t RobotReceiveTaskHandle;
+const osThreadAttr_t RobotReceiveTask_attributes = {
+  .name = "RobotReceiveTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 128 * 4
+};
 /* Definitions for xResetButtonTimer */
 osTimerId_t xResetButtonTimerHandle;
 const osTimerAttr_t xResetButtonTimer_attributes = {
@@ -337,6 +351,11 @@ const osMessageQueueAttr_t xWifi_Parse_Queue_attributes = {
 osMessageQueueId_t xMqttManagerQueueHandle;
 const osMessageQueueAttr_t xMqttManagerQueue_attributes = {
   .name = "xMqttManagerQueue"
+};
+/* Definitions for xRobotQueue */
+osMessageQueueId_t xRobotQueueHandle;
+const osMessageQueueAttr_t xRobotQueue_attributes = {
+  .name = "xRobotQueue"
 };
 /* Definitions for xMotorTxSem */
 osSemaphoreId_t xMotorTxSemHandle;
@@ -465,6 +484,8 @@ void MX_FREERTOS_Init(void) {
   xWifi_Parse_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xWifi_Parse_Queue_attributes);
   /* creation of xMqttManagerQueue */
   xMqttManagerQueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xMqttManagerQueue_attributes);
+  /* creation of xRobotQueue */
+  xRobotQueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xRobotQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -539,6 +560,12 @@ void MX_FREERTOS_Init(void) {
   /* creation of MqttReceiveTask */
   MqttReceiveTaskHandle = osThreadNew(vMqttReceiveTask, NULL, &MqttReceiveTask_attributes);
 
+  /* creation of RobotManagerTask */
+  RobotManagerTaskHandle = osThreadNew(vRobotManagerTask, NULL, &RobotManagerTask_attributes);
+
+  /* creation of RobotReceiveTask */
+  RobotReceiveTaskHandle = osThreadNew(vRobotReceiveTask, NULL, &RobotReceiveTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   
@@ -562,7 +589,8 @@ void MX_FREERTOS_Init(void) {
   osThreadSuspend(BoxLEDTaskHandle);
   osThreadSuspend(MqttManagerTaskHandle);
   osThreadSuspend(MqttReceiveTaskHandle);  
-
+  osThreadSuspend(RobotManagerTaskHandle); 
+  osThreadSuspend(RobotReceiveTaskHandle);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */

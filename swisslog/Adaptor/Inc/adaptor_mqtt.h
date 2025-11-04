@@ -21,9 +21,15 @@ typedef enum
 typedef enum
 {
     MQTT_MSG_WIFI_CHANGE = 0,
-
+    MQTT_MSG_HEARTBEAT,
+    MQTT_MSG_ROBOT_EVENT,
 }MqttMsgType_t;
 
+typedef struct 
+{
+    MqttMsgType_t type;
+    char *data;
+}MqttMsgdata_t;
 
 extern MqttObject mqttObj;//mqtt对象，用于连接客户端
 extern MqttNet mNetwork;//网络结构体
@@ -32,7 +38,7 @@ extern int mqtt_isConnected;
 
 
 int MqttInit(void);
-void Mqtt_SendMsg(MqttMsgType_t msg);
+void Mqtt_SendMsg(MqttMsgType_t msg,char *data);
 void Mqtt_ParseData(uint8_t* rbuf,int len);
-
+void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t qos, uint8_t retain);
 #endif

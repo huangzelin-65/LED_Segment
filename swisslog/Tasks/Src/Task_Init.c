@@ -28,6 +28,8 @@ extern osThreadId_t HmiWaitTaskHandle;
 extern osThreadId_t BoxLEDTaskHandle;
 extern osThreadId_t MqttManagerTaskHandle;
 extern osThreadId_t MqttReceiveTaskHandle;
+extern osThreadId_t RobotManagerTaskHandle;
+extern osThreadId_t RobotReceiveTaskHandle;
 
 extern CarStatus_t CarStatus;
 
@@ -55,6 +57,8 @@ void vInitTask(void *argument)
   osThreadResume(BoxLEDTaskHandle);
   // osThreadResume(MqttManagerTaskHandle);
   // osThreadResume(MqttReceiveTaskHandle); 
+  // osThreadResume(RobotManagerTaskHandle);
+  // osThreadResume(RobotReceiveTaskHandle);   
 
   DEBUGINFO("InitTask\r\n");
 
