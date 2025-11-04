@@ -41,7 +41,7 @@ void vMqttManagerTask(void *argument)
                 break;
                 case MQTT_MSG_HEARTBEAT:
                 {
-                    Mqtt_PublishMsg(MQTT_TOPIC_NAME, (byte*)MQTT_PUBLISH_MSG, XSTRLEN(MQTT_PUBLISH_MSG), 0, 0);
+                    Mqtt_PublishMsg(MQTT_TOPIC_NAME, (char*)MQTT_PUBLISH_MSG, XSTRLEN(MQTT_PUBLISH_MSG), 0, 0);
                 }
                 default:break;
             }
