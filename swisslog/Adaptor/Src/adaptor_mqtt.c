@@ -531,3 +531,19 @@ void Mqtt_ParseData(uint8_t* rbuf,int len)
         default:break;
     }   
 }
+
+void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t qos, uint8_t retain)
+{
+    XMEMSET(&mqttObj, 0, sizeof(mqttObj));
+    mqttObj.publish.qos = qos;
+    mqttObj.publish.retain = retain;
+    mqttObj.publish.topic_name = pub_topic;
+    mqttObj.publish.packet_id = Mqtt_GetPacketid();
+    mqttObj.publish.buffer = (byte*)pub_buf;
+    mqttObj.publish.total_len = data_len;
+    mqttObj.publish.buffer_len = data_len;
+    int rc = MqttClient_Publish(&mClient, &mqttObj.publish);
+    // int rc = MqttClient_Publish_WriteOnly(&mClient, &mqttObj.publish,wolfmqtt_PublishCb);
+    // int rc = MqttClient_Publish_ex(&mClient, &mqttObj.publish,wolfmqtt_PublishCb);
+    DEBUGINFO("MqttClient_Publish rc:%d\n",rc);  
+}

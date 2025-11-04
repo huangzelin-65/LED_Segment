@@ -11,6 +11,8 @@
 #include <stdbool.h>
 #include "queue.h"
 
+#define MQTT_TOPIC_NAME      "bcss/v1/slhc/st_1/state" 
+#define MQTT_PUBLISH_MSG     "HEARTBEAT"
 #define MQTT_CMD_TIMEOUT_MS    30000
 
 extern osMessageQueueId_t xMqttManagerQueueHandle;
@@ -39,7 +41,7 @@ void vMqttManagerTask(void *argument)
                 break;
                 case MQTT_MSG_HEARTBEAT:
                 {
-
+                    Mqtt_PublishMsg(MQTT_TOPIC_NAME, (byte*)MQTT_PUBLISH_MSG, XSTRLEN(MQTT_PUBLISH_MSG), 0, 0);
                 }
                 default:break;
             }
