@@ -108,5 +108,5 @@ void vRobotReceiveTask(void *argument);
 void Robot_Init(void);
 void Robot_CreateStateJson(void);
 void Robot_UpdateStateJson(cJSON* robotJson, const RobotState_t* robotState);
-
+char* Robot_GetStateJsonStr(void);
 #endif

@@ -12,6 +12,9 @@
 #include "queue.h"
 #include "adaptor_mqtt.h"
 
+extern osMessageQueueId_t xRobotQueueHandle;//该消息队列处理事件上报
+
+//保存服务器下发的动作消息
 RobotAction_t robotAction = {
     // 顶层字段初始化
     .header_id = 331,                  // 消息头部ID，递增序列
@@ -94,14 +97,25 @@ void vRobotManagerTask(void *argument)
 //处理事件发生时，更新robot相关的结构体和对应的json
 void vRobotReceiveTask(void *argument)
 {
-  while (1)
-  {
-	osDelay(pdMS_TO_TICKS(100));
-  }
+    char *robot_data = NULL;
+    while (1)
+    {
+        if(xQueueReceive(xRobotQueueHandle, &robot_data, portMAX_DELAY) == pdTRUE)
+        {
+            if(robot_init)//保证robot json已经被创建
+            {
+                //此处需增加一个更新robot state 的接口
+                Robot_UpdateStateJson(RobotJson,&robotSate);//根据robot state更新对应的json字段
+                //发送消息给mqtt队列，让最新robot状态发布给服务器
+                Mqtt_SendMsg(MQTT_MSG_ROBOT_EVENT,Robot_GetStateJsonStr());
+            }
+        }
+    }
 }
 
 // 辅助函数：将Direction枚举转换为字符串
-const char* Robot_DirectionToString(Direction dir) {
+const char* Robot_DirectionToString(Direction dir) 
+{
     switch (dir) {
         case DIRECTION_FORWARD: return "DIRECTION_FORWARD";
         case DIRECTION_BACKWARD: return "DIRECTION_BACKWARD";
@@ -109,7 +123,8 @@ const char* Robot_DirectionToString(Direction dir) {
     }
 }
 //创建vda5050必要字段，赋值为NULL
-void Robot_AddNullFields(cJSON* root) {
+void Robot_AddNullFields(cJSON* root) 
+{
     const char* null_fields[] = {
         "manufacturer", "serialNumber", "orderId", "orderUpdateId",
         "lastNodeId", "lastNodeSequenceId", "nodeStates", "edgeStates",
@@ -120,21 +135,24 @@ void Robot_AddNullFields(cJSON* root) {
     }
 }
 //小车前后碰把开关的状态
-cJSON* Robot_CreateBumperState() {
+cJSON* Robot_CreateBumperState()
+{
     cJSON* obj = cJSON_CreateObject();
     cJSON_AddBoolToObject(obj, "front", robotSate.bumperState.front);
     cJSON_AddBoolToObject(obj, "back", robotSate.bumperState.back);
     return obj;
 }
 //小车速度的状态
-cJSON* Robot_CreateMoveState() {
+cJSON* Robot_CreateMoveState()
+{
     cJSON* obj = cJSON_CreateObject();
     cJSON_AddNumberToObject(obj, "speedLevel", robotSate.moveState.speedLevel);
     cJSON_AddNumberToObject(obj, "direction", robotSate.moveState.direction);
     return obj;
 }
 //车厢消毒净化状态
-cJSON* Robot_CreateDisinfectState() {
+cJSON* Robot_CreateDisinfectState() 
+{
     cJSON* obj = cJSON_CreateObject();
     cJSON_AddBoolToObject(obj, "runState", robotSate.disinfectState.runState);
     cJSON_AddNumberToObject(obj, "runTime", robotSate.disinfectState.runTime);
@@ -143,7 +161,8 @@ cJSON* Robot_CreateDisinfectState() {
     return obj;
 }
 //小车报错的消息
-cJSON* Robot_CreateErrors() {
+cJSON* Robot_CreateErrors() 
+{
     cJSON* obj = cJSON_CreateObject();
     cJSON_AddStringToObject(obj, "errorType", robotSate.errors.errorType);
     cJSON_AddStringToObject(obj, "errorLevel", robotSate.errors.errorLevel);
@@ -489,6 +508,17 @@ void Robot_UpdateStateJson(cJSON* robotJson, const RobotState_t* robotState) {
             }
         }
     }
+}
+//获取robot json转成字符串的接口，返回值需要释放
+char* Robot_GetStateJsonStr(void) 
+{
+    if(RobotJson == NULL)
+    {
+        printf("robot_GetStateJsonStr fail\n");
+        return NULL;
+    }    
+    char* json_str = cJSON_PrintUnformatted(RobotJson);
+    return json_str;
 }
 //ROBOT 相关的初始化
 void Robot_Init(void)

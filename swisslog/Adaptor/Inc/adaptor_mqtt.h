@@ -22,6 +22,7 @@ typedef enum
 {
     MQTT_MSG_WIFI_CHANGE = 0,
     MQTT_MSG_HEARTBEAT,
+    MQTT_MSG_ROBOT_EVENT,
 }MqttMsgType_t;
 
 typedef struct 
