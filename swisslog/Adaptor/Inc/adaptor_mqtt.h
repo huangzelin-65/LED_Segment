@@ -18,6 +18,13 @@ typedef enum
     MQTT_WAIT_STATE_SOCKET_CLOSE,
 }MqttWaitState_t;
 
+typedef enum
+{
+    MQTT_MSG_WIFI_CHANGE = 0,
+
+}MqttMsgType_t;
+
+
 extern MqttObject mqttObj;//mqtt对象，用于连接客户端
 extern MqttNet mNetwork;//网络结构体
 extern MqttClient mClient;//mqtt客户端
@@ -25,6 +32,7 @@ extern int mqtt_isConnected;
 
 
 int MqttInit(void);
+void Mqtt_SendMsg(MqttMsgType_t msg);
 void Mqtt_ParseData(uint8_t* rbuf,int len);
 
 #endif

@@ -51,7 +51,23 @@ MqttClient mClient;//mqtt客户端
 int mSockFd = INVALID_SOCKET_FD;
 char mqtt_readbuffer[MQTT_RX_BUF_SIZE];
 int mqtt_isConnected = 0;//mqtt连接状态
+extern osMessageQueueId_t xMqttManagerQueueHandle;//
 
+//发送消息给线程，处理相关消息类型，指定处理内容
+void Mqtt_SendMsg(MqttMsgType_t msg)
+{
+    if(xMqttManagerQueueHandle != NULL)
+    {
+        MqttMsgType_t *temp_msg = pvPortMalloc(sizeof(MqttMsgType_t));
+        *temp_msg = msg;
+        if (xQueueSend(xMqttManagerQueueHandle, &temp_msg, portMAX_DELAY) == pdPASS) 
+        {
+            DEBUGINFO("msg :%d",msg);
+        } 
+    } 
+}
+
+//发送消息给WiFi模块
 HAL_StatusTypeDef Mqtt_SendATCmd(const char *cmd,int32_t timeout_ms)
 {
   HAL_StatusTypeDef status;
@@ -423,7 +439,7 @@ int MqttInit(void)
     // mqtt_attributes.stack_size = MQTT_THREAD_STACK_SIZE;
     // mqtt_attributes.priority = osPriorityLow;
     // osThreadNew(mqtt_thread, &mqttObj, &mqtt_attributes);
-
+    return rc;
 exit:
     if (rc != MQTT_CODE_SUCCESS) {
         DEBUGINFO("MQTT Error %d: %s", rc, MqttClient_ReturnCodeToString(rc));

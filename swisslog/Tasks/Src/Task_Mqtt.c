@@ -23,7 +23,22 @@ void vMqttManagerTask(void *argument)
     {
         if(xQueueReceive(xMqttManagerQueueHandle, &manage_data, portMAX_DELAY) == pdTRUE)
         {
-            
+            MqttMsgType_t *msg = (MqttMsgType_t *)manage_data;
+            DEBUGINFO("msg:%d",msg);
+            switch(*msg)
+            {
+                case MQTT_MSG_WIFI_CHANGE:
+                {
+                    int rc = MqttInit();
+                    if(rc == MQTT_CODE_SUCCESS)
+                    {
+                        mqtt_isConnected = 1;
+                        DEBUGINFO("mqtt_isConnected");
+                    }
+                }
+                break;
+                default:break;
+            }
         }
     }
 }

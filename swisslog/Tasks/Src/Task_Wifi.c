@@ -19,6 +19,7 @@
 #include "adaptor_mqtt.h"
 
 extern osMessageQueueId_t xWifi_Parse_QueueHandle;
+
 /* WiFi管理任务入口函数 */
 void vWifiManagerTask(void *argument)
 {
@@ -28,6 +29,10 @@ void vWifiManagerTask(void *argument)
   while (1)
   {
     Wifi_ConnectProcess();
+    if(Wifi_IsChanged())//通知mqtt任务，wifi状态发送变化
+    {
+        Mqtt_SendMsg(MQTT_MSG_WIFI_CHANGE);
+    }
 	  osDelay(pdMS_TO_TICKS(100));
   }
 }
