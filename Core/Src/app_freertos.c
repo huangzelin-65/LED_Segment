@@ -589,7 +589,8 @@ void MX_FREERTOS_Init(void) {
   osThreadSuspend(BoxLEDTaskHandle);
   osThreadSuspend(MqttManagerTaskHandle);
   osThreadSuspend(MqttReceiveTaskHandle);  
-
+  osThreadSuspend(RobotManagerTaskHandle); 
+  osThreadSuspend(RobotReceiveTaskHandle);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
