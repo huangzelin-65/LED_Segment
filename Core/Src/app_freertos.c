@@ -219,6 +219,20 @@ const osThreadAttr_t BoxLEDTask_attributes = {
   .priority = (osPriority_t) osPriorityBelowNormal,
   .stack_size = 128 * 4
 };
+/* Definitions for MqttManagerTask */
+osThreadId_t MqttManagerTaskHandle;
+const osThreadAttr_t MqttManagerTask_attributes = {
+  .name = "MqttManagerTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 512 * 4
+};
+/* Definitions for MqttReceiveTask */
+osThreadId_t MqttReceiveTaskHandle;
+const osThreadAttr_t MqttReceiveTask_attributes = {
+  .name = "MqttReceiveTask",
+  .priority = (osPriority_t) osPriorityLow,
+  .stack_size = 512 * 4
+};
 /* Definitions for xResetButtonTimer */
 osTimerId_t xResetButtonTimerHandle;
 const osTimerAttr_t xResetButtonTimer_attributes = {
@@ -519,6 +533,12 @@ void MX_FREERTOS_Init(void) {
   /* creation of BoxLEDTask */
   BoxLEDTaskHandle = osThreadNew(vBoxLEDTask, NULL, &BoxLEDTask_attributes);
 
+  /* creation of MqttManagerTask */
+  MqttManagerTaskHandle = osThreadNew(vMqttManagerTask, NULL, &MqttManagerTask_attributes);
+
+  /* creation of MqttReceiveTask */
+  MqttReceiveTaskHandle = osThreadNew(vMqttReceiveTask, NULL, &MqttReceiveTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   
@@ -540,7 +560,8 @@ void MX_FREERTOS_Init(void) {
   osThreadSuspend(HmiRecvTaskHandle);
   osThreadSuspend(HmiWaitTaskHandle);
   osThreadSuspend(BoxLEDTaskHandle);
-  
+  osThreadSuspend(MqttManagerTaskHandle);
+  osThreadSuspend(MqttReceiveTaskHandle);  
 
   /* USER CODE END RTOS_THREADS */
 

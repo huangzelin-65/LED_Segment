@@ -51,6 +51,7 @@ void vMqttReceiveTask(void *argument)
                 DEBUGINFO("MqttClient_WaitMessage_ex:%d",rc);
             }
         }
+        if(!mqtt_isConnected)osDelay(pdMS_TO_TICKS(100));
     }
 }
 

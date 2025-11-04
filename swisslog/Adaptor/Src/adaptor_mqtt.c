@@ -82,7 +82,7 @@ int Mqtt_NetConnect(void *context, const char* host, word16 port,int timeout_ms)
             cnt = 0;
             return MQTT_CODE_ERROR_TIMEOUT;
         }
-        osDelay(1);
+        osDelay(pdMS_TO_TICKS(1));
     };
     cnt = 0;
     DEBUGINFO("mqtt_net_connect MQTT_WAIT_STATE_SOCKET_OPEN success\n");
@@ -169,7 +169,7 @@ int Mqtt_NetRead(void *context, byte* buf, int buf_len, int timeout_ms)
             cnt = 0;
             return MQTT_CODE_ERROR_TIMEOUT;
         }
-        osDelay(1);
+        osDelay(pdMS_TO_TICKS(1));
     };
     cnt = 0;
     if(mqtt_rest2read)//需要及时消耗完成
@@ -248,7 +248,7 @@ int Mqtt_NetWrite(void *context, const byte* buf, int buf_len,int timeout_ms)
             cnt = 0;
             return MQTT_CODE_ERROR_TIMEOUT;
         }
-        osDelay(1);
+        osDelay(pdMS_TO_TICKS(1));
     };
     cnt = 0;
     return MQTT_CODE_SUCCESS; 
@@ -295,7 +295,7 @@ int Mqtt_NetDisconnect(void *context)
             cnt = 0;
             return MQTT_CODE_ERROR_TIMEOUT;
         }
-        osDelay(1);
+        osDelay(pdMS_TO_TICKS(1));
     };
     cnt = 0;
     DEBUGINFO("mqtt_net_disconnect success\n");
