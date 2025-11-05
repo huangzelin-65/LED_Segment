@@ -371,6 +371,9 @@ static int Mqtt_MessageCb(MqttClient *client, MqttMessage *msg,byte msg_new, byt
 
     if (msg_done) {
         DEBUGINFO("MQTT Message: Done");
+        char *receive_data = pvPortMalloc(len + 1);
+        XMEMCPY(receive_data, msg->buffer, len);
+        Mqtt_SendMsg(MQTT_MSG_RECIEVE,receive_data);
     }
     return MQTT_CODE_SUCCESS;
 }
@@ -549,4 +552,11 @@ void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t 
     // int rc = MqttClient_Publish_WriteOnly(&mClient, &mqttObj.publish,wolfmqtt_PublishCb);
     // int rc = MqttClient_Publish_ex(&mClient, &mqttObj.publish,wolfmqtt_PublishCb);
     DEBUGINFO("MqttClient_Publish rc:%d\n",rc);  
+}
+
+void Mqtt_SetMsgCb(MqttClient *client,MqttMsgCb msg_cb)
+{
+    if(client == NULL) return;
+
+    client->msg_cb = msg_cb;
 }

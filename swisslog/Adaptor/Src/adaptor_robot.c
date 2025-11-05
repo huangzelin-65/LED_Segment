@@ -467,6 +467,93 @@ void Robot_UpdateStateJson(cJSON* robotJson, const RobotState_t* robotState) {
         }
     }
 }
+//解析服务器发来的json数据
+void Robot_ParseJson(char* json_data) 
+{
+    TickType_t start_tick = xTaskGetTickCount();
+    DEBUGINFO("start:%ld\n",start_tick);
+    // 解析JSON数据
+    cJSON *root = cJSON_Parse(json_data);
+    if (root == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            printf("JSON error: %s\n", error_ptr);
+        }
+        return;
+    }
+
+    // 填充顶层字段
+    cJSON *headerId = cJSON_GetObjectItem(root, "headerId");
+    if (headerId) robotAction.header_id = headerId->valueint;
+    
+    cJSON *timestamp = cJSON_GetObjectItem(root, "timestamp");
+    if (timestamp) robotAction.timestamp = timestamp->valueint;
+    
+    cJSON *version = cJSON_GetObjectItem(root, "version");
+    if (version) robotAction.version = version->valueint;
+    
+    cJSON *manufacturer = cJSON_GetObjectItem(root, "manufacturer");
+    if (manufacturer && manufacturer->type != cJSON_NULL && manufacturer->valuestring) {
+        robotAction.manufacturer = strdup(manufacturer->valuestring);
+    }
+    
+    cJSON *serialNumber = cJSON_GetObjectItem(root, "serialNumber");
+    if (serialNumber && serialNumber->type != cJSON_NULL && serialNumber->valuestring) {
+        robotAction.serial_number = strdup(serialNumber->valuestring);
+    }
+
+    // 填充actions字段
+    cJSON *actions = cJSON_GetObjectItem(root, "actions");
+    if (actions) {
+        cJSON *actionType = cJSON_GetObjectItem(actions, "actionType");
+        if (actionType) robotAction.actions.action_type = actionType->valueint;
+        
+        cJSON *actionDescription = cJSON_GetObjectItem(actions, "actionDescription");
+        if (actionDescription && actionDescription->type != cJSON_NULL && actionDescription->valuestring) {
+            robotAction.actions.action_description = strdup(actionDescription->valuestring);
+        }
+
+        // 填充actionParameters字段
+        cJSON *actionParameters = cJSON_GetObjectItem(actions, "actionParameters");
+        if (actionParameters) {
+            cJSON *operatingMode = cJSON_GetObjectItem(actionParameters, "operatingMode");
+            if (operatingMode && operatingMode->valuestring) {
+                strncpy(robotAction.actions.parameters.operating_mode, 
+                       operatingMode->valuestring, 
+                       sizeof(robotAction.actions.parameters.operating_mode) - 1);
+            }
+            
+            cJSON *speadLevel = cJSON_GetObjectItem(actionParameters, "speadLevel");
+            if (speadLevel) robotAction.actions.parameters.speed_level = speadLevel->valueint;
+            
+            cJSON *direction = cJSON_GetObjectItem(actionParameters, "direction");
+            if (direction) robotAction.actions.parameters.direction = direction->valueint;
+
+            // 填充disinfectState字段
+            cJSON *disinfectState = cJSON_GetObjectItem(actionParameters, "disinfectState");
+            if (disinfectState) {
+                cJSON *state = cJSON_GetObjectItem(disinfectState, "state");
+                if (state) robotAction.actions.parameters.disinfect_state.runState = state->valueint;
+                
+                cJSON *startTime = cJSON_GetObjectItem(disinfectState, "startTime");
+                if (startTime) robotAction.actions.parameters.disinfect_state.startTime = startTime->valueint;
+                
+                cJSON *setTime = cJSON_GetObjectItem(disinfectState, "setTime");
+                if (setTime) robotAction.actions.parameters.disinfect_state.setTime = setTime->valueint;
+            }
+        }
+    }
+
+    // 打印结构体内容，验证解析结果
+    DEBUGINFO("parse:\nheader_id: %d\ntimestamp: %d\nversion: %d\nmanufacturer: %s\nserial_number: %s\naction_type: %d\naction_description: %s\noperating_mode: %s\nspeed_level: %d\ndirection: %d\ndisinfect_state.state: %s\ndisinfect_state.start_time: %d\ndisinfect_state.set_time: %d\n",robotAction.header_id,robotAction.timestamp,robotAction.version,robotAction.manufacturer ? robotAction.manufacturer : "null",robotAction.serial_number ? robotAction.serial_number : "null",robotAction.actions.action_type,robotAction.actions.action_description ? robotAction.actions.action_description : "null",robotAction.actions.parameters.operating_mode,robotAction.actions.parameters.speed_level,robotAction.actions.parameters.direction,robotAction.actions.parameters.disinfect_state.runState ? "true" : "false",robotAction.actions.parameters.disinfect_state.startTime,robotAction.actions.parameters.disinfect_state.setTime);
+    // 释放资源
+    cJSON_Delete(root);
+    //统计解析耗时
+    TickType_t end_tick = xTaskGetTickCount();
+    TickType_t elapsed_tick = end_tick - start_tick; 
+    uint32_t elapsed_ms = pdMS_TO_TICKS(elapsed_tick);    
+    DEBUGINFO("elapsed_ms:%ld\n",elapsed_ms);
+}
 //获取robot json转成字符串的接口，返回值需要释放
 char* Robot_GetStateJsonStr(void) 
 {
@@ -503,14 +590,16 @@ void Robot_Init(void)
 
     DEBUGINFO("end\n");
 }
-//其他线程利用此接口通知发布状态消息
-void Robot_SendMsg(void)
+//通知robot接收任务去发送指定的消息类型或解析来
+void Robot_SendMsg(RobotMsgType_t type,char *data)
 {
     if(xRobotQueueHandle != NULL)
     {
-        char *robot_data = NULL;
+        RobotMsg_t * robot_msg = pvPortMalloc(sizeof(RobotMsg_t));
+        robot_msg->type = type;
+        robot_msg->data = data;        
         DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(xRobotQueueHandle),uxQueueSpacesAvailable(xRobotQueueHandle));
-        if (xQueueSend(xRobotQueueHandle, &robot_data, portMAX_DELAY) == pdPASS) 
+        if (xQueueSend(xRobotQueueHandle, &robot_msg, portMAX_DELAY) == pdPASS) 
         {
             DEBUGINFO("msg");
         } 

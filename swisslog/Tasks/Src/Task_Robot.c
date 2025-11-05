@@ -29,13 +29,13 @@ void vRobotManagerTask(void *argument)
             cnt++;
             if(cnt == 20)//10秒发送一次心跳包
             {
-                DEBUGINFO("MQTT_MSG_HEARTBEAT\n");  
-                Mqtt_SendMsg(MQTT_MSG_HEARTBEAT,NULL);
+                DEBUGINFO("ROBOT_MSG_HEART\n");  
+                Robot_SendMsg(ROBOT_MSG_HEART,NULL);
             }
             if(cnt == 40)
             {
-                DEBUGINFO("Robot_SendMsg\n");  
-                Robot_SendMsg();
+                DEBUGINFO("ROBOT_MSG_SEND\n");  
+                Robot_SendMsg(ROBOT_MSG_SEND,NULL);
                 cnt = 0;
             }                
         }
@@ -45,21 +45,47 @@ void vRobotManagerTask(void *argument)
 //处理事件发生时，更新robot相关的结构体和对应的json
 void vRobotReceiveTask(void *argument)
 { 
-    char *robot_data = NULL;
+    RobotMsg_t * robot_msg = NULL;
     DEBUGINFO("xRobotQueueHandle:%p\n",xRobotQueueHandle); 
     while (1)
     {
-        if(xQueueReceive(xRobotQueueHandle, &robot_data, portMAX_DELAY) == pdTRUE)
+        if(xQueueReceive(xRobotQueueHandle, &robot_msg, portMAX_DELAY) == pdTRUE)
         {
             if(robot_init)//保证robot json已经被创建
             {
-                //此处需增加一个更新robot state 的接口
-                DEBUGINFO("Robot_ReceiveMsg\n");  
-                //根据robot state更新对应的json字段
-                Robot_UpdateStateJson(RobotJson,&robotSate);
-                //发送消息给mqtt队列，让最新robot状态发布给服务器
-                Mqtt_SendMsg(MQTT_MSG_ROBOT_EVENT,Robot_GetStateJsonStr());
+                DEBUGINFO("type:%d\n",robot_msg->type); 
+                switch (robot_msg->type)
+                {
+                    case ROBOT_MSG_HEART://发送心跳包到服务器
+                    {
+                        DEBUGINFO("ROBOT_MSG_HEART\n"); 
+                        Mqtt_SendMsg(MQTT_MSG_HEARTBEAT,NULL);
+                    }
+                    break;
+                    case ROBOT_MSG_SEND://代表需要把消息发送到服务器
+                    {
+                        //此处需增加一个更新robot state 的接口
+                        DEBUGINFO("ROBOT_MSG_SEND\n");  
+                        //根据robot state更新对应的json字段
+                        Robot_UpdateStateJson(RobotJson,&robotSate);
+                        //发送消息给mqtt队列，让最新robot状态发布给服务器
+                        Mqtt_SendMsg(MQTT_MSG_ROBOT_EVENT,Robot_GetStateJsonStr());                        
+                    }
+                    break;
+                    case ROBOT_MSG_RECEIVE://代表从服务器获取到消息
+                    {
+                        DEBUGINFO("ROBOT_MSG_RECEIVE:%s\n",robot_msg->data); 
+                        //解析来自mqtt的数据
+                        Robot_ParseJson(robot_msg->data);
+                        vPortFree(robot_msg->data);
+                    }
+                    break;                                        
+                    default:
+                    break;
+                }
+
             }
+            vPortFree(robot_msg);
         }
     }
 }

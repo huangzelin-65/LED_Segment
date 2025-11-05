@@ -10,6 +10,7 @@
 #include "Common.h"
 #include <stdbool.h>
 #include "queue.h"
+#include "adaptor_robot.h"
 
 #define MQTT_TOPIC_NAME      "bcss/v1/slhc/st_1/state" 
 #define MQTT_PUBLISH_MSG     "HEARTBEAT"
@@ -49,6 +50,11 @@ void vMqttManagerTask(void *argument)
                     char* robot_json_str = (char*)msg->data;
                     Mqtt_PublishMsg(MQTT_TOPIC_NAME, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
                     vPortFree(robot_json_str);
+                }
+                break;
+                case MQTT_MSG_RECIEVE:
+                {
+                    Robot_SendMsg(ROBOT_MSG_RECEIVE,msg->data);
                 }
                 break;
                 default:break;

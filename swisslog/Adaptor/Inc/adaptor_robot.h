@@ -99,6 +99,20 @@ typedef struct {
     Errors errors;
 } RobotState_t;
 
+
+typedef enum {
+    ROBOT_MSG_HEART = 0,//发送心跳包到服务器
+    ROBOT_MSG_SEND,//代表需要把消息发送到服务器
+    ROBOT_MSG_RECEIVE,//代表从服务器获取到消息
+} RobotMsgType_t;
+
+
+typedef struct {
+    RobotMsgType_t type;
+    char *data;
+}RobotMsg_t;
+
+
 extern RobotState_t robotSate;
 extern bool robot_init;
 extern cJSON* RobotJson;
@@ -106,7 +120,8 @@ extern cJSON* RobotJson;
 void Robot_Init(void);
 void Robot_CreateStateJson(void);
 void Robot_UpdateStateJson(cJSON* robotJson, const RobotState_t* robotState);
+void Robot_ParseJson(char* json_data);
 char* Robot_GetStateJsonStr(void);
-void Robot_SendMsg(void);
+void Robot_SendMsg(RobotMsgType_t type,char *data);
 
 #endif
