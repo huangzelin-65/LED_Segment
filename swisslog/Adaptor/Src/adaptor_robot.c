@@ -12,31 +12,7 @@ extern osMessageQueueId_t xRobotQueueHandle;//该消息队列处理事件上报
 extern osThreadId_t RobotReceiveTaskHandle;//该任务处理事件上报
 
 //保存服务器下发的动作消息
-RobotAction_t robotAction = {
-    // 顶层字段初始化
-    .header_id = 331,                  // 消息头部ID，递增序列
-    .timestamp = 1695000000,           // 时间戳（示例：2023-09-18 12:00:00）
-    .version = 2,                      // 协议版本号
-    .manufacturer = "RoboTech Inc",    // 制造商名称
-    .serial_number = "RT-2023-0045",   // 设备序列号
-    
-    // 动作字段初始化
-    .actions = {
-        .action_type = 1,              // 动作类型：1表示移动控制
-        .action_description = "Manual movement control",  // 动作描述
-        .parameters = {
-            .operating_mode = "MANUAL",       // 操作模式：手动模式
-            .speed_level = 3,                 // 速度等级：3级（1-5级）
-            .direction = DIRECTION_FORWARD,   // 方向：前进（对应枚举值）
-            .disinfect_state = {
-                .runState = false,            // 消毒状态：未运行
-                .runTime = 0,                 // 已运行时间：0秒
-                .startTime = 0,               // 开始时间戳：未启动
-                .setTime = 120                // 设定消毒时长：120秒
-            }
-        }
-    }
-};
+RobotAction_t robotAction;
 
 //此处根据不同的设备，定义不同的变量
 RobotState_t robotSate = {
@@ -468,98 +444,162 @@ void Robot_UpdateStateJson(cJSON* robotJson, const RobotState_t* robotState) {
     }
 }
 //解析服务器发来的json数据
-void Robot_ParseJson(char* json_data) 
+int Robot_ParseJson(char *json_str,RobotAction_t *robot) 
 {
     TickType_t start_tick = xTaskGetTickCount();
     DEBUGINFO("start:%ld\n",start_tick);
     // 解析JSON数据
-    cJSON *root = cJSON_Parse(json_data);
+    if (json_str == NULL || robot == NULL) {
+        DEBUGINFO("parameters null\n");
+        return -1;
+    }
+
+    // 1. 解析整个JSON
+    cJSON *root = cJSON_Parse(json_str);
     if (root == NULL) {
-        const char *error_ptr = cJSON_GetErrorPtr();
-        if (error_ptr != NULL) {
-            printf("JSON error: %s\n", error_ptr);
-        }
-        return;
+        DEBUGINFO("cJSON_Parse fail\n");
+        return -1;
     }
 
-    // 填充顶层字段
+    // 2. 解析顶层字段: headerId
     cJSON *headerId = cJSON_GetObjectItem(root, "headerId");
-    if (headerId) robotAction.header_id = headerId->valueint;
-    
+    if (headerId == NULL || !cJSON_IsString(headerId)) {
+        DEBUGINFO("headerId Not find\n");
+        cJSON_Delete(root);
+        return -1;
+    }
+    strncpy(robot->headerId, headerId->valuestring, sizeof(robot->headerId)-1);
+    robot->headerId[sizeof(robot->headerId)-1] = '\0';  // 确保字符串终止
+
+    // 3. 解析顶层字段: timestamp
     cJSON *timestamp = cJSON_GetObjectItem(root, "timestamp");
-    if (timestamp) robotAction.timestamp = timestamp->valueint;
-    
+    if (timestamp == NULL || !cJSON_IsString(timestamp)) {
+        DEBUGINFO("timestamp Not find\n");
+        cJSON_Delete(root);
+        return -1;
+    }
+    strncpy(robot->timestamp, timestamp->valuestring, sizeof(robot->timestamp)-1);
+    robot->timestamp[sizeof(robot->timestamp)-1] = '\0';
+
+    // 4. 解析顶层字段: version
     cJSON *version = cJSON_GetObjectItem(root, "version");
-    if (version) robotAction.version = version->valueint;
-    
-    cJSON *manufacturer = cJSON_GetObjectItem(root, "manufacturer");
-    if (manufacturer && manufacturer->type != cJSON_NULL && manufacturer->valuestring) {
-        robotAction.manufacturer = strdup(manufacturer->valuestring);
+    if (version == NULL || !cJSON_IsString(version)) {
+        DEBUGINFO("version Not find\n");
+        cJSON_Delete(root);
+        return -1;
     }
-    
-    cJSON *serialNumber = cJSON_GetObjectItem(root, "serialNumber");
-    if (serialNumber && serialNumber->type != cJSON_NULL && serialNumber->valuestring) {
-        robotAction.serial_number = strdup(serialNumber->valuestring);
+    strncpy(robot->version, version->valuestring, sizeof(robot->version)-1);
+    robot->version[sizeof(robot->version)-1] = '\0';
+
+    // 5. 解析action对象
+    cJSON *action_obj = cJSON_GetObjectItem(root, "action");
+    if (action_obj == NULL || !cJSON_IsObject(action_obj)) {
+        DEBUGINFO("action Not find\n");
+        cJSON_Delete(root);
+        return -1;
     }
 
-    // 填充actions字段
-    cJSON *actions = cJSON_GetObjectItem(root, "actions");
-    if (actions) {
-        cJSON *actionType = cJSON_GetObjectItem(actions, "actionType");
-        if (actionType) robotAction.actions.action_type = actionType->valueint;
-        
-        cJSON *actionDescription = cJSON_GetObjectItem(actions, "actionDescription");
-        if (actionDescription && actionDescription->type != cJSON_NULL && actionDescription->valuestring) {
-            robotAction.actions.action_description = strdup(actionDescription->valuestring);
+    // 5.1 解析action.Type
+    cJSON *type = cJSON_GetObjectItem(action_obj, "Type");
+    if (type == NULL || !cJSON_IsNumber(type)) {
+        DEBUGINFO("action.Type Not find\n");
+        cJSON_Delete(root);
+        return -1;
+    }
+    robot->action.Type = type->valueint;
+
+    // 5.2 解析action.cmds数组
+    cJSON *cmds_array = cJSON_GetObjectItem(action_obj, "cmds");
+    if (cmds_array == NULL || !cJSON_IsArray(cmds_array)) {
+        DEBUGINFO("action.cmds Not find\n");
+        cJSON_Delete(root);
+        return -1;
+    }
+    //限制最多八条命令
+    robot->action.cmd_count = cJSON_GetArraySize(cmds_array);
+    if (robot->action.cmd_count <= 0 || robot->action.cmd_count > 8) {
+        DEBUGINFO("cmds Not find\n");
+        cJSON_Delete(root);
+        return -1;
+    }
+
+    // 遍历cmds数组，解析每个命令
+    for (int i = 0; i < robot->action.cmd_count; i++) {
+        cJSON *cmd_obj = cJSON_GetArrayItem(cmds_array, i);
+        if (cmd_obj == NULL || !cJSON_IsObject(cmd_obj)) {
+            DEBUGINFO("cmds %d is not object\n", i);
+            cJSON_Delete(root);
+            return -1;
         }
 
-        // 填充actionParameters字段
-        cJSON *actionParameters = cJSON_GetObjectItem(actions, "actionParameters");
-        if (actionParameters) {
-            cJSON *operatingMode = cJSON_GetObjectItem(actionParameters, "operatingMode");
-            if (operatingMode && operatingMode->valuestring) {
-                strncpy(robotAction.actions.parameters.operating_mode, 
-                       operatingMode->valuestring, 
-                       sizeof(robotAction.actions.parameters.operating_mode) - 1);
-            }
-            
-            cJSON *speadLevel = cJSON_GetObjectItem(actionParameters, "speadLevel");
-            if (speadLevel) robotAction.actions.parameters.speed_level = speadLevel->valueint;
-            
-            cJSON *direction = cJSON_GetObjectItem(actionParameters, "direction");
-            if (direction) robotAction.actions.parameters.direction = direction->valueint;
+        // 解析cmd字段
+        cJSON *cmd = cJSON_GetObjectItem(cmd_obj, "cmd");
+        if (cmd == NULL || !cJSON_IsString(cmd)) {
+            DEBUGINFO("cmd [%d] is not string\n", i);
+            cJSON_Delete(root);
+            return -1;
+        }
+        strncpy(robot->action.cmds[i].cmd, cmd->valuestring, sizeof(robot->action.cmds[i].cmd)-1);
+        robot->action.cmds[i].cmd[sizeof(robot->action.cmds[i].cmd)-1] = '\0';
 
-            // 填充disinfectState字段
-            cJSON *disinfectState = cJSON_GetObjectItem(actionParameters, "disinfectState");
-            if (disinfectState) {
-                cJSON *state = cJSON_GetObjectItem(disinfectState, "state");
-                if (state) robotAction.actions.parameters.disinfect_state.runState = state->valueint;
-                
-                cJSON *startTime = cJSON_GetObjectItem(disinfectState, "startTime");
-                if (startTime) robotAction.actions.parameters.disinfect_state.startTime = startTime->valueint;
-                
-                cJSON *setTime = cJSON_GetObjectItem(disinfectState, "setTime");
-                if (setTime) robotAction.actions.parameters.disinfect_state.setTime = setTime->valueint;
-            }
+        // 解析cmdId字段
+        cJSON *cmdId = cJSON_GetObjectItem(cmd_obj, "cmdId");
+        if (cmdId == NULL || !cJSON_IsString(cmdId)) {
+            DEBUGINFO("cmdId[%d] is not string\n", i);
+            cJSON_Delete(root);
+            return -1;
+        }
+        strncpy(robot->action.cmds[i].cmdId, cmdId->valuestring, sizeof(robot->action.cmds[i].cmdId)-1);
+        robot->action.cmds[i].cmdId[sizeof(robot->action.cmds[i].cmdId)-1] = '\0';
+
+        // 解析params对象（model字段）
+        cJSON *params_obj = cJSON_GetObjectItem(cmd_obj, "params");
+        if (params_obj == NULL || !cJSON_IsObject(params_obj)) {
+            DEBUGINFO("params[%d] is not object\n", i);
+            cJSON_Delete(root);
+            return -1;
+        }
+        cJSON *model = cJSON_GetObjectItem(params_obj, "model");
+        if (model != NULL && cJSON_IsString(model)) {  // model可能在非runModel命令中不存在
+            strncpy(robot->action.cmds[i].params.model, model->valuestring, sizeof(robot->action.cmds[i].params.model)-1);
+            robot->action.cmds[i].params.model[sizeof(robot->action.cmds[i].params.model)-1] = '\0';
+        } else {
+            robot->action.cmds[i].params.model[0] = '\0';  // 空字符串表示无参数
         }
     }
-
-    // 打印结构体内容，验证解析结果
-    DEBUGINFO("parse:\nheader_id: %d\ntimestamp: %d\nversion: %d\nmanufacturer: %s\nserial_number: %s\naction_type: %d\naction_description: %s\noperating_mode: %s\nspeed_level: %d\ndirection: %d\ndisinfect_state.state: %s\ndisinfect_state.start_time: %d\ndisinfect_state.set_time: %d\n",robotAction.header_id,robotAction.timestamp,robotAction.version,robotAction.manufacturer ? robotAction.manufacturer : "null",robotAction.serial_number ? robotAction.serial_number : "null",robotAction.actions.action_type,robotAction.actions.action_description ? robotAction.actions.action_description : "null",robotAction.actions.parameters.operating_mode,robotAction.actions.parameters.speed_level,robotAction.actions.parameters.direction,robotAction.actions.parameters.disinfect_state.runState ? "true" : "false",robotAction.actions.parameters.disinfect_state.startTime,robotAction.actions.parameters.disinfect_state.setTime);
-    // 释放资源
+    // 释放cJSON资源
     cJSON_Delete(root);
     //统计解析耗时
     TickType_t end_tick = xTaskGetTickCount();
     TickType_t elapsed_tick = end_tick - start_tick; 
     uint32_t elapsed_ms = pdMS_TO_TICKS(elapsed_tick);    
     DEBUGINFO("elapsed_ms:%ld\n",elapsed_ms);
+
+    // 打印顶层结构体成员
+    DEBUGINFO("  headerId: %s\n", robot->headerId);
+    DEBUGINFO("  timestamp: %s\n", robot->timestamp);
+    DEBUGINFO("  version: %s\n", robot->version);
+    
+    // 打印RobotAction成员
+    DEBUGINFO("  Type: %d\n", robot->action.Type);
+    DEBUGINFO("  cmd_count: %d\n", robot->action.cmd_count);
+    
+    // 打印命令数组（cmds）中的每个命令
+    for (int i = 0; i < robot->action.cmd_count; i++) {
+        DEBUGINFO("      cmd number %d\n", i + 1);
+        DEBUGINFO("      cmd: %s\n", robot->action.cmds[i].cmd);
+        DEBUGINFO("      cmdId: %s\n", robot->action.cmds[i].cmdId);
+        DEBUGINFO("      params.model: %s\n", robot->action.cmds[i].params.model);
+    }
+
+    return 0;
 }
 //获取robot json转成字符串的接口，返回值需要释放
 char* Robot_GetStateJsonStr(void) 
 {
     if(RobotJson == NULL)
     {
-        printf("robot_GetStateJsonStr fail\n");
+        DEBUGINFO("robot_GetStateJsonStr fail\n");
         return NULL;
     }    
     char* json_str = cJSON_PrintUnformatted(RobotJson);

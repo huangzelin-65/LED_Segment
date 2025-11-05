@@ -46,31 +46,6 @@ typedef struct {
     const char * errorLevel;
 } Errors;
 
-// 定义动作参数结构体
-typedef struct {
-    char operating_mode[20];  // 操作模式
-    int speed_level;          // 速度等级
-    int direction;            // 方向
-    DisinfectState disinfect_state;  // 消毒状态
-} ActionParameters;
-
-// 定义动作结构体
-typedef struct {
-    int action_type;          // 动作类型
-    char *action_description; // 动作描述（可能为NULL）
-    ActionParameters parameters;  // 动作参数
-} Actions;
-
-// 定义主数据结构体
-typedef struct {
-    int header_id;            // 头部ID
-    int timestamp;            // 时间戳
-    int version;              // 版本号
-    char *manufacturer;       // 制造商（可能为NULL）
-    char *serial_number;      // 序列号（可能为NULL）
-    Actions actions;          // 动作
-} RobotAction_t;
-
 typedef struct {
     int headerId;
     int timestamp;
@@ -100,6 +75,35 @@ typedef struct {
 } RobotState_t;
 
 
+
+// 命令参数结构体（对应params字段）
+typedef struct {
+    char model[16];  // 存储"auto"或"manual"，预留足够长度
+} RobotCmdParams;
+
+// 命令结构体（对应cmds数组中的元素）
+typedef struct {
+    char cmd[16];     // 存储"forward"/"back"/"stop"/"runModel"
+    char cmdId[16];   // 存储命令ID（如"1"）
+    RobotCmdParams params;  // 命令参数
+} RobotCmd;
+
+// 动作结构体（对应action字段）
+typedef struct {
+    int Type;             // 动作类型（如1）
+    RobotCmd cmds[8];     // 命令数组（假设最多8条命令）
+    int cmd_count;        // 实际命令数量
+} RobotAction;
+
+// 顶层结构体（对应整个JSON）
+typedef struct {
+    char headerId[8];     // 最多4字符+":"+Long，预留长度
+    char timestamp[32];   // Unix毫秒时间戳（字符串形式）
+    char version[16];     // 版本号（如"1.0.0"）
+    RobotAction action;   // 动作内容
+} RobotAction_t;	
+
+
 typedef enum {
     ROBOT_MSG_HEART = 0,//发送心跳包到服务器
     ROBOT_MSG_SEND,//代表需要把消息发送到服务器
@@ -112,7 +116,7 @@ typedef struct {
     char *data;
 }RobotMsg_t;
 
-
+extern RobotAction_t robotAction;
 extern RobotState_t robotSate;
 extern bool robot_init;
 extern cJSON* RobotJson;
@@ -120,7 +124,7 @@ extern cJSON* RobotJson;
 void Robot_Init(void);
 void Robot_CreateStateJson(void);
 void Robot_UpdateStateJson(cJSON* robotJson, const RobotState_t* robotState);
-void Robot_ParseJson(char* json_data);
+int Robot_ParseJson(char* json_str,RobotAction_t *robot);
 char* Robot_GetStateJsonStr(void);
 void Robot_SendMsg(RobotMsgType_t type,char *data);
 

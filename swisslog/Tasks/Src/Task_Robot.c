@@ -76,7 +76,10 @@ void vRobotReceiveTask(void *argument)
                     {
                         DEBUGINFO("ROBOT_MSG_RECEIVE:%s\n",robot_msg->data); 
                         //解析来自mqtt的数据
-                        Robot_ParseJson(robot_msg->data);
+                        int result = Robot_ParseJson(robot_msg->data,&robotAction);
+
+                        DEBUGINFO("parse result:%d\n",result); 
+                        
                         vPortFree(robot_msg->data);
                     }
                     break;                                        
