@@ -244,7 +244,7 @@ const osThreadAttr_t RobotManagerTask_attributes = {
 osThreadId_t RobotReceiveTaskHandle;
 const osThreadAttr_t RobotReceiveTask_attributes = {
   .name = "RobotReceiveTask",
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 256 * 4
 };
 /* Definitions for xResetButtonTimer */
