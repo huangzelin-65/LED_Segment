@@ -6,7 +6,7 @@
 #define LOG_LENGTH_LONG 120
 #define LOG_LENGTH_SINGLE 4
 
-#define DEBUGINFO(fmt, ...) safe_printf_long("[%s] " fmt, __func__, ##__VA_ARGS__)
+#define DEBUGINFO(fmt, ...) safe_printf_long("[%s] " fmt"\n", __func__, ##__VA_ARGS__)
 // #define DEBUGINFO_ISR(fmt, ...) safe_printf_isr("[%s] " fmt, __func__, ##__VA_ARGS__)
 // #define DEBUGINFO_ALL(fmt, ...) safe_printf_all("[%s] " fmt"\n", __func__, ##__VA_ARGS__)
 
