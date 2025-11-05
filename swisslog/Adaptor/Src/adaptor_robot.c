@@ -9,6 +9,7 @@
 #include "queue.h"
 
 extern osMessageQueueId_t xRobotQueueHandle;//该消息队列处理事件上报
+extern osThreadId_t RobotReceiveTaskHandle;//该任务处理事件上报
 
 //保存服务器下发的动作消息
 RobotAction_t robotAction = {
@@ -502,8 +503,19 @@ void Robot_Init(void)
 
     DEBUGINFO("end\n");
 }
-
-
+//其他线程利用此接口通知发布状态消息
+void Robot_SendMsg(void)
+{
+    if(xRobotQueueHandle != NULL)
+    {
+        char *robot_data = NULL;
+        DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(xRobotQueueHandle),uxQueueSpacesAvailable(xRobotQueueHandle));
+        if (xQueueSend(xRobotQueueHandle, &robot_data, portMAX_DELAY) == pdPASS) 
+        {
+            DEBUGINFO("msg");
+        } 
+    }     
+}
 
 
 

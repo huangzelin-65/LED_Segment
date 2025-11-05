@@ -45,20 +45,20 @@ void vInitTask(void *argument)
   osThreadResume(CarRfidTaskHandle); 
   osThreadResume(SensorTaskHandle);
   osThreadResume(TestTaskHandle);
-  // osThreadResume(WifiManagerTaskHandle);
-  // osThreadResume(WifiReceiveTaskHandle);
-  osThreadResume(BoxCtrlTaskHandle);
-  osThreadResume(BoxRfidTaskHandle);
-  osThreadResume(BoxRfidEventTaskHandle);
-  osThreadResume(HmiEventTaskHandle);
-  osThreadResume(HmiSendTaskHandle);
-  osThreadResume(HmiRecvTaskHandle);
-  osThreadResume(HmiWaitTaskHandle);
-  osThreadResume(BoxLEDTaskHandle);
-  // osThreadResume(MqttManagerTaskHandle);
-  // osThreadResume(MqttReceiveTaskHandle); 
-  // osThreadResume(RobotManagerTaskHandle);
-  // osThreadResume(RobotReceiveTaskHandle);   
+  osThreadResume(WifiManagerTaskHandle);
+  osThreadResume(WifiReceiveTaskHandle);
+  // osThreadResume(BoxCtrlTaskHandle);
+  // osThreadResume(BoxRfidTaskHandle);
+  // osThreadResume(BoxRfidEventTaskHandle);
+  // osThreadResume(HmiEventTaskHandle);
+  // osThreadResume(HmiSendTaskHandle);
+  // osThreadResume(HmiRecvTaskHandle);
+  // osThreadResume(HmiWaitTaskHandle);
+  // osThreadResume(BoxLEDTaskHandle);
+  osThreadResume(MqttManagerTaskHandle);
+  osThreadResume(MqttReceiveTaskHandle); 
+  osThreadResume(RobotManagerTaskHandle);
+  osThreadResume(RobotReceiveTaskHandle);   
 
   DEBUGINFO("InitTask\r\n");
 

@@ -62,7 +62,7 @@ void vWifiReceiveTask(void *argument)
             read_buffer[i - wifi_data->last_read_id] = wifi_data->rx_buffer[i];
             dataLength++;
           }
-          DEBUGINFO("read_buffer 1:%s\n",read_buffer);
+          DEBUGINFO("read_buffer 1:%s dataLength:%d\n",read_buffer,dataLength);
           parse_rbuf = true;
         }
         else if(wifi_data->last_read_id > wifi_data->size)
@@ -79,7 +79,7 @@ void vWifiReceiveTask(void *argument)
             read_buffer[j + i] = wifi_data->rx_buffer[i];
             dataLength++;
           } 
-          DEBUGINFO("read_buffer 2:%s\n",read_buffer);
+          DEBUGINFO("read_buffer 2:%s dataLength:%d\n",read_buffer,dataLength);
           parse_rbuf = true;      
         }
 

@@ -244,8 +244,8 @@ const osThreadAttr_t RobotManagerTask_attributes = {
 osThreadId_t RobotReceiveTaskHandle;
 const osThreadAttr_t RobotReceiveTask_attributes = {
   .name = "RobotReceiveTask",
-  .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 128 * 4
+  .priority = (osPriority_t) osPriorityLow,
+  .stack_size = 256 * 4
 };
 /* Definitions for xResetButtonTimer */
 osTimerId_t xResetButtonTimerHandle;
@@ -498,7 +498,8 @@ void MX_FREERTOS_Init(void) {
   vQueueAddToRegistry(xMotion_QueueHandle, "Motion_Queue");
   vQueueAddToRegistry(xPrint_QueueHandle, "Print_Queue");
   vQueueAddToRegistry(xWifi_Parse_QueueHandle, "Wifi_Parse_Queue");
-
+  vQueueAddToRegistry(xMqttManagerQueueHandle, "MqttManagerQueue");
+  vQueueAddToRegistry(xRobotQueueHandle, "RobotQueue");
   /* USER CODE END RTOS_QUEUES */
   /* creation of InitTask */
   InitTaskHandle = osThreadNew(vInitTask, NULL, &InitTask_attributes);

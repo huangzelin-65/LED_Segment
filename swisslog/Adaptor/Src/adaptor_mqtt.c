@@ -13,7 +13,7 @@
 #define MQTT_HOST              "192.168.1.10" 
 #define MQTT_QOS               MQTT_QOS_0
 #define MQTT_KEEP_ALIVE_SEC    60
-#define MQTT_CON_TIMEOUT_MS    5000
+#define MQTT_CON_TIMEOUT_MS    30000
 #define MQTT_CLIENT_ID         "WolfMQTTClientSimple"
 #define MQTT_TOPIC_NAME        "bcss/v1/slhc/st_1/state"
 #define MQTT_SUB_TOPIC_NAME    "pc" 
@@ -63,7 +63,7 @@ void Mqtt_SendMsg(MqttMsgType_t msg,char *data)
         msg_data->data = data;
         if (xQueueSend(xMqttManagerQueueHandle, &msg_data, portMAX_DELAY) == pdPASS) 
         {
-            DEBUGINFO("msg :%d",msg);
+            DEBUGINFO("msg :%d\n",msg);
         } 
     } 
 }
@@ -402,6 +402,7 @@ int MqttInit(void)
     rc = MqttClient_NetConnect(&mClient, MQTT_HOST, MQTT_PORT,
         MQTT_CON_TIMEOUT_MS, MQTT_USE_TLS, Mqtt_TlsCb);
     if (rc != MQTT_CODE_SUCCESS) {
+        DEBUGINFO("MqttClient_NetConnect fail");
         goto exit;
     }
     DEBUGINFO("MQTT Network Connect Success: Host %s, Port %d, UseTLS %d",
@@ -414,6 +415,7 @@ int MqttInit(void)
     mqttObj.connect.password = MQTT_PASSWORD;
     rc = MqttClient_Connect(&mClient, &mqttObj.connect);
     if (rc != MQTT_CODE_SUCCESS) {
+        DEBUGINFO("MqttClient_Connect fail");
         goto exit;
     }
     DEBUGINFO("MQTT Broker Connect Success: ClientID %s, Username %s, Password %s",
@@ -430,6 +432,7 @@ int MqttInit(void)
     mqttObj.subscribe.topics = topics;
     rc = MqttClient_Subscribe(&mClient, &mqttObj.subscribe);
     if (rc != MQTT_CODE_SUCCESS) {
+        DEBUGINFO("MqttClient_Subscribe fail\n");
         goto exit;
     }
     DEBUGINFO("MQTT Subscribe Success: Topic %s, QoS %d",MQTT_SUB_TOPIC_NAME, MQTT_QOS);

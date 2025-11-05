@@ -26,7 +26,7 @@ void vMqttManagerTask(void *argument)
         if(xQueueReceive(xMqttManagerQueueHandle, &manage_data, portMAX_DELAY) == pdTRUE)
         {
             MqttMsgdata_t *msg = (MqttMsgdata_t *)manage_data;
-            DEBUGINFO("msg type:%d",msg->type);
+            DEBUGINFO("msg type:%d\n",msg->type);
             switch(msg->type)
             {
                 case MQTT_MSG_WIFI_CHANGE:
@@ -43,6 +43,14 @@ void vMqttManagerTask(void *argument)
                 {
                     Mqtt_PublishMsg(MQTT_TOPIC_NAME, (char*)MQTT_PUBLISH_MSG, XSTRLEN(MQTT_PUBLISH_MSG), 0, 0);
                 }
+                break;
+                case MQTT_MSG_ROBOT_EVENT:
+                {
+                    char* robot_json_str = (char*)msg->data;
+                    Mqtt_PublishMsg(MQTT_TOPIC_NAME, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
+                    vPortFree(robot_json_str);
+                }
+                break;
                 default:break;
             }
             vPortFree(manage_data);
