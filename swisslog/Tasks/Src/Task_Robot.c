@@ -15,7 +15,7 @@
 #include "semphr.h"
 #include <limits.h>
 
-extern ServerToCarData_t ServerToCarData;
+
 extern osMessageQueueId_t xRobotQueueHandle;//该消息队列处理事件上报
 
 //处理robot相关任务，心跳包等
@@ -81,22 +81,9 @@ void vRobotReceiveTask(void *argument)
 
                         DEBUGINFO("parse result:%d\n",result); 
 
-                        ServerToCarData.wCtrl = 0x18; // 控制信号 
-                        ServerToCarData.xStationStatus = 0x01; // 到站状态 
-                        char *res = strstr(robotAction.action.cmds[0].cmd, "forward");
-                        if (res != NULL) {
-                            DEBUGINFO("forward\n"); 
-                            ServerToCarData.ucDirection = 1; // 小车运行方向 1=正转 2=反转                                                       
-                        } 
-                        else
-                        {
-                            char *res = strstr(robotAction.action.cmds[0].cmd, "backward");
-                            if (res != NULL) {
-                                DEBUGINFO("backward\n"); 
-                                ServerToCarData.ucDirection = 2; // 小车运行方向 1=正转 2=反转 
-                            }
-                        }
-                        vParseCommandToCar();  
+                        //将解析后再到实际的控制接口
+                        Robot_Action2Cmd();
+
                         vPortFree(robot_msg->data);
                     }
                     break;                                        

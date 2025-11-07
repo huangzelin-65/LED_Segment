@@ -127,5 +127,6 @@ void Robot_UpdateStateJson(cJSON* robotJson, const RobotState_t* robotState);
 int Robot_ParseJson(char* json_str,RobotAction_t *robot);
 char* Robot_GetStateJsonStr(void);
 void Robot_SendMsg(RobotMsgType_t type,char *data);
-
+void Robot_UpdateState(void);
+void Robot_Action2Cmd(void);
 #endif

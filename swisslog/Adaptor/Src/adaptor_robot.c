@@ -7,7 +7,9 @@
 #include "adaptor_robot.h"
 #include "LogDebugInfo.h"
 #include "queue.h"
+#include "common.h"
 
+extern ServerToCarData_t ServerToCarData;
 extern osMessageQueueId_t xRobotQueueHandle;//该消息队列处理事件上报
 extern osThreadId_t RobotReceiveTaskHandle;//该任务处理事件上报
 
@@ -645,11 +647,34 @@ void Robot_SendMsg(RobotMsgType_t type,char *data)
         } 
     }     
 }
-
-
-
-
-
+//事件通知更新状态到服务器接口
+void Robot_UpdateState(void)
+{
+    Robot_SendMsg(ROBOT_MSG_SEND,NULL);
+}
+//将解析后再到实际的控制接口
+void Robot_Action2Cmd(void)
+{
+    for (int i = 0; i < robotAction.action.cmd_count; i++) 
+    {
+        ServerToCarData.wCtrl = 0x18; // 控制信号 
+        ServerToCarData.xStationStatus = 0x01; // 到站状态 
+        char *res = strstr(robotAction.action.cmds[i].cmd, "forward");
+        if (res != NULL) {
+            DEBUGINFO("forward\n"); 
+            ServerToCarData.ucDirection = 1; // 小车运行方向 1=正转 2=反转                                                       
+        } 
+        else
+        {
+            char *res = strstr(robotAction.action.cmds[i].cmd, "back");
+            if (res != NULL) {
+                DEBUGINFO("backward\n"); 
+                ServerToCarData.ucDirection = 2; // 小车运行方向 1=正转 2=反转 
+            }
+        }
+        vParseCommandToCar(); 
+    }   
+}
 
 
 
