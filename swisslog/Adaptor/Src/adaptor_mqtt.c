@@ -16,7 +16,7 @@
 #define MQTT_CON_TIMEOUT_MS    30000
 #define MQTT_CLIENT_ID         "WolfMQTTClientSimple"
 #define MQTT_TOPIC_NAME        "bcss/v1/slhc/st_1/state"
-#define MQTT_SUB_TOPIC_NAME    "pc" 
+#define MQTT_SUB_TOPIC_NAME    "tk/v1/slhc/ts-1/instantactions" 
 #define MQTT_PUBLISH_MSG       "Test Publish"
 #define MQTT_USERNAME          "hcms_mqtt"
 #define MQTT_PASSWORD          "KM5zng23"

@@ -28,13 +28,13 @@ void vRobotManagerTask(void *argument)
         if(mqtt_isConnected)
         {
             cnt++;
-            if(cnt == 100)//10秒发送一次心跳包
+            if(cnt == 10)//10秒发送一次心跳包
             {
                 DEBUGINFO("ROBOT_MSG_HEART\n");  
                 Robot_SendMsg(ROBOT_MSG_HEART,NULL);
                 cnt = 0;
             }
-            if(cnt == 50)//这里只是模拟事件发生，测试代码
+            if(cnt == 5)//这里只是模拟事件发生，测试代码
             {
                 DEBUGINFO("ROBOT_MSG_SEND\n");  
                 Robot_SendMsg(ROBOT_MSG_SEND,NULL);  
