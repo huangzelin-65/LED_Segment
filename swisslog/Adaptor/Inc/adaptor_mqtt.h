@@ -24,6 +24,7 @@ typedef enum
     MQTT_MSG_HEARTBEAT,
     MQTT_MSG_ROBOT_EVENT,
     MQTT_MSG_RECIEVE,
+    MQTT_MSG_SUBSCRIBE,
 }MqttMsgType_t;
 
 typedef struct 
@@ -42,5 +43,7 @@ int MqttInit(void);
 void Mqtt_SendMsg(MqttMsgType_t msg,char *data);
 void Mqtt_ParseData(uint8_t* rbuf,int len);
 void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t qos, uint8_t retain);
+int Mqtt_SubscribeMsg(MqttTopic *topics,int count);
+int Mqtt_SubscribeTopicInit(void);
 void Mqtt_SetMsgCb(MqttClient *client,MqttMsgCb msg_cb);
 #endif

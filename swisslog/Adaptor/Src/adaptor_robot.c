@@ -49,6 +49,9 @@ cJSON* RobotJson = NULL;
 //保存robot初始化状态
 bool robot_init = false;
 
+//保留创建的heart beat json 的指针
+cJSON* Robot_HeartBeatJson = NULL;
+
 // 辅助函数：将Direction枚举转换为字符串
 const char* Robot_DirectionToString(Direction dir) 
 {
@@ -607,6 +610,54 @@ char* Robot_GetStateJsonStr(void)
     char* json_str = cJSON_PrintUnformatted(RobotJson);
     return json_str;
 }
+//创建心跳包的json
+void Robot_CreateHeartBeatJson(void) 
+{
+    DEBUGINFO("start\n");
+
+    if(Robot_HeartBeatJson != NULL)   
+    {
+        DEBUGINFO("Robot_HeartBeatJson has been created\n");
+        return;
+    }
+    // 创建根JSON对象
+    Robot_HeartBeatJson = cJSON_CreateObject();
+    if (Robot_HeartBeatJson == NULL) {
+        DEBUGINFO("Robot_HeartBeatJson fail\n");
+        return;
+    }
+    // 向JSON对象添加键值对
+    // 添加整数类型：headerId
+    cJSON_AddNumberToObject(Robot_HeartBeatJson, "headerId", 125);
+    
+    // 添加整数类型：timestamp（大整数可正常存储为cJSON的number类型）
+    cJSON_AddNumberToObject(Robot_HeartBeatJson, "timestamp", 1);
+    
+    // 添加字符串类型：version
+    cJSON_AddStringToObject(Robot_HeartBeatJson, "version", "1.0.0");
+    
+    // 添加字符串类型：manufacturer
+    cJSON_AddStringToObject(Robot_HeartBeatJson, "manufacturer", "slhc");
+    
+    // 添加字符串类型：serialNumber
+    cJSON_AddStringToObject(Robot_HeartBeatJson, "serialNumber", "bcss.v1.0.0");
+    
+    // 添加字符串类型：connectionState
+    cJSON_AddStringToObject(Robot_HeartBeatJson, "connectionState", "ONLINE");  
+
+    DEBUGINFO("end\n");
+}
+//获取robot heart beat json转成字符串的接口，返回值需要释放
+char* Robot_GetHeartBeatJsonStr(void) 
+{
+    if(Robot_HeartBeatJson == NULL)
+    {
+        DEBUGINFO("Robot_HeartBeatJson fail\n");
+        return NULL;
+    }    
+    char* json_str = cJSON_PrintUnformatted(Robot_HeartBeatJson);
+    return json_str;    
+}
 //ROBOT 相关的初始化
 void Robot_Init(void)
 {
@@ -627,6 +678,8 @@ void Robot_Init(void)
 
     Robot_CreateStateJson();
 
+    Robot_CreateHeartBeatJson();
+
     //初始化状态
     robot_init = true;
 
@@ -643,7 +696,7 @@ void Robot_SendMsg(RobotMsgType_t type,char *data)
         DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(xRobotQueueHandle),uxQueueSpacesAvailable(xRobotQueueHandle));
         if (xQueueSend(xRobotQueueHandle, &robot_msg, portMAX_DELAY) == pdPASS) 
         {
-            DEBUGINFO("msg");
+            DEBUGINFO("xRobotQueueHandle add success");
         } 
     }     
 }

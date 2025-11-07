@@ -32,6 +32,7 @@
 #define PRINT_BUFFER_SIZE      1024
 #define MQTT_TX_BUF_SIZE       1024
 #define MQTT_RX_BUF_SIZE       1024
+#define MQTT_SUBSCRIBE_COUNT     1
 
 extern UART_HandleTypeDef huart6;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel2;
@@ -44,7 +45,7 @@ int mqtt_ready2read = 0;//接收到mqtt数据，可以开始读取
 int mqtt_rest2read = 0;//剩余需要区域读取得mqtt数据长度
 int mqtt_socket_id = 0;//mqtt底层tcp连接时，被分配得socket ip
 volatile word16 mPacketIdLast;//mqtt唯一id
-MqttTopic topics[1];//订阅的话题
+MqttTopic subscribe_topics[MQTT_SUBSCRIBE_COUNT];//订阅的话题
 MqttObject mqttObj;//mqtt对象，用于连接客户端
 MqttNet mNetwork;//网络结构体
 MqttClient mClient;//mqtt客户端
@@ -425,21 +426,6 @@ int MqttInit(void)
         MQTT_CLIENT_ID,
         (MQTT_USERNAME == NULL) ? "Null" : MQTT_USERNAME,
         (MQTT_PASSWORD == NULL) ? "Null" : MQTT_PASSWORD);
-
-    //订阅话题
-    XMEMSET(&mqttObj, 0, sizeof(mqttObj));
-    topics[0].topic_filter = MQTT_SUB_TOPIC_NAME;
-    topics[0].qos = MQTT_QOS;
-    mqttObj.subscribe.packet_id = Mqtt_GetPacketid();
-    mqttObj.subscribe.topic_count = sizeof(topics) / sizeof(MqttTopic);
-    mqttObj.subscribe.topics = topics;
-    rc = MqttClient_Subscribe(&mClient, &mqttObj.subscribe);
-    if (rc != MQTT_CODE_SUCCESS) {
-        DEBUGINFO("MqttClient_Subscribe fail\n");
-        goto exit;
-    }
-    DEBUGINFO("MQTT Subscribe Success: Topic %s, QoS %d",MQTT_SUB_TOPIC_NAME, MQTT_QOS);
-
     return rc;
 exit:
     if (rc != MQTT_CODE_SUCCESS) {
@@ -537,7 +523,7 @@ void Mqtt_ParseData(uint8_t* rbuf,int len)
         default:break;
     }   
 }
-
+//发布消息调用接口
 void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t qos, uint8_t retain)
 {
     XMEMSET(&mqttObj, 0, sizeof(mqttObj));
@@ -553,6 +539,58 @@ void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t 
     // int rc = MqttClient_Publish_ex(&mClient, &mqttObj.publish,wolfmqtt_PublishCb);
     DEBUGINFO("MqttClient_Publish rc:%d\n",rc);  
 }
+//订阅话题调用接口
+int Mqtt_SubscribeMsg(MqttTopic *topics,int count)
+{
+    XMEMSET(&mqttObj, 0, sizeof(mqttObj));
+    mqttObj.subscribe.packet_id = Mqtt_GetPacketid();
+    mqttObj.subscribe.topic_count = count;
+    mqttObj.subscribe.topics = topics;
+    int rc = MqttClient_Subscribe(&mClient, &mqttObj.subscribe);
+    if (rc == MQTT_CODE_SUCCESS) {
+        DEBUGINFO("MQTT Subscribe Success");
+    }
+    return rc;
+}
+
+//需要订阅的话题初始化
+int Mqtt_SubscribeTopicInit(void)
+{
+    DEBUGINFO("start");
+    for (int i = 0; i < MQTT_SUBSCRIBE_COUNT; i++)
+    {
+        switch (i)
+        {
+            case 0:
+            {
+                subscribe_topics[i].topic_filter = MQTT_SUB_TOPIC_NAME;
+                subscribe_topics[i].qos = MQTT_QOS;
+            }
+            break;
+            case 1:
+            {
+                subscribe_topics[i].topic_filter = MQTT_SUB_TOPIC_NAME;//此处话题需要根据实际需要更换
+                subscribe_topics[i].qos = MQTT_QOS;
+            }
+            break;
+            case 2:
+            {
+                subscribe_topics[i].topic_filter = MQTT_SUB_TOPIC_NAME;//此处话题需要根据实际需要更换
+                subscribe_topics[i].qos = MQTT_QOS;
+            }
+            break;                    
+            default:
+            break;
+        }
+    }
+    
+    int rc = Mqtt_SubscribeMsg(subscribe_topics,MQTT_SUBSCRIBE_COUNT);
+    if (rc == MQTT_CODE_SUCCESS) {
+        DEBUGINFO("Mqtt_SubscribeTopicInit Success");
+    }    
+    return rc;
+}
+
 
 void Mqtt_SetMsgCb(MqttClient *client,MqttMsgCb msg_cb)
 {

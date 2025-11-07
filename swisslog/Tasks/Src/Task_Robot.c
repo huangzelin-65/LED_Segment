@@ -32,12 +32,12 @@ void vRobotManagerTask(void *argument)
             {
                 DEBUGINFO("ROBOT_MSG_HEART\n");  
                 Robot_SendMsg(ROBOT_MSG_HEART,NULL);
+                cnt = 0;
             }
-            if(cnt == 40)
+            if(cnt == 50)//这里只是模拟事件发生，测试代码
             {
                 DEBUGINFO("ROBOT_MSG_SEND\n");  
-                Robot_SendMsg(ROBOT_MSG_SEND,NULL);
-                cnt = 0;
+                Robot_SendMsg(ROBOT_MSG_SEND,NULL);  
             }                
         }
         osDelay(pdMS_TO_TICKS(100));
@@ -60,7 +60,7 @@ void vRobotReceiveTask(void *argument)
                     case ROBOT_MSG_HEART://发送心跳包到服务器
                     {
                         DEBUGINFO("ROBOT_MSG_HEART\n"); 
-                        Mqtt_SendMsg(MQTT_MSG_HEARTBEAT,NULL);
+                        Mqtt_SendMsg(MQTT_MSG_HEARTBEAT,Robot_GetHeartBeatJsonStr());
                     }
                     break;
                     case ROBOT_MSG_SEND://代表需要把消息发送到服务器

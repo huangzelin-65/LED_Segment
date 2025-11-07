@@ -12,9 +12,10 @@
 #include "queue.h"
 #include "adaptor_robot.h"
 
-#define MQTT_TOPIC_NAME      "bcss/v1/slhc/st_1/state" 
-#define MQTT_PUBLISH_MSG     "HEARTBEAT"
-#define MQTT_CMD_TIMEOUT_MS    30000
+#define MQTT_TOPIC_NAME                 "bcss/v1/slhc/st_1/state" 
+#define MQTT_HEARTBEAT_TOPIC_NAME       "bcss/v1/slhc/st_1/connection" 
+#define MQTT_PUBLISH_MSG                "HEARTBEAT"
+#define MQTT_CMD_TIMEOUT_MS             30000
 
 extern osMessageQueueId_t xMqttManagerQueueHandle;
 //mqtt主任务，处理初始化，发送消息等
@@ -37,12 +38,16 @@ void vMqttManagerTask(void *argument)
                     {
                         mqtt_isConnected = 1;
                         DEBUGINFO("mqtt_isConnected");
+                        //服务器连接成功，需要订阅话题
+                        Mqtt_SendMsg(MQTT_MSG_SUBSCRIBE,NULL);
                     }
                 }
                 break;
                 case MQTT_MSG_HEARTBEAT:
                 {
-                    Mqtt_PublishMsg(MQTT_TOPIC_NAME, (char*)MQTT_PUBLISH_MSG, XSTRLEN(MQTT_PUBLISH_MSG), 0, 0);
+                    char* robot_json_str = (char*)msg->data;
+                    Mqtt_PublishMsg(MQTT_HEARTBEAT_TOPIC_NAME, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
+                    vPortFree(robot_json_str);
                 }
                 break;
                 case MQTT_MSG_ROBOT_EVENT:
@@ -50,6 +55,16 @@ void vMqttManagerTask(void *argument)
                     char* robot_json_str = (char*)msg->data;
                     Mqtt_PublishMsg(MQTT_TOPIC_NAME, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
                     vPortFree(robot_json_str);
+                }
+                break;
+                case MQTT_MSG_SUBSCRIBE:
+                {
+                    int rc = Mqtt_SubscribeTopicInit();
+                    if (rc != MQTT_CODE_SUCCESS) {
+                        DEBUGINFO("Mqtt_SubscribeTopicInit fail");
+                        //订阅话题失败，尝试再次订阅
+                        Mqtt_SendMsg(MQTT_MSG_SUBSCRIBE,NULL);                        
+                    }                    
                 }
                 break;
                 case MQTT_MSG_RECIEVE:
