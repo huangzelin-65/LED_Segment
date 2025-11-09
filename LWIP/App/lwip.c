@@ -32,6 +32,8 @@
 #include "stdio.h"
 #include <string.h>
 #include "LogDebugInfo.h"
+#include "sockets.h"
+#include "adaptor_mqtt.h"
 /* USER CODE END 0 */
 /* Private function prototypes -----------------------------------------------*/
 static void ethernet_link_status_updated(struct netif *netif);
@@ -59,20 +61,40 @@ osThreadAttr_t attributes;
 static void dhcp_status_callback(struct netif *netif) {
   if (netif->flags & NETIF_FLAG_UP) {
     // DHCP成功获取IP地址
-    printf("DHCP bound: IP=%d.%d.%d.%d\n", 
+    DEBUGINFO("DHCP bound: IP=%d.%d.%d.%d\n", 
            ip4_addr1(&netif->ip_addr),
            ip4_addr2(&netif->ip_addr),
            ip4_addr3(&netif->ip_addr),
            ip4_addr4(&netif->ip_addr));
-    printf("Gateway=%d.%d.%d.%d\n",
+    DEBUGINFO("Gateway=%d.%d.%d.%d\n",
            ip4_addr1(&netif->gw),
            ip4_addr2(&netif->gw),
            ip4_addr3(&netif->gw),
            ip4_addr4(&netif->gw));
+    Mqtt_SendMsg(MQTT_MSG_START,NULL);
   } else {
     // DHCP失败或断开
-    printf("DHCP failed or disconnected\n");
+    DEBUGINFO("DHCP failed or disconnected\n");
   }
+}
+void setup_timeout(struct timeval* tv, int timeout_ms)
+{
+    tv->tv_sec = timeout_ms / 1000;
+    tv->tv_usec = (timeout_ms % 1000) * 1000;
+
+    /* Make sure there is a minimum value specified */
+    if (tv->tv_sec < 0 || (tv->tv_sec == 0 && tv->tv_usec <= 0)) {
+        tv->tv_sec = 0;
+        tv->tv_usec = 100;
+    }
+}
+
+int socket_get_error(int sockFd)
+{
+    int so_error = 0;
+    socklen_t len = sizeof(so_error);
+    (void)getsockopt(sockFd, SOL_SOCKET, SO_ERROR, &so_error, &len);
+    return so_error;
 }
 /* USER CODE END 2 */
 

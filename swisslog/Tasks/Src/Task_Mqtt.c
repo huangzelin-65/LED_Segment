@@ -31,7 +31,7 @@ void vMqttManagerTask(void *argument)
             DEBUGINFO("msg type:%d\n",msg->type);
             switch(msg->type)
             {
-                case MQTT_MSG_WIFI_CHANGE:
+                case MQTT_MSG_START:
                 {
                     int rc = MqttInit();
                     if(rc == MQTT_CODE_SUCCESS)

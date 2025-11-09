@@ -40,6 +40,7 @@
 #if !NO_SYS
 
 #include "cmsis_os.h"
+#include "FreeRTOS.h"
 
 #if defined(LWIP_PROVIDE_ERRNO)
 int errno;
@@ -83,7 +84,7 @@ void sys_mbox_free(sys_mbox_t *mbox)
 #endif
   {
     /* Line for breakpoint.  Should never break here! */
-    portNOP();
+    __NOP();
 #if SYS_STATS
     lwip_stats.sys.mbox.err++;
 #endif /* SYS_STATS */

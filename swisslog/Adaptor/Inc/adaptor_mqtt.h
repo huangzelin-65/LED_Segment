@@ -20,7 +20,7 @@ typedef enum
 
 typedef enum
 {
-    MQTT_MSG_WIFI_CHANGE = 0,
+    MQTT_MSG_START = 0,//启动mqtt服务
     MQTT_MSG_HEARTBEAT,
     MQTT_MSG_ROBOT_EVENT,
     MQTT_MSG_RECIEVE,

@@ -10,6 +10,10 @@
 #include <stdbool.h>
 #include "queue.h"
 #include "lwip.h"
+#include "adaptor_mqtt.h"
+
+extern struct netif gnetif;
+
 /* TCP管理任务入口函数 */
 void vTcpManagerTask(void *argument)
 {

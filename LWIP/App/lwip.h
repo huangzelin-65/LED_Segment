@@ -49,6 +49,8 @@ extern ETH_HandleTypeDef heth;
 
 /* LWIP init function */
 void MX_LWIP_Init(void);
+void setup_timeout(struct timeval* tv, int timeout_ms);
+int socket_get_error(int sockFd);
 
 #if !WITH_RTOS
 /* USER CODE BEGIN 1 */
