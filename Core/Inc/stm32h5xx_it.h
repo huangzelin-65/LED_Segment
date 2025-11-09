@@ -86,6 +86,8 @@ void GPDMA2_Channel1_IRQHandler(void);
 void GPDMA2_Channel2_IRQHandler(void);
 void UART7_IRQHandler(void);
 void UART8_IRQHandler(void);
+void ETH_IRQHandler(void);
+void ETH_WKUP_IRQHandler(void);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */

@@ -79,6 +79,24 @@
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/wolfSSL_wolfSSL_wolfSSL/wolfssl/"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/wolfSSL_wolfMQTT_wolfMQTT/wolfmqtt/"/>
 									<listOptionValue builtIn="false" value="../wolfSSL"/>
+									<listOptionValue builtIn="false" value="../LWIP/App"/>
+									<listOptionValue builtIn="false" value="../LWIP/Target"/>
+									<listOptionValue builtIn="false" value="../LWIP/LwIP/src/include"/>
+									<listOptionValue builtIn="false" value="../LWIP/LwIP/src/include/lwip"/>
+									<listOptionValue builtIn="false" value="../LWIP/LwIP/src/include/lwip/apps"/>
+									<listOptionValue builtIn="false" value="../LWIP/LwIP/src/include/lwip/prot"/>
+									<listOptionValue builtIn="false" value="../LWIP/LwIP/src/include/lwip/priv"/>
+									<listOptionValue builtIn="false" value="../LWIP/LwIP/src/include/compat/posix"/>
+									<listOptionValue builtIn="false" value="../LWIP/LwIP/src/include/compat/posix/arpa"/>
+									<listOptionValue builtIn="false" value="../LWIP/LwIP/src/include/compat/posix/net"/>
+									<listOptionValue builtIn="false" value="../LWIP/LwIP/src/include/compat/posix/sys"/>
+									<listOptionValue builtIn="false" value="../LWIP/LwIP/src/include/compat/stdc"/>
+									<listOptionValue builtIn="false" value="../LWIP/LwIP/src/include/netif"/>
+									<listOptionValue builtIn="false" value="../LWIP/LwIP/src/include/netif/ppp"/>
+									<listOptionValue builtIn="false" value="../LWIP/LwIP/system"/>
+									<listOptionValue builtIn="false" value="../LWIP/LwIP/system/arch"/>
+									<listOptionValue builtIn="false" value="../LWIP/LwIP/src/include/netif/ppp/polarssl"/>
+									<listOptionValue builtIn="false" value="../LWIP/lan8742"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1865227280" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -108,6 +126,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="swisslog"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="wolfMQTT"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="LWIP"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="wolfSSL"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
