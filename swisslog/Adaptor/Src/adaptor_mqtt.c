@@ -12,7 +12,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
-
+#include "lwip.h"
 
 // #define MQTT_WIFI              //开启此宏，mqtt数据通过WiFi模块tcp功能发送
 #define MQTT_HOST              "192.168.1.10" 
