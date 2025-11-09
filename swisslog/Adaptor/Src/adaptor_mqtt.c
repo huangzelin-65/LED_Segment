@@ -14,7 +14,6 @@
 #include <unistd.h>
 #include "lwip.h"
 
-// #define MQTT_WIFI              //开启此宏，mqtt数据通过WiFi模块tcp功能发送
 #define MQTT_HOST              "192.168.1.10" 
 #define MQTT_QOS               MQTT_QOS_0
 #define MQTT_KEEP_ALIVE_SEC    60
@@ -94,7 +93,7 @@ int Mqtt_NetConnect(void *context, const char* host, word16 port,int timeout_ms)
     mqtt_result = MQTT_ERROR;
     mqtt_waitstate = MQTT_WAIT_STATE_SOCKET_OPEN;
     memset(Mqtt_SendBuffer,0,MQTT_TX_BUF_SIZE);
-    snDEBUGINFO(Mqtt_SendBuffer, MQTT_TX_BUF_SIZE, "AT+SOCKET=1,%s,%d", host, port);
+    snprintf(Mqtt_SendBuffer, MQTT_TX_BUF_SIZE, "AT+SOCKET=1,%s,%d", host, port);
     Mqtt_SendATCmd(Mqtt_SendBuffer, 2000);  
     DEBUGINFO("mqtt_net_connect MQTT_WAIT_STATE_SOCKET_OPEN,host:%s port:%ld\n",host,port);
     static int cnt = 0;
@@ -245,7 +244,7 @@ int Mqtt_NetWrite(void *context, const byte* buf, int buf_len,int timeout_ms)
     DEBUGINFO("Mqtt_NetWrite timeout_ms:%d",timeout_ms);
     #ifdef MQTT_WIFI
     memset(Mqtt_SendBuffer,0,1024);
-    int prefix_len = snDEBUGINFO(Mqtt_SendBuffer, MQTT_TX_BUF_SIZE, "AT+SOCKETSENDLINE=%d,%d,", mqtt_socket_id, buf_len);
+    int prefix_len = snprintf(Mqtt_SendBuffer, MQTT_TX_BUF_SIZE, "AT+SOCKETSENDLINE=%d,%d,", mqtt_socket_id, buf_len);
     // 检查前缀生成是否正常，以及剩余空间是否足够容纳 buf
     if (prefix_len < 0 || prefix_len >= 1024) {
         // 前缀生成失败（缓冲区不足），处理错误
@@ -307,7 +306,7 @@ int Mqtt_NetDisconnect(void *context)
     mqtt_result = MQTT_ERROR;
     mqtt_waitstate = MQTT_WAIT_STATE_SOCKET_CLOSE;
     memset(Mqtt_SendBuffer,0,1024);
-    snDEBUGINFO(Mqtt_SendBuffer, 1024, "AT+SOCKETDEL=%d",mqtt_socket_id);
+    snprintf(Mqtt_SendBuffer, 1024, "AT+SOCKETDEL=%d",mqtt_socket_id);
     Mqtt_SendATCmd(Mqtt_SendBuffer, 2000);  
     DEBUGINFO("mqtt_net_disconnect socket:%ld\n",mqtt_socket_id);
     static int cnt = 0;

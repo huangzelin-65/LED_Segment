@@ -31,7 +31,11 @@ void vTcpManagerTask(void *argument)
             case TCP_MSG_MQTT://启动mqtt服务
             {
                 DEBUGINFO("TCP_MSG_MQTT\n"); 
-                Mqtt_SendMsg(MQTT_MSG_START,NULL);
+                #ifdef MQTT_WIFI
+                    DEBUGINFO("MQTT START BY WIFI\n"); 
+                #else
+                    Mqtt_SendMsg(MQTT_MSG_START,NULL);
+                #endif
             }
             break;
             case TCP_MSG_SERVER://启动tcp客户端
