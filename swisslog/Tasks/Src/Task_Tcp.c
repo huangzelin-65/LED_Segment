@@ -52,7 +52,7 @@ void vTcpManagerTask(void *argument)
 }
     
 
-/* wifi接收任务入口函数 */
+/* tcp接收任务入口函数,后续做为server使用，接收数据，实现ota*/
 void vTcpReceiveTask(void *argument)
 {
   DEBUGINFO("vTcpReceiveTask\r\n");
