@@ -828,27 +828,18 @@ int32_t ETH_PHY_IO_GetTick(void)
 void ethernet_link_thread(void* argument)
 {
   ETH_MACConfigTypeDef MACConf = {0};
-  int32_t PHYLinkState = 0,netif_is_link_up = 0;
+  int32_t PHYLinkState = 0;
   uint32_t linkchanged = 0U, speed = 0U, duplex = 0U;
-  int32_t pre_PHYLinkState = -1,pre_netif_is_link_up = -1;
 
   struct netif *netif = (struct netif *) argument;
 /* USER CODE BEGIN ETH link init */
-  DEBUGINFO("ethernet_link_thread\r\n");
+  DEBUGINFO("start");
 /* USER CODE END ETH link init */
 
   for(;;)
   {
   PHYLinkState = LAN8742_GetLinkState(&LAN8742);
-  netif_is_link_up = netif_is_link_up(netif);
 
-  if(PHYLinkState != pre_PHYLinkState || netif_is_link_up != pre_netif_is_link_up)
-  {
-    DEBUGINFO("PHYLinkState:%ld netif_is_link_up:%ld\r\n",PHYLinkState,netif_is_link_up);
-    pre_PHYLinkState = PHYLinkState;
-    pre_netif_is_link_up = netif_is_link_up;
-  }
-  
   if(netif_is_link_up(netif) && (PHYLinkState <= LAN8742_STATUS_LINK_DOWN))
   {
     HAL_ETH_Stop_IT(&heth);

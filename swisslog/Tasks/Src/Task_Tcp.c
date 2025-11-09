@@ -9,11 +9,12 @@
 #include "Common.h"
 #include <stdbool.h>
 #include "queue.h"
-
+#include "lwip.h"
 /* TCP管理任务入口函数 */
 void vTcpManagerTask(void *argument)
 {
   DEBUGINFO("vTcpManagerTask\r\n");
+  MX_LWIP_Init();
   while (1)
   {
 	osDelay(pdMS_TO_TICKS(100));

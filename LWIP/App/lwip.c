@@ -148,11 +148,14 @@ static void ethernet_link_status_updated(struct netif *netif)
   if (netif_is_up(netif))
   {
 /* USER CODE BEGIN 5 */
+    DEBUGINFO("netif is up");
+    dhcp_start(netif);
 /* USER CODE END 5 */
   }
   else /* netif is down */
   {
 /* USER CODE BEGIN 6 */
+    DEBUGINFO("netif is down");
 /* USER CODE END 6 */
   }
 }
