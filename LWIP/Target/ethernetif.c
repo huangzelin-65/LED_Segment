@@ -34,6 +34,7 @@
 /* Within 'USER CODE' section, code will be kept by default at each generation */
 /* USER CODE BEGIN 0 */
 #include "FreeRTOS.h"
+#include "LogDebugInfo.h"
 /* USER CODE END 0 */
 
 /* Private define ------------------------------------------------------------*/
@@ -184,7 +185,37 @@ void HAL_ETH_ErrorCallback(ETH_HandleTypeDef *handlerEth)
 }
 
 /* USER CODE BEGIN 4 */
+// 读取STM32 UID（实际需根据芯片型号调整地址）
+static void read_uid(uint8_t *uid) {
+    uint32_t UID[3];
+    UID[0] = HAL_GetUIDw0();
+    UID[1] = HAL_GetUIDw1();
+    UID[2] = HAL_GetUIDw2(); 
 
+    uid[0] = (UID[0] >> 0) & 0xFF;
+    uid[1] = (UID[0] >> 8) & 0xFF;
+    uid[2] = (UID[0] >> 16) & 0xFF;
+    uid[3] = (UID[0] >> 24) & 0xFF;
+    uid[4] = (UID[1] >> 0) & 0xFF;
+    uid[5] = (UID[1] >> 8) & 0xFF;
+    uid[6] = (UID[1] >> 16) & 0xFF;
+    uid[7] = (UID[1] >> 24) & 0xFF;
+    uid[8] = (UID[2] >> 0) & 0xFF;
+    uid[9] = (UID[2] >> 8) & 0xFF;
+    uid[10] = (UID[2] >> 16) & 0xFF;
+    uid[11] = (UID[2] >> 24) & 0xFF;
+}
+// 转换UID为MAC地址
+static void uid_to_mac(uint8_t *uid, uint8_t *mac) {
+    // 前3字节：本地管理OUI
+    mac[0] = 0x02;
+    mac[1] = 0x00;
+    mac[2] = 0x00;
+    // 后3字节：UID分组异或
+    mac[3] = uid[0] ^ uid[1] ^ uid[2] ^ uid[3];
+    mac[4] = uid[4] ^ uid[5] ^ uid[6] ^ uid[7];
+    mac[5] = uid[8] ^ uid[9] ^ uid[10] ^ uid[11];
+}
 /* USER CODE END 4 */
 
 /*******************************************************************************
@@ -199,7 +230,7 @@ void HAL_ETH_ErrorCallback(ETH_HandleTypeDef *handlerEth)
  */
 static void low_level_init(struct netif *netif)
 {
-  printf("low_level_init:%p\r\n",netif);
+  DEBUGINFO("start");
   HAL_StatusTypeDef hal_eth_init_status = HAL_OK;
 /* USER CODE BEGIN OS_THREAD_ATTR_CMSIS_RTOS_V2 */
   osThreadAttr_t attributes;
@@ -221,14 +252,20 @@ static void low_level_init(struct netif *netif)
   heth.Init.MediaInterface = HAL_ETH_RMII_MODE;
   heth.Init.TxDesc = DMATxDscrTab;
   heth.Init.RxDesc = DMARxDscrTab;
-  heth.Init.RxBuffLen = 1536;
+  heth.Init.RxBuffLen = ETH_RX_BUFFER_SIZE;
 
   /* USER CODE BEGIN MACADDRESS */
-
+  uint8_t uid[12];
+  read_uid(uid);
+  uid_to_mac(uid, MACAddr);
+  for(int i = 0;i < 6;i++)
+  {
+      DEBUGINFO("MACAddr %d:%x",i,MACAddr[i]);
+  }  
   /* USER CODE END MACADDRESS */
 
   hal_eth_init_status = HAL_ETH_Init(&heth);
-  printf("hal_eth_init_status:%d\r\n",hal_eth_init_status);
+  DEBUGINFO("hal_eth_init_status:%d\r\n",hal_eth_init_status);
 
   memset(&TxConfig, 0 , sizeof(ETH_TxPacketConfig));
   TxConfig.Attributes = ETH_TX_PACKETS_FEATURES_CSUM | ETH_TX_PACKETS_FEATURES_CRCPAD;
@@ -237,7 +274,7 @@ static void low_level_init(struct netif *netif)
 
   /* End ETH HAL Init */
 
-  printf("Initialize the RX POOL\r\n");
+  DEBUGINFO("Initialize the RX POOL\r\n");
   /* Initialize the RX POOL */
   LWIP_MEMPOOL_INIT(RX_POOL);
 
@@ -271,7 +308,7 @@ static void low_level_init(struct netif *netif)
   /* create a binary semaphore used for informing ethernetif of frame transmission */
   TxPktSemaphore = osSemaphoreNew(1, 1, NULL);
 
-  printf("create the task that handles the ETH_MAC\r\n");
+  DEBUGINFO("create the task that handles the ETH_MAC\r\n");
   /* create the task that handles the ETH_MAC */
 /* USER CODE BEGIN OS_THREAD_NEW_CMSIS_RTOS_V2 */
   memset(&attributes, 0x0, sizeof(osThreadAttr_t));
@@ -293,7 +330,7 @@ static void low_level_init(struct netif *netif)
   if (hal_eth_init_status == HAL_OK)
   {
     PHYLinkState = LAN8742_GetLinkState(&LAN8742);
-    printf("low_level_init:PHYLinkState:%ld\r\n",PHYLinkState);
+    DEBUGINFO("low_level_init:PHYLinkState:%ld\r\n",PHYLinkState);
     /* Get link state */
     if(PHYLinkState <= LAN8742_STATUS_LINK_DOWN)
     {
@@ -325,7 +362,7 @@ static void low_level_init(struct netif *netif)
         speed = ETH_SPEED_100M;
         break;
       }
-    printf("duplex:%ld speed:%ld\r\n",duplex,speed);
+    DEBUGINFO("duplex:%ld speed:%ld\r\n",duplex,speed);
     /* Get MAC Config MAC */
     HAL_ETH_GetMACConfig(&heth, &MACConf);
     MACConf.DuplexMode = duplex;
@@ -449,7 +486,7 @@ void ethernetif_input(void* argument)
 {
   struct pbuf *p = NULL;
   struct netif *netif = (struct netif *) argument;
-  printf("thread,ethernetif_input,netif:%p\r\n",netif);
+  DEBUGINFO("thread,ethernetif_input,netif:%p\r\n",netif);
   for( ;; )
   {
     if (osSemaphoreAcquire(RxPktSemaphore, TIME_WAITING_FOR_INPUT) == osOK)
@@ -505,7 +542,7 @@ static err_t low_level_output_arp_off(struct netif *netif, struct pbuf *q, const
 err_t ethernetif_init(struct netif *netif)
 {
   LWIP_ASSERT("netif != NULL", (netif != NULL));
-  printf("ethernetif_init netif:%p\r\n",netif);
+  DEBUGINFO("ethernetif_init netif:%p\r\n",netif);
 #if LWIP_NETIF_HOSTNAME
   /* Initialize interface hostname */
   netif->hostname = "lwip";
@@ -797,7 +834,7 @@ void ethernet_link_thread(void* argument)
 
   struct netif *netif = (struct netif *) argument;
 /* USER CODE BEGIN ETH link init */
-  printf("ethernet_link_thread\r\n");
+  DEBUGINFO("ethernet_link_thread\r\n");
 /* USER CODE END ETH link init */
 
   for(;;)
@@ -807,7 +844,7 @@ void ethernet_link_thread(void* argument)
 
   if(PHYLinkState != pre_PHYLinkState || netif_is_link_up != pre_netif_is_link_up)
   {
-    printf("PHYLinkState:%ld netif_is_link_up:%ld\r\n",PHYLinkState,netif_is_link_up);
+    DEBUGINFO("PHYLinkState:%ld netif_is_link_up:%ld\r\n",PHYLinkState,netif_is_link_up);
     pre_PHYLinkState = PHYLinkState;
     pre_netif_is_link_up = netif_is_link_up;
   }

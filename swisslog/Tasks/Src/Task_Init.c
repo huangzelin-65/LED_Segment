@@ -30,7 +30,8 @@ extern osThreadId_t MqttManagerTaskHandle;
 extern osThreadId_t MqttReceiveTaskHandle;
 extern osThreadId_t RobotManagerTaskHandle;
 extern osThreadId_t RobotReceiveTaskHandle;
-
+extern osThreadId_t TcpManagerTaskHandle;
+extern osThreadId_t TcpReceiveTaskHandle;
 extern CarStatus_t CarStatus;
 
 
@@ -58,7 +59,9 @@ void vInitTask(void *argument)
   // osThreadResume(MqttManagerTaskHandle);
   // osThreadResume(MqttReceiveTaskHandle); 
   // osThreadResume(RobotManagerTaskHandle);
-  // osThreadResume(RobotReceiveTaskHandle);   
+  // osThreadResume(RobotReceiveTaskHandle); 
+  // osThreadResume(TcpManagerTaskHandle);
+  // osThreadResume(TcpReceiveTaskHandle);     
 
   DEBUGINFO("InitTask\r\n");
 

@@ -30,6 +30,8 @@
 /* USER CODE BEGIN 0 */
 #include "main.h"
 #include "stdio.h"
+#include <string.h>
+#include "LogDebugInfo.h"
 /* USER CODE END 0 */
 /* Private function prototypes -----------------------------------------------*/
 static void ethernet_link_status_updated(struct netif *netif);
@@ -54,6 +56,24 @@ uint8_t GATEWAY_ADDRESS[4];
 #define INTERFACE_THREAD_STACK_SIZE ( 1024 )
 osThreadAttr_t attributes;
 /* USER CODE END OS_THREAD_ATTR_CMSIS_RTOS_V2 */
+static void dhcp_status_callback(struct netif *netif) {
+  if (netif->flags & NETIF_FLAG_UP) {
+    // DHCP成功获取IP地址
+    printf("DHCP bound: IP=%d.%d.%d.%d\n", 
+           ip4_addr1(&netif->ip_addr),
+           ip4_addr2(&netif->ip_addr),
+           ip4_addr3(&netif->ip_addr),
+           ip4_addr4(&netif->ip_addr));
+    printf("Gateway=%d.%d.%d.%d\n",
+           ip4_addr1(&netif->gw),
+           ip4_addr2(&netif->gw),
+           ip4_addr3(&netif->gw),
+           ip4_addr4(&netif->gw));
+  } else {
+    // DHCP失败或断开
+    printf("DHCP failed or disconnected\n");
+  }
+}
 /* USER CODE END 2 */
 
 /**
@@ -62,57 +82,36 @@ osThreadAttr_t attributes;
 void MX_LWIP_Init(void)
 {
   /* IP addresses initialization */
-  //192.168.1.101
-  IP_ADDRESS[0] = 192;
-  IP_ADDRESS[1] = 168;
-  IP_ADDRESS[2] = 1;
-  IP_ADDRESS[3] = 120;
-  NETMASK_ADDRESS[0] = 255;
-  NETMASK_ADDRESS[1] = 255;
-  NETMASK_ADDRESS[2] = 255;
-  NETMASK_ADDRESS[3] = 0;
-  GATEWAY_ADDRESS[0] = 0;
-  GATEWAY_ADDRESS[1] = 0;
-  GATEWAY_ADDRESS[2] = 0;
-  GATEWAY_ADDRESS[3] = 0;
+  DEBUGINFO("start");
 
-  printf("IP_ADDRESS:%d:%d:%d:%d\r\n",IP_ADDRESS[0],IP_ADDRESS[1],IP_ADDRESS[2],IP_ADDRESS[3]);
-/* USER CODE BEGIN IP_ADDRESSES */
-/* USER CODE END IP_ADDRESSES */
-
-  printf("Initilialize the LwIP stack with RTOS\r\n");
   /* Initilialize the LwIP stack with RTOS */
   tcpip_init( NULL, NULL );
 
-  printf("IP addresses initialization without DHCP (IPv4)\r\n");
   /* IP addresses initialization without DHCP (IPv4) */
-  IP4_ADDR(&ipaddr, IP_ADDRESS[0], IP_ADDRESS[1], IP_ADDRESS[2], IP_ADDRESS[3]);
-  IP4_ADDR(&netmask, NETMASK_ADDRESS[0], NETMASK_ADDRESS[1] , NETMASK_ADDRESS[2], NETMASK_ADDRESS[3]);
-  IP4_ADDR(&gw, GATEWAY_ADDRESS[0], GATEWAY_ADDRESS[1], GATEWAY_ADDRESS[2], GATEWAY_ADDRESS[3]);
-  printf("add the network interface (IPv4/IPv6) with RTOS\r\n");
+  IP4_ADDR(&ipaddr, 0, 0, 0, 0);
+  IP4_ADDR(&netmask, 0, 0, 0, 0);
+  IP4_ADDR(&gw, 0, 0, 0, 0);
+
   /* add the network interface (IPv4/IPv6) with RTOS */
   netif_add(&gnetif, &ipaddr, &netmask, &gw, NULL, &ethernetif_init, &tcpip_input);
-  printf("Registers the default network interface\r\n");
+
   /* Registers the default network interface */
   netif_set_default(&gnetif);
 
+  netif_set_status_callback(&gnetif, dhcp_status_callback);
+
   if (netif_is_link_up(&gnetif))
   {
-    printf("When the netif is fully configured this function must be called\r\n");
     /* When the netif is fully configured this function must be called */
     netif_set_up(&gnetif);
   }
   else
   {
-    printf("When the netif link is down this function must be called\r\n");
     /* When the netif link is down this function must be called */
     netif_set_down(&gnetif);
   }
-  printf("Set the link callback function, this function is called on change of link status\r\n");
   /* Set the link callback function, this function is called on change of link status*/
   netif_set_link_callback(&gnetif, ethernet_link_status_updated);
-
-  printf("Create the Ethernet link handler thread\r\n");
   /* Create the Ethernet link handler thread */
   /* USER CODE BEGIN H7_OS_THREAD_NEW_CMSIS_RTOS_V2 */
     memset(&attributes, 0x0, sizeof(osThreadAttr_t));
@@ -123,7 +122,12 @@ void MX_LWIP_Init(void)
   /* USER CODE END H7_OS_THREAD_NEW_CMSIS_RTOS_V2 */
 
 /* USER CODE BEGIN 3 */
-
+  if (netif_is_link_up(&gnetif))
+  {
+    DEBUGINFO(" netif is link up");
+    dhcp_start(&gnetif);
+  }
+  DEBUGINFO("end");
 /* USER CODE END 3 */
 }
 

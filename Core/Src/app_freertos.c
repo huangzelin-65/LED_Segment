@@ -247,6 +247,20 @@ const osThreadAttr_t RobotReceiveTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 256 * 4
 };
+/* Definitions for TcpManagerTask */
+osThreadId_t TcpManagerTaskHandle;
+const osThreadAttr_t TcpManagerTask_attributes = {
+  .name = "TcpManagerTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 2048 * 4
+};
+/* Definitions for TcpReceiveTask */
+osThreadId_t TcpReceiveTaskHandle;
+const osThreadAttr_t TcpReceiveTask_attributes = {
+  .name = "TcpReceiveTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
 /* Definitions for xResetButtonTimer */
 osTimerId_t xResetButtonTimerHandle;
 const osTimerAttr_t xResetButtonTimer_attributes = {
@@ -567,6 +581,12 @@ void MX_FREERTOS_Init(void) {
   /* creation of RobotReceiveTask */
   RobotReceiveTaskHandle = osThreadNew(vRobotReceiveTask, NULL, &RobotReceiveTask_attributes);
 
+  /* creation of TcpManagerTask */
+  TcpManagerTaskHandle = osThreadNew(vTcpManagerTask, NULL, &TcpManagerTask_attributes);
+
+  /* creation of TcpReceiveTask */
+  TcpReceiveTaskHandle = osThreadNew(vTcpReceiveTask, NULL, &TcpReceiveTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   
@@ -592,6 +612,8 @@ void MX_FREERTOS_Init(void) {
   osThreadSuspend(MqttReceiveTaskHandle);  
   osThreadSuspend(RobotManagerTaskHandle); 
   osThreadSuspend(RobotReceiveTaskHandle);
+  osThreadSuspend(TcpManagerTaskHandle); 
+  osThreadSuspend(TcpReceiveTaskHandle);  
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */

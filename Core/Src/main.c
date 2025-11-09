@@ -147,7 +147,7 @@ int main(void)
   MX_GPIO_Init();
   MX_GPDMA1_Init();
   MX_GPDMA2_Init();
-  // MX_ICACHE_Init();
+//  MX_ICACHE_Init();
   MX_USART1_UART_Init();
   MX_UART7_Init();
   MX_UART5_Init();
