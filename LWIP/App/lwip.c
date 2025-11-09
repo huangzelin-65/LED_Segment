@@ -33,7 +33,7 @@
 #include <string.h>
 #include "LogDebugInfo.h"
 #include "sockets.h"
-#include "adaptor_mqtt.h"
+#include "adaptor_tcp.h"
 /* USER CODE END 0 */
 /* Private function prototypes -----------------------------------------------*/
 static void ethernet_link_status_updated(struct netif *netif);
@@ -71,7 +71,7 @@ static void dhcp_status_callback(struct netif *netif) {
            ip4_addr2(&netif->gw),
            ip4_addr3(&netif->gw),
            ip4_addr4(&netif->gw));
-    Mqtt_SendMsg(MQTT_MSG_START,NULL);
+    Tcp_SendMsg(TCP_MSG_MQTT,NULL);
   } else {
     // DHCP失败或断开
     DEBUGINFO("DHCP failed or disconnected\n");

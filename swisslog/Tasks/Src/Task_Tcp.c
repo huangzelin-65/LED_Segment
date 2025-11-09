@@ -10,18 +10,40 @@
 #include <stdbool.h>
 #include "queue.h"
 #include "lwip.h"
+#include "adaptor_tcp.h"
 #include "adaptor_mqtt.h"
 
-extern struct netif gnetif;
+extern osMessageQueueId_t xTcpManageQueueHandle;
 
 /* TCP管理任务入口函数 */
 void vTcpManagerTask(void *argument)
 {
+  TcpMsg_t *tcp_msg = NULL;
   DEBUGINFO("vTcpManagerTask\r\n");
   MX_LWIP_Init();
   while (1)
   {
-	osDelay(pdMS_TO_TICKS(100));
+    if(xQueueReceive(xTcpManageQueueHandle, &tcp_msg, portMAX_DELAY) == pdTRUE)
+    {
+        DEBUGINFO("type:%d\n",tcp_msg->type); 
+        switch (tcp_msg->type)
+        {
+            case TCP_MSG_MQTT://启动mqtt服务
+            {
+                DEBUGINFO("TCP_MSG_MQTT\n"); 
+                Mqtt_SendMsg(MQTT_MSG_START,NULL);
+            }
+            break;
+            case TCP_MSG_SERVER://启动tcp客户端
+            {
+                DEBUGINFO("TCP_MSG_SERVER\n");                      
+            }
+            break;                                       
+            default:
+            break;
+        }
+        vPortFree(tcp_msg);
+    }
   }
 }
     

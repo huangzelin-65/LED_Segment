@@ -95,7 +95,7 @@ typedef unsigned long    UBaseType_t;
 #define portSTACK_GROWTH                   ( -1 )
 #define portTICK_PERIOD_MS                 ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
 #define portBYTE_ALIGNMENT                 8
-#define portNOP()                          
+#define portNOP()
 #define portINLINE                         __inline
 #ifndef portFORCE_INLINE
     #define portFORCE_INLINE               inline __attribute__( ( always_inline ) )

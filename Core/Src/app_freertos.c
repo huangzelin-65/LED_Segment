@@ -371,6 +371,11 @@ osMessageQueueId_t xRobotQueueHandle;
 const osMessageQueueAttr_t xRobotQueue_attributes = {
   .name = "xRobotQueue"
 };
+/* Definitions for xTcpManageQueue */
+osMessageQueueId_t xTcpManageQueueHandle;
+const osMessageQueueAttr_t xTcpManageQueue_attributes = {
+  .name = "xTcpManageQueue"
+};
 /* Definitions for xMotorTxSem */
 osSemaphoreId_t xMotorTxSemHandle;
 const osSemaphoreAttr_t xMotorTxSem_attributes = {
@@ -500,6 +505,8 @@ void MX_FREERTOS_Init(void) {
   xMqttManagerQueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xMqttManagerQueue_attributes);
   /* creation of xRobotQueue */
   xRobotQueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xRobotQueue_attributes);
+  /* creation of xTcpManageQueue */
+  xTcpManageQueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xTcpManageQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
