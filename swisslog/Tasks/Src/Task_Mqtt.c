@@ -69,7 +69,7 @@ void vMqttManagerTask(void *argument)
                 break;
                 case MQTT_MSG_RECIEVE:
                 {
-                    Robot_SendMsg(ROBOT_MSG_RECEIVE,msg->data);
+                    Robot_SendMsg(ROBOT_MSG_PARSE,msg->data);
                 }
                 break;
                 default:break;

@@ -47,9 +47,9 @@ typedef struct {
 } Errors;
 
 typedef struct {
-    int headerId;
-    int timestamp;
-    int version;
+    char headerId[8];
+    char timestamp[32];   // Unix毫秒时间戳（字符串形式）
+    char version[16];     // 版本号（如"1.0.0"）
     const char *manufacturer;
     const char *serialNumber;
     const char *orderId;
@@ -103,11 +103,25 @@ typedef struct {
     RobotAction action;   // 动作内容
 } RobotAction_t;	
 
+typedef struct {
+    char cmd[16];     // 存储"forward"/"back"/"stop"/"runModel"
+    char cmdId[16];   // 存储命令ID（如"1"）
+    char status[24];  // 动作执行状态
+} RobotCmdAck;
+
+typedef struct {
+    char headerId[8];     // 最多4字符+":"+Long，预留长度
+    char timestamp[32];   // Unix毫秒时间戳（字符串形式）
+    char version[16];     // 版本号（如"1.0.0"）
+    RobotCmdAck actionStates[8];   // 动作内容，最多8组命令
+    int states_count;
+} RobotActionAck_t;
 
 typedef enum {
     ROBOT_MSG_HEART = 0,//发送心跳包到服务器
-    ROBOT_MSG_SEND,//代表需要把消息发送到服务器
-    ROBOT_MSG_RECEIVE,//代表从服务器获取到消息
+    ROBOT_MSG_STATE,//代表需要把消息发送到服务器
+    ROBOT_MSG_PARSE,//代表从服务器获取到消息
+    ROBOT_MSG_ACTION_STATUS,//回复下发的action的状态
 } RobotMsgType_t;
 
 
@@ -115,6 +129,13 @@ typedef struct {
     RobotMsgType_t type;
     char *data;
 }RobotMsg_t;
+
+typedef enum {
+    ROBOT_ACTION_STATUS_ACK = 0,//回复action ack
+    ROBOT_ACTION_STATUS_RUNNING,
+    ROBOT_ACTION_STATUS_FINISHED,
+    ROBOT_ACTION_STATUS_FAILED
+} RobotActionStatus_t;
 
 extern RobotAction_t robotAction;
 extern RobotState_t robotSate;
@@ -131,4 +152,6 @@ char* Robot_GetStateJsonStr(void);
 void Robot_SendMsg(RobotMsgType_t type,char *data);
 void Robot_UpdateState(void);
 void Robot_Action2Cmd(void);
+void Robot_ActionAckUpdate(RobotActionStatus_t status);
+
 #endif

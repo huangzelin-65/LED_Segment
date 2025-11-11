@@ -28,17 +28,17 @@ void vRobotManagerTask(void *argument)
         if(mqtt_isConnected)
         {
             cnt++;
-            if(cnt == 10)//10秒发送一次心跳包
+            if(cnt == 100)//10秒发送一次心跳包
             {
                 DEBUGINFO("ROBOT_MSG_HEART\n");  
                 Robot_SendMsg(ROBOT_MSG_HEART,NULL);
                 cnt = 0;
             }
-            if(cnt == 5)//这里只是模拟事件发生，测试代码
-            {
-                DEBUGINFO("ROBOT_MSG_SEND\n");  
-                Robot_SendMsg(ROBOT_MSG_SEND,NULL);  
-            }                
+            // if(cnt == 5)//这里只是模拟事件发生，测试代码
+            // {
+            //     DEBUGINFO("ROBOT_MSG_STATE\n");  
+            //     Robot_SendMsg(ROBOT_MSG_STATE,NULL);  
+            // }                
         }
         osDelay(pdMS_TO_TICKS(100));
     }
@@ -63,19 +63,19 @@ void vRobotReceiveTask(void *argument)
                         Mqtt_SendMsg(MQTT_MSG_HEARTBEAT,Robot_GetHeartBeatJsonStr());
                     }
                     break;
-                    case ROBOT_MSG_SEND://代表需要把消息发送到服务器
+                    case ROBOT_MSG_STATE://代表需要把消息发送到服务器
                     {
                         //此处需增加一个更新robot state 的接口
-                        DEBUGINFO("ROBOT_MSG_SEND\n");  
+                        DEBUGINFO("ROBOT_MSG_STATE\n");  
                         //根据robot state更新对应的json字段
                         Robot_UpdateStateJson(RobotJson,&robotSate);
                         //发送消息给mqtt队列，让最新robot状态发布给服务器
                         Mqtt_SendMsg(MQTT_MSG_ROBOT_EVENT,Robot_GetStateJsonStr());                        
                     }
                     break;
-                    case ROBOT_MSG_RECEIVE://代表从服务器获取到消息
+                    case ROBOT_MSG_PARSE://代表从服务器获取到消息
                     {
-                        DEBUGINFO("ROBOT_MSG_RECEIVE:%s\n",robot_msg->data); 
+                        DEBUGINFO("ROBOT_MSG_PARSE:%s\n",robot_msg->data); 
                         //解析来自mqtt的数据
                         int result = Robot_ParseJson(robot_msg->data,&robotAction);
 
@@ -85,6 +85,19 @@ void vRobotReceiveTask(void *argument)
                         Robot_Action2Cmd();
 
                         vPortFree(robot_msg->data);
+
+                        //需要回复服务器ack，在state中的actionstate回复状态
+
+                        Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_ACK);
+
+                        Robot_SendMsg(ROBOT_MSG_STATE,NULL);  
+                    }
+                    break;  
+                    case ROBOT_MSG_ACTION_STATUS://返回action的状态，如running或finish
+                    {
+                        DEBUGINFO("ROBOT_MSG_ACTION_STATUS\n");
+                        //此处需要更新robot实际运行状态
+                        Robot_SendMsg(ROBOT_MSG_STATE,NULL);  
                     }
                     break;                                        
                     default:

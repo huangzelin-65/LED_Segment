@@ -14,13 +14,28 @@ extern osMessageQueueId_t xRobotQueueHandle;//该消息队列处理事件上报
 extern osThreadId_t RobotReceiveTaskHandle;//该任务处理事件上报
 
 //保存服务器下发的动作消息
-RobotAction_t robotAction;
+RobotAction_t robotAction = {
+    .headerId = "h0:123",       // 示例：headerId（不超过8字符）
+    .timestamp = "1731300000000", // 示例：Unix毫秒时间戳字符串
+    .version = "1.0.0",         // 版本号
+    .action = {
+        .Type = 1,              // 动作类型示例
+        .cmd_count = 1,         // 实际命令数量为2条
+        .cmds = {
+            [0] = {             // 第一条命令
+                .cmd = "forward",
+                .cmdId = "1",
+                .params = {.model = ""}  // forward命令无需model参数，留空
+            }
+        }
+    }
+};
 
 //此处根据不同的设备，定义不同的变量
 RobotState_t robotSate = {
-    .headerId = 1,
-    .timestamp = 0,
-    .version = 1,
+    .headerId = "h0:123",       // 示例：headerId（不超过8字符）
+    .timestamp = "1731300000000", // 示例：Unix毫秒时间戳字符串
+    .version = "1.0.0",         // 版本号
     .manufacturer = NULL,
     .serialNumber = NULL,
     .orderId = NULL,
@@ -41,6 +56,20 @@ RobotState_t robotSate = {
     .moveState = {0, DIRECTION_FORWARD},
     .disinfectState = {false, 10, 20, 30},
     .errors = {ERROR_TYPE_NONE, ERROR_LEVEL_LOW}
+};
+
+RobotActionAck_t robotActionAck = {
+    .headerId = "h2:789",       // 示例headerId（不超过8字符，含结束符）
+    .timestamp = "1731302345678", // 示例Unix毫秒时间戳字符串
+    .version = "1.0.0",         // 版本号
+    .states_count = 1, 
+    .actionStates = {
+        [0] = {                 // 第一组命令状态
+            .cmd = "forward",
+            .cmdId = "1",
+            .status = "fail"  // 执行状态：成功
+        }
+    }
 };
 
 //保留创建的robot json 的指针
@@ -67,7 +96,7 @@ void Robot_AddNullFields(cJSON* root)
     const char* null_fields[] = {
         "manufacturer", "serialNumber", "orderId", "orderUpdateId",
         "lastNodeId", "lastNodeSequenceId", "nodeStates", "edgeStates",
-        "driving", "actionStates", "batteryState"
+        "driving", "batteryState"
     };
     for(int i=0; i<sizeof(null_fields)/sizeof(null_fields[0]); i++) {
         cJSON_AddNullToObject(root, null_fields[i]);
@@ -79,6 +108,14 @@ cJSON* Robot_CreateBumperState()
     cJSON* obj = cJSON_CreateObject();
     cJSON_AddBoolToObject(obj, "front", robotSate.bumperState.front);
     cJSON_AddBoolToObject(obj, "back", robotSate.bumperState.back);
+    return obj;
+}
+//小车前后霍尔开关的状态
+cJSON* Robot_CreateHallState()
+{
+    cJSON* obj = cJSON_CreateObject();
+    cJSON_AddBoolToObject(obj, "front", robotSate.hallState.front);
+    cJSON_AddBoolToObject(obj, "back", robotSate.hallState.back);
     return obj;
 }
 //小车速度的状态
@@ -107,6 +144,23 @@ cJSON* Robot_CreateErrors()
     cJSON_AddStringToObject(obj, "errorLevel", robotSate.errors.errorLevel);
     return obj;
 }
+//创建ation对象,动作数组
+cJSON* Robot_CreateActionAck()
+{
+    cJSON *actionStates = cJSON_CreateArray();
+
+    //目前数组中，只有一个动作命令
+    DEBUGINFO("status:%s states_count:%d\n",robotActionAck.actionStates[0].status,robotActionAck.states_count);
+    for (int i = 0; i < robotActionAck.states_count; i++) {
+        cJSON *stateObj = cJSON_CreateObject();
+        cJSON_AddStringToObject(stateObj, "cmdId", robotActionAck.actionStates[i].cmdId);
+        cJSON_AddStringToObject(stateObj, "cmd", robotActionAck.actionStates[i].cmd);
+        cJSON_AddStringToObject(stateObj, "status", robotActionAck.actionStates[i].status);
+        cJSON_AddItemToArray(actionStates, stateObj);
+    }
+
+    return actionStates;  
+}
 //robot json 创建之后不做释放，避免重复申请和释放内存，造成碎片化
 void Robot_CreateStateJson(void) 
 {
@@ -126,9 +180,9 @@ void Robot_CreateStateJson(void)
     }
 
     // 2. 添加基础字段
-    cJSON_AddNumberToObject(RobotJson, "headerId", robotSate.headerId);
-    cJSON_AddNumberToObject(RobotJson, "timestamp", robotSate.timestamp);
-    cJSON_AddNumberToObject(RobotJson, "version", robotSate.version);
+    cJSON_AddStringToObject(RobotJson, "headerId", robotSate.headerId);
+    cJSON_AddStringToObject(RobotJson, "timestamp", robotSate.timestamp);
+    cJSON_AddStringToObject(RobotJson, "version", robotSate.version);
     cJSON_AddStringToObject(RobotJson, "operatingMode", robotSate.operatingMode);
     cJSON_AddBoolToObject(RobotJson, "emergencyBtn", robotSate.emergencyBtn);
     cJSON_AddStringToObject(RobotJson, "rfid", robotSate.rfid);
@@ -141,10 +195,12 @@ void Robot_CreateStateJson(void)
     
     // 4. 添加嵌套对象
     cJSON_AddItemToObject(RobotJson, "bumperState", Robot_CreateBumperState());
+    cJSON_AddItemToObject(RobotJson, "HallState", Robot_CreateHallState());
     cJSON_AddItemToObject(RobotJson, "moveState", Robot_CreateMoveState());
     cJSON_AddItemToObject(RobotJson, "disinfectState", Robot_CreateDisinfectState());
     cJSON_AddItemToObject(RobotJson, "errors", Robot_CreateErrors());
-
+    // 5. 添加action
+    cJSON_AddItemToObject(RobotJson, "actionStates", Robot_CreateActionAck());
     DEBUGINFO("end\n");
 }
 // 更新已有cJSON对象（RobotJson）为robotState的最新状态
@@ -153,29 +209,30 @@ void Robot_UpdateStateJson(cJSON* robotJson, const RobotState_t* robotState) {
         return; // 入参无效，直接返回
     }
 
-    // 1. 更新int类型成员
-    cJSON* headerIdItem = cJSON_CreateNumber(robotState->headerId);
-    if (headerIdItem != NULL) {
-        cJSON_bool replaceRet = cJSON_ReplaceItemInObject(robotJson, "headerId", headerIdItem);
-        if (!replaceRet) { // 替换失败，主动销毁新创建的项
-            cJSON_Delete(headerIdItem);
-        }
+    // 1. 更新string类型成员
+    cJSON* headeridItem = cJSON_CreateString(robotState->headerId);
+    if (headeridItem != NULL) {
+        cJSON_bool replaceRet = cJSON_ReplaceItemInObject(robotJson, "headerId", headeridItem);
+        if (!replaceRet) {
+            DEBUGINFO("headeridItem fail\n");
+            cJSON_Delete(headeridItem);
+        }        
     }
 
-    cJSON* timestampItem = cJSON_CreateNumber(robotState->timestamp);
+    cJSON* timestampItem = cJSON_CreateString(robotState->timestamp);
     if (timestampItem != NULL) {
         cJSON_bool replaceRet = cJSON_ReplaceItemInObject(robotJson, "timestamp", timestampItem);
         if (!replaceRet) {
             cJSON_Delete(timestampItem);
-        }
+        }        
     }
 
-    cJSON* versionItem = cJSON_CreateNumber(robotState->version);
+    cJSON* versionItem = cJSON_CreateString(robotState->version);
     if (versionItem != NULL) {
         cJSON_bool replaceRet = cJSON_ReplaceItemInObject(robotJson, "version", versionItem);
         if (!replaceRet) {
             cJSON_Delete(versionItem);
-        }
+        }        
     }
 
     cJSON* runtimeItem = cJSON_CreateNumber(robotState->runtime);
@@ -256,15 +313,6 @@ void Robot_UpdateStateJson(cJSON* robotJson, const RobotState_t* robotState) {
         cJSON_bool replaceRet = cJSON_ReplaceItemInObject(robotJson, "edgeStates", edgeStatesItem);
         if (!replaceRet) {
             cJSON_Delete(edgeStatesItem);
-        }
-    }
-
-    const char* actionStatesStr = robotState->actionStates ? robotState->actionStates : "";
-    cJSON* actionStatesItem = cJSON_CreateString(actionStatesStr);
-    if (actionStatesItem != NULL) {
-        cJSON_bool replaceRet = cJSON_ReplaceItemInObject(robotJson, "actionStates", actionStatesItem);
-        if (!replaceRet) {
-            cJSON_Delete(actionStatesItem);
         }
     }
 
@@ -447,6 +495,18 @@ void Robot_UpdateStateJson(cJSON* robotJson, const RobotState_t* robotState) {
             }
         }
     }
+    //9. 更新action
+    cJSON* action_array = cJSON_GetObjectItem(robotJson, "actionStates");
+    if (action_array != NULL) {
+        DEBUGINFO("actionJson find\n");
+        cJSON *stateObj = cJSON_CreateObject();
+        for (int i = 0; i < robotActionAck.states_count; i++) {
+            cJSON_AddStringToObject(stateObj, "cmdId", robotActionAck.actionStates[i].cmdId);
+            cJSON_AddStringToObject(stateObj, "cmd", robotActionAck.actionStates[i].cmd);
+            cJSON_AddStringToObject(stateObj, "status", robotActionAck.actionStates[i].status);        
+            cJSON_ReplaceItemInArray(action_array,i,stateObj);
+        }
+    }  
 }
 //解析服务器发来的json数据
 int Robot_ParseJson(char *json_str,RobotAction_t *robot) 
@@ -703,7 +763,7 @@ void Robot_SendMsg(RobotMsgType_t type,char *data)
 //事件通知更新状态到服务器接口
 void Robot_UpdateState(void)
 {
-    Robot_SendMsg(ROBOT_MSG_SEND,NULL);
+    Robot_SendMsg(ROBOT_MSG_STATE,NULL);
 }
 //将解析后再到实际的控制接口
 void Robot_Action2Cmd(void)
@@ -753,8 +813,41 @@ void Robot_Action2Cmd(void)
         vParseCommandToCar(); 
     }   
 }
-
-
-
+//回复action的ack
+void Robot_ActionAckUpdate(RobotActionStatus_t status)
+{ 
+    memcpy(robotSate.headerId,robotAction.headerId,8);
+    robotActionAck.states_count = robotAction.action.cmd_count;
+    DEBUGINFO("status:%d states_count:%d\n",status,robotActionAck.states_count);
+    for (int i = 0; i < robotActionAck.states_count; i++) {
+        memcpy(robotActionAck.actionStates[i].cmd,robotAction.action.cmds[i].cmd,sizeof(robotAction.action.cmds[i].cmd));
+        memcpy(robotActionAck.actionStates[i].cmdId,robotAction.action.cmds[i].cmdId,sizeof(robotAction.action.cmds[i].cmdId));
+        switch (status)
+        {
+        case ROBOT_ACTION_STATUS_ACK:
+            {
+                strcpy(robotActionAck.actionStates[i].status,"ack");
+            }
+            break;
+        case ROBOT_ACTION_STATUS_RUNNING:
+            {
+                strcpy(robotActionAck.actionStates[i].status,"running");
+            }
+            break;        
+        case ROBOT_ACTION_STATUS_FINISHED:
+            {
+                strcpy(robotActionAck.actionStates[i].status,"finished");
+            }
+            break;
+        case ROBOT_ACTION_STATUS_FAILED:
+            {
+                strcpy(robotActionAck.actionStates[i].status,"failed");
+            }
+            break;                    
+        default:
+            break;
+        }
+    }
+}
 
 

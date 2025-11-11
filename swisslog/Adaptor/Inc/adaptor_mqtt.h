@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include "wolfmqtt/mqtt_client.h"
 
-#define MQTT_WIFI              //开启此宏，mqtt数据通过WiFi模块tcp功能发送
+// #define MQTT_WIFI              //开启此宏，mqtt数据通过WiFi模块tcp功能发送
 typedef enum
 {
     MQTT_OK = 0,
