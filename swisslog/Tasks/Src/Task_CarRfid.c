@@ -107,14 +107,14 @@ void vGetCarPosition(char *data)
   ulCurPos = strtoul(pcCurPos, NULL, 10); // 将字符串转换为无符号长整型数(10进制)
 
   // 跟上一次读取的位置比较，如果不相同，则更新当前位置
-  if(CarToServerData.dwCurPos != ulCurPos)
+  if(CarStatus.dwCurPos != ulCurPos)
   {
     // 记录上一次位置
-    CarToServerData.dwPrevPos = CarToServerData.dwCurPos; 
-    DEBUGINFO("dwPrevPos:%lu\r\n",CarToServerData.dwPrevPos);
+    CarStatus.dwPrevPos = CarStatus.dwCurPos; 
+    DEBUGINFO("dwPrevPos:%lu\r\n",CarStatus.dwPrevPos);
     // 更新当前位置
-    CarToServerData.dwCurPos = ulCurPos; 
-    DEBUGINFO("dwCurPos:%lu\r\n",CarToServerData.dwCurPos);
+    CarStatus.dwCurPos = ulCurPos; 
+    DEBUGINFO("dwCurPos:%lu\r\n",CarStatus.dwCurPos);
 
     HMI_Update_CurLocationId_Req(ulCurPos);
   }
