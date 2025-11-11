@@ -38,6 +38,8 @@ extern CarStatus_t CarStatus;
 void vInitTask(void *argument)
 {
   CarStatus.xSetDirection = Forward; //小车预设运行方向为前进
+  CarStatus.xMotorStopReason = NoStopReason; //小车停止原因为无
+  DEBUGINFO("MotorStopReason: NoStopReason\r\n");
 
   osThreadResume(PrintTaskHandle);
   osThreadResume(IntProcessTaskHandle); 
@@ -74,10 +76,16 @@ void vInitTask(void *argument)
 
   uint32_t uid0, uid1, uid2;
     
+  /* 1. 禁用 ICACHE */
+  HAL_ICACHE_Disable();
+
   // 读取芯片UID
   uid0 = HAL_GetUIDw0();
   uid1 = HAL_GetUIDw1();
   uid2 = HAL_GetUIDw2();
+
+  /* 2. 重新启用 ICACHE */
+  HAL_ICACHE_Enable();
 
   // 处理或输出UID（例如通过串口打印）
   DEBUGINFO("STM32H563 Chip ID:\r\n");

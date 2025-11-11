@@ -147,7 +147,7 @@ int main(void)
   MX_GPIO_Init();
   MX_GPDMA1_Init();
   MX_GPDMA2_Init();
-//  MX_ICACHE_Init();
+  MX_ICACHE_Init();
   MX_USART1_UART_Init();
   MX_UART7_Init();
   MX_UART5_Init();
@@ -456,12 +456,8 @@ static void MX_ICACHE_Init(void)
 
   /* USER CODE END ICACHE_Init 1 */
 
-  /** Enable instruction cache in 1-way (direct mapped cache)
+  /** Enable instruction cache (default 2-ways set associative cache)
   */
-  if (HAL_ICACHE_ConfigAssociativityMode(ICACHE_1WAY) != HAL_OK)
-  {
-    Error_Handler();
-  }
   if (HAL_ICACHE_Enable() != HAL_OK)
   {
     Error_Handler();
