@@ -89,8 +89,11 @@ void vSensorTask(void *argument)
                 GPIO_WRITE(LED1, GPIO_PIN_SET); // 使能LED1
                 DEBUGINFO("sensors Error\r\n");
                 DEBUGINFO("enable LED1\r\n");
-
-                //请求停止电机
+              
+                // 电机停止原因
+                CarStatus.xMotorStopReason = BySensorError;
+                DEBUGINFO("MotorStopReason: BySensorError\r\n");
+                // 请求停止电机
                 ucMotion_msg = CarStop;
               }
 
@@ -102,7 +105,10 @@ void vSensorTask(void *argument)
                 DEBUGINFO("sensors Trigger\r\n");
                 DEBUGINFO("enable LED1\r\n");
 
-                //请求停止电机
+                // 电机停止原因
+                CarStatus.xMotorStopReason = BySensorTrigger;
+                DEBUGINFO("MotorStopReason: BySensorTrigger\r\n");
+                // 请求停止电机
                 ucMotion_msg = CarStop;
               }
               //运动方向上其中全部传感器释放即可释放
@@ -130,7 +136,10 @@ void vSensorTask(void *argument)
                 DEBUGINFO("sensors Error\r\n");
                 DEBUGINFO("enable LED1\r\n");
 
-                //请求停止电机
+                // 电机停止原因
+                CarStatus.xMotorStopReason = BySensorError;
+                DEBUGINFO("MotorStopReason: BySensorError\r\n");
+                // 请求停止电机
                 ucMotion_msg = CarStop;
               }
 
@@ -142,7 +151,10 @@ void vSensorTask(void *argument)
                 DEBUGINFO("sensors Trigger\r\n");
                 DEBUGINFO("enable LED1\r\n");
 
-                //请求停止电机
+                // 电机停止原因
+                CarStatus.xMotorStopReason = BySensorTrigger;
+                DEBUGINFO("MotorStopReason: BySensorTrigger\r\n");
+                // 请求停止电机
                 ucMotion_msg = CarStop;
               }
               //运动方向上其中全部传感器释放即可释放
@@ -216,6 +228,9 @@ void vSensorTask(void *argument)
         //********************************* 拨动开关停止 ******************************
         case ToggleStop:
           CarStatus.xAutoMode = Manual;
+          // 电机停止原因
+          CarStatus.xMotorStopReason = ByToggleStop;
+          DEBUGINFO("MotorStopReason: ByToggleStop\r\n");
           // 停止电机
           ucMotion_msg = CarStop;
           if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
@@ -245,6 +260,9 @@ void vSensorTask(void *argument)
         //************************************ 维修控杆停止 ********************************
         case ServiceStop:
           // 停止电机
+          CarStatus.xMotorStopReason = ByServiceMode;
+          DEBUGINFO("MotorStopReason: ByServiceMode\r\n");
+
           ucMotion_msg = CarStop;
           if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
           {
@@ -260,6 +278,10 @@ void vSensorTask(void *argument)
           {
             GPIO_WRITE(LED_RESET, GPIO_PIN_SET); // 使能LED_RESET
             DEBUGINFO("reset button trigger\r\n");
+
+            // 电机停止原因
+            CarStatus.xMotorStopReason = ByReset;
+            DEBUGINFO("MotorStopReason: ByReset\r\n");
 
             // 请求停止电机
             ucMotion_msg = CarStop;

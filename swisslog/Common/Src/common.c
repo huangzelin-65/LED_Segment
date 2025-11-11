@@ -91,6 +91,16 @@ void vParseCommandToCar()
     } else {
       // 停止电机
       CarStatus.xMotorEnable = MotorDisable;
+
+      // 电机停止原因
+      if(CarStatus.xBoxLocked == UnLock){
+        CarStatus.xMotorStopReason = ByBoxUnlock;
+        DEBUGINFO("MotorStopReason: ByBoxUnlock\r\n");
+      } else if(ServerToCarData.xStationStatus == InStation){
+        CarStatus.xMotorStopReason = ByInstation;
+        DEBUGINFO("MotorStopReason: ByInstation\r\n");
+      }
+      
       ucMotion_msg = CarStop;
       DEBUGINFO("Can't Run!! check Box LockStatus or StationStatus!!\r\n");
     }
@@ -99,6 +109,10 @@ void vParseCommandToCar()
   {
     // 停止电机
     CarStatus.xMotorEnable = MotorDisable;
+    // 电机停止原因
+    CarStatus.xMotorStopReason = ByCommand;
+    DEBUGINFO("MotorStopReason: ByCommand\r\n");
+
     ucMotion_msg = CarStop;
   }
 

@@ -151,6 +151,22 @@ typedef enum
     MotorEnable = 1,
 }eMotorStatusType;
 
+//----------电机停止原因枚举----------
+typedef enum
+{
+    NoStopReason,       // 无停止原因
+    ByCommand,          // 通过命令停止
+    BySensorError,      // 传感器异常停止
+    BySensorTrigger,    // 传感器触发停止
+    ByToggleStop,       // 拨动开关停止
+    ByServiceMode,      // 维修模式停止
+    ByStopTag,          // 停止标签停止
+    ByBoxUnlock,        // 车厢未上锁停止
+    ByInstation,        // 进站停止
+    ByReset,            // 复位导致停止
+    ByMotorError,       // 电机异常停止
+}eMotorStopReasonType;
+
 //----------LED灯颜色枚举----------
 typedef enum
 {
@@ -192,6 +208,7 @@ typedef struct
     uint16_t CarID;	  					// 小车车号
     uint16_t Destination;				// 小车目的地
     CarStationStatus xStationStatus;    // 小车当前在站状态 0：InStation 1：OutStation
+    eMotorStopReasonType xMotorStopReason; // 电机停止原因
 
     eSensorMotiontType ToggleSwtichPosition;	// 拨码开关位置 ToggleStop:停车/ToggleFront:前进/ToggleBack:后退
     eSensorMotiontType ServiceJoystickPosition; // 维修控杆位置 ServiceStop:停车/ServiceFront:前进/ServiceBack:后退

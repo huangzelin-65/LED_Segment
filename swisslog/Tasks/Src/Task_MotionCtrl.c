@@ -160,7 +160,7 @@ void vMotorFeedbackTask(void *argument)
       DEBUGINFO("Motor received len:%d\r\n",ucReciveLen);
       vPrint_Array(ucMotor_Task_Rx_Buffer, ucReciveLen);
 
-      // 重启DMA接收(DMA循环模式下，重启后从缓冲区起始地址覆盖写入)
+      // 重启DMA接收(DMA单次模式下，重启后从缓冲区起始地址覆盖写入)
       vMotor_Start_DMA_Receive(ucMotor_Task_Rx_Buffer);
     }
   }

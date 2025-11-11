@@ -144,6 +144,10 @@ void vGetTagPosType(char *data)
       && (CarStatus.ToggleSwtichPosition == ToggleFront)
       && (CarStatus.xAutoMode == Auto))
     {
+      // 电机停止原因
+      CarStatus.xMotorStopReason = ByStopTag;
+      DEBUGINFO("MotorStopReason: ByStopTag\r\n");
+
       ucMotion_msg = CarStop;
       if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
       {
