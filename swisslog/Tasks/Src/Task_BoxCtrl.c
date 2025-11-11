@@ -53,8 +53,13 @@ static CarStationStatus Car_Read_Station_Status(void)
 	uint8_t result = 0;
 	bEeprom_Check_Conn();
 	bEeprom_Read_Byte(EEP_ADD_CAR_STATION_STATUS,&result);	
-	CarStatus.xStationStatus = result; // 更新全局变量的在站状态
 	DEBUGINFO("result:%d\n",result);
+	// 有时候读出来的值变为160，原因未知，暂时强制限制范围
+	if(result > 1)
+	{
+		result = 1;
+	}
+	CarStatus.xStationStatus = result; // 更新全局变量的在站状态
 	return (CarStationStatus)result;
 }
 
