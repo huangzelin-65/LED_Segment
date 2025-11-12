@@ -389,7 +389,7 @@ static int Mqtt_TlsCb(MqttClient* client)
     return 0;
 }
 //mqtt参数初始化，连接服务器、订阅话题
-int MqttInit(void)
+int MqttInit(const char *client_id)
 {
     int rc = 0;
     //初始化客户端
@@ -418,7 +418,7 @@ int MqttInit(void)
     //连接服务器第二步
     XMEMSET(&mqttObj, 0, sizeof(mqttObj));
     mqttObj.connect.keep_alive_sec = MQTT_KEEP_ALIVE_SEC;
-    mqttObj.connect.client_id = MQTT_CLIENT_ID;
+    mqttObj.connect.client_id = client_id;
     mqttObj.connect.username = MQTT_USERNAME;
     mqttObj.connect.password = MQTT_PASSWORD;
     rc = MqttClient_Connect(&mClient, &mqttObj.connect);
@@ -427,7 +427,7 @@ int MqttInit(void)
         goto exit;
     }
     DEBUGINFO("MQTT Broker Connect Success: ClientID %s, Username %s, Password %s",
-        MQTT_CLIENT_ID,
+        client_id,
         (MQTT_USERNAME == NULL) ? "Null" : MQTT_USERNAME,
         (MQTT_PASSWORD == NULL) ? "Null" : MQTT_PASSWORD);
     return rc;

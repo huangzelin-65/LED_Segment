@@ -33,7 +33,7 @@ void vMqttManagerTask(void *argument)
             {
                 case MQTT_MSG_START:
                 {
-                    int rc = MqttInit();
+                    int rc = MqttInit(robotSate.client_id);
                     if(rc == MQTT_CODE_SUCCESS)
                     {
                         mqtt_isConnected = 1;

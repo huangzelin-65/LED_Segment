@@ -750,6 +750,18 @@ void Robot_Init(void)
 
     Robot_CreateHeartBeatJson();
 
+    //获取uid
+    HAL_ICACHE_Disable();
+    robotSate.UID[0] = HAL_GetUIDw0();
+    robotSate.UID[1] = HAL_GetUIDw1();
+    robotSate.UID[2] = HAL_GetUIDw2(); 
+    HAL_ICACHE_Enable();
+
+    DEBUGINFO("UID %x %x %x\n",robotSate.UID[0],robotSate.UID[1],robotSate.UID[2]);
+
+    snprintf(robotSate.client_id, sizeof(robotSate.client_id), "%ld%ld%ld", robotSate.UID[0],robotSate.UID[1],robotSate.UID[2]);
+
+    DEBUGINFO("client_id %s\n",robotSate.client_id);
     //初始化状态
     robot_init = true;
 

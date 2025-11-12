@@ -76,6 +76,8 @@ typedef struct {
     MoveState moveState;
     DisinfectState disinfectState;
     Errors errors;
+    uint32_t UID[3];
+    char client_id[64];
 } RobotState_t;
 
 
