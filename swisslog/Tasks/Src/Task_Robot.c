@@ -34,7 +34,7 @@ void vRobotManagerTask(void *argument)
                 Robot_SendMsg(ROBOT_MSG_HEART,NULL);
                 cnt = 0;
             }
-            // if(cnt == 5)//这里只是模拟事件发生，测试代码
+            // if(cnt == 50)//这里只是模拟事件发生，测试代码
             // {
             //     DEBUGINFO("ROBOT_MSG_STATE\n");  
             //     Robot_SendMsg(ROBOT_MSG_STATE,NULL);  

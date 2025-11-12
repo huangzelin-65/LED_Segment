@@ -25,7 +25,9 @@ void vWifiManagerTask(void *argument)
 {
   DEBUGINFO("vWifiManagerTask\r\n");
   osDelay(pdMS_TO_TICKS(3000));//wifi模块上电需要等待3秒才可以发送命令
+  #ifdef MQTT_WIFI
   Wifi_ConnectStart();
+  #endif
   while (1)
   {
     Wifi_ConnectProcess();

@@ -9,6 +9,7 @@
 #include "queue.h"
 #include "common.h"
 
+extern CarStatus_t CarStatus;
 extern ServerToCarData_t ServerToCarData;
 extern osMessageQueueId_t xRobotQueueHandle;//该消息队列处理事件上报
 extern osThreadId_t RobotReceiveTaskHandle;//该任务处理事件上报
@@ -49,6 +50,8 @@ RobotState_t robotSate = {
     .operatingMode = NULL,
     .rfid = NULL,
     .position = NULL,
+    .curPos = 0,
+    .car_running = 0,//一开始为停止
     .lockState = false,
     .bumperState = {false, false},
     .hallState = {false, false},
@@ -67,7 +70,7 @@ RobotActionAck_t robotActionAck = {
         [0] = {                 // 第一组命令状态
             .cmd = "forward",
             .cmdId = "1",
-            .status = "fail"  // 执行状态：成功
+            .status = "ack"  // 执行状态：成功
         }
     }
 };
@@ -189,7 +192,7 @@ void Robot_CreateStateJson(void)
     cJSON_AddStringToObject(RobotJson, "position", robotSate.position);
     cJSON_AddBoolToObject(RobotJson, "lockState", robotSate.lockState);
     cJSON_AddNumberToObject(RobotJson, "runtime", robotSate.runtime);
-    
+    cJSON_AddNumberToObject(RobotJson, "curPos", robotSate.curPos);
     // 3. 添加NULL字段
     Robot_AddNullFields(RobotJson);
     
@@ -243,6 +246,13 @@ void Robot_UpdateStateJson(cJSON* robotJson, const RobotState_t* robotState) {
         }
     }
 
+    cJSON* curPosItem = cJSON_CreateNumber(robotState->curPos);
+    if (curPosItem != NULL) {
+        cJSON_bool replaceRet = cJSON_ReplaceItemInObject(robotJson, "curPos", curPosItem);
+        if (!replaceRet) {
+            cJSON_Delete(curPosItem);
+        }
+    }
     // 2. 更新字符串类型成员（处理NULL情况）
     const char* manufacturerStr = robotState->manufacturer ? robotState->manufacturer : "";
     cJSON* manufacturerItem = cJSON_CreateString(manufacturerStr);
@@ -760,10 +770,19 @@ void Robot_SendMsg(RobotMsgType_t type,char *data)
         } 
     }     
 }
-//事件通知更新状态到服务器接口
+//事件通知更新状态
 void Robot_UpdateState(void)
 {
-    Robot_SendMsg(ROBOT_MSG_STATE,NULL);
+    DEBUGINFO("curPos:%d xRealDirection:%d xRealSpeed:%d xAutoMode:%d",CarStatus.dwCurPos,CarStatus.xRealDirection,CarStatus.xRealSpeed,CarStatus.xAutoMode);
+    robotSate.lockState = (CarStatus.xBoxLocked == Locked ? true : false);
+    robotSate.bumperState.front = (CarStatus.FrontCrashStatus == SensorTrigger ? true : false);
+    robotSate.bumperState.back = (CarStatus.RearCrashStatus == SensorTrigger ? true : false);
+    robotSate.hallState.front = (CarStatus.FrontProxStatus == SensorTrigger ? true : false);
+    robotSate.hallState.back = (CarStatus.RearProxStatus == SensorTrigger ? true : false);
+    robotSate.curPos = CarStatus.dwCurPos;
+    robotSate.moveState.direction = CarStatus.xRealDirection;
+    robotSate.moveState.speedLevel = CarStatus.xRealSpeed;
+    robotSate.operatingMode = (CarStatus.xAutoMode == Auto ? MODE_TYPE_AUTO : MODE_TYPE_MANUAL);
 }
 //将解析后再到实际的控制接口
 void Robot_Action2Cmd(void)
@@ -849,5 +868,38 @@ void Robot_ActionAckUpdate(RobotActionStatus_t status)
         }
     }
 }
-
-
+//更新动作状态
+void Robot_UpdateAction(void)
+{
+    DEBUGINFO("car_running:%d xIsCarRunning:%d",robotSate.car_running,CarStatus.xIsCarRunning);
+    if(CarStatus.xIsCarRunning == CarRunning)//当前为running
+    {
+        if(robotSate.car_running != CarRunning)//之前为stop
+        {
+            Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_RUNNING);           
+        }
+    }
+    else//当前为stop
+    {
+        if(robotSate.car_running == CarRunning)//之前为running
+        {
+            if(CarStatus.xIsCarRunning == CarStop)//不是触发标签停止
+            {
+                Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_FAILED);
+            }
+            else//触发标签停止
+            {
+                Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_FINISHED);
+            }             
+        }
+    }
+    robotSate.car_running = CarStatus.xIsCarRunning;
+}
+//事件发生，上报状态
+void Robot_Event(void)
+{
+    DEBUGINFO("start");
+    Robot_UpdateState();
+    Robot_UpdateAction();
+    Robot_SendMsg(ROBOT_MSG_STATE,NULL);
+}

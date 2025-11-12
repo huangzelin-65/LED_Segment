@@ -13,8 +13,10 @@
 #define ERROR_TYPE_SENSOR "ERROR_TYPE_SENSOR"
 #define ERROR_TYPE_COMMUNICATION "ERROR_TYPE_COMMUNICATION"
 
-
+#define MODE_TYPE_AUTO      "AUTO"
+#define MODE_TYPE_MANUAL    "MANUAL"
 typedef enum {
+    DIRECTION_STOP = 0,
     DIRECTION_FORWARD,
     DIRECTION_BACKWARD
 } Direction;
@@ -65,6 +67,8 @@ typedef struct {
     bool emergencyBtn;
     const char *rfid;
     const char *position;
+    int car_running;
+    uint32_t curPos;
     bool lockState;
     BumperState bumperState;
     HallState hallState;
@@ -153,5 +157,5 @@ void Robot_SendMsg(RobotMsgType_t type,char *data);
 void Robot_UpdateState(void);
 void Robot_Action2Cmd(void);
 void Robot_ActionAckUpdate(RobotActionStatus_t status);
-
+void Robot_Event(void);
 #endif

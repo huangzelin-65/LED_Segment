@@ -451,7 +451,9 @@ void Error_Handler(void);
 #define CAR_TO_PLC_DATA_SIZE sizeof(CarToServerData_t) //先不加协议头
 #define PLC_TO_CAR_DATA_SIZE sizeof(ServerToCarData_t) //先不加协议头
 #define TEMP_SIZE 12
-    
+
+#define MQTT_WIFI     //开启此宏，mqtt数据通过WiFi模块tcp功能发送
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

@@ -20,7 +20,9 @@ void vTcpManagerTask(void *argument)
 {
   TcpMsg_t *tcp_msg = NULL;
   DEBUGINFO("vTcpManagerTask\r\n");
+  #ifndef MQTT_WIFI
   MX_LWIP_Init();
+  #endif
   while (1)
   {
     if(xQueueReceive(xTcpManageQueueHandle, &tcp_msg, portMAX_DELAY) == pdTRUE)
@@ -31,11 +33,7 @@ void vTcpManagerTask(void *argument)
             case TCP_MSG_MQTT://启动mqtt服务
             {
                 DEBUGINFO("TCP_MSG_MQTT\n"); 
-                #ifdef MQTT_WIFI
-                    DEBUGINFO("MQTT START BY WIFI\n"); 
-                #else
-                    Mqtt_SendMsg(MQTT_MSG_START,NULL);
-                #endif
+                Mqtt_SendMsg(MQTT_MSG_START,NULL);       
             }
             break;
             case TCP_MSG_SERVER://启动tcp客户端
