@@ -450,7 +450,7 @@ void Mqtt_ParseData(uint8_t* rbuf,int len)
             int sid, data_len, pos;
             // "+WFDATA=%d,%d,%[^\n]" 匹配前缀，然后按逗号分隔读取两个整数，最后读取剩余所有字符的起始位置
             int ret = sscanf(result, "+WFDATA=%d,%d,%n", &sid, &data_len,&pos);
-            DEBUGINFO("ret:%d\n",ret);  
+            DEBUGINFO("ret:%d len:%d data_len:%d\n",ret,len,data_len);  
             // 检查是否成功读取3个部分
             if (ret == 2 && (len > data_len)) {
                 memcpy(mqtt_readbuffer, result + pos, data_len);       

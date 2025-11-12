@@ -55,7 +55,7 @@ void vWifiReceiveTask(void *argument)
         bool parse_rbuf = false;
 
         memset(read_buffer,0,sizeof(read_buffer));
-
+        DEBUGINFO("last_read_id:%d size:%d\n",wifi_data->last_read_id,wifi_data->size);
         //当last_read_id与Size相等时，代表没有数据更新，此时不解析数据
         if(wifi_data->last_read_id < wifi_data->size)
         {
@@ -70,7 +70,7 @@ void vWifiReceiveTask(void *argument)
         else if(wifi_data->last_read_id > wifi_data->size)
         {
           int j = 0;
-          for(int i = wifi_data->last_read_id;i < sizeof(wifi_data->rx_buffer);i++)
+          for(int i = wifi_data->last_read_id;i < WIFI_RX_BUF_SIZE;i++)
           {
             read_buffer[i - wifi_data->last_read_id] = wifi_data->rx_buffer[i];
             j++;

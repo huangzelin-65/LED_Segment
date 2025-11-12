@@ -59,7 +59,7 @@ void Wifi_ParseDataStart(uint8_t *rx_buffer,uint16_t last_read_id,uint16_t size)
 //接收中断中调用，处理wifi接收的数据
 void Wifi_ReceiveData(uint16_t Size)
 {
-    printf("Wifi_ReceiveData\n");
+    // printf("Wifi_ReceiveData\n");
     Wifi_ParseDataStart(Wifi_ReceiveBuffer,wifi_last_read_id,Size);
     wifi_last_read_id = Size;
 }
