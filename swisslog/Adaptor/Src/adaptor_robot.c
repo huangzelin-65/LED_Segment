@@ -58,10 +58,8 @@ RobotState_t robotSate = {
     .runtime = 0,
     .moveState = {0, DIRECTION_FORWARD},
     .disinfectState = {false, 10, 20, 30},
-    .errors = {ERROR_TYPE_NONE, ERROR_LEVEL_LOW}
-};
-
-RobotActionAck_t robotActionAck = {
+    .errors = {ERROR_TYPE_NONE, ERROR_LEVEL_LOW},
+    .robotActionAck = {
     .headerId = "h2:789",       // 示例headerId（不超过8字符，含结束符）
     .timestamp = "1731302345678", // 示例Unix毫秒时间戳字符串
     .version = "1.0.0",         // 版本号
@@ -73,7 +71,9 @@ RobotActionAck_t robotActionAck = {
             .status = "ack"  // 执行状态：成功
         }
     }
+}
 };
+
 
 //保留创建的robot json 的指针
 cJSON* RobotJson = NULL;
@@ -153,12 +153,12 @@ cJSON* Robot_CreateActionAck()
     cJSON *actionStates = cJSON_CreateArray();
 
     //目前数组中，只有一个动作命令
-    DEBUGINFO("status:%s states_count:%d\n",robotActionAck.actionStates[0].status,robotActionAck.states_count);
-    for (int i = 0; i < robotActionAck.states_count; i++) {
+    DEBUGINFO("status:%s states_count:%d\n",robotSate.robotActionAck.actionStates[0].status,robotSate.robotActionAck.states_count);
+    for (int i = 0; i < robotSate.robotActionAck.states_count; i++) {
         cJSON *stateObj = cJSON_CreateObject();
-        cJSON_AddStringToObject(stateObj, "cmdId", robotActionAck.actionStates[i].cmdId);
-        cJSON_AddStringToObject(stateObj, "cmd", robotActionAck.actionStates[i].cmd);
-        cJSON_AddStringToObject(stateObj, "status", robotActionAck.actionStates[i].status);
+        cJSON_AddStringToObject(stateObj, "cmdId", robotSate.robotActionAck.actionStates[i].cmdId);
+        cJSON_AddStringToObject(stateObj, "cmd", robotSate.robotActionAck.actionStates[i].cmd);
+        cJSON_AddStringToObject(stateObj, "status", robotSate.robotActionAck.actionStates[i].status);
         cJSON_AddItemToArray(actionStates, stateObj);
     }
 
@@ -510,10 +510,10 @@ void Robot_UpdateStateJson(cJSON* robotJson, const RobotState_t* robotState) {
     if (action_array != NULL) {
         DEBUGINFO("actionJson find\n");
         cJSON *stateObj = cJSON_CreateObject();
-        for (int i = 0; i < robotActionAck.states_count; i++) {
-            cJSON_AddStringToObject(stateObj, "cmdId", robotActionAck.actionStates[i].cmdId);
-            cJSON_AddStringToObject(stateObj, "cmd", robotActionAck.actionStates[i].cmd);
-            cJSON_AddStringToObject(stateObj, "status", robotActionAck.actionStates[i].status);        
+        for (int i = 0; i < robotState->robotActionAck.states_count; i++) {
+            cJSON_AddStringToObject(stateObj, "cmdId", robotState->robotActionAck.actionStates[i].cmdId);
+            cJSON_AddStringToObject(stateObj, "cmd", robotState->robotActionAck.actionStates[i].cmd);
+            cJSON_AddStringToObject(stateObj, "status", robotState->robotActionAck.actionStates[i].status);        
             cJSON_ReplaceItemInArray(action_array,i,stateObj);
         }
     }  
@@ -768,7 +768,7 @@ void Robot_Init(void)
     DEBUGINFO("end\n");
 }
 //通知robot接收任务去发送指定的消息类型或解析来
-void Robot_SendMsg(RobotMsgType_t type,char *data)
+void Robot_SendMsg(RobotMsgType_t type,void *data)
 {
     if(xRobotQueueHandle != NULL)
     {
@@ -848,31 +848,31 @@ void Robot_Action2Cmd(void)
 void Robot_ActionAckUpdate(RobotActionStatus_t status)
 { 
     memcpy(robotSate.headerId,robotAction.headerId,8);
-    robotActionAck.states_count = robotAction.action.cmd_count;
-    DEBUGINFO("status:%d states_count:%d\n",status,robotActionAck.states_count);
-    for (int i = 0; i < robotActionAck.states_count; i++) {
-        memcpy(robotActionAck.actionStates[i].cmd,robotAction.action.cmds[i].cmd,sizeof(robotAction.action.cmds[i].cmd));
-        memcpy(robotActionAck.actionStates[i].cmdId,robotAction.action.cmds[i].cmdId,sizeof(robotAction.action.cmds[i].cmdId));
+    robotSate.robotActionAck.states_count = robotAction.action.cmd_count;
+    DEBUGINFO("status:%d states_count:%d\n",status,robotSate.robotActionAck.states_count);
+    for (int i = 0; i < robotSate.robotActionAck.states_count; i++) {
+        memcpy(robotSate.robotActionAck.actionStates[i].cmd,robotAction.action.cmds[i].cmd,sizeof(robotAction.action.cmds[i].cmd));
+        memcpy(robotSate.robotActionAck.actionStates[i].cmdId,robotAction.action.cmds[i].cmdId,sizeof(robotAction.action.cmds[i].cmdId));
         switch (status)
         {
         case ROBOT_ACTION_STATUS_ACK:
             {
-                strcpy(robotActionAck.actionStates[i].status,"ack");
+                strcpy(robotSate.robotActionAck.actionStates[i].status,"ack");
             }
             break;
         case ROBOT_ACTION_STATUS_RUNNING:
             {
-                strcpy(robotActionAck.actionStates[i].status,"running");
+                strcpy(robotSate.robotActionAck.actionStates[i].status,"running");
             }
             break;        
         case ROBOT_ACTION_STATUS_FINISHED:
             {
-                strcpy(robotActionAck.actionStates[i].status,"finished");
+                strcpy(robotSate.robotActionAck.actionStates[i].status,"finished");
             }
             break;
         case ROBOT_ACTION_STATUS_FAILED:
             {
-                strcpy(robotActionAck.actionStates[i].status,"failed");
+                strcpy(robotSate.robotActionAck.actionStates[i].status,"failed");
             }
             break;                    
         default:
@@ -907,11 +907,21 @@ void Robot_UpdateAction(void)
     }
     robotSate.car_running = CarStatus.xIsCarRunning;
 }
+//获取当前机器状态，用队列形式上报
+void Robot_State(void)
+{
+    DEBUGINFO("start");
+    RobotState_t *robot_state_data = pvPortMalloc(sizeof(RobotState_t));
+
+    memcpy(robot_state_data, &robotSate, sizeof(RobotState_t));                        
+
+    Robot_SendMsg(ROBOT_MSG_STATE,robot_state_data); 
+}
 //事件发生，上报状态
 void Robot_Event(void)
 {
     DEBUGINFO("start");
     Robot_UpdateState();
     Robot_UpdateAction();
-    Robot_SendMsg(ROBOT_MSG_STATE,NULL);
+    Robot_State();
 }

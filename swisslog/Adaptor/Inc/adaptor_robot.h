@@ -15,6 +15,7 @@
 
 #define MODE_TYPE_AUTO      "AUTO"
 #define MODE_TYPE_MANUAL    "MANUAL"
+
 typedef enum {
     DIRECTION_STOP = 0,
     DIRECTION_FORWARD,
@@ -49,6 +50,20 @@ typedef struct {
 } Errors;
 
 typedef struct {
+    char cmd[16];     // 存储"forward"/"back"/"stop"/"runModel"
+    char cmdId[16];   // 存储命令ID（如"1"）
+    char status[24];  // 动作执行状态
+} RobotCmdAck;
+
+typedef struct {
+    char headerId[8];     // 最多4字符+":"+Long，预留长度
+    char timestamp[32];   // Unix毫秒时间戳（字符串形式）
+    char version[16];     // 版本号（如"1.0.0"）
+    RobotCmdAck actionStates[8];   // 动作内容，最多8组命令
+    int states_count;
+} RobotActionAck_t;
+
+typedef struct {
     char headerId[8];
     char timestamp[32];   // Unix毫秒时间戳（字符串形式）
     char version[16];     // 版本号（如"1.0.0"）
@@ -78,6 +93,7 @@ typedef struct {
     Errors errors;
     uint32_t UID[3];
     char client_id[64];
+    RobotActionAck_t robotActionAck;
 } RobotState_t;
 
 
@@ -108,20 +124,6 @@ typedef struct {
     char version[16];     // 版本号（如"1.0.0"）
     RobotAction action;   // 动作内容
 } RobotAction_t;	
-
-typedef struct {
-    char cmd[16];     // 存储"forward"/"back"/"stop"/"runModel"
-    char cmdId[16];   // 存储命令ID（如"1"）
-    char status[24];  // 动作执行状态
-} RobotCmdAck;
-
-typedef struct {
-    char headerId[8];     // 最多4字符+":"+Long，预留长度
-    char timestamp[32];   // Unix毫秒时间戳（字符串形式）
-    char version[16];     // 版本号（如"1.0.0"）
-    RobotCmdAck actionStates[8];   // 动作内容，最多8组命令
-    int states_count;
-} RobotActionAck_t;
 
 typedef enum {
     ROBOT_MSG_HEART = 0,//发送心跳包到服务器
@@ -155,9 +157,10 @@ void Robot_CreateHeartBeatJson(void);
 char* Robot_GetHeartBeatJsonStr(void);
 int Robot_ParseJson(char* json_str,RobotAction_t *robot);
 char* Robot_GetStateJsonStr(void);
-void Robot_SendMsg(RobotMsgType_t type,char *data);
+void Robot_SendMsg(RobotMsgType_t type,void *data);
 void Robot_UpdateState(void);
 void Robot_Action2Cmd(void);
 void Robot_ActionAckUpdate(RobotActionStatus_t status);
 void Robot_Event(void);
+void Robot_State(void);
 #endif

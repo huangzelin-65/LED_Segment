@@ -34,11 +34,11 @@ void vRobotManagerTask(void *argument)
                 Robot_SendMsg(ROBOT_MSG_HEART,NULL);
                 cnt = 0;
             }
-            // if(cnt == 50)//这里只是模拟事件发生，测试代码
-            // {
-            //     DEBUGINFO("ROBOT_MSG_STATE\n");  
-            //     Robot_SendMsg(ROBOT_MSG_STATE,NULL);  
-            // }                
+            if(cnt == 50)//这里只是模拟事件发生，测试代码
+            {
+                // DEBUGINFO("ROBOT_MSG_STATE\n");  
+                // Robot_State(); 
+            }                
         }
         osDelay(pdMS_TO_TICKS(100));
     }
@@ -68,9 +68,13 @@ void vRobotReceiveTask(void *argument)
                         //此处需增加一个更新robot state 的接口
                         DEBUGINFO("ROBOT_MSG_STATE\n");  
                         //根据robot state更新对应的json字段
-                        Robot_UpdateStateJson(RobotJson,&robotSate);
+                        RobotState_t *robot_state_data = (RobotState_t *)robot_msg->data; 
+
+                        Robot_UpdateStateJson(RobotJson,robot_state_data);
                         //发送消息给mqtt队列，让最新robot状态发布给服务器
-                        Mqtt_SendMsg(MQTT_MSG_ROBOT_EVENT,Robot_GetStateJsonStr());                        
+                        Mqtt_SendMsg(MQTT_MSG_ROBOT_EVENT,Robot_GetStateJsonStr());
+                        //释放内存
+                        vPortFree(robot_msg->data);
                     }
                     break;
                     case ROBOT_MSG_PARSE://代表从服务器获取到消息
@@ -90,14 +94,14 @@ void vRobotReceiveTask(void *argument)
 
                         Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_ACK);
 
-                        Robot_SendMsg(ROBOT_MSG_STATE,NULL);  
+                        Robot_State();
                     }
                     break;  
                     case ROBOT_MSG_ACTION_STATUS://返回action的状态，如running或finish
                     {
                         DEBUGINFO("ROBOT_MSG_ACTION_STATUS\n");
                         //此处需要更新robot实际运行状态
-                        Robot_SendMsg(ROBOT_MSG_STATE,NULL);  
+                        Robot_State();  
                     }
                     break;                                        
                     default:
