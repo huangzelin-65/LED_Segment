@@ -187,11 +187,13 @@ void HAL_ETH_ErrorCallback(ETH_HandleTypeDef *handlerEth)
 /* USER CODE BEGIN 4 */
 // 读取STM32 UID（实际需根据芯片型号调整地址）
 static void read_uid(uint8_t *uid) {
+    
+    HAL_ICACHE_Disable();
     uint32_t UID[3];
     UID[0] = HAL_GetUIDw0();
     UID[1] = HAL_GetUIDw1();
     UID[2] = HAL_GetUIDw2(); 
-
+    HAL_ICACHE_Enable();
     uid[0] = (UID[0] >> 0) & 0xFF;
     uid[1] = (UID[0] >> 8) & 0xFF;
     uid[2] = (UID[0] >> 16) & 0xFF;
