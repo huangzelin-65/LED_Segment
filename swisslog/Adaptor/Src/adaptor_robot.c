@@ -8,6 +8,7 @@
 #include "LogDebugInfo.h"
 #include "queue.h"
 #include "common.h"
+#include "semphr.h"
 
 extern CarStatus_t CarStatus;
 extern ServerToCarData_t ServerToCarData;
@@ -59,6 +60,7 @@ RobotState_t robotSate = {
     .moveState = {0, DIRECTION_FORWARD},
     .disinfectState = {false, 10, 20, 30},
     .errors = {ERROR_TYPE_NONE, ERROR_LEVEL_LOW},
+    .mutex = NULL,
     .robotActionAck = {
     .headerId = "h2:789",       // 示例headerId（不超过8字符，含结束符）
     .timestamp = "1731302345678", // 示例Unix毫秒时间戳字符串
@@ -508,9 +510,9 @@ void Robot_UpdateStateJson(cJSON* robotJson, const RobotState_t* robotState) {
     //9. 更新action
     cJSON* action_array = cJSON_GetObjectItem(robotJson, "actionStates");
     if (action_array != NULL) {
-        DEBUGINFO("actionJson find\n");
         cJSON *stateObj = cJSON_CreateObject();
         for (int i = 0; i < robotState->robotActionAck.states_count; i++) {
+            DEBUGINFO("cmdId:%s cmd:%s status:%s",robotState->robotActionAck.actionStates[i].cmdId,robotState->robotActionAck.actionStates[i].cmd,robotState->robotActionAck.actionStates[i].status);
             cJSON_AddStringToObject(stateObj, "cmdId", robotState->robotActionAck.actionStates[i].cmdId);
             cJSON_AddStringToObject(stateObj, "cmd", robotState->robotActionAck.actionStates[i].cmd);
             cJSON_AddStringToObject(stateObj, "status", robotState->robotActionAck.actionStates[i].status);        
@@ -762,6 +764,12 @@ void Robot_Init(void)
     snprintf(robotSate.client_id, sizeof(robotSate.client_id), "%ld%ld%ld", robotSate.UID[0],robotSate.UID[1],robotSate.UID[2]);
 
     DEBUGINFO("client_id %s\n",robotSate.client_id);
+    //互斥锁创建
+    robotSate.mutex = xSemaphoreCreateMutex();
+    if (robotSate.mutex == NULL) {
+        DEBUGINFO("xSemaphoreCreateMutex fail\n");
+        return;
+    }
     //初始化状态
     robot_init = true;
 
@@ -883,7 +891,7 @@ void Robot_ActionAckUpdate(RobotActionStatus_t status)
 //更新动作状态
 void Robot_UpdateAction(void)
 {
-    DEBUGINFO("car_running:%d xIsCarRunning:%d",robotSate.car_running,CarStatus.xIsCarRunning);
+    DEBUGINFO("car_running:%d xIsCarRunning:%d car_running:%d",robotSate.car_running,CarStatus.xIsCarRunning,robotSate.car_running);
     if(CarStatus.xIsCarRunning == CarRunning)//当前为running
     {
         if(robotSate.car_running != CarRunning)//之前为stop
@@ -891,7 +899,7 @@ void Robot_UpdateAction(void)
             Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_RUNNING);           
         }
     }
-    else//当前为stop
+    else//当前为stop或readytoRun
     {
         if(robotSate.car_running == CarRunning)//之前为running
         {
@@ -917,11 +925,26 @@ void Robot_State(void)
 
     Robot_SendMsg(ROBOT_MSG_STATE,robot_state_data); 
 }
+//回复action ack
+void Robot_ActionAck(void)
+{
+    DEBUGINFO("start");
+    if (robotSate.mutex == NULL)return;
+    if (xSemaphoreTake(robotSate.mutex, portMAX_DELAY) != pdPASS) return;
+    Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_ACK);
+    Robot_State(); 
+    xSemaphoreGive(robotSate.mutex);  
+    DEBUGINFO("end"); 
+}
 //事件发生，上报状态
 void Robot_Event(void)
 {
     DEBUGINFO("start");
+    if (robotSate.mutex == NULL)return;
+    if (xSemaphoreTake(robotSate.mutex, portMAX_DELAY) != pdPASS) return;
     Robot_UpdateState();
     Robot_UpdateAction();
     Robot_State();
+    xSemaphoreGive(robotSate.mutex);
+    DEBUGINFO("end");
 }

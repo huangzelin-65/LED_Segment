@@ -94,6 +94,7 @@ typedef struct {
     uint32_t UID[3];
     char client_id[64];
     RobotActionAck_t robotActionAck;
+    void* mutex;           // 线程安全锁（FreeRTOS互斥锁）
 } RobotState_t;
 
 
@@ -163,4 +164,5 @@ void Robot_Action2Cmd(void);
 void Robot_ActionAckUpdate(RobotActionStatus_t status);
 void Robot_Event(void);
 void Robot_State(void);
+void Robot_ActionAck(void);
 #endif

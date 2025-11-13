@@ -91,17 +91,13 @@ void vRobotReceiveTask(void *argument)
                         vPortFree(robot_msg->data);
 
                         //需要回复服务器ack，在state中的actionstate回复状态
-
-                        Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_ACK);
-
-                        Robot_State();
+                        Robot_ActionAck();
                     }
                     break;  
                     case ROBOT_MSG_ACTION_STATUS://返回action的状态，如running或finish
                     {
                         DEBUGINFO("ROBOT_MSG_ACTION_STATUS\n");
                         //此处需要更新robot实际运行状态
-                        Robot_State();  
                     }
                     break;                                        
                     default:
