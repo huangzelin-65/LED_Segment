@@ -891,7 +891,7 @@ void Robot_ActionAckUpdate(RobotActionStatus_t status)
 //更新动作状态
 void Robot_UpdateAction(void)
 {
-    DEBUGINFO("car_running:%d xIsCarRunning:%d car_running:%d",robotSate.car_running,CarStatus.xIsCarRunning,robotSate.car_running);
+    DEBUGINFO("car_running:%d xIsCarRunning:%d car_running:%d xMotorStopReason:%d",robotSate.car_running,CarStatus.xIsCarRunning,robotSate.car_running,CarStatus.xMotorStopReason);
     if(CarStatus.xIsCarRunning == CarRunning)//当前为running
     {
         if(robotSate.car_running != CarRunning)//之前为stop
@@ -905,7 +905,19 @@ void Robot_UpdateAction(void)
         {
             if(CarStatus.xIsCarRunning == CarStop)//不是触发标签停止
             {
-                Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_FAILED);
+                if(CarStatus.xMotorStopReason == BySensorError ||
+                    CarStatus.xMotorStopReason == BySensorTrigger ||
+                    CarStatus.xMotorStopReason == ByBoxUnlock ||
+                    CarStatus.xMotorStopReason == ByReset ||
+                    CarStatus.xMotorStopReason == ByMotorError
+                ) 
+                {
+                    Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_FAILED);
+                }
+                else
+                {
+                    Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_FINISHED);
+                }
             }
             else//触发标签停止
             {
