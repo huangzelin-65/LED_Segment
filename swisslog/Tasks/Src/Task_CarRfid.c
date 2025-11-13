@@ -174,17 +174,13 @@ void vGetTagSpeed(char *data)
   // 判断目标速度在1-3之间
   if((pcSpeed[0]>=1) && (pcSpeed[0]<=3))
   {
-    // 速度有变化时才更新
-    if(CarStatus.xRealSpeed != pcSpeed[0])
-    {
-      // 更新预设速度模式
-      CarStatus.xSetSpeed = pcSpeed[0]; 
+    // 更新预设速度模式
+    CarStatus.xSetSpeed = pcSpeed[0]; 
 
-      ucMotion_msg = CarRunning;
-      if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
-      {
-        DEBUGINFO("send motion msg error\r\n");
-      }
+    ucMotion_msg = CarRunning;
+    if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
+    {
+      DEBUGINFO("send motion msg error\r\n");
     }
   }
 }
