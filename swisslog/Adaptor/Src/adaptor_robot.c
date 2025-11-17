@@ -819,6 +819,11 @@ void Robot_Action2Cmd(void)
             ServerToCarData.xStationStatus = 0x01; // 出站状态
             DEBUGINFO("out station\n"); 
         }
+        else
+        {
+            ServerToCarData.xStationStatus = 0x00;//默认为在站状态
+            DEBUGINFO("type:%d\n"); 
+        }
         char *res = strstr(robotAction.action.cmds[i].cmd, "forward");
         if (res != NULL) {
             DEBUGINFO("forward\n"); 
