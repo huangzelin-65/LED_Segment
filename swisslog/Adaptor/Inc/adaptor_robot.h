@@ -16,6 +16,9 @@
 #define MODE_TYPE_AUTO      "AUTO"
 #define MODE_TYPE_MANUAL    "MANUAL"
 
+#define ROBOT_IN_STATION  10
+#define ROBOT_OUT_STATION 20
+
 typedef enum {
     DIRECTION_STOP = 0,
     DIRECTION_FORWARD,

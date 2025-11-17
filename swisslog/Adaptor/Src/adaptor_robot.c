@@ -809,7 +809,16 @@ void Robot_Action2Cmd(void)
 {
     for (int i = 0; i < robotAction.action.cmd_count; i++) 
     {
-        ServerToCarData.xStationStatus = 0x01; // 到站状态 
+        if(robotAction.action.Type == ROBOT_IN_STATION)
+        {
+            ServerToCarData.xStationStatus = 0x00; // 在站状态 
+            DEBUGINFO("in station\n"); 
+        }
+        else if(robotAction.action.Type == ROBOT_OUT_STATION)
+        {
+            ServerToCarData.xStationStatus = 0x01; // 出站状态
+            DEBUGINFO("out station\n"); 
+        }
         char *res = strstr(robotAction.action.cmds[i].cmd, "forward");
         if (res != NULL) {
             DEBUGINFO("forward\n"); 
