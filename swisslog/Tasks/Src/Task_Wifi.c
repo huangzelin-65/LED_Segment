@@ -23,7 +23,9 @@ extern osMessageQueueId_t xWifi_Parse_QueueHandle;
 /* WiFi管理任务入口函数 */
 void vWifiManagerTask(void *argument)
 {
+  int check_wifi_rssi_cnt = 0;
   DEBUGINFO("vWifiManagerTask\r\n");
+  Wifi_Init();
   osDelay(pdMS_TO_TICKS(3000));//wifi模块上电需要等待3秒才可以发送命令
   #ifdef MQTT_WIFI
   Wifi_ConnectStart();
@@ -34,6 +36,15 @@ void vWifiManagerTask(void *argument)
     if(Wifi_IsChanged())//通知mqtt任务，wifi状态发送变化
     {
       Mqtt_SendMsg(MQTT_MSG_START,NULL);
+    }
+    //增加wifi模块强度查询
+    if(Wifi_IsConnected())
+    {
+      if(check_wifi_rssi_cnt++ > 100)//10秒获取一次wifi信号强度
+      {
+        check_wifi_rssi_cnt = 0;
+        Wifi_SendATCmd("AT+RSSI",2000);
+      }
     }
 	  osDelay(pdMS_TO_TICKS(100));
   }

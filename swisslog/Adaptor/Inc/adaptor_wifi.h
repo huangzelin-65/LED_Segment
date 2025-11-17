@@ -37,6 +37,11 @@ typedef struct
     uint8_t *rx_buffer;
 }WifiParseData_t;
 
+typedef struct 
+{ 
+    int rssi;
+}WifiStatus_t;
+
 HAL_StatusTypeDef Wifi_SendATCmd(const char *cmd,int32_t timeout_ms);
 void Wifi_ReceiveInit(void);
 void Wifi_ParseDataStart(uint8_t *rx_buffer,uint16_t last_read_id,uint16_t size);
@@ -46,8 +51,7 @@ void Wifi_ConnectProcess(void);
 void Wifi_ConnectAck(uint8_t* rbuf,int len);
 bool Wifi_IsConnected(void);
 bool Wifi_IsChanged(void);
-void vSendToWifiTX(uint8_t * CmdDataArr,uint8_t len); //发送数据到WIFI TX
-
+void Wifi_Init(void);
 
 
 

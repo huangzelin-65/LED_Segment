@@ -20,7 +20,7 @@
 #define MQTT_CON_TIMEOUT_MS    30000
 #define MQTT_CLIENT_ID         "WolfMQTTClientSimple"
 #define MQTT_TOPIC_NAME        "bcss/v1/slhc/st_1/state"
-#define MQTT_SUB_TOPIC_NAME    "tk/v1/slhc/ts-1/instantactions" 
+#define MQTT_SUB_TOPIC_NAME    "tk/v1/slhc/tkv-1/instantactions" 
 #define MQTT_PUBLISH_MSG       "Test Publish"
 #define MQTT_USERNAME          "hcms_mqtt"
 #define MQTT_PASSWORD          "KM5zng23"
@@ -40,6 +40,7 @@
 
 extern UART_HandleTypeDef huart6;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel2;
+extern osMutexId_t wifiUsartMutexHandle;
 static byte mSendBuf[MQTT_MAX_PACKET_SZ];
 static byte mReadBuf[MQTT_MAX_PACKET_SZ];
 char Mqtt_SendBuffer[MQTT_TX_BUF_SIZE];
@@ -56,7 +57,7 @@ MqttClient mClient;//mqtt客户端
 int mSockFd = INVALID_SOCKET_FD;
 char mqtt_readbuffer[MQTT_RX_BUF_SIZE];
 int mqtt_isConnected = 0;//mqtt连接状态
-extern osMessageQueueId_t xMqttManagerQueueHandle;//
+extern osMessageQueueId_t xMqttManagerQueueHandle;//处理mqtt任务的消息队列
 
 //发送消息给线程，处理相关消息类型，指定处理内容
 void Mqtt_SendMsg(MqttMsgType_t msg,char *data)
@@ -76,6 +77,10 @@ void Mqtt_SendMsg(MqttMsgType_t msg,char *data)
 //发送消息给WiFi模块
 HAL_StatusTypeDef Mqtt_SendATCmd(const char *cmd,int32_t timeout_ms)
 {
+  if (wifiUsartMutexHandle == NULL) return HAL_TIMEOUT;
+
+  if (osMutexAcquire(wifiUsartMutexHandle, portMAX_DELAY) != osOK) return HAL_TIMEOUT;
+
   HAL_StatusTypeDef status;
 
   uint16_t len = snprintf(Mqtt_SendBuffer, sizeof(Mqtt_SendBuffer), "%s\r\n", cmd);
@@ -83,6 +88,8 @@ HAL_StatusTypeDef Mqtt_SendATCmd(const char *cmd,int32_t timeout_ms)
   status = HAL_UART_Transmit(&huart6, (uint8_t*)Mqtt_SendBuffer, len, timeout_ms);
 
   DEBUGINFO("cmd 6:%s",Mqtt_SendBuffer);
+
+  osMutexRelease(wifiUsartMutexHandle);
 
   return status;
 }
@@ -260,7 +267,13 @@ int Mqtt_NetWrite(void *context, const byte* buf, int buf_len,int timeout_ms)
     // 步骤2：用 memcpy 复制 buf 的全部内容（包括中间的 '\0'）
     memcpy(Mqtt_SendBuffer + prefix_len, buf, buf_len);   
  
+    if (wifiUsartMutexHandle == NULL) return MQTT_CODE_ERROR_TIMEOUT;
+
+    if (osMutexAcquire(wifiUsartMutexHandle, portMAX_DELAY) != osOK) return MQTT_CODE_ERROR_TIMEOUT;
+
     HAL_UART_Transmit(&huart6, (uint8_t*)Mqtt_SendBuffer, (prefix_len + buf_len), 3000);
+
+    osMutexRelease(wifiUsartMutexHandle);
 
     static int cnt = 0;
     while(mqtt_result == MQTT_ERROR)

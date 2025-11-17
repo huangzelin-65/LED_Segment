@@ -12,15 +12,21 @@ extern osSemaphoreId_t xWifiTxSemHandle;
 extern osMessageQueueId_t xWifi_Parse_QueueHandle;
 extern UART_HandleTypeDef huart6;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel2;
+extern osMutexId_t wifiUsartMutexHandle;
 char Wifi_SendBuffer[WIFI_TX_BUF_SIZE];//wifi数据发送的buffer
 uint8_t Wifi_ReceiveBuffer[WIFI_RX_BUF_SIZE];//保存wifi数据，必要时需要加大长度
 WifiState_t wifi_state = WIFI_IDLE;//连接wifi的步骤状态
 WifiResult_t wifi_result = WIFI_ERROR;//连接wifi的步骤结果
 uint16_t wifi_last_read_id = 0;//wifi数据解析的最后一个位置
 WifiResult_t wifi_connect_state = WIFI_ERROR;//wifi是否成功连接到热点
+WifiStatus_t wifi_status;
 
 HAL_StatusTypeDef Wifi_SendATCmd(const char *cmd,int32_t timeout_ms)
 {
+  if (wifiUsartMutexHandle == NULL) return HAL_TIMEOUT;
+
+  if (osMutexAcquire(wifiUsartMutexHandle, portMAX_DELAY) != osOK) return HAL_TIMEOUT;    
+
   HAL_StatusTypeDef status;
 
   uint16_t len = snprintf(Wifi_SendBuffer, sizeof(Wifi_SendBuffer), "%s\r\n", cmd);
@@ -29,7 +35,16 @@ HAL_StatusTypeDef Wifi_SendATCmd(const char *cmd,int32_t timeout_ms)
 
   DEBUGINFO("cmd 6:%s",Wifi_SendBuffer);
 
+  osMutexRelease(wifiUsartMutexHandle);
+
   return status;
+}
+
+//wifi模块状态初始化
+void Wifi_Init(void)
+{
+    DEBUGINFO("Start\n");
+    wifi_status.rssi = 0;   
 }
 
 //启动串口空闲中断，关闭DMA半传输中断和传输完成中断，只响应串口空闲完成中断；
@@ -166,6 +181,19 @@ void Wifi_ConnectProcess(void)
 //wifi模块连接路由过程中，ack的校验
 void Wifi_ConnectAck(uint8_t* rbuf,int len)
 {
+    //解析wifi的数据
+    {
+        char target_mqtt_str[] = "+RSSI=";
+        // 查找目标前缀在rbuf中的位置
+        char *result = strstr((char *)rbuf, target_mqtt_str);
+        if (result != NULL) {
+            DEBUGINFO("find:%s\n", target_mqtt_str);  
+            int rssi;
+            int ret = sscanf(result, "+RSSI=%d", &rssi);
+            DEBUGINFO("ret:%d rssi:%d\n",ret,rssi);  
+            wifi_status.rssi = rssi;              
+        }            
+    }    
     if(wifi_state <= WIFI_AT) 
     {
         return;
@@ -237,30 +265,3 @@ void Wifi_ConnectAck(uint8_t* rbuf,int len)
     }
 }
 
-/*********************************************************************
- * 向 Wi-Fi 发送数据
- *
- *  @param ucCmdDataArr 要发送的数据数组
- *  @param len 数据数组的长度
- *
- *  @note 函数使用 osSemaphoreAcquire 获取 TX 发送锁，确保数据发送的原子性
- **********************************************************************/
-void vSendToWifiTX(uint8_t *ucCmdDataArr, uint8_t len)
-{
-  if (ucCmdDataArr == NULL || len == 0)
-  {
-    DEBUGINFO("Invalid TX parameters");
-    return;
-  }
-
-  // 获取TX发送锁
-  if (osSemaphoreAcquire(xWifiTxSemHandle, osWaitForever) == osOK)
-  {
-    taskENTER_CRITICAL();                              // 进入临界区
-    HAL_UART_Transmit_DMA(&huart6, ucCmdDataArr, len); // 启动DMA发送
-    // HAL_UART_Transmit_IT(&huart2, CmdDataArr, len); // 启动中断发送
-    taskEXIT_CRITICAL(); // 退出临界区
-
-    DEBUGINFO("wifi send:%s", ucCmdDataArr);
-  }
-}

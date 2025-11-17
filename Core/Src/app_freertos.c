@@ -261,6 +261,11 @@ const osThreadAttr_t TcpReceiveTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 256 * 4
 };
+/* Definitions for wifiUsartMutex */
+osMutexId_t wifiUsartMutexHandle;
+const osMutexAttr_t wifiUsartMutex_attributes = {
+  .name = "wifiUsartMutex"
+};
 /* Definitions for xResetButtonTimer */
 osTimerId_t xResetButtonTimerHandle;
 const osTimerAttr_t xResetButtonTimer_attributes = {
@@ -411,6 +416,8 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
+  /* creation of wifiUsartMutex */
+  wifiUsartMutexHandle = osMutexNew(&wifiUsartMutex_attributes);
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
