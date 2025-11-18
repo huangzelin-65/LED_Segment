@@ -948,6 +948,7 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 			setRTCTime[4] = h10ToBCD(setRTCTime[4]);
 			setRTCTime[5] = h10ToBCD(setRTCTime[5]);
 			HMI_Update_Rtc(setRTCTime);
+			HMI_Update_CarNum_Req(carNum);
 			HMI_Change_Page(pgHome);
 			break;
 			
@@ -963,8 +964,8 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 				bEeprom_Read_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,&defaultUvSetTime);
 				HMI_Update_DefaultUVTime_Req(defaultUvSetTime);//twice when first commu
 			}
-			HMI_Change_Page(pgHome);
 			HMI_Update_CarNum_Req(carNum);
+			HMI_Change_Page(pgHome);
 			HMI_Get_Rtc();
 			actFlag = rtcForCheckCorrect;
 			break;
