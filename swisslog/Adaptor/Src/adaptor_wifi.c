@@ -18,8 +18,11 @@ uint8_t Wifi_ReceiveBuffer[WIFI_RX_BUF_SIZE];//保存wifi数据，必要时需�
 WifiState_t wifi_state = WIFI_IDLE;//连接wifi的步骤状态
 WifiResult_t wifi_result = WIFI_ERROR;//连接wifi的步骤结果
 uint16_t wifi_last_read_id = 0;//wifi数据解析的最后一个位置
-WifiResult_t wifi_connect_state = WIFI_ERROR;//wifi是否成功连接到热点
-WifiStatus_t wifi_status;
+WifiStatus_t wifi_status = {
+    .connect_state = WIFI_ERROR,
+    .ip = {0},
+    .rssi = 0
+};//wifi模块所有状态
 
 HAL_StatusTypeDef Wifi_SendATCmd(const char *cmd,int32_t timeout_ms)
 {
@@ -81,7 +84,7 @@ void Wifi_ReceiveData(uint16_t Size)
 //调用此结果，判断此时wifi是否正常连接
 bool Wifi_IsConnected(void)
 {
-    if(wifi_connect_state == WIFI_OK)
+    if(wifi_status.connect_state == WIFI_OK)
     {
       return true;
     }
@@ -91,10 +94,10 @@ bool Wifi_IsConnected(void)
 bool Wifi_IsChanged(void)
 {
     static WifiResult_t wifi_temp_connect_state = WIFI_ERROR;
-    if(wifi_temp_connect_state != wifi_connect_state)
+    if(wifi_temp_connect_state != wifi_status.connect_state)
     {
-        DEBUGINFO("Wifi_IsChanged %d",wifi_connect_state);
-        wifi_temp_connect_state = wifi_connect_state;
+        DEBUGINFO("Wifi_IsChanged %d",wifi_status.connect_state);
+        wifi_temp_connect_state = wifi_status.connect_state;
         return true;
     }
     return false;
@@ -193,12 +196,36 @@ void Wifi_ConnectAck(uint8_t* rbuf,int len)
             DEBUGINFO("ret:%d rssi:%d\n",ret,rssi);  
             wifi_status.rssi = rssi;              
         }            
+    }
+    //保存wifi IP
+    {
+        char target_mqtt_str[] = WIFI_CHECK_IP;
+        char *result = strstr((char *)rbuf, target_mqtt_str);
+        if (result != NULL) {  
+            wifi_result = WIFI_OK; 
+            wifi_status.connect_state = WIFI_OK; 
+            wifi_state = WIFI_END;    
+            char *equal_pos = strchr((char *)rbuf, '=');
+            if (equal_pos != NULL) {
+                char *ip_str = equal_pos + 1;
+                // 复制IP到字符串数组（strcpy会自动添加终止符）
+                // 先检查IP长度，避免数组溢出（可选，增强安全性）
+                if (strlen(ip_str) >= sizeof(wifi_status.ip)) {
+                    DEBUGINFO("IP too long\n");
+                }
+                else
+                {
+                    strcpy(wifi_status.ip, ip_str); 
+                    DEBUGINFO("WIFI IP:%s\n",wifi_status.ip);         
+                }          
+            }                
+        }        
     }    
     if(wifi_state <= WIFI_AT) 
     {
         return;
     }
-    printf("wifi_state:%d\n",wifi_state);      
+    DEBUGINFO("wifi_state:%d\n",wifi_state);      
     switch(wifi_state - 1)
     {
         case WIFI_AT:
@@ -206,7 +233,7 @@ void Wifi_ConnectAck(uint8_t* rbuf,int len)
             char target_mqtt_str[] = "OK";
             char *result = strstr((char *)rbuf, target_mqtt_str);
             if (result != NULL) {
-                printf("WIFI_AT ok\n");    
+                DEBUGINFO("WIFI_AT ok\n");    
                 wifi_result = WIFI_OK;
                 wifi_state = WIFI_CHECK_CONNET;    
             }            
@@ -217,7 +244,7 @@ void Wifi_ConnectAck(uint8_t* rbuf,int len)
             char target_mqtt_str[] = "a";
             char *result = strstr((char *)rbuf, target_mqtt_str);
             if (result != NULL) {
-                printf("WIFI_TPMODE_EXIT_1 ok\n");    
+                DEBUGINFO("WIFI_TPMODE_EXIT_1 ok\n");    
                 wifi_result = WIFI_OK;     
             }            
         }
@@ -227,7 +254,7 @@ void Wifi_ConnectAck(uint8_t* rbuf,int len)
             char target_mqtt_str[] = "+ok";
             char *result = strstr((char *)rbuf, target_mqtt_str);
             if (result != NULL) {
-                printf("WIFI_TPMODE_EXIT_2 ok\n");    
+                DEBUGINFO("WIFI_TPMODE_EXIT_2 ok\n");    
                 wifi_result = WIFI_OK;     
             }            
         }
@@ -237,14 +264,14 @@ void Wifi_ConnectAck(uint8_t* rbuf,int len)
             char target_mqtt_str[] = WIFI_CHECK_IP;
             char *result = strstr((char *)rbuf, target_mqtt_str);
             if (result != NULL) {
-                printf("WIFI_CHECK_CONNET ok\n");   
+                DEBUGINFO("WIFI_CHECK_CONNET ok\n");   
                 wifi_result = WIFI_OK; 
-                wifi_connect_state = WIFI_OK; 
-                wifi_state = WIFI_END;     
+                wifi_status.connect_state = WIFI_OK; 
+                wifi_state = WIFI_END;                    
             } 
             else
             {
-                printf("WIFI_CHECK_CONNET to WIFI_SET_CONNECT\n");
+                DEBUGINFO("WIFI_CHECK_CONNET to WIFI_SET_CONNECT\n");
                 wifi_result = WIFI_OK;  
             }           
         }
@@ -254,13 +281,13 @@ void Wifi_ConnectAck(uint8_t* rbuf,int len)
             char target_mqtt_str[] = "WIFI_CONNECT";
             char *result = strstr((char *)rbuf, target_mqtt_str);
             if (result != NULL) {
-                printf("WIFI_SET_CONNECT ok\n");     
+                DEBUGINFO("WIFI_SET_CONNECT ok\n");     
                 wifi_result = WIFI_OK;
-                wifi_connect_state = WIFI_OK;     
+                wifi_status.connect_state = WIFI_OK;     
             }           
         }
         break;                    
-        default:if(wifi_state != WIFI_IDLE)printf("error wifi_state:%d",wifi_state);
+        default:if(wifi_state != WIFI_IDLE)DEBUGINFO("error wifi_state:%d",wifi_state);
         break;        
     }
 }

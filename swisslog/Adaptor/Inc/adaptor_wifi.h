@@ -40,7 +40,11 @@ typedef struct
 typedef struct 
 { 
     int rssi;
+    WifiResult_t connect_state;//wifi是否成功连接到热点
+    char ip[36];
 }WifiStatus_t;
+
+extern WifiStatus_t wifi_status;
 
 HAL_StatusTypeDef Wifi_SendATCmd(const char *cmd,int32_t timeout_ms);
 void Wifi_ReceiveInit(void);
