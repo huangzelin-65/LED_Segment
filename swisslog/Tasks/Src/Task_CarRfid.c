@@ -190,7 +190,8 @@ void vGetTagSpeed(char *data)
 void vCarRfidTask(void *argument)
 {
   uint32_t ucReciveLen = 0;
-  
+  char pcPreviousCardNum[10] = {0};
+
   
   //启动DMA接收
   vCarRfid_Start_DMA_Receive(ucCarRfid_Rx_Buffer[ucCarRfid_current_buf_idx]);
@@ -219,10 +220,12 @@ void vCarRfidTask(void *argument)
       {
         strcpy(pcCardNum, pResult);
 
-        //cardNum的长度是否等于9
-        if(strlen(pcCardNum) == CARD_NUM_LEN)
+        //cardNum的长度是否等于9, 且cardNum是否和上一次读取的cardNum不一样
+        if((strlen(pcCardNum) == CARD_NUM_LEN) && (strcmp(pcCardNum, pcPreviousCardNum) != 0))
         {
           DEBUGINFO("cardNum:%s,len:%d\r\n",pcCardNum,strlen(pcCardNum));
+
+          strcpy(pcPreviousCardNum, pcCardNum);
 
           //把卡号通过wifi发送到上位机
           //vSendToWifiTX((uint8_t *)pcCardNum, strlen(pcCardNum));
