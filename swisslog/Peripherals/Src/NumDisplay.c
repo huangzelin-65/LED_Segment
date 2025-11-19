@@ -21,7 +21,7 @@ void NumDisp_SetNumber(uint16_t num)
 	setCarID[8] = (CRC16(setCarID,7));
 	vSendToNumDisp(setCarID,sizeof(setCarID));//发送小车号
   DEBUGINFO("setCarID:%d\r\n",num);
-  DEBUGINFO("setCarID[5]:%X,setCarID[5]:%X\r\n",setCarID[5],setCarID[6]);
+  DEBUGINFO("setCarID[5]:%X,setCarID[6]:%X\r\n",setCarID[5],setCarID[6]);
 }
 
 
