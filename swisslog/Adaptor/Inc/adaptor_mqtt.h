@@ -12,6 +12,7 @@ typedef enum
 typedef enum
 {
     MQTT_WAIT_STATE_IDLE = 0,
+    MQTT_WAIT_STATE_SOCKET_CHECK,
     MQTT_WAIT_STATE_SOCKET_OPEN,
     MQTT_WAIT_STATE_TPMODE,
     MQTT_WAIT_STATE_WRITE,
@@ -33,6 +34,30 @@ typedef struct
     MqttMsgType_t type;
     char *data;
 }MqttMsgdata_t;
+
+// 1：未连接
+// 2：连接中
+// 3：连接成功
+// 4：连接失败
+// 5：地址解析错误
+typedef enum
+{
+    SOCKET_DISCONNECT = 1,
+    SOCKET_CONNECTING,
+    SOCKET_CONNECTED,
+    SOCKET_FAIL,
+    SOCKET_ERROR_ADDR
+}Mqtt_SocketStatus;
+
+typedef struct 
+{
+    int id;
+    int type;
+    int status;
+    int host;
+    int port;
+    char ip_addr[16];    
+}MqttSocket_t;
 
 extern MqttObject mqttObj;//mqtt对象，用于连接客户端
 extern MqttNet mNetwork;//网络结构体

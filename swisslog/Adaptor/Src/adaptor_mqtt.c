@@ -58,7 +58,13 @@ int mSockFd = INVALID_SOCKET_FD;
 char mqtt_readbuffer[MQTT_RX_BUF_SIZE];
 int mqtt_isConnected = 0;//mqtt连接状态
 extern osMessageQueueId_t xMqttManagerQueueHandle;//处理mqtt任务的消息队列
-
+MqttSocket_t mqtt_socket = {
+    .ip_addr[0] = 0,
+    .host = 0,
+    .id = -1,
+    .status = 0,
+    .type = 0
+};
 //发送消息给线程，处理相关消息类型，指定处理内容
 void Mqtt_SendMsg(MqttMsgType_t msg,char *data)
 {
@@ -97,13 +103,40 @@ HAL_StatusTypeDef Mqtt_SendATCmd(const char *cmd,int32_t timeout_ms)
 int Mqtt_NetConnect(void *context, const char* host, word16 port,int timeout_ms)
 {
     #ifdef MQTT_WIFI
+    static int cnt = 0;
+    //检测socket连接情况
+    mqtt_result = MQTT_ERROR;
+    mqtt_waitstate = MQTT_WAIT_STATE_SOCKET_CHECK;
+    memset(Mqtt_SendBuffer,0,MQTT_TX_BUF_SIZE);
+    snprintf(Mqtt_SendBuffer, MQTT_TX_BUF_SIZE, "AT+SOCKET?");
+    Mqtt_SendATCmd(Mqtt_SendBuffer, 2000);  
+    DEBUGINFO("mqtt_net_connect MQTT_WAIT_STATE_SOCKET_CHECK\n");
+    while(mqtt_result == MQTT_ERROR)
+    {
+        if(cnt++ >= timeout_ms)
+        {
+            cnt = 0;
+            return MQTT_CODE_ERROR_TIMEOUT;
+        }
+        osDelay(pdMS_TO_TICKS(1));
+    }; 
+    //判断socket状态
+    if(mqtt_socket.id != -1)
+    {
+        if(mqtt_socket.status == SOCKET_CONNECTED)
+        {
+            DEBUGINFO("mqtt_net_connect MQTT_WAIT_STATE_SOCKET_CHECK success\n");
+            return MQTT_CODE_SUCCESS;
+        }
+    }   
+    //启动socket
     mqtt_result = MQTT_ERROR;
     mqtt_waitstate = MQTT_WAIT_STATE_SOCKET_OPEN;
     memset(Mqtt_SendBuffer,0,MQTT_TX_BUF_SIZE);
     snprintf(Mqtt_SendBuffer, MQTT_TX_BUF_SIZE, "AT+SOCKET=1,%s,%d", host, port);
     Mqtt_SendATCmd(Mqtt_SendBuffer, 2000);  
     DEBUGINFO("mqtt_net_connect MQTT_WAIT_STATE_SOCKET_OPEN,host:%s port:%ld\n",host,port);
-    static int cnt = 0;
+    cnt = 0;
     while(mqtt_result == MQTT_ERROR)
     {
         if(cnt++ >= timeout_ms)
@@ -482,6 +515,41 @@ void Mqtt_ParseData(uint8_t* rbuf,int len)
     }
     switch(mqtt_waitstate)
     {
+        case MQTT_WAIT_STATE_SOCKET_CHECK:
+        {
+            {
+                //+SOCKET:id,type,status,host,port
+                //+SOCKET:0,1,3,192.168.1.130,777
+                // 假设目标字符串前缀为"+SOCKET:"
+                char *target_str = "+SOCKET:";
+                char *result = strstr((char *)rbuf, target_str);
+                if (result != NULL) {
+                    DEBUGINFO("find:%s\n", target_str);    
+                    // 解析格式：前缀"+SOCKET:"后依次为%d,%d,%d,%s,%d（逗号分隔）
+                    int ret = sscanf(result, "+SOCKET:%d,%d,%d,%15s,%d", &mqtt_socket.id, &mqtt_socket.type, &mqtt_socket.status, mqtt_socket.ip_addr, &mqtt_socket.port);
+                    if (ret == 5) {  // 成功提取5个内容
+                        DEBUGINFO("get parameters success\n");
+                        DEBUGINFO("id:%d\n", mqtt_socket.id);       // 对应第一个逗号后的值：0
+                        DEBUGINFO("type:%d\n", mqtt_socket.type);       // 对应第二个逗号后的值：1
+                        DEBUGINFO("status:%d\n", mqtt_socket.status);       // 对应第三个逗号后的值：3
+                        DEBUGINFO("ip_addr:%s\n", mqtt_socket.ip_addr); // 对应第四个逗号后的值：192.168.1.130
+                        DEBUGINFO("port:%d\n", mqtt_socket.port);       // 对应第五个逗号后的值：777
+                        // 可根据需要将提取的值赋值给其他变量（如业务变量）
+                    } else {
+                        DEBUGINFO("get parameters fail\n");
+                    }                
+                } 
+            }
+            {
+                char target_mqtt_str[] = "OK";
+                char *result = strstr((char *)rbuf, target_mqtt_str);
+                if (result != NULL) {
+                    DEBUGINFO("MQTT_WAIT_STATE_SOCKET_CHECK ok\n");    
+                    mqtt_result = MQTT_OK;        
+                }                 
+            }           
+        }
+        break;
         case MQTT_WAIT_STATE_SOCKET_OPEN:
         {
             char target_mqtt_str[] = "+SOCKET_OPEN:";
