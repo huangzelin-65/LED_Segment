@@ -12,8 +12,8 @@
 #include "queue.h"
 #include "adaptor_robot.h"
 
-#define MQTT_TOPIC_NAME                 "bcss/v1/slhc/st_1/state" 
-#define MQTT_HEARTBEAT_TOPIC_NAME       "bcss/v1/slhc/st_1/connection" 
+#define MQTT_TOPIC_NAME                 "tk/v1/slhc/tkv-1/state" 
+#define MQTT_HEARTBEAT_TOPIC_NAME       "tk/v1/slhc/tkv-1/connection" 
 #define MQTT_PUBLISH_MSG                "HEARTBEAT"
 #define MQTT_CMD_TIMEOUT_MS             30000
 
