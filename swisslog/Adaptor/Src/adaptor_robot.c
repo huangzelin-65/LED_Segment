@@ -27,7 +27,10 @@ RobotAction_t robotAction = {
             [0] = {             // 第一条命令
                 .cmd = "forward",
                 .cmdId = "1",
-                .params = {.model = ""}  // forward命令无需model参数，留空
+                .params = {
+                    .model = "",
+                    .speedLevel = ""
+                }  // forward命令无需model参数，留空
             }
         }
     }
@@ -643,6 +646,13 @@ int Robot_ParseJson(char *json_str,RobotAction_t *robot)
         } else {
             robot->action.cmds[i].params.model[0] = '\0';  // 空字符串表示无参数
         }
+        cJSON *speedLevel = cJSON_GetObjectItem(params_obj, "speedLevel");
+        if (speedLevel != NULL && cJSON_IsString(speedLevel)) { 
+            strncpy(robot->action.cmds[i].params.speedLevel, speedLevel->valuestring, sizeof(robot->action.cmds[i].params.speedLevel)-1);
+            robot->action.cmds[i].params.speedLevel[sizeof(robot->action.cmds[i].params.speedLevel)-1] = '\0';
+        } else {
+            robot->action.cmds[i].params.speedLevel[0] = '\0';  // 空字符串表示无参数
+        }        
     }
     // 释放cJSON资源
     cJSON_Delete(root);
@@ -667,6 +677,7 @@ int Robot_ParseJson(char *json_str,RobotAction_t *robot)
         DEBUGINFO("      cmd: %s\n", robot->action.cmds[i].cmd);
         DEBUGINFO("      cmdId: %s\n", robot->action.cmds[i].cmdId);
         DEBUGINFO("      params.model: %s\n", robot->action.cmds[i].params.model);
+        DEBUGINFO("      params.speedLevel: %s\n", robot->action.cmds[i].params.speedLevel);
     }
 
     return 0;
@@ -860,6 +871,37 @@ void Robot_Action2Cmd(void)
                             ServerToCarData.wCtrl &= ~0x10; // 手动模式 
                         } 
                     }                    
+                }
+            }
+        }
+        {
+            char *res = strstr(robotAction.action.cmds[i].params.speedLevel, "0");
+            if(res != NULL)
+            {
+                DEBUGINFO("speed level 0\n"); 
+            }
+            else
+            {
+                char *res = strstr(robotAction.action.cmds[i].params.speedLevel, "1");
+                if(res != NULL)
+                {
+                    DEBUGINFO("speed level 1\n"); 
+                }
+                else
+                {
+                    char *res = strstr(robotAction.action.cmds[i].params.speedLevel, "2");
+                    if(res != NULL)
+                    {
+                        DEBUGINFO("speed level 2\n"); 
+                    }
+                    else
+                    {
+                        char *res = strstr(robotAction.action.cmds[i].params.speedLevel, "3");
+                        if(res != NULL)
+                        {
+                            DEBUGINFO("speed level 3\n"); 
+                        }                      
+                    }
                 }
             }
         }

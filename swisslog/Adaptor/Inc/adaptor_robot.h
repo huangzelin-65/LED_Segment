@@ -105,6 +105,7 @@ typedef struct {
 // 命令参数结构体（对应params字段）
 typedef struct {
     char model[16];  // 存储"auto"或"manual"，预留足够长度
+    char speedLevel[16];
 } RobotCmdParams;
 
 // 命令结构体（对应cmds数组中的元素）
