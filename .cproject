@@ -97,6 +97,7 @@
 									<listOptionValue builtIn="false" value="../LWIP/LwIP/system/arch"/>
 									<listOptionValue builtIn="false" value="../LWIP/LwIP/src/include/netif/ppp/polarssl"/>
 									<listOptionValue builtIn="false" value="../LWIP/lan8742"/>
+									<listOptionValue builtIn="false" value="../swisslog/Robot/Inc"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1865227280" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
