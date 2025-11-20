@@ -42,11 +42,27 @@ void vCarRunStatusInit()
   CarStatus.xMotorEnable = MotorDisable;
 }
 
+void vMotorInit()
+{
+  osDelay(pdMS_TO_TICKS(500));
+
+  // 设置电机加速度
+  vMotorSetting(MOTOR_SETTING_ACCEL, MOTOR_SETTING_ACCEL_1000);
+
+  osDelay(pdMS_TO_TICKS(500));
+
+  // 设置电机减速度
+  vMotorSetting(MOTOR_SETTING_DECEL, MOTOR_SETTING_DECEL_1000);
+}
+
 void vMotionCtrlTask(void *argument)
 {
   
-  //小车运行状态初始化
+  // 小车运行状态初始化
   vCarRunStatusInit();
+
+  // 电机参数初始化
+  vMotorInit();
 
   while (1)
     {

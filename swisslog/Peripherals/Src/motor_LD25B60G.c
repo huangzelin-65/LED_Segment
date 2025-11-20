@@ -31,7 +31,6 @@ u8 MotorCWCmd_1500Speed[8]= {0x01,0x06,0x10,0x04,0x05,0xDC,0xCE,0x02}; //电机�
 u8 MotorCWCmd_1800Speed[8]= {0x01,0x06,0x10,0x04,0x07,0x08,0xCF,0x3D}; //电机顺时针方向(在reset键那边看)1800rpm速度发送命令 (0.594 m/s)
 u8 MotorCWCmd_2000Speed[8]= {0x01,0x06,0x10,0x04,0x07,0xD0,0xCF,0x67}; //电机顺时针方向(在reset键那边看)2000rpm速度发送命令 (0.66 m/s)
 
-
 //电机逆时针方向速度表
 u8 MotorCCWCmd_100Speed[8]= {0x01,0x06,0x10,0x04,0xFF,0x9C,0x8D,0x52}; //电机逆时针方向(在reset键那边看)100rpm速度发送命令 (0.033 m/s)
 u8 MotorCCWCmd_200Speed[8]= {0x01,0x06,0x10,0x04,0xFF,0x38,0x8C,0xE9}; //电机逆时针方向(在reset键那边看)200rpm速度发送命令 (0.066 m/s)
@@ -44,21 +43,110 @@ u8 MotorCCWCmd_1500Speed[8]= {0x01,0x06,0x10,0x04,0xFA,0x24,0x8E,0x70}; //电机
 u8 MotorCCWCmd_1800Speed[8]= {0x01,0x06,0x10,0x04,0xF8,0xF8,0x8E,0x89}; //电机逆时针方向(在reset键那边看)1800rpm速度发送命令 (0.594 m/s)
 u8 MotorCCWCmd_2000Speed[8]= {0x01,0x06,0x10,0x04,0xF8,0x30,0x8F,0x1F}; //电机逆时针方向(在reset键那边看)2000rpm速度发送命令 (0.66 m/s)
 
+// 加速度表
+u8 MotorAccelerate_10000[13] = {0x01,0x10,0x10,0x06,0x00,0x02,0x04,0x27,0x10,0x00,0x00,0xb5,0x34};  
+u8 MotorAccelerate_8000[13] = {0x01,0x10,0x10,0x06,0x00,0x02,0x04,0x1F,0x40,0x00,0x00,0xb8,0x45};  
+u8 MotorAccelerate_5000[13] = {0x01,0x10,0x10,0x06,0x00,0x02,0x04,0x13,0x88,0x00,0x00,0x3A,0xEB};  
+u8 MotorAccelerate_3000[13] = {0x01,0x10,0x10,0x06,0x00,0x02,0x04,0x0B,0xB8,0x00,0x00,0x3C,0x44};  
+u8 MotorAccelerate_1000[13] = {0x01,0x10,0x10,0x06,0x00,0x02,0x04,0x03,0xE8,0x00,0x00,0x3E,0x35}; 
 
+// 减速度表
+u8 MotorDecelerate_10000[13] = {0x01,0x10,0x10,0x08,0x00,0x02,0x04,0x27,0x10,0x00,0x00,0x34,0xb8};
+u8 MotorDecelerate_8000[13] = {0x01,0x10,0x10,0x08,0x00,0x02,0x04,0x1F,0x40,0x00,0x00,0x39,0xC9};
+u8 MotorDecelerate_5000[13] = {0x01,0x10,0x10,0x08,0x00,0x02,0x04,0x13,0x88,0x00,0x00,0xBB,0x67};
+u8 MotorDecelerate_3000[13] = {0x01,0x10,0x10,0x08,0x00,0x02,0x04,0x0B,0xB8,0x00,0x00,0xBD,0xC8};
+u8 MotorDecelerate_1000[13] = {0x01,0x10,0x10,0x08,0x00,0x02,0x04,0x03,0xE8,0x00,0x00,0xBF,0xB9};
+
+// 读取命令
 u8 MotorCmd_GetSpeed[8]= {0x01,0x03,0x11,0x66,0x00,0x01,0x61,0x29}; //读取平均速度命令
 u8 MotorCmd_GetStatus[8]= {0x01,0x03,0x11,0x6E,0x00,0x01,0xE0,0xEB}; //读驱动器实时状态命令
 u8 MotorCmd_GetErr[8]= {0x01,0x03,0x11,0x6C,0x00,0x01,0x41,0x2B}; //读驱动器故障码命令 
 
+//***********************************************电机设置函数********************************************
+void vMotorSetting(eMotorSetting xSetting, eMotorSettingParam xParam)
+{
+	switch (xSetting)
+	{
+		// 加速度设置
+		case MOTOR_SETTING_ACCEL:
+			switch (xParam)
+			{
+				case MOTOR_SETTING_ACCEL_10000:
+					vSendToMotor(MotorAccelerate_10000,13);
+					DEBUGINFO("MotorAccelerate 10000");
+					break;
+				
+				case MOTOR_SETTING_ACCEL_8000:
+					vSendToMotor(MotorAccelerate_8000,13);
+					DEBUGINFO("MotorAccelerate 8000");
+					break;
 
+				case MOTOR_SETTING_ACCEL_5000:
+					vSendToMotor(MotorAccelerate_5000,13);
+					DEBUGINFO("MotorAccelerate 5000");
+					break;
 
-//电机控制函数
+				case MOTOR_SETTING_ACCEL_3000:
+					vSendToMotor(MotorAccelerate_3000,13);
+					DEBUGINFO("MotorAccelerate 3000");
+					break;
+
+				case MOTOR_SETTING_ACCEL_1000:
+					vSendToMotor(MotorAccelerate_1000,13);
+					DEBUGINFO("MotorAccelerate 1000");
+					break;
+				
+				default:
+					break;
+			}
+			break;
+
+		// 减速度设置
+		case MOTOR_SETTING_DECEL:
+			switch (xParam)
+			{
+				case MOTOR_SETTING_DECEL_10000:
+					vSendToMotor(MotorDecelerate_10000,13);
+					DEBUGINFO("MotorDecelerate 10000");
+					break;
+				
+				case MOTOR_SETTING_DECEL_8000:
+					vSendToMotor(MotorDecelerate_8000,13);
+					DEBUGINFO("MotorDecelerate 8000");
+					break;
+
+				case MOTOR_SETTING_DECEL_5000:
+					vSendToMotor(MotorDecelerate_5000,13);
+					DEBUGINFO("MotorDecelerate 5000");
+					break;
+
+				case MOTOR_SETTING_DECEL_3000:
+					vSendToMotor(MotorDecelerate_3000,13);
+					DEBUGINFO("MotorDecelerate 3000");
+					break;
+
+				case MOTOR_SETTING_DECEL_1000:
+					vSendToMotor(MotorDecelerate_1000,13);
+					DEBUGINFO("MotorDecelerate 1000");
+					break;
+
+				default:
+					break;
+			}
+
+		default:
+			break;
+	}
+}
+
+//***********************************************电机控制函数********************************************
 void vMotorOps(u8 Direction, u8 Speed)
 {
 	//判断方向
 	switch (Direction)
 	{
 		case NoDirection:
-			DEBUGINFO("MOTOR_STOP\r\n");
+			DEBUGINFO("MOTOR_STOP");
 			vSendToMotor(MotorStopCmd,8);
 			CarStatus.xRealSpeed = ZeroSpeed; //实际速度记录为0
 			break;

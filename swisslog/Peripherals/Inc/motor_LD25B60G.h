@@ -35,7 +35,31 @@ typedef enum
   MOTOR_GET_ERROR = 2,
 }eMotorQuery;
 
+//----------电机设置选项枚举----------
+typedef enum
+{
+  MOTOR_SETTING_ACCEL = 0,
+  MOTOR_SETTING_DECEL = 1,
+}eMotorSetting;
+
+//----------电机设置参数枚举----------
+typedef enum
+{
+  MOTOR_SETTING_ACCEL_10000 = 0,
+  MOTOR_SETTING_ACCEL_8000,
+  MOTOR_SETTING_ACCEL_5000,
+  MOTOR_SETTING_ACCEL_3000,
+  MOTOR_SETTING_ACCEL_1000,
+
+  MOTOR_SETTING_DECEL_10000,
+  MOTOR_SETTING_DECEL_8000,
+  MOTOR_SETTING_DECEL_5000,
+  MOTOR_SETTING_DECEL_3000,
+  MOTOR_SETTING_DECEL_1000,
+}eMotorSettingParam;
+
 void vMotorOps(u8 Direction, u8 Speed);
+void vMotorSetting(eMotorSetting xSetting, eMotorSettingParam xParam);
 void vMotorRead(u8 Cmd);
 void vMotorTest();
 
