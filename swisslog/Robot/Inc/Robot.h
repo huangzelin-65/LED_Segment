@@ -1,5 +1,5 @@
-#ifndef ADAPTOR_INC_ADAPTOR_ROBOT_H_
-#define ADAPTOR_INC_ADAPTOR_ROBOT_H_
+#ifndef INC_ROBOT_H_
+#define INC_ROBOT_H_
 #include <stdbool.h>
 #include "cJSON.h"
 #include <stdio.h>

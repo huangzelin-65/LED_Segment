@@ -10,7 +10,7 @@
 #include "Common.h"
 #include <stdbool.h>
 #include "queue.h"
-#include "adaptor_robot.h"
+#include "Robot.h"
 
 #define MQTT_TOPIC_NAME                 "tk/v1/slhc/tkv-1/state" 
 #define MQTT_HEARTBEAT_TOPIC_NAME       "tk/v1/slhc/tkv-1/connection" 

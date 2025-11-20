@@ -17,7 +17,7 @@
 #include "adaptor_motor.h"
 #include "adaptor_wifi.h"
 #include "motor_LD25B60G.h"
-#include "adaptor_robot.h"
+#include "Robot.h"
 // DMA缓冲区
 #define MOTOR_BUF_SIZE 16
 uint8_t MotorDmaBuffer[2][MOTOR_BUF_SIZE]={0};
