@@ -84,14 +84,12 @@ void vRobotReceiveTask(void *argument)
                         int result = Robot_ParseJson(robot_msg->data,&robotAction);
 
                         DEBUGINFO("parse result:%d\n",result); 
-
+                        //需要回复服务器ack，在state中的actionstate回复状态
+                        Robot_ActionAck();
                         //将解析后再到实际的控制接口
                         Robot_Action2Cmd();
 
                         vPortFree(robot_msg->data);
-
-                        //需要回复服务器ack，在state中的actionstate回复状态
-                        Robot_ActionAck();
                     }
                     break;  
                     case ROBOT_MSG_ACTION_STATUS://返回action的状态，如running或finish
