@@ -838,23 +838,24 @@ void Robot_Action2Cmd(void)
         char *res = strstr(robotAction.action.cmds[i].cmd, "forward");
         if (res != NULL) {
             DEBUGINFO("forward\n"); 
-            ServerToCarData.xDirection = 1; // 小车运行方向 1=正转 2=反转 
-            ServerToCarData.wCtrl |= 0x08;                                                      
+            ServerToCarData.xDirection = Forward; // 小车运行方向 1=正转 2=反转 
+            ServerToCarData.xMotorEnable = MotorEnable;                                                      
         } 
         else
         {
             char *res = strstr(robotAction.action.cmds[i].cmd, "back");
             if (res != NULL) {
                 DEBUGINFO("backward\n"); 
-                ServerToCarData.xDirection = 2; // 小车运行方向 1=正转 2=反转 
-                ServerToCarData.wCtrl |= 0x08;
+                ServerToCarData.xDirection = Backward; // 小车运行方向 1=正转 2=反转 
+                ServerToCarData.xMotorEnable = MotorEnable;
             }
             else
             {
                 char *res = strstr(robotAction.action.cmds[i].cmd, "stop");
                 if (res != NULL) {
                     DEBUGINFO("stop\n"); 
-                    ServerToCarData.wCtrl &= ~0x08;
+                    ServerToCarData.xDirection = NoDirection;
+                    ServerToCarData.xMotorEnable = MotorDisable;
                 }
                 else
                 {
@@ -864,11 +865,11 @@ void Robot_Action2Cmd(void)
                         char *res = strstr(robotAction.action.cmds[i].params.model, "auto");
                         if(res != NULL)
                         {
-                            ServerToCarData.wCtrl |= 0x10; // 自动模式 
+                            ServerToCarData.xAutoMode = Auto; // 自动模式 
                         }
                         else
                         {
-                            ServerToCarData.wCtrl &= ~0x10; // 手动模式 
+                            ServerToCarData.xAutoMode = Manual; // 手动模式 
                         } 
                     }                    
                 }
@@ -879,13 +880,15 @@ void Robot_Action2Cmd(void)
             if(res != NULL)
             {
                 DEBUGINFO("speed level 0\n"); 
+                ServerToCarData.xSetSpeed = ZeroSpeed;
             }
             else
             {
                 char *res = strstr(robotAction.action.cmds[i].params.speedLevel, "1");
                 if(res != NULL)
                 {
-                    DEBUGINFO("speed level 1\n"); 
+                    DEBUGINFO("speed level 1\n");
+                    ServerToCarData.xSetSpeed = LowSpeed; 
                 }
                 else
                 {
@@ -893,6 +896,7 @@ void Robot_Action2Cmd(void)
                     if(res != NULL)
                     {
                         DEBUGINFO("speed level 2\n"); 
+                        ServerToCarData.xSetSpeed = NormalSpeed;
                     }
                     else
                     {
@@ -900,6 +904,7 @@ void Robot_Action2Cmd(void)
                         if(res != NULL)
                         {
                             DEBUGINFO("speed level 3\n"); 
+                            ServerToCarData.xSetSpeed = HighSpeed;
                         }                      
                     }
                 }
