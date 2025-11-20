@@ -18,13 +18,32 @@ extern CarStatus_t CarStatus;
 
 u8 MotorStopCmd[8]= {0x01,0x06,0x10,0x04,0x00,0x00,0xCC,0xCB}; //电机停止发送命令
 
-u8 MotorCWCmd_100Speed[8]= {0x01,0x06,0x10,0x04,0x00,0x64,0xCD,0x20};//电机顺时针方向(在reset键那边看)100rpm速度发送命令
-u8 MotorCWCmd_500Speed[8]= {0x01,0x06,0x10,0x04,0x01,0xF4,0xCC,0xDC};//电机顺时针方向(在reset键那边看)500rpm速度发送命令
-u8 MotorCWCmd_1000Speed[8]= {0x01,0x06,0x10,0x04,0x03,0xE8,0xCC,0x75}; //电机顺时针方向(在reset键那边看)1000rpm速度发送命令
+//驱动轮直径D = 102mm,齿轮84mm, 减速比16,实际速度:D*3.14*rpm/60/16
+//电机顺时针方向速度表
+u8 MotorCWCmd_100Speed[8]= {0x01,0x06,0x10,0x04,0x00,0x64,0xCD,0x20}; //电机顺时针方向(在reset键那边看)100rpm速度发送命令 (0.033 m/s)
+u8 MotorCWCmd_200Speed[8]= {0x01,0x06,0x10,0x04,0x00,0xC8,0xCD,0x5D}; //电机顺时针方向(在reset键那边看)200rpm速度发送命令 (0.066 m/s)
+u8 MotorCWCmd_300Speed[8]= {0x01,0x06,0x10,0x04,0x01,0x2C,0xCC,0x86}; //电机顺时针方向(在reset键那边看)300rpm速度发送命令 (0.1 m/s)
+u8 MotorCWCmd_500Speed[8]= {0x01,0x06,0x10,0x04,0x01,0xF4,0xCC,0xDC}; //电机顺时针方向(在reset键那边看)500rpm速度发送命令 (0.165 m/s)
+u8 MotorCWCmd_800Speed[8]= {0x01,0x06,0x10,0x04,0x03,0x20,0xCD,0xE3}; //电机顺时针方向(在reset键那边看)800rpm速度发送命令 (0.264 m/s)
+u8 MotorCWCmd_1000Speed[8]= {0x01,0x06,0x10,0x04,0x03,0xE8,0xCC,0x75}; //电机顺时针方向(在reset键那边看)1000rpm速度发送命令 (0.33 m/s)
+u8 MotorCWCmd_1200Speed[8]= {0x01,0x06,0x10,0x04,0x04,0xB0,0xCF,0xBF}; //电机顺时针方向(在reset键那边看)1200rpm速度发送命令	(0.396 m/s)
+u8 MotorCWCmd_1500Speed[8]= {0x01,0x06,0x10,0x04,0x05,0xDC,0xCE,0x02}; //电机顺时针方向(在reset键那边看)1500rpm速度发送命令 (0.495 m/s)
+u8 MotorCWCmd_1800Speed[8]= {0x01,0x06,0x10,0x04,0x07,0x08,0xCF,0x3D}; //电机顺时针方向(在reset键那边看)1800rpm速度发送命令 (0.594 m/s)
+u8 MotorCWCmd_2000Speed[8]= {0x01,0x06,0x10,0x04,0x07,0xD0,0xCF,0x67}; //电机顺时针方向(在reset键那边看)2000rpm速度发送命令 (0.66 m/s)
 
-u8 MotorCCWCmd_100Speed[8]= {0x01,0x06,0x10,0x04,0xFF,0x9C,0x8D,0x52}; //电机逆时针方向(在reset键那边看)100rpm速度发送命令
-u8 MotorCCWCmd_500Speed[8]= {0x01,0x06,0x10,0x04,0xFE,0x0C,0x8C,0xAE}; //电机逆时针方向(在reset键那边看)500rpm速度发送命令
-u8 MotorCCWCmd_1000Speed[8]= {0x01,0x06,0x10,0x04,0xFC,0x18,0x8D,0xC1}; //电机逆时针方向(在reset键那边看)1000rpm速度发送命令
+
+//电机逆时针方向速度表
+u8 MotorCCWCmd_100Speed[8]= {0x01,0x06,0x10,0x04,0xFF,0x9C,0x8D,0x52}; //电机逆时针方向(在reset键那边看)100rpm速度发送命令 (0.033 m/s)
+u8 MotorCCWCmd_200Speed[8]= {0x01,0x06,0x10,0x04,0xFF,0x38,0x8C,0xE9}; //电机逆时针方向(在reset键那边看)200rpm速度发送命令 (0.066 m/s)
+u8 MotorCCWCmd_300Speed[8]= {0x01,0x06,0x10,0x04,0xFE,0xD4,0x8C,0xF4}; //电机逆时针方向(在reset键那边看)300rpm速度发送命令 (0.1 m/s)
+u8 MotorCCWCmd_500Speed[8]= {0x01,0x06,0x10,0x04,0xFE,0x0C,0x8C,0xAE}; //电机逆时针方向(在reset键那边看)500rpm速度发送命令 (0.165 m/s)
+u8 MotorCCWCmd_800Speed[8]= {0x01,0x06,0x10,0x04,0xFC,0xE0,0x8C,0x43}; //电机逆时针方向(在reset键那边看)800rpm速度发送命令 (0.264 m/s)
+u8 MotorCCWCmd_1000Speed[8]= {0x01,0x06,0x10,0x04,0xFC,0x18,0x8D,0xC1}; //电机逆时针方向(在reset键那边看)1000rpm速度发送命令 (0.33 m/s)
+u8 MotorCCWCmd_1200Speed[8]= {0x01,0x06,0x10,0x04,0xFB,0x50,0x8F,0xC7}; //电机逆时针方向(在reset键那边看)1200rpm速度发送命令 (0.396 m/s)
+u8 MotorCCWCmd_1500Speed[8]= {0x01,0x06,0x10,0x04,0xFA,0x24,0x8E,0x70}; //电机逆时针方向(在reset键那边看)1500rpm速度发送命令 (0.495 m/s)
+u8 MotorCCWCmd_1800Speed[8]= {0x01,0x06,0x10,0x04,0xF8,0xF8,0x8E,0x89}; //电机逆时针方向(在reset键那边看)1800rpm速度发送命令 (0.594 m/s)
+u8 MotorCCWCmd_2000Speed[8]= {0x01,0x06,0x10,0x04,0xF8,0x30,0x8F,0x1F}; //电机逆时针方向(在reset键那边看)2000rpm速度发送命令 (0.66 m/s)
+
 
 u8 MotorCmd_GetSpeed[8]= {0x01,0x03,0x11,0x66,0x00,0x01,0x61,0x29}; //读取平均速度命令
 u8 MotorCmd_GetStatus[8]= {0x01,0x03,0x11,0x6E,0x00,0x01,0xE0,0xEB}; //读驱动器实时状态命令
@@ -50,17 +69,17 @@ void vMotorOps(u8 Direction, u8 Speed)
 			switch (Speed)
 			{
 				case LowSpeed:
-					vSendToMotor(MotorCCWCmd_100Speed,8);
+					vSendToMotor(MotorCCWCmd_300Speed,8);
 					DEBUGINFO("MOTOR_FORWARD, LowSpeed\r\n");
 					CarStatus.xRealSpeed = LowSpeed;
 					break;
 				case NormalSpeed:
-					vSendToMotor(MotorCCWCmd_500Speed,8);
+					vSendToMotor(MotorCCWCmd_800Speed,8);
 					DEBUGINFO("MOTOR_FORWARD, NormalSpeed\r\n");
 					CarStatus.xRealSpeed = NormalSpeed;
 					break;
 				case HighSpeed:
-					vSendToMotor(MotorCCWCmd_1000Speed,8);
+					vSendToMotor(MotorCCWCmd_1800Speed,8);
 					DEBUGINFO("MOTOR_FORWARD, HighSpeed\r\n");
 					CarStatus.xRealSpeed = HighSpeed;
 					break;
@@ -75,17 +94,17 @@ void vMotorOps(u8 Direction, u8 Speed)
 			switch (Speed)
 			{
 				case LowSpeed:
-					vSendToMotor(MotorCWCmd_100Speed,8);
+					vSendToMotor(MotorCWCmd_300Speed,8);
 					DEBUGINFO("MOTOR_BACKWARD, LowSpeed\r\n");
 					CarStatus.xRealSpeed = LowSpeed;
 					break;
 				case NormalSpeed:
-					vSendToMotor(MotorCWCmd_500Speed,8);
+					vSendToMotor(MotorCWCmd_800Speed,8);
 					DEBUGINFO("MOTOR_BACKWARD, NormalSpeed\r\n");
 					CarStatus.xRealSpeed = NormalSpeed;
 					break;
 				case HighSpeed:
-					vSendToMotor(MotorCWCmd_1000Speed,8);
+					vSendToMotor(MotorCWCmd_1800Speed,8);
 					DEBUGINFO("MOTOR_BACKWARD, HighSpeed\r\n");
 					CarStatus.xRealSpeed = HighSpeed;
 					break;
