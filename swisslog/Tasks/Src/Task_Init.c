@@ -48,8 +48,6 @@ void vInitTask(void *argument)
   osThreadResume(CarRfidTaskHandle); 
   osThreadResume(SensorTaskHandle);
   osThreadResume(TestTaskHandle);
-  osThreadResume(WifiManagerTaskHandle);
-  osThreadResume(WifiReceiveTaskHandle);
   osThreadResume(BoxCtrlTaskHandle);
   osThreadResume(BoxRfidTaskHandle);
   osThreadResume(BoxRfidEventTaskHandle);
@@ -58,6 +56,8 @@ void vInitTask(void *argument)
   osThreadResume(HmiRecvTaskHandle);
   osThreadResume(HmiWaitTaskHandle);
   osThreadResume(BoxLEDTaskHandle);
+  osThreadResume(WifiManagerTaskHandle);
+  osThreadResume(WifiReceiveTaskHandle);
   osThreadResume(MqttManagerTaskHandle);
   osThreadResume(MqttReceiveTaskHandle); 
   osThreadResume(RobotManagerTaskHandle);

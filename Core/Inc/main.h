@@ -132,8 +132,8 @@ typedef enum
 //----------小车自动模式枚举----------
 typedef enum
 {
-    Manual = 0,
-    Auto = 1,
+    Manual = 1,
+    Auto = 2,
 }eAutoModeType;
 
 //----------小车运动状态枚举----------
@@ -201,8 +201,8 @@ typedef struct
     eDirectionType xSetDirection;			// 小车设置方向记录 0:Stop/1.Forward/2:Backward    
     eDirectionType xRealDirection;		    // 小车实际方向记录 0:Stop/1.Forward/2:Backward  
     eSpeedType xSetSpeed;					// 小车设置速度记录 0:停止/1:低速/2:额定速度/3:高速  
-    eSpeedType xRealSpeed;				// 小车实际速度记录 0:停止/1:低速/2:额定速度/3:高速  --使用CarToServerData.ucSpdMode代替RealSpeed
-    eAutoModeType xAutoMode;                   // 自动模式标志 0:Manual/1:Auto
+    eSpeedType xRealSpeed;				    // 小车实际速度记录 0:停止/1:低速/2:额定速度/3:高速
+    eAutoModeType xAutoMode;                   // 自动模式标志 1:Manual/2:Auto
     eCarRunningStatusType xIsCarRunning;       // 小车运行状态 0:CarStop/1:CarReadyToRun/2:CarRunning
     eMotorStatusType xMotorEnable;             // 电机使能标志 0:MotorDisable/1:MotorEnable
     uint16_t CarID;	  					// 小车车号
@@ -266,7 +266,10 @@ typedef struct {
     uint8_t  bDestSTID;    // 目的地站点号
     uint8_t  bSpare28;     // 备用
     uint8_t  bType;        // 小车类型：1=洁车 2=污车
-    uint8_t  ucDirection;  // 小车运行方向1=正转 2=反转
+    eAutoModeType  xAutoMode;        // 自动模式标志 1:Manual/2:Auto
+    eDirectionType  xDirection;      // 小车运行方向 1=正转 2=反转
+    eSpeedType xSetSpeed;            // 小车速度设置 0:停止/1:低速/2:额定速度/3:高速  
+    eMotorStatusType xMotorEnable;   // 电机使能标志 0:MotorDisable/1:MotorEnable
     CarStationStatus xStationStatus; // 小车当前在站状态 0：InStation 1：OutStation
 } ServerToCarData_t;
 
@@ -288,7 +291,7 @@ typedef struct {
     uint16_t wTemperature;  // 小车温度（℃）
     uint16_t wErrCode;      // 小车驱动器错误代码
     uint8_t ucPosType;      // 小车位置类型
-    uint8_t ucDirection;    // 小车运行方向1=正转 2=反转，手动运行时不修改此变量
+    uint8_t xDirection;    // 小车运行方向1=正转 2=反转，手动运行时不修改此变量
     uint32_t dwVersion;     // 小车固件版本号
     uint8_t  bSpare[4];     // 备用36~39
 } CarToServerData_t;

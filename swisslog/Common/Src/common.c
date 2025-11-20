@@ -31,89 +31,81 @@ void vParseCommandToCar()
 {
   u8 ucMotion_msg;
   
-  //*******************************电机控制命令解析****************************** 
-  //**********************方向解析********************
-  // PLC下发设置前进(正转)
-  if(ServerToCarData.ucDirection == Forward)
+  //*********************************************电机控制命令解析*************************************** 
+  //************************************模式解析+方向解析*****************************
+  // 拨动开关拨到自动档位下才能使用远程控制
+  if(CarStatus.ToggleSwtichPosition == ToggleFront)
   {
-    DEBUGINFO("auto Forward\r\n");
-    CarStatus.xSetDirection = Forward; //小车预设运行方向为前进
-  }
-  // PLC下发设置后退(反转)
-  else if(ServerToCarData.ucDirection == Backward)
-  {
-    DEBUGINFO("auto Backward\r\n");
-    CarStatus.xSetDirection = Backward; //小车预设运行方向为后退
-  }
-
-
-  //***********************动作解析*********************
-  //小车远程手动模式(拨动开关需要在自动档位下才能使用)
-  if(ServerToCarData.wCtrl & 0x01)
-  {
-    DEBUGINFO("manual mode\r\n");
-    CarStatus.xAutoMode = Manual;
-
-    //0x0002前进，0x0004后退
-    if(ServerToCarData.wCtrl & 0x02)
+    switch (ServerToCarData.xAutoMode)
     {
-      // 手动设置前进(正转)
-      DEBUGINFO("manual Forward\r\n");
-      CarStatus.xRealDirection = Forward;
-    }
-    else if(ServerToCarData.wCtrl & 0x04)
-    {
-      // 手动设置后退(反转)
-      DEBUGINFO("manual Backward\r\n");
-      CarStatus.xRealDirection = Backward; //手动模式下直接设置实际运行方向为后退
-    }
-  }
+      // 远程手动模式
+      case Manual:
+        DEBUGINFO("remote manual mode\r\n");
+        CarStatus.xAutoMode = Manual;
+        CarStatus.xRealDirection = ServerToCarData.xDirection; // 手动模式下直接设置实际运行方向
+        break;
 
-  //小车远程自动模式 (拨动开关需要在自动档位下才能使用)
-  else if ((ServerToCarData.wCtrl & 0x10) && 
-    (CarStatus.ToggleSwtichPosition == ToggleFront))
-  {
-    DEBUGINFO("auto mode\r\n");
-    CarStatus.xAutoMode = Auto;
-    CarStatus.xRealDirection = CarStatus.xSetDirection; // 自动模式下直接设置实际运行方向为预设方向
+      //小车远程自动模式 
+      case Auto:
+          DEBUGINFO("remote auto mode\r\n");
+          CarStatus.xAutoMode = Auto;
+          CarStatus.xRealDirection = CarStatus.xSetDirection; // 自动模式下直接设置实际运行方向为预设方向
+        break;
+
+      default:
+        break;
+    }
   }
 
   
-  //判断启动/停止电机
-  if( ServerToCarData.wCtrl & 0x08 ) //使能运行位为1
+  //***********************************速度解析******************************
+  // 服务器下发设置速度
+  DEBUGINFO("SetSpeed: %d\r\n",ServerToCarData.xSetSpeed);
+  CarStatus.xSetSpeed = ServerToCarData.xSetSpeed; //小车预设运行速度
+
+  
+  //***********************************电机使能解析******************************
+  // 判断 电机使能运行
+  switch (ServerToCarData.xMotorEnable)
   {
-    //车厢锁上且未到站才能发车
-    if( CarStatus.xBoxLocked == Locked && ServerToCarData.xStationStatus == OutStation )
-    {
-      //启动电机
-      CarStatus.xMotorEnable = MotorEnable;
-      ucMotion_msg = CarRunning;
-    } else {
+    case MotorDisable:
       // 停止电机
       CarStatus.xMotorEnable = MotorDisable;
 
       // 电机停止原因
-      if(CarStatus.xBoxLocked == UnLock){
-        CarStatus.xMotorStopReason = ByBoxUnlock;
-        DEBUGINFO("MotorStopReason: ByBoxUnlock\r\n");
-      } else if(ServerToCarData.xStationStatus == InStation){
-        CarStatus.xMotorStopReason = ByInstation;
-        DEBUGINFO("MotorStopReason: ByInstation\r\n");
-      }
-      
-      ucMotion_msg = CarStop;
-      DEBUGINFO("Can't Run!! check Box LockStatus or StationStatus!!\r\n");
-    }
-  }
-  else //使能运行位为0
-  {
-    // 停止电机
-    CarStatus.xMotorEnable = MotorDisable;
-    // 电机停止原因
-    CarStatus.xMotorStopReason = ByCommand;
-    DEBUGINFO("MotorStopReason: ByCommand\r\n");
+      CarStatus.xMotorStopReason = ByCommand;
+      DEBUGINFO("MotorStopReason: ByCommand\r\n");
 
-    ucMotion_msg = CarStop;
+      ucMotion_msg = CarStop;
+      break;
+
+    case MotorEnable:
+      //车厢锁上且未到站才能发车
+      if( CarStatus.xBoxLocked == Locked && ServerToCarData.xStationStatus == OutStation )
+      {
+        //启动电机
+        CarStatus.xMotorEnable = MotorEnable;
+        ucMotion_msg = CarRunning;
+      } else {
+        // 停止电机
+        CarStatus.xMotorEnable = MotorDisable;
+
+        // 电机停止原因
+        if(CarStatus.xBoxLocked == UnLock){
+          CarStatus.xMotorStopReason = ByBoxUnlock;
+          DEBUGINFO("MotorStopReason: ByBoxUnlock\r\n");
+        } else if(ServerToCarData.xStationStatus == InStation){
+          CarStatus.xMotorStopReason = ByInstation;
+          DEBUGINFO("MotorStopReason: ByInstation\r\n");
+        }
+        
+        ucMotion_msg = CarStop;
+        DEBUGINFO("Can't Run!! check Box LockStatus or StationStatus!!\r\n");
+      }
+      break;
+    
+    default:
+      break;
   }
 
   // 发送电机控制消息

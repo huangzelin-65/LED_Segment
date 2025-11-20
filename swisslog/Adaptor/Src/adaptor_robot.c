@@ -838,7 +838,7 @@ void Robot_Action2Cmd(void)
         char *res = strstr(robotAction.action.cmds[i].cmd, "forward");
         if (res != NULL) {
             DEBUGINFO("forward\n"); 
-            ServerToCarData.ucDirection = 1; // 小车运行方向 1=正转 2=反转 
+            ServerToCarData.xDirection = 1; // 小车运行方向 1=正转 2=反转 
             ServerToCarData.wCtrl |= 0x08;                                                      
         } 
         else
@@ -846,7 +846,7 @@ void Robot_Action2Cmd(void)
             char *res = strstr(robotAction.action.cmds[i].cmd, "back");
             if (res != NULL) {
                 DEBUGINFO("backward\n"); 
-                ServerToCarData.ucDirection = 2; // 小车运行方向 1=正转 2=反转 
+                ServerToCarData.xDirection = 2; // 小车运行方向 1=正转 2=反转 
                 ServerToCarData.wCtrl |= 0x08;
             }
             else

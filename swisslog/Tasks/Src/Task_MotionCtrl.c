@@ -111,7 +111,7 @@ void vMotionCtrlTask(void *argument)
                 DEBUGINFO("remote Manual mode\r\n");
                 // 电机按实际运行方向 和 普通速度运行（手动档下）
                 CarStatus.xIsCarRunning = CarRunning;
-                vMotorOps(CarStatus.xRealDirection, NormalSpeed);  
+                vMotorOps(CarStatus.xRealDirection, CarStatus.xSetSpeed);  
                 GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
                 DEBUGINFO("LED4 ON\r\n");
               }

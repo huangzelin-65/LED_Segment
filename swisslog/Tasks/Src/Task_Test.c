@@ -39,19 +39,13 @@ void vTestTask(void *argument)
       DEBUGINFO("Test received len:%d\r\n",ucReciveLen);
       vPrint_Array(ucTest_Rx_Buffer, ucReciveLen);
 
-      // for (u8 i=0;i<strlen((char *)ucTest_Rx_Buffer);i++)
-      // {
-      //   DEBUGINFO("%X ",ucTest_Rx_Buffer[i]);
-      // }
-
-
-      // ServerToCarData.wCtrl = ucTest_Rx_Buffer[1]<<8 | ucTest_Rx_Buffer[0]; // 控制信号
-      // ServerToCarData.ucDirection = ucTest_Rx_Buffer[2]; // 小车运行方向 1=正转 2=反转
-
-      ServerToCarData.ucDirection = ucTest_Rx_Buffer[0]; // 小车运行方向 1=正转 2=反转
-      ServerToCarData.wCtrl = ucTest_Rx_Buffer[1]; // 控制信号
-      ServerToCarData.xStationStatus = ucTest_Rx_Buffer[2]; // 到站状态
-      DEBUGINFO("wCtrl : %X, ucDirection : %X\r\n",ServerToCarData.wCtrl,ServerToCarData.ucDirection);
+      ServerToCarData.xAutoMode = ucTest_Rx_Buffer[0]; // 模式选择
+      ServerToCarData.xDirection = ucTest_Rx_Buffer[1]; // 方向
+      ServerToCarData.xSetSpeed = ucTest_Rx_Buffer[2]; // 速度
+      ServerToCarData.xMotorEnable = ucTest_Rx_Buffer[3]; // 电机使能运行
+      ServerToCarData.xStationStatus = ucTest_Rx_Buffer[4]; // 到站状态
+      DEBUGINFO("xAutoMode : %X, xDirection : %X, xSetSpeed : %X, xMotorEnable : %X, xStationStatus : %X",
+        ServerToCarData.xAutoMode, ServerToCarData.xDirection, ServerToCarData.xSetSpeed, ServerToCarData.xMotorEnable, ServerToCarData.xStationStatus);
 
       vParseCommandToCar();
 
