@@ -49,7 +49,7 @@ void vParseCommandToCar()
       case Auto:
           DEBUGINFO("remote auto mode\r\n");
           CarStatus.xAutoMode = Auto;
-          CarStatus.xRealDirection = CarStatus.xSetDirection; // 自动模式下直接设置实际运行方向为预设方向
+          CarStatus.xSetDirection = ServerToCarData.xDirection; // 自动模式下设置预设方向
         break;
 
       default:
