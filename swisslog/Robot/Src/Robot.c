@@ -861,19 +861,21 @@ void Robot_Action2Cmd(void)
                 {
                     char *res = strstr(robotAction.action.cmds[i].cmd, "runModel");
                     if (res != NULL) {
-                        DEBUGINFO("runModel\n"); 
-                        char *res = strstr(robotAction.action.cmds[i].params.model, "auto");
-                        if(res != NULL)
-                        {
-                            ServerToCarData.xAutoMode = Auto; // 自动模式 
-                        }
-                        else
-                        {
-                            ServerToCarData.xAutoMode = Manual; // 手动模式 
-                        } 
+                        DEBUGINFO("runModel\n");  
                     }                    
                 }
             }
+        }
+        {
+            char *res = strstr(robotAction.action.cmds[i].params.model, "auto");
+            if(res != NULL)
+            {
+                ServerToCarData.xAutoMode = Auto; // 自动模式 
+            }
+            else
+            {
+                ServerToCarData.xAutoMode = Manual; // 手动模式 
+            }            
         }
         {
             char *res = strstr(robotAction.action.cmds[i].params.speedLevel, "0");
