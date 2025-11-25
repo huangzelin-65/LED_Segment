@@ -75,7 +75,21 @@ int list_insert_at(List* list, int index, void* data);
  * @return 成功返回被删除的数据，失败返回 NULL
  */
 void* list_remove_at(List* list, int index, DestroyFunc destroy);
+/**
+ * @brief 获取链表的最后一个元素的数据。
+ * @param list 链表实例。
+ * @return 成功返回最后一个元素的数据指针，失败（空链表）返回 NULL。
+ */
+void* list_get_last(List* list);
 
+/**
+ * @brief 弹出（删除）链表的最后一个元素。
+ * @param list 链表实例。
+ * @param destroy 数据销毁函数（NULL 表示不释放数据）。
+ * @return 成功返回被弹出元素的数据指针，失败（空链表）返回 NULL。
+ * @note 调用者需要负责管理返回的数据内存（如果 destroy 为 NULL）。
+ */
+void* list_pop_tail(List* list, DestroyFunc destroy);
 /**
  * @brief 根据数据值删除节点（需提供比较函数）
  * @param list 链表实例

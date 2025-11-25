@@ -58,6 +58,14 @@ typedef struct
     char ip_addr[16];    
 }MqttSocket_t;
 
+typedef struct 
+{
+    char *data;//接收到的数据指针
+    int len;//数据的长度
+    int rest_len;//剩余长度
+}MqttReceiveData_t;
+
+
 extern MqttObject mqttObj;//mqtt对象，用于连接客户端
 extern MqttNet mNetwork;//网络结构体
 extern MqttClient mClient;//mqtt客户端
@@ -71,4 +79,8 @@ void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t 
 int Mqtt_SubscribeMsg(MqttTopic *topics,int count);
 int Mqtt_SubscribeTopicInit(void);
 void Mqtt_SetMsgCb(MqttClient *client,MqttMsgCb msg_cb);
+void Mqtt_ListInit(void);
+int Mqtt_GetListSize(void);
+void Mqtt_PopListTail(void);
+MqttReceiveData_t* Mqtt_GetListTail(void);
 #endif

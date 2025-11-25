@@ -273,6 +273,11 @@ osMutexId_t wifiUsartMutexHandle;
 const osMutexAttr_t wifiUsartMutex_attributes = {
   .name = "wifiUsartMutex"
 };
+/* Definitions for mqttMutex */
+osMutexId_t mqttMutexHandle;
+const osMutexAttr_t mqttMutex_attributes = {
+  .name = "mqttMutex"
+};
 /* Definitions for xResetButtonTimer */
 osTimerId_t xResetButtonTimerHandle;
 const osTimerAttr_t xResetButtonTimer_attributes = {
@@ -425,6 +430,9 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END Init */
   /* creation of wifiUsartMutex */
   wifiUsartMutexHandle = osMutexNew(&wifiUsartMutex_attributes);
+
+  /* creation of mqttMutex */
+  mqttMutexHandle = osMutexNew(&mqttMutex_attributes);
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */

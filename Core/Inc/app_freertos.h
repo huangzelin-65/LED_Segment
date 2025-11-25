@@ -86,6 +86,7 @@ extern osThreadId_t TcpManagerTaskHandle;
 extern osThreadId_t TcpReceiveTaskHandle;
 extern osThreadId_t RobotHeartBeatTaskHandle;
 extern osMutexId_t wifiUsartMutexHandle;
+extern osMutexId_t mqttMutexHandle;
 extern osTimerId_t xResetButtonTimerHandle;
 extern osTimerId_t xSensorDebounceTimerHandle;
 extern osTimerId_t xToggleSwitchTimerHandle;

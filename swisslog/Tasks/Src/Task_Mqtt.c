@@ -22,6 +22,7 @@ extern osMessageQueueId_t xMqttManagerQueueHandle;
 void vMqttManagerTask(void *argument)
 {
     DEBUGINFO("vMqttManagerTask\r\n");
+    Mqtt_ListInit();
     char *manage_data = NULL;
     while (1)
     {

@@ -169,7 +169,53 @@ void* list_remove_at(List* list, int index, DestroyFunc destroy) {
 
     return data; // 返回被删除的数据（由调用者管理）
 }
+/**
+ * @brief 获取链表的最后一个元素的数据。
+ */
+void* list_get_last(List* list) {
+    if (list == NULL || list->size == 0) {
+        return NULL;
+    }
+    // tail 指针直接指向最后一个数据节点
+    return list->tail->data;
+}
 
+/**
+ * @brief 弹出（删除）链表的最后一个元素。
+ */
+void* list_pop_tail(List* list, DestroyFunc destroy) {
+    if (list == NULL || list->size == 0) {
+        return NULL;
+    }
+
+    // 保存要删除的节点和它的数据
+    ListNode* node_to_remove = list->tail;
+    void* data = node_to_remove->data;
+
+    // 找到新的尾节点（即倒数第二个节点）
+    // 因为是单链表，我们必须从头开始遍历
+    ListNode* new_tail = list->head;
+    while (new_tail->next != node_to_remove) {
+        new_tail = new_tail->next;
+    }
+
+    // 更新链表的 tail 指针和 size
+    list->tail = new_tail;
+    new_tail->next = NULL; // 新的尾节点后面没有节点了
+    list->size--;
+
+    // 释放节点本身的内存
+    free(node_to_remove);
+
+    // 根据需要释放数据内存
+    if (destroy != NULL) {
+        destroy(data);
+        return NULL; // 数据已被释放，返回 NULL
+    }
+
+    // 如果不释放数据，将数据返回给调用者
+    return data;
+}
 /**
  * @brief 根据数据值删除节点
  */
