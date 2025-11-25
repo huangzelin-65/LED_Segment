@@ -64,6 +64,7 @@ RobotState_t robotSate = {
     .disinfectState = {false, 10, 20, 30},
     .errors = {ERROR_TYPE_NONE, ERROR_LEVEL_LOW},
     .mutex = NULL,
+    .heartbeat_cnt = 0,
     .robotActionAck = {
     .headerId = "h2:789",       // 示例headerId（不超过8字符，含结束符）
     .timestamp = "1731302345678", // 示例Unix毫秒时间戳字符串
@@ -998,7 +999,9 @@ void Robot_State(void)
 
     memcpy(robot_state_data, &robotSate, sizeof(RobotState_t));                        
 
-    Robot_SendMsg(ROBOT_MSG_STATE,robot_state_data); 
+    Robot_SendMsg(ROBOT_MSG_STATE,robot_state_data);
+    
+    robotSate.heartbeat_cnt = 0;//复位心跳包
 }
 //回复action ack
 void Robot_ActionAck(void)

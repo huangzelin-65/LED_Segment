@@ -261,6 +261,13 @@ const osThreadAttr_t TcpReceiveTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 256 * 4
 };
+/* Definitions for RobotHeartBeatTask */
+osThreadId_t RobotHeartBeatTaskHandle;
+const osThreadAttr_t RobotHeartBeatTask_attributes = {
+  .name = "RobotHeartBeatTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 128 * 4
+};
 /* Definitions for wifiUsartMutex */
 osMutexId_t wifiUsartMutexHandle;
 const osMutexAttr_t wifiUsartMutex_attributes = {
@@ -600,6 +607,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of TcpReceiveTask */
   TcpReceiveTaskHandle = osThreadNew(vTcpReceiveTask, NULL, &TcpReceiveTask_attributes);
+
+  /* creation of RobotHeartBeatTask */
+  RobotHeartBeatTaskHandle = osThreadNew(vRobotHeartBeatTask, NULL, &RobotHeartBeatTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

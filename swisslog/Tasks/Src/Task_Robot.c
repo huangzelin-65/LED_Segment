@@ -121,5 +121,30 @@ void vRobotReceiveTask(void *argument)
     }
 }
 
-
+void vRobotHeartBeatTask(void *argument)
+{
+    TickType_t xLastWakeTime;  // 记录上次唤醒时间
+    const TickType_t xPeriod = pdMS_TO_TICKS(1000);  // 周期：1000ms（转成节拍数）
+    // 初始化：首次唤醒时间 = 当前系统时间
+    xLastWakeTime = xTaskGetTickCount();        
+    DEBUGINFO("vRobotHeartBeatTask\n"); 
+    while (1)
+    {
+        if(mqtt_isConnected)
+        {
+            if(robot_init)
+            {
+                // DEBUGINFO("heartbeat_cnt:%d\n",robotSate.heartbeat_cnt); 
+                if(robotSate.heartbeat_cnt++ >= 10)//10秒一次心跳
+                {
+                    DEBUGINFO("heartbeat\n");
+                    robotSate.heartbeat_cnt = 0;
+                    Robot_Notify(ROBOT_HEARTBEAT);
+                }
+            }
+        }
+        // 延时到下一个周期（关键：保证间隔准确）
+        vTaskDelayUntil(&xLastWakeTime, xPeriod);        
+    }    
+}
 
