@@ -996,12 +996,14 @@ void Robot_State(void)
 {
     DEBUGINFO("start");
     RobotState_t *robot_state_data = pvPortMalloc(sizeof(RobotState_t));
+    if(robot_state_data != NULL)
+    {
+        memcpy(robot_state_data, &robotSate, sizeof(RobotState_t));                        
 
-    memcpy(robot_state_data, &robotSate, sizeof(RobotState_t));                        
-
-    Robot_SendMsg(ROBOT_MSG_STATE,robot_state_data);
-    
+        Robot_SendMsg(ROBOT_MSG_STATE,robot_state_data);
+    }
     robotSate.heartbeat_cnt = 0;//复位心跳包
+    DEBUGINFO("end");
 }
 //回复action ack
 void Robot_ActionAck(void)

@@ -266,7 +266,7 @@ osThreadId_t RobotHeartBeatTaskHandle;
 const osThreadAttr_t RobotHeartBeatTask_attributes = {
   .name = "RobotHeartBeatTask",
   .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 128 * 4
+  .stack_size = 256 * 4
 };
 /* Definitions for wifiUsartMutex */
 osMutexId_t wifiUsartMutexHandle;

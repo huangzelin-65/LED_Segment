@@ -16,7 +16,7 @@
 #include <limits.h>
 
 extern osMessageQueueId_t xRobotQueueHandle;//该消息队列处理事件上报
-
+int test_cnt = 0;
 //处理robot相关任务，心跳包等
 void vRobotManagerTask(void *argument)
 {
@@ -43,6 +43,8 @@ void vRobotManagerTask(void *argument)
             DEBUGINFO("ROBOT_ACTIONACK\n");  
             //需要回复服务器ack，在state中的actionstate回复状态
             Robot_ActionAck();
+
+            test_cnt = 6;
           } 
           if(ulNotificationValue & ROBOT_ACTIONCMD)
           {
@@ -89,7 +91,15 @@ void vRobotReceiveTask(void *argument)
 
                         Robot_UpdateStateJson(RobotJson,robot_state_data);
                         //发送消息给mqtt队列，让最新robot状态发布给服务器
-                        Mqtt_SendMsg(MQTT_MSG_ROBOT_EVENT,Robot_GetStateJsonStr());
+                        char* json_str = Robot_GetStateJsonStr();
+                        if(json_str != NULL)
+                        {
+                            Mqtt_SendMsg(MQTT_MSG_ROBOT_EVENT,json_str);
+                        }
+                        else
+                        {
+                            DEBUGINFO("Robot_GetStateJsonStr fail\n");  
+                        }
                         //释放内存
                         vPortFree(robot_msg->data);
 
@@ -134,6 +144,21 @@ void vRobotHeartBeatTask(void *argument)
         {
             if(robot_init)
             {
+                if(test_cnt)
+                {
+                    test_cnt--;
+                    DEBUGINFO("test_cnt:%d\n",test_cnt); 
+                    if(test_cnt == 5)
+                    {
+                        Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_RUNNING);
+                        Robot_State();
+                    }
+                    if(test_cnt == 1)
+                    {
+                        Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_FINISHED);
+                        Robot_State();
+                    }
+                }
                 // DEBUGINFO("heartbeat_cnt:%d\n",robotSate.heartbeat_cnt); 
                 if(robotSate.heartbeat_cnt++ >= 10)//10秒一次心跳
                 {
