@@ -14,7 +14,7 @@ extern CarStatus_t CarStatus;
 extern ServerToCarData_t ServerToCarData;
 extern osMessageQueueId_t xRobotQueueHandle;//该消息队列处理事件上报
 extern osThreadId_t RobotReceiveTaskHandle;//该任务处理事件上报
-
+extern osThreadId_t RobotManagerTaskHandle;//主任务句柄
 //保存服务器下发的动作消息
 RobotAction_t robotAction = {
     .headerId = "h0:123",       // 示例：headerId（不超过8字符）
@@ -1023,3 +1023,24 @@ void Robot_Event(void)
     xSemaphoreGive(robotSate.mutex);
     DEBUGINFO("end");
 }
+//消息通知主线程
+void Robot_Notify(uint32_t value)
+{
+    if(RobotManagerTaskHandle != NULL)
+    {
+        DEBUGINFO("value:%lx",value);
+        BaseType_t xReturn = pdPASS;
+        xReturn = xTaskNotify(RobotManagerTaskHandle, 
+                    value, 
+                    eSetValueWithoutOverwrite);
+        if(xReturn != pdPASS)
+        {
+            DEBUGINFO("xReturn is not pdPASS:%ld\n",xReturn);
+        } 
+    }
+    else
+    {
+        DEBUGINFO("RobotManagerTaskHandle NULL");
+    }
+}
+

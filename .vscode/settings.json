@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "adaptor_mqtt.h": "c",
+        "freertos.h": "c"
+    }
+}

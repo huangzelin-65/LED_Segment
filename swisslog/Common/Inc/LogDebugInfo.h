@@ -2,6 +2,7 @@
 #define  LOGDEBUGINFO_H
 
 #include <stdio.h>
+#include "main.h"
 
 #define LOG_LENGTH_LONG 300
 #define LOG_LENGTH_SINGLE 4

@@ -13,6 +13,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #include "lwip.h"
+#include "Robot.h"
 
 #define MQTT_HOST              "192.168.1.10" 
 #define MQTT_QOS               MQTT_QOS_0
@@ -73,6 +74,7 @@ void Mqtt_SendMsg(MqttMsgType_t msg,char *data)
         MqttMsgdata_t *msg_data = pvPortMalloc(sizeof(MqttMsgdata_t));
         msg_data->type = msg;
         msg_data->data = data;
+        DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(xMqttManagerQueueHandle),uxQueueSpacesAvailable(xMqttManagerQueueHandle));
         if (xQueueSend(xMqttManagerQueueHandle, &msg_data, portMAX_DELAY) == pdPASS) 
         {
             DEBUGINFO("msg :%d\n",msg);
@@ -222,7 +224,6 @@ int Mqtt_NetConnect(void *context, const char* host, word16 port,int timeout_ms)
 int Mqtt_NetRead(void *context, byte* buf, int buf_len, int timeout_ms)
 {
     #ifdef MQTT_WIFI
-    DEBUGINFO("Mqtt_NetRead timeout_ms:%d",timeout_ms);
     static int cnt = 0;
     while(!mqtt_ready2read)
     {
@@ -423,8 +424,15 @@ static int Mqtt_MessageCb(MqttClient *client, MqttMessage *msg,byte msg_new, byt
     if (msg_done) {
         DEBUGINFO("MQTT Message: Done");
         char *receive_data = pvPortMalloc(len + 1);
-        XMEMCPY(receive_data, msg->buffer, len);
-        Mqtt_SendMsg(MQTT_MSG_RECIEVE,receive_data);
+        if(receive_data != NULL)
+        {
+            XMEMCPY(receive_data, msg->buffer, len);
+            Robot_SendMsg(ROBOT_MSG_PARSE,receive_data);
+        }
+        else
+        {
+            DEBUGINFO("pvPortMalloc Message fail!!!");
+        }
     }
     return MQTT_CODE_SUCCESS;
 }
@@ -480,6 +488,10 @@ int MqttInit(const char *client_id)
 exit:
     if (rc != MQTT_CODE_SUCCESS) {
         DEBUGINFO("MQTT Error %d: %s", rc, MqttClient_ReturnCodeToString(rc));
+    }
+    else
+    {
+        XMEMSET(&mqttObj, 0, sizeof(mqttObj));
     }
     return rc;
 }
@@ -611,7 +623,7 @@ void Mqtt_ParseData(uint8_t* rbuf,int len)
 //发布消息调用接口
 void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t qos, uint8_t retain)
 {
-    XMEMSET(&mqttObj, 0, sizeof(mqttObj));
+    // XMEMSET(&mqttObj, 0, sizeof(mqttObj));
     mqttObj.publish.qos = qos;
     mqttObj.publish.retain = retain;
     mqttObj.publish.topic_name = pub_topic;
@@ -627,7 +639,6 @@ void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t 
 //订阅话题调用接口
 int Mqtt_SubscribeMsg(MqttTopic *topics,int count)
 {
-    XMEMSET(&mqttObj, 0, sizeof(mqttObj));
     mqttObj.subscribe.packet_id = Mqtt_GetPacketid();
     mqttObj.subscribe.topic_count = count;
     mqttObj.subscribe.topics = topics;

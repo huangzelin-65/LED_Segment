@@ -25,7 +25,6 @@ typedef enum
     MQTT_MSG_START = 0,//启动mqtt服务
     MQTT_MSG_HEARTBEAT,
     MQTT_MSG_ROBOT_EVENT,
-    MQTT_MSG_RECIEVE,
     MQTT_MSG_SUBSCRIBE,
 }MqttMsgType_t;
 

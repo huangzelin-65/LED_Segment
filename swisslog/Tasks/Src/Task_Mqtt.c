@@ -53,7 +53,7 @@ void vMqttManagerTask(void *argument)
                 case MQTT_MSG_ROBOT_EVENT:
                 {
                     char* robot_json_str = (char*)msg->data;
-                    Mqtt_PublishMsg(MQTT_TOPIC_NAME, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
+                    Mqtt_PublishMsg(MQTT_TOPIC_NAME, robot_json_str, XSTRLEN(robot_json_str), 1, 0);
                     vPortFree(robot_json_str);
                 }
                 break;
@@ -65,11 +65,6 @@ void vMqttManagerTask(void *argument)
                         //订阅话题失败，尝试再次订阅
                         Mqtt_SendMsg(MQTT_MSG_SUBSCRIBE,NULL);                        
                     }                    
-                }
-                break;
-                case MQTT_MSG_RECIEVE:
-                {
-                    Robot_SendMsg(ROBOT_MSG_PARSE,msg->data);
                 }
                 break;
                 default:break;

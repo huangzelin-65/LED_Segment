@@ -134,7 +134,6 @@ typedef enum {
     ROBOT_MSG_HEART = 0,//发送心跳包到服务器
     ROBOT_MSG_STATE,//代表需要把消息发送到服务器
     ROBOT_MSG_PARSE,//代表从服务器获取到消息
-    ROBOT_MSG_ACTION_STATUS,//回复下发的action的状态
 } RobotMsgType_t;
 
 
@@ -149,6 +148,12 @@ typedef enum {
     ROBOT_ACTION_STATUS_FINISHED,
     ROBOT_ACTION_STATUS_FAILED
 } RobotActionStatus_t;
+
+typedef enum {
+    ROBOT_HEARTBEAT = 0x01,
+    ROBOT_ACTIONACK = 0x02,
+    ROBOT_ACTIONCMD = 0x04,
+} RobotNotify_t;
 
 extern RobotAction_t robotAction;
 extern RobotState_t robotSate;
@@ -169,4 +174,5 @@ void Robot_ActionAckUpdate(RobotActionStatus_t status);
 void Robot_Event(void);
 void Robot_State(void);
 void Robot_ActionAck(void);
+void Robot_Notify(uint32_t value);
 #endif
