@@ -602,6 +602,10 @@ void Mqtt_ParseData(uint8_t* rbuf,int len)
                     }                   
                 }
                 #endif
+            }
+            else
+            {
+                DEBUGINFO("error data_len:%d len:%d ret:%d\n", data_len,len,ret);
             }                
         }            
     }     

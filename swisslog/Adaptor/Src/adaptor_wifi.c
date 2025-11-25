@@ -70,6 +70,7 @@ void Wifi_ParseDataStart(uint8_t *rx_buffer,uint16_t last_read_id,uint16_t size)
     wifi_data->size = size;
     wifi_data->rx_buffer = rx_buffer;
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(xWifi_Parse_QueueHandle),uxQueueSpacesAvailable(xWifi_Parse_QueueHandle));
     if (xQueueSendFromISR(xWifi_Parse_QueueHandle, &wifi_data, &xHigherPriorityTaskWoken) == pdPASS) {
         portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // 必要时切换任务
     }    
@@ -77,7 +78,7 @@ void Wifi_ParseDataStart(uint8_t *rx_buffer,uint16_t last_read_id,uint16_t size)
 //接收中断中调用，处理wifi接收的数据
 void Wifi_ReceiveData(uint16_t Size)
 {
-    // printf("Wifi_ReceiveData\n");
+    DEBUGINFO("wifi_last_read_id:%d Size:%d\n",wifi_last_read_id,Size);
     Wifi_ParseDataStart(Wifi_ReceiveBuffer,wifi_last_read_id,Size);
     wifi_last_read_id = Size;
 }
