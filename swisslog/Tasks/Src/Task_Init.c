@@ -32,6 +32,7 @@ extern osThreadId_t RobotManagerTaskHandle;
 extern osThreadId_t RobotReceiveTaskHandle;
 extern osThreadId_t TcpManagerTaskHandle;
 extern osThreadId_t TcpReceiveTaskHandle;
+extern osThreadId_t RobotHeartBeatTaskHandle;
 extern CarStatus_t CarStatus;
 
 
@@ -63,7 +64,8 @@ void vInitTask(void *argument)
   osThreadResume(RobotManagerTaskHandle);
   osThreadResume(RobotReceiveTaskHandle); 
   osThreadResume(TcpManagerTaskHandle);
-  osThreadResume(TcpReceiveTaskHandle);     
+  osThreadResume(TcpReceiveTaskHandle);
+  osThreadResume(RobotHeartBeatTaskHandle);     
 
   DEBUGINFO("InitTask\r\n");
 

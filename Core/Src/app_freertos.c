@@ -543,6 +543,7 @@ void MX_FREERTOS_Init(void) {
   vQueueAddToRegistry(xWifi_Parse_QueueHandle, "Wifi_Parse_Queue");
   vQueueAddToRegistry(xMqttManagerQueueHandle, "MqttManagerQueue");
   vQueueAddToRegistry(xRobotQueueHandle, "RobotQueue");
+  vQueueAddToRegistry(xTcpManageQueueHandle, "TcpManageQueue");
   /* USER CODE END RTOS_QUEUES */
   /* creation of InitTask */
   InitTaskHandle = osThreadNew(vInitTask, NULL, &InitTask_attributes);
@@ -645,7 +646,8 @@ void MX_FREERTOS_Init(void) {
   osThreadSuspend(RobotManagerTaskHandle); 
   osThreadSuspend(RobotReceiveTaskHandle);
   osThreadSuspend(TcpManagerTaskHandle); 
-  osThreadSuspend(TcpReceiveTaskHandle);  
+  osThreadSuspend(TcpReceiveTaskHandle); 
+  osThreadSuspend(RobotHeartBeatTaskHandle); 
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */

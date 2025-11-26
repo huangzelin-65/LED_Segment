@@ -3,6 +3,6 @@
 
 void vRobotManagerTask(void *argument);
 void vRobotReceiveTask(void *argument);
-
+void vRobotHeartBeatTask(void *argument);
 
 #endif
