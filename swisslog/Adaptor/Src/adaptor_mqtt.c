@@ -266,8 +266,9 @@ int Mqtt_NetRead(void *context, byte* buf, int buf_len, int timeout_ms)
                     osDelay(pdMS_TO_TICKS(1));
                 };
                 cnt = 0;   
-                MqttReceiveData_t *rec_data = Mqtt_GetListTail(); 
-                DEBUGINFO("len:%d rest_len:%d\n",rec_data->len,rec_data->rest_len);
+                MqttReceiveData_t *rec_data = Mqtt_GetListTail();
+                if(rec_data == NULL)return MQTT_CODE_ERROR_BAD_ARG; 
+                DEBUGINFO("buf_len:%d len:%d rest_len:%d\n",buf_len,rec_data->len,rec_data->rest_len);
                 if(rec_data->len == rec_data->rest_len)
                 {
                     memcpy(mReadBuf,rec_data->data,rec_data->len);
@@ -580,7 +581,7 @@ void Mqtt_ParseData(uint8_t* rbuf,int len)
                                 if(rec_data->data != NULL)
                                 {
                                     memcpy(rec_data->data, result + pos, data_len);
-                                    int rc = list_insert_tail(mqtt_list,rec_data);
+                                    int rc = list_insert_head(mqtt_list,rec_data);
                                     if(rc == -1)
                                     {
                                         DEBUGINFO("mqtt_list fail\n");
@@ -797,11 +798,13 @@ int Mqtt_GetListSize(void)
     int rc = 0;
     if (mqttMutexHandle != NULL)
     {
+        // DEBUGINFO("start");
         if (osMutexAcquire(mqttMutexHandle, portMAX_DELAY) == osOK)
         {
             rc = list_size(mqtt_list);
             osMutexRelease(mqttMutexHandle); 
-        }       
+        }
+        // DEBUGINFO("end");       
     }
     return rc;
 }

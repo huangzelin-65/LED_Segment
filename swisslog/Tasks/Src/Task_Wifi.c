@@ -43,7 +43,7 @@ void vWifiManagerTask(void *argument)
       if(check_wifi_cnt++ > 100)//10秒获取一次wifi信号强度
       {
         check_wifi_cnt = 0;
-        Wifi_SendATCmd("AT+RSSI",2000);
+        // Wifi_SendATCmd("AT+RSSI",2000);
         DEBUGINFO("wifi status connect_state:%d rssi:%d ip:%s\n",wifi_status.connect_state,wifi_status.rssi,wifi_status.ip);
       }
       if(check_wifi_cnt == 50)
