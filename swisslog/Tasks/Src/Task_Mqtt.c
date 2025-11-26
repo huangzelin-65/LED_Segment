@@ -47,7 +47,7 @@ void vMqttManagerTask(void *argument)
                 case MQTT_MSG_HEARTBEAT:
                 {
                     char* robot_json_str = (char*)msg->data;
-                    Mqtt_PublishMsg(MQTT_HEARTBEAT_TOPIC_NAME, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
+                    if(mqtt_isConnected)Mqtt_PublishMsg(MQTT_HEARTBEAT_TOPIC_NAME, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
                     vPortFree(robot_json_str);
                 }
                 break;
@@ -57,7 +57,7 @@ void vMqttManagerTask(void *argument)
                     if(robot_json_str != NULL)
                     {
                         DEBUGINFO("robot_json_str:%s\n",robot_json_str);
-                        Mqtt_PublishMsg(MQTT_TOPIC_NAME, robot_json_str, XSTRLEN(robot_json_str), 1, 0);
+                        if(mqtt_isConnected)Mqtt_PublishMsg(MQTT_TOPIC_NAME, robot_json_str, XSTRLEN(robot_json_str), 1, 0);
                         vPortFree(robot_json_str);
                     }
                 }
