@@ -538,16 +538,95 @@ exit:
     }
     return rc;
 }
-//mqtt解析数据
-void Mqtt_ParseData(uint8_t* rbuf,int len)
+/**
+ * @brief 在一个可能包含'\0'的字节数组中查找所有"+WFDATA="的起始位置。
+ * 
+ * @param arr 待搜索的字节数组。
+ * @param arr_len 数组的总长度。
+ * @param result 用于存储结果（起始索引）的数组。
+ * @param max_result 结果数组的最大容量。
+ * @return int 实际找到的匹配项数量。
+ */
+int Mqtt_FindAllStrPositions(uint8_t *arr,char *target,int arr_len, int *result, int max_result)
 {
-    //解析tcp的数据
+    int target_len = strlen(target);
+    int count = 0;
+
+    // 遍历数组，直到剩下的长度不足以容纳目标字符串
+    for (int i = 0; i <= arr_len - target_len; i++) {
+        // 检查从当前位置i开始的字符串是否与目标匹配
+        if (memcmp(arr + i, target, target_len) == 0) {
+            // 如果找到匹配项，且结果数组还有空间，则存储位置
+            if (count < max_result) {
+                result[count] = i;
+            }
+            count++;
+        }
+    }
+
+    return count;
+}
+//将数据解析到数组里面（动态）
+void Mqtt_ParseData2List(uint8_t *result,int len)
+{
+    if(mqtt_list == NULL)return;//链表还未初始化       
+    int sid, data_len, pos;
+    // "+WFDATA=%d,%d,%[^\n]" 匹配前缀，然后按逗号分隔读取两个整数，最后读取剩余所有字符的起始位置
+    int ret = sscanf((char*)result, "+WFDATA=%d,%d,%n", &sid, &data_len,&pos);
+    DEBUGINFO("ret:%d sid:%d len:%d data_len:%d pos:%d\n",ret,sid,len,data_len,pos);  
+    if(sid != mqtt_socket_id)
     {
-        char target_mqtt_str[] = "+WFDATA=";
+        DEBUGINFO("sid is different,mqtt_socket_id:%d",mqtt_socket_id);
+        return;
+    }
+    // 检查是否成功读取3个部分
+    if (ret == 2 && (len > data_len))
+    {                    
+        if (mqttMutexHandle != NULL)
+        {
+            DEBUGINFO("mqtt_list add start\n");
+            if (osMutexAcquire(mqttMutexHandle, portMAX_DELAY) == osOK)
+            {                            
+                MqttReceiveData_t *rec_data =  pvPortMalloc(sizeof(MqttReceiveData_t));
+                if(rec_data != NULL)
+                {
+                    rec_data->data = pvPortMalloc(data_len + 1);
+                    rec_data->len = data_len;
+                    rec_data->rest_len = data_len;
+                    if(rec_data->data != NULL)
+                    {
+                        memcpy(rec_data->data, result + pos, data_len);
+                        int rc = list_insert_head(mqtt_list,rec_data);
+                        if(rc == -1)
+                        {
+                            DEBUGINFO("mqtt_list fail\n");
+                        }
+                        else
+                        {
+                            DEBUGINFO("mqtt_list size:%d\n",list_size(mqtt_list));
+                        }
+                    }
+                    else
+                    {
+                        vPortFree(rec_data);
+                    }
+                }
+
+                osMutexRelease(mqttMutexHandle); 
+            }
+            DEBUGINFO("mqtt_list add end\n");
+        }
+    }
+}
+//解析mqtt数据包,搜索是否有"+WFDATA="开头的，有则解析
+void Mqtt_ParseTcpData(uint8_t* rbuf,int len)
+{
+    #ifdef MQTT_STATIC_ARRAY
+        char target_str[] = "+WFDATA=";
         // 查找目标前缀在rbuf中的位置
-        char *result = strstr((char *)rbuf, target_mqtt_str);
+        char *result = strstr((char *)rbuf, target_str);
         if (result != NULL) {
-            DEBUGINFO("find:%s\n", target_mqtt_str);  
+            DEBUGINFO("find:%s\n", target_str);  
             int sid, data_len, pos;
             // "+WFDATA=%d,%d,%[^\n]" 匹配前缀，然后按逗号分隔读取两个整数，最后读取剩余所有字符的起始位置
             int ret = sscanf(result, "+WFDATA=%d,%d,%n", &sid, &data_len,&pos);
@@ -555,7 +634,6 @@ void Mqtt_ParseData(uint8_t* rbuf,int len)
             // 检查是否成功读取3个部分
             if (ret == 2 && (len > data_len)) {
                 //静态数组形式
-                #ifdef MQTT_STATIC_ARRAY
                 memcpy(mqtt_readbuffer, result + pos, data_len);
                 DEBUGINFO("mqtt_socket_id:%ld",mqtt_socket_id);    
                 if(sid == mqtt_socket_id)
@@ -564,52 +642,33 @@ void Mqtt_ParseData(uint8_t* rbuf,int len)
                     mqtt_rest2read = data_len;
                     mqtt_ready2read = 1;
                 }
-                #else
-                if(mqtt_list != NULL)    
-                {
-                    if (mqttMutexHandle != NULL)
-                    {
-                        DEBUGINFO("mqtt_list add start\n");
-                        if (osMutexAcquire(mqttMutexHandle, portMAX_DELAY) == osOK)
-                        {                            
-                            MqttReceiveData_t *rec_data =  pvPortMalloc(sizeof(MqttReceiveData_t));
-                            if(rec_data != NULL)
-                            {
-                                rec_data->data = pvPortMalloc(data_len + 1);
-                                rec_data->len = data_len;
-                                rec_data->rest_len = data_len;
-                                if(rec_data->data != NULL)
-                                {
-                                    memcpy(rec_data->data, result + pos, data_len);
-                                    int rc = list_insert_head(mqtt_list,rec_data);
-                                    if(rc == -1)
-                                    {
-                                        DEBUGINFO("mqtt_list fail\n");
-                                    }
-                                    else
-                                    {
-                                        DEBUGINFO("mqtt_list size:%d\n",list_size(mqtt_list));
-                                    }
-                                }
-                                else
-                                {
-                                    vPortFree(rec_data);
-                                }
-                            }
 
-                            osMutexRelease(mqttMutexHandle); 
-                        }
-                        DEBUGINFO("mqtt_list add end\n");
-                    }                   
-                }
-                #endif
             }
             else
             {
                 DEBUGINFO("error data_len:%d len:%d ret:%d\n", data_len,len,ret);
             }                
-        }            
-    }     
+        } 
+    #else
+        // 假设最多查找 10 个位置
+        char target_str[] = "+WFDATA=";
+        int positions[10];
+        int found_count = Mqtt_FindAllStrPositions(rbuf,target_str,len,positions,10);
+
+        if (found_count > 0) {
+            DEBUGINFO("found_count: %d\n", found_count);
+            for (int i = 0; i < found_count; i++) {
+                DEBUGINFO("  position(%d): %d\n", i, positions[i]);
+                Mqtt_ParseData2List((rbuf + positions[i]),len);
+            }
+        } 
+    #endif
+}
+//mqtt解析数据
+void Mqtt_ParseData(uint8_t* rbuf,int len)
+{
+    //解析tcp的数据
+    Mqtt_ParseTcpData(rbuf,len);    
     if(mqtt_waitstate != MQTT_WAIT_STATE_IDLE)
     {
         DEBUGINFO("mqtt_waitstate %d\n",mqtt_waitstate);

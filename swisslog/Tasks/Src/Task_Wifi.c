@@ -64,6 +64,7 @@ void vWifiReceiveTask(void *argument)
 {
   DEBUGINFO("vWifiReceiveTask\r\n");
   uint8_t read_buffer[WIFI_RX_BUF_SIZE];
+  uint8_t printf_buffer[LOG_LENGTH_LONG];
   WifiParseData_t *wifi_data = NULL;
   Wifi_ReceiveInit();//启动串口空闲中断，DMA接收数据
   while (1)
@@ -106,6 +107,15 @@ void vWifiReceiveTask(void *argument)
 
         if(parse_rbuf)
         {
+          memset(printf_buffer,0,sizeof(printf_buffer));
+          memcpy(printf_buffer,read_buffer,dataLength);
+          for (int i = 0; i < (dataLength - 1); i++) { 
+              if (printf_buffer[i] == '\0') {
+                  printf_buffer[i] = ' ';
+              }
+          }
+          DEBUGINFO("printf_buffer:%s\n",printf_buffer);
+
           Wifi_ConnectAck(read_buffer,dataLength);
           Mqtt_ParseData(read_buffer,dataLength);
         }  
