@@ -8,7 +8,6 @@
 #include "LogDebugInfo.h"
 #include "queue.h"
 
-extern osSemaphoreId_t xWifiTxSemHandle;
 extern osMessageQueueId_t xWifi_Parse_QueueHandle;
 extern UART_HandleTypeDef huart6;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel2;
@@ -18,6 +17,8 @@ uint8_t Wifi_ReceiveBuffer[WIFI_RX_BUF_SIZE];//保存wifi数据，必要时需�
 WifiState_t wifi_state = WIFI_IDLE;//连接wifi的步骤状态
 WifiResult_t wifi_result = WIFI_ERROR;//连接wifi的步骤结果
 uint16_t wifi_last_read_id = 0;//wifi数据解析的最后一个位置
+WifiParseData_t wifi_parse_array[WIFI_ARRAY_LEN];
+int wifi_parse_pos = 0; 
 WifiStatus_t wifi_status = {
     .connect_state = WIFI_ERROR,
     .ip = {0},
@@ -36,7 +37,7 @@ HAL_StatusTypeDef Wifi_SendATCmd(const char *cmd,int32_t timeout_ms)
 
   status = HAL_UART_Transmit(&huart6, (uint8_t*)Wifi_SendBuffer, len, timeout_ms);
 
-  DEBUGINFO("cmd 6:%s",Wifi_SendBuffer);
+  DEBUGINFO("cmd 6:%s status:%d len:%d",Wifi_SendBuffer,status,len);
 
   osMutexRelease(wifiUsartMutexHandle);
 
@@ -49,7 +50,6 @@ void Wifi_Init(void)
     DEBUGINFO("Start\n");
     wifi_status.rssi = 0;   
 }
-
 //启动串口空闲中断，关闭DMA半传输中断和传输完成中断，只响应串口空闲完成中断；
 void Wifi_ReceiveInit(void)
 {
@@ -65,20 +65,38 @@ void Wifi_ReceiveInit(void)
 //从中断中发送队列，线程中中获取队列，并解析数据
 void Wifi_ParseDataStart(uint8_t *rx_buffer,uint16_t last_read_id,uint16_t size)
 {
+    #ifdef WIFI_USE_MALLOC
     WifiParseData_t *wifi_data = pvPortMalloc(sizeof(WifiParseData_t));
     wifi_data->last_read_id = last_read_id;
     wifi_data->size = size;
     wifi_data->rx_buffer = rx_buffer;
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    // DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(xWifi_Parse_QueueHandle),uxQueueSpacesAvailable(xWifi_Parse_QueueHandle));
     if (xQueueSendFromISR(xWifi_Parse_QueueHandle, &wifi_data, &xHigherPriorityTaskWoken) == pdPASS) {
         portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // 必要时切换任务
+    }   
+    #else
+    WifiParseData_t data;
+    data.last_read_id = last_read_id;
+    data.size = size;
+    data.rx_buffer = rx_buffer;
+    if(wifi_parse_pos >= WIFI_ARRAY_LEN)
+    {
+        wifi_parse_pos = 0;
+    }
+    wifi_parse_array[wifi_parse_pos] = data;//赋值操作，线程中取出使用
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    WifiParseData_t *wifi_data = &wifi_parse_array[wifi_parse_pos];
+    // DEBUGINFO("wifi_data %p rx_buffer:%p",wifi_data,wifi_data->rx_buffer);
+    if (xQueueSendFromISR(xWifi_Parse_QueueHandle, &wifi_data, &xHigherPriorityTaskWoken) == pdPASS) {
+        wifi_parse_pos = (wifi_parse_pos + 1) % WIFI_ARRAY_LEN;//移到下个位置
     }    
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // 必要时切换任务
+    #endif
 }
 //接收中断中调用，处理wifi接收的数据
 void Wifi_ReceiveData(uint16_t Size)
 {
-    // DEBUGINFO("wifi_last_read_id:%d Size:%d\n",wifi_last_read_id,Size);
+    // printf("Wifi_ReceiveData\n");
     Wifi_ParseDataStart(Wifi_ReceiveBuffer,wifi_last_read_id,Size);
     wifi_last_read_id = Size;
 }
@@ -197,7 +215,7 @@ void Wifi_ConnectAck(uint8_t* rbuf,int len)
             DEBUGINFO("ret:%d rssi:%d\n",ret,rssi);  
             wifi_status.rssi = rssi;              
         }            
-    }
+    }  
     //保存wifi IP
     {
         char target_mqtt_str[] = WIFI_CHECK_IP;
@@ -221,7 +239,7 @@ void Wifi_ConnectAck(uint8_t* rbuf,int len)
                 }          
             }                
         }        
-    }    
+    }      
     if(wifi_state <= WIFI_AT) 
     {
         return;
@@ -268,7 +286,7 @@ void Wifi_ConnectAck(uint8_t* rbuf,int len)
                 DEBUGINFO("WIFI_CHECK_CONNET ok\n");   
                 wifi_result = WIFI_OK; 
                 wifi_status.connect_state = WIFI_OK; 
-                wifi_state = WIFI_END;                    
+                wifi_state = WIFI_END;     
             } 
             else
             {
