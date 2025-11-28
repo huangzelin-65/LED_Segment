@@ -19,7 +19,7 @@
 #define MQTT_HOST              "192.168.1.10" 
 #define MQTT_QOS               MQTT_QOS_0
 #define MQTT_KEEP_ALIVE_SEC    60
-#define MQTT_CON_TIMEOUT_MS    30000
+#define MQTT_CON_TIMEOUT_MS    1500
 #define MQTT_CLIENT_ID         "WolfMQTTClientSimple"
 #define MQTT_TOPIC_NAME        "bcss/v1/slhc/st_1/state"
 #define MQTT_SUB_TOPIC_NAME    "tk/v1/slhc/tkv-1/instantactions" 

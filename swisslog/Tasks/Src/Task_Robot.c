@@ -15,7 +15,7 @@
 #include "semphr.h"
 #include <limits.h>
 
-#define   TEST_MONITOR
+// #define   TEST_MONITOR
 
 extern osMessageQueueId_t xRobotQueueHandle;//该消息队列处理事件上报
 

@@ -64,9 +64,12 @@ void vPrintTask(void *argument)
 	{
 		if(xQueueReceive(xPrint_QueueHandle, &rxData, portMAX_DELAY) == pdPASS)
 		{
+      #ifdef LOG_USE_MALLOC
       vPrint_start_Transmit(rxData, strlen((char *)rxData));
-      // HAL_UART_Transmit(&huart1, rxData, strlen((char *)rxData), HAL_MAX_DELAY);
+      #else
+      HAL_UART_Transmit(&huart1, rxData, strlen((char *)rxData), HAL_MAX_DELAY);
       // vPortFree(rxData);
+      #endif
 		}
 	}
 }
