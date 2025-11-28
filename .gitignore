@@ -2,4 +2,7 @@ Debug/
 Release/
 .settings/stm32cubeide.project.prefs
 .settings/language.settings.xml
+.settings/org.eclipse.core.resources.prefs
 VCB2.1 Debug.launch
+.cproject
+VCB2.1.launch

@@ -833,7 +833,7 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 		
 		case btToSettingPage:
 		DEBUGINFO("btToSettingPage\r\n");
-			System_Get_RunTime_Ascii(RunTimeHoursASCII,RunTimeMinutesASCII,RunTimeSecondsASCII);
+			vSystem_Get_RunTime_Ascii(RunTimeHoursASCII,RunTimeMinutesASCII,RunTimeSecondsASCII);
 			HMI_Display_Text_RunTime();
 			//osDelay(pdMS_TO_TICKS(50));
 			HMI_Get_Rtc();
@@ -851,7 +851,7 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 			DEBUGINFO("btSysPasswdConfirm\r\n");
 			if(UserPswd_Check_SysPasswd() > 0)
 			{
-				System_Get_RunTime_Ascii(RunTimeHoursASCII,RunTimeMinutesASCII,RunTimeSecondsASCII);
+				vSystem_Get_RunTime_Ascii(RunTimeHoursASCII,RunTimeMinutesASCII,RunTimeSecondsASCII);
 				HMI_Display_Text_RunTime();
 				//osDelay(pdMS_TO_TICKS(50));
 				HMI_Get_Rtc();

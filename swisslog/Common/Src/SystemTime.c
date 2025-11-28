@@ -12,7 +12,7 @@ static uint32_t last_tick_count = 0;
 static SemaphoreHandle_t tick_mutex = NULL;
 
 // 初始化时间跟踪系统
-void time_tracker_init(void)
+void vTime_Tracker_Init(void)
 {
     // 创建互斥锁保护共享变量
     tick_mutex = xSemaphoreCreateMutex();
@@ -27,7 +27,7 @@ void time_tracker_init(void)
 }
 
 // 检查并处理滴答计数溢出
-static void check_for_tick_overflow(void)
+static void vCheck_For_Tick_Overflow(void)
 {
     if(tick_mutex != NULL && xSemaphoreTake(tick_mutex, portMAX_DELAY) == pdTRUE)
     {
@@ -45,13 +45,13 @@ static void check_for_tick_overflow(void)
 }
 
 // 获取系统上电以来的毫秒数，带溢出处理
-uint64_t get_system_uptime_ms(void)
+uint64_t ullGet_System_Uptime_Ms(void)
 {
     uint64_t total_ms = 0;
     uint32_t current_tick = 0;
     uint32_t overflow_count = 0;
     
-    check_for_tick_overflow();
+    vCheck_For_Tick_Overflow();
     
     if(tick_mutex != NULL && xSemaphoreTake(tick_mutex, portMAX_DELAY) == pdTRUE)
     {
@@ -70,7 +70,7 @@ uint64_t get_system_uptime_ms(void)
 }
 
 // 将毫秒数转换为时分秒
-void convert_ms_to_hms(uint64_t ms, uint16_t *hours, uint8_t *minutes, uint8_t *seconds)
+void vConvert_Ms_To_HMS(uint64_t ms, uint16_t *hours, uint8_t *minutes, uint8_t *seconds)
 {
     uint64_t total_seconds = ms / 1000;
     
@@ -96,7 +96,7 @@ void convert_ms_to_hms(uint64_t ms, uint16_t *hours, uint8_t *minutes, uint8_t *
 
 // 将时间转换为指定格式的ASCII码
 // hours_ascii: 4字节，分钟和秒各2字节
-void convert_time_to_ascii(uint16_t hours, uint8_t minutes, uint8_t seconds, 
+void vConvert_Time_To_Ascii(uint16_t hours, uint8_t minutes, uint8_t seconds, 
                           char *hours_ascii, char *minutes_ascii, char *seconds_ascii)
 {
     // 确保数组有足够空间（包括终止符）
@@ -115,23 +115,23 @@ void convert_time_to_ascii(uint16_t hours, uint8_t minutes, uint8_t seconds,
 }
 
 // 获取当前时间
-void System_Get_RunTime(uint16_t hours, uint8_t minutes, uint8_t seconds)
+void vSystem_Get_RunTime(uint16_t hours, uint8_t minutes, uint8_t seconds)
 {
-    uint64_t uptime_ms = get_system_uptime_ms();
-    convert_ms_to_hms(uptime_ms, &hours, &minutes, &seconds);
+    uint64_t uptime_ms = ullGet_System_Uptime_Ms();
+    vConvert_Ms_To_HMS(uptime_ms, &hours, &minutes, &seconds);
 		DEBUGINFO("hours:%d,minutes:%d,seconds:%d\n",hours,minutes,seconds);
 }
 
 // 获取当前时间并转换为ASCII
-void System_Get_RunTime_Ascii(uint8_t *hours_ascii, uint8_t *minutes_ascii, uint8_t *seconds_ascii)
+void vSystem_Get_RunTime_Ascii(uint8_t *hours_ascii, uint8_t *minutes_ascii, uint8_t *seconds_ascii)
 {
-    uint64_t uptime_ms = get_system_uptime_ms();
+    uint64_t uptime_ms = ullGet_System_Uptime_Ms();
     uint16_t hours;
     uint8_t minutes, seconds;
     
-    convert_ms_to_hms(uptime_ms, &hours, &minutes, &seconds);
+    vConvert_Ms_To_HMS(uptime_ms, &hours, &minutes, &seconds);
 		DEBUGINFO("hours:%d,minutes:%d,seconds:%d\n",hours,minutes,seconds);
-    convert_time_to_ascii(hours, minutes, seconds, (char *)hours_ascii, (char *)minutes_ascii, (char *)seconds_ascii);
+    vConvert_Time_To_Ascii(hours, minutes, seconds, (char *)hours_ascii, (char *)minutes_ascii, (char *)seconds_ascii);
 		DEBUGINFO("hours_ascii:%s,minutes_ascii:%s,seconds_ascii:%s\n",hours_ascii,minutes_ascii,seconds_ascii);
 }
 

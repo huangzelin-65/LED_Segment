@@ -36,7 +36,7 @@ void LowVoltageDetect_Test(void)
   uint16_t i = 0;
   while (1)
   {
-    DEBUGINFO("%d\r\n",i);
+    DEBUGINFO("%d",i);
     i++;
     osDelay(pdMS_TO_TICKS(100));
   }
@@ -95,9 +95,9 @@ void vIntProcessTask(void *argument)
           break;
         
         case LowVoltageDetect:
-          //车厢电子锁检测防重入
+          // 检查到电源低电压
           DEBUGINFO("LowVoltageDetect\r\n");
-          LowVoltageDetect_Test();
+          // LowVoltageDetect_Test();
           break;
 
         case ServiceJoystick:

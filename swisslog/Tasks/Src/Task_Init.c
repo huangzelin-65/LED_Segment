@@ -35,9 +35,47 @@ extern osThreadId_t TcpReceiveTaskHandle;
 extern osThreadId_t RobotHeartBeatTaskHandle;
 extern CarStatus_t CarStatus;
 
+void vGetChipID(void)
+{
+ uint32_t uid0, uid1, uid2;
+    
+  /* 1. 禁用 ICACHE */
+  HAL_ICACHE_Disable();
+
+  // 读取芯片UID
+  uid0 = HAL_GetUIDw0();
+  uid1 = HAL_GetUIDw1();
+  uid2 = HAL_GetUIDw2();
+
+  /* 2. 重新启用 ICACHE */
+  HAL_ICACHE_Enable();
+
+  // 处理或输出UID（例如通过串口打印）
+  DEBUGINFO("STM32H563 Chip ID:\r\n");
+  DEBUGINFO("UID0: 0x%08X\r\n", uid0);
+  DEBUGINFO("UID1: 0x%08X\r\n", uid1);
+  DEBUGINFO("UID2: 0x%08X\r\n", uid2);
+}
+
+void vPower_init(void)
+{
+  GPIO_WRITE(BOX_5V,GPIO_PIN_SET);        // 车厢5V电源
+  GPIO_WRITE(Wifi_Power,GPIO_PIN_SET);    // Wifi电源
+  GPIO_WRITE(Rfid_Car_Power,GPIO_PIN_SET);// 底盘Rfid电源
+}
 
 void vInitTask(void *argument)
 {
+  DEBUGINFO("InitTask\r\n");
+
+  vPower_init();
+  vEeprom_Data_Init();
+  vTime_Tracker_Init();
+  vGetChipID();
+
+  //vEepromTest();
+
+  // Car_Set_Station_Status(InStation);// 设置小车状态为InStation
   CarStatus.xSetDirection = Forward; //小车预设运行方向为前进
   CarStatus.xMotorStopReason = NoStopReason; //小车停止原因为无
   DEBUGINFO("MotorStopReason: NoStopReason\r\n");
@@ -57,43 +95,17 @@ void vInitTask(void *argument)
   osThreadResume(HmiRecvTaskHandle);
   osThreadResume(HmiWaitTaskHandle);
   osThreadResume(BoxLEDTaskHandle);
-  osThreadResume(WifiManagerTaskHandle);
-  osThreadResume(WifiReceiveTaskHandle);
-  osThreadResume(MqttManagerTaskHandle);
-  osThreadResume(MqttReceiveTaskHandle); 
-  osThreadResume(RobotManagerTaskHandle);
-  osThreadResume(RobotReceiveTaskHandle); 
-  osThreadResume(TcpManagerTaskHandle);
-  osThreadResume(TcpReceiveTaskHandle);
-  osThreadResume(RobotHeartBeatTaskHandle);     
+  // osThreadResume(WifiManagerTaskHandle);
+  // osThreadResume(WifiReceiveTaskHandle);
+  // osThreadResume(MqttManagerTaskHandle);
+  // osThreadResume(MqttReceiveTaskHandle); 
+  // osThreadResume(RobotManagerTaskHandle);
+  // osThreadResume(RobotReceiveTaskHandle); 
+  // osThreadResume(TcpManagerTaskHandle);
+  // osThreadResume(TcpReceiveTaskHandle);
+  // osThreadResume(RobotHeartBeatTaskHandle);     
 
-  DEBUGINFO("InitTask\r\n");
 
-  vEeprom_Data_Init();
-  time_tracker_init();
-
-  //Car_Set_Station_Status(InStation);// 设置小车状态为InStation
-  
-  //vEepromTest();
-
-  uint32_t uid0, uid1, uid2;
-    
-  /* 1. 禁用 ICACHE */
-  HAL_ICACHE_Disable();
-
-  // 读取芯片UID
-  uid0 = HAL_GetUIDw0();
-  uid1 = HAL_GetUIDw1();
-  uid2 = HAL_GetUIDw2();
-
-  /* 2. 重新启用 ICACHE */
-  HAL_ICACHE_Enable();
-
-  // 处理或输出UID（例如通过串口打印）
-  DEBUGINFO("STM32H563 Chip ID:\r\n");
-  DEBUGINFO("UID0: 0x%08X\r\n", uid0);
-  DEBUGINFO("UID1: 0x%08X\r\n", uid1);
-  DEBUGINFO("UID2: 0x%08X\r\n", uid2);
 
   osThreadExit();
 }

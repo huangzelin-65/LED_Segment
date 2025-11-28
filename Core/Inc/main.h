@@ -361,18 +361,12 @@ void Error_Handler(void);
 #define TOGGLE_FRONT_Pin GPIO_PIN_4
 #define TOGGLE_FRONT_GPIO_Port GPIOH
 #define TOGGLE_FRONT_EXTI_IRQn EXTI4_IRQn
-#define LED5_Pin GPIO_PIN_8
-#define LED5_GPIO_Port GPIOG
 #define Wifi_TX_Pin GPIO_PIN_6
 #define Wifi_TX_GPIO_Port GPIOC
 #define NUMDISP_TX_Pin GPIO_PIN_3
 #define NUMDISP_TX_GPIO_Port GPIOF
 #define NUMDISP_RX_Pin GPIO_PIN_4
 #define NUMDISP_RX_GPIO_Port GPIOF
-#define LED3_Pin GPIO_PIN_7
-#define LED3_GPIO_Port GPIOG
-#define LED4_Pin GPIO_PIN_6
-#define LED4_GPIO_Port GPIOG
 #define SERVICE_FRONT_Pin GPIO_PIN_5
 #define SERVICE_FRONT_GPIO_Port GPIOF
 #define SERVICE_FRONT_EXTI_IRQn EXTI5_IRQn
@@ -381,14 +375,14 @@ void Error_Handler(void);
 #define FC_L_EXTI_IRQn EXTI12_IRQn
 #define FC_H_Pin GPIO_PIN_5
 #define FC_H_GPIO_Port GPIOG
-#define LED2_Pin GPIO_PIN_4
-#define LED2_GPIO_Port GPIOG
 #define FP_H_Pin GPIO_PIN_11
 #define FP_H_GPIO_Port GPIOH
 #define FP_H_EXTI_IRQn EXTI11_IRQn
 #define RC_H_Pin GPIO_PIN_10
 #define RC_H_GPIO_Port GPIOH
 #define RC_H_EXTI_IRQn EXTI10_IRQn
+#define LED1_Pin GPIO_PIN_15
+#define LED1_GPIO_Port GPIOD
 #define ELOCK1_STATUS_Pin GPIO_PIN_2
 #define ELOCK1_STATUS_GPIO_Port GPIOC
 #define ELOCK1_STATUS_EXTI_IRQn EXTI2_IRQn
@@ -400,6 +394,8 @@ void Error_Handler(void);
 #define RC_L_Pin GPIO_PIN_9
 #define RC_L_GPIO_Port GPIOH
 #define RC_L_EXTI_IRQn EXTI9_IRQn
+#define LED2_Pin GPIO_PIN_14
+#define LED2_GPIO_Port GPIOD
 #define SERVICE_BACK_Pin GPIO_PIN_0
 #define SERVICE_BACK_GPIO_Port GPIOA
 #define SERVICE_BACK_EXTI_IRQn EXTI0_IRQn
@@ -408,10 +404,10 @@ void Error_Handler(void);
 #define RP_H_EXTI_IRQn EXTI13_IRQn
 #define FP_L_Pin GPIO_PIN_0
 #define FP_L_GPIO_Port GPIOG
+#define Rfid_Car_Power_Pin GPIO_PIN_13
+#define Rfid_Car_Power_GPIO_Port GPIOE
 #define OUT_DIR_Pin GPIO_PIN_11
 #define OUT_DIR_GPIO_Port GPIOD
-#define LED1_Pin GPIO_PIN_10
-#define LED1_GPIO_Port GPIOD
 #define LED_BOX_B_Pin GPIO_PIN_12
 #define LED_BOX_B_GPIO_Port GPIOF
 #define RESET_Pin GPIO_PIN_15
@@ -419,10 +415,16 @@ void Error_Handler(void);
 #define RESET_EXTI_IRQn EXTI15_IRQn
 #define Motor_TX_Pin GPIO_PIN_8
 #define Motor_TX_GPIO_Port GPIOE
+#define Wifi_Power_Pin GPIO_PIN_9
+#define Wifi_Power_GPIO_Port GPIOE
 #define Rfid_Car_RX_Pin GPIO_PIN_12
 #define Rfid_Car_RX_GPIO_Port GPIOB
 #define Rfid_Car_TX_Pin GPIO_PIN_13
 #define Rfid_Car_TX_GPIO_Port GPIOB
+#define LED4_Pin GPIO_PIN_9
+#define LED4_GPIO_Port GPIOD
+#define LED3_Pin GPIO_PIN_8
+#define LED3_GPIO_Port GPIOD
 #define RP_L_Pin GPIO_PIN_3
 #define RP_L_GPIO_Port GPIOA
 #define RP_L_EXTI_IRQn EXTI3_IRQn
@@ -432,6 +434,8 @@ void Error_Handler(void);
 #define LED_BOX_G_GPIO_Port GPIOB
 #define Motor_RX_Pin GPIO_PIN_7
 #define Motor_RX_GPIO_Port GPIOE
+#define LED5_Pin GPIO_PIN_10
+#define LED5_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
 
