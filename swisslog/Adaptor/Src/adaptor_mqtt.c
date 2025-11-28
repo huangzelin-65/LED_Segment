@@ -277,8 +277,10 @@ int Mqtt_NetRead(void *context, byte* buf, int buf_len, int timeout_ms)
                 if(rec_data->rest_len <= 0)
                 {
                     rec_data->rest_len = 0;
+                    DEBUGINFO("Mqtt_PopListTail rec_data:%p data:%p\n",rec_data,rec_data->data);
+                    DEBUGINFO("mqtt_list size:%d\n",list_size(mqtt_list));
                     vPortFree(rec_data->data);
-                    Mqtt_PopListTail();
+                    Mqtt_PopListTail();                    
                 }
                 return buf_len;                             
             }
@@ -596,6 +598,7 @@ void Mqtt_ParseData2List(uint8_t *result,int len)
                     if(rec_data->data != NULL)
                     {
                         memcpy(rec_data->data, result + pos, data_len);
+                        DEBUGINFO("list_insert_head rec_data:%p data:%p\n",rec_data,rec_data->data);
                         int rc = list_insert_head(mqtt_list,rec_data);
                         if(rc == -1)
                         {

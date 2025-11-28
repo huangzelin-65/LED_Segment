@@ -90,15 +90,15 @@ void vInitTask(void *argument)
   osThreadResume(HmiRecvTaskHandle);
   osThreadResume(HmiWaitTaskHandle);
   osThreadResume(BoxLEDTaskHandle);
-  // osThreadResume(WifiManagerTaskHandle);
-  // osThreadResume(WifiReceiveTaskHandle);
-  // osThreadResume(MqttManagerTaskHandle);
-  // osThreadResume(MqttReceiveTaskHandle); 
-  // osThreadResume(RobotManagerTaskHandle);
-  // osThreadResume(RobotReceiveTaskHandle); 
-  // osThreadResume(TcpManagerTaskHandle);
-  // osThreadResume(TcpReceiveTaskHandle);
-  // osThreadResume(RobotHeartBeatTaskHandle);     
+  osThreadResume(WifiManagerTaskHandle);
+  osThreadResume(WifiReceiveTaskHandle);
+  osThreadResume(MqttManagerTaskHandle);
+  osThreadResume(MqttReceiveTaskHandle); 
+  osThreadResume(RobotManagerTaskHandle);
+  osThreadResume(RobotReceiveTaskHandle); 
+  osThreadResume(TcpManagerTaskHandle);
+  osThreadResume(TcpReceiveTaskHandle);
+  osThreadResume(RobotHeartBeatTaskHandle);     
 
 
 

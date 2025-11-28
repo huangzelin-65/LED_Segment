@@ -44,7 +44,16 @@ void safe_printf_long(const char *format, ...) {
 void safe_printf_single(const char *format, ...) {
     va_list args;
     va_start(args, format);
+    #ifdef LOG_USE_MALLOC
     char *buffer  = pvPortMalloc(LOG_LENGTH_SINGLE * sizeof(char));
+    #else
+    if(printf_pos >= LOG_ARRAY_LEN)
+    {
+        printf_pos = 0;
+    }
+    char *buffer = printf_arr[printf_pos];//取出对应位号的字符串数组
+    printf_pos = (printf_pos + 1) % LOG_ARRAY_LEN;
+    #endif    
     int len = vsnprintf(buffer, LOG_LENGTH_SINGLE, format, args);
     // 手动添加终止符
     if (len >= LOG_LENGTH_SINGLE) {

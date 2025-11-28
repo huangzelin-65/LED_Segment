@@ -105,6 +105,7 @@ void vRobotReceiveTask(void *argument)
                         else
                         {
                             DEBUGINFO("Robot_GetStateJsonStr fail\n");  
+                            DEBUGINFO("xPortGetFreeHeapSize %u bytes\r\n", xPortGetFreeHeapSize()); 
                         }
                         //释放内存
                         vPortFree(robot_msg->data);
@@ -175,6 +176,12 @@ void vRobotHeartBeatTask(void *argument)
                     Robot_Notify(ROBOT_HEARTBEAT);
                 }
             }
+        }
+        static int cnt = 0;
+        if(cnt++ >= 10)
+        {
+            cnt = 0;
+            DEBUGINFO("xPortGetFreeHeapSize %u bytes\r\n", xPortGetFreeHeapSize());
         }
         // 延时到下一个周期（关键：保证间隔准确）
         vTaskDelayUntil(&xLastWakeTime, xPeriod);        

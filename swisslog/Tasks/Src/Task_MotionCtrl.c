@@ -47,12 +47,12 @@ void vMotorInit()
   osDelay(pdMS_TO_TICKS(500));
 
   // 设置电机加速度
-  vMotorSetting(MOTOR_SETTING_ACCEL, MOTOR_SETTING_ACCEL_1000);
+  vMotorSetting(MOTOR_SETTING_ACCEL, MOTOR_SETTING_ACCEL_8000);
 
   osDelay(pdMS_TO_TICKS(500));
 
   // 设置电机减速度
-  vMotorSetting(MOTOR_SETTING_DECEL, MOTOR_SETTING_DECEL_1000);
+  vMotorSetting(MOTOR_SETTING_DECEL, MOTOR_SETTING_DECEL_8000);
 }
 
 void vMotionCtrlTask(void *argument)

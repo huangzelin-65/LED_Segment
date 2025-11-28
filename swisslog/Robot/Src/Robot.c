@@ -688,9 +688,14 @@ char* Robot_GetStateJsonStr(void)
 {
     if(RobotJson == NULL)
     {
-        DEBUGINFO("robot_GetStateJsonStr fail\n");
+        DEBUGINFO("RobotJson is null ,fail\n");
         return NULL;
-    }    
+    } 
+    if(cJSON_IsInvalid(RobotJson))
+    {
+        DEBUGINFO("cJSON_IsInvalid  fail\n");
+        return NULL;        
+    }   
     char* json_str = cJSON_PrintUnformatted(RobotJson);
     return json_str;
 }
