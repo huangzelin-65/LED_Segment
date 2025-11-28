@@ -16,6 +16,7 @@
 #include "motor_LD25B60G.h"
 #include "LogDebugInfo.h"
 #include "adaptor_beep.h"
+#include "adaptor_power.h"
 
 extern QueueHandle_t xMotion_QueueHandle;
 extern QueueHandle_t xSensor_QueueHandle;
@@ -303,6 +304,8 @@ void vSensorTask(void *argument)
         //*********************** 开始复位（复位按钮持续触发1秒） **********************
         case Reset:
           DEBUGINFO("SystemReset\r\n");
+          vPower_DeInit(); // 关闭电源
+          osDelay(pdMS_TO_TICKS(1000));  // 等待电源关闭
           NVIC_SystemReset();
           break;
 

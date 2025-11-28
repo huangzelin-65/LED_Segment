@@ -4,6 +4,7 @@
 #include "cmsis_os2.h"
 #include "LogDebugInfo.h"
 #include "adaptor_eeprom.h"
+#include "adaptor_power.h"
 #include "SystemTime.h"
 #include "Task_BoxCtrl.h"
 
@@ -57,18 +58,12 @@ void vGetChipID(void)
   DEBUGINFO("UID2: 0x%08X\r\n", uid2);
 }
 
-void vPower_init(void)
-{
-  GPIO_WRITE(BOX_5V,GPIO_PIN_SET);        // 车厢5V电源
-  GPIO_WRITE(Wifi_Power,GPIO_PIN_SET);    // Wifi电源
-  GPIO_WRITE(Rfid_Car_Power,GPIO_PIN_SET);// 底盘Rfid电源
-}
 
 void vInitTask(void *argument)
 {
   DEBUGINFO("InitTask\r\n");
 
-  vPower_init();
+  vPower_Init();
   vEeprom_Data_Init();
   vTime_Tracker_Init();
   vGetChipID();

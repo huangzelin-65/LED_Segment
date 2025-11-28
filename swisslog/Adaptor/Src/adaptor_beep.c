@@ -4,7 +4,6 @@
 #include "task.h"
 #include "adaptor_beep.h"
 #include "LogDebugInfo.h"
-#include "adaptor_beep.h"
 
 // 蜂鸣器PWM配置参数
 #define BUZZER_TIM &htim4  // TIM4
