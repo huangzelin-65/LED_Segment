@@ -798,7 +798,7 @@ void Robot_SendMsg(RobotMsgType_t type,void *data)
         DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(xRobotQueueHandle),uxQueueSpacesAvailable(xRobotQueueHandle));
         if (xQueueSend(xRobotQueueHandle, &robot_msg, portMAX_DELAY) == pdPASS) 
         {
-            DEBUGINFO("xRobotQueueHandle add success");
+            DEBUGINFO("type :%d\n",type);
         } 
     }     
 }

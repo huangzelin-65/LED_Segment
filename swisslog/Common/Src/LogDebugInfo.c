@@ -7,6 +7,9 @@
 #include "cmsis_os2.h"
 #include <stdlib.h>
 
+char printf_arr[LOG_ARRAY_LEN][LOG_LENGTH_LONG];
+int printf_pos = 0;
+
 extern osMessageQueueId_t xPrint_QueueHandle;
 
 extern UART_HandleTypeDef huart1;
@@ -14,7 +17,17 @@ extern UART_HandleTypeDef huart1;
 void safe_printf_long(const char *format, ...) {
     va_list args;
     va_start(args, format);
+    #ifdef LOG_USE_MALLOC
     char *buffer  = pvPortMalloc(LOG_LENGTH_LONG * sizeof(char));
+    #else
+    if(printf_pos >= LOG_ARRAY_LEN)
+    {
+        printf_pos = 0;
+    }
+    char *buffer = printf_arr[printf_pos];//取出对应位号的字符串数组
+    printf_pos = (printf_pos + 1) % LOG_ARRAY_LEN;
+    #endif
+    if(buffer == NULL)return;//防止malloc失败
     int len = vsnprintf(buffer, LOG_LENGTH_LONG, format, args);
     // 手动添加终止符
     if (len >= LOG_LENGTH_LONG) {

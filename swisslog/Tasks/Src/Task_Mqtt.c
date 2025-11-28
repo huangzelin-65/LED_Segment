@@ -53,6 +53,7 @@ void vMqttManagerTask(void *argument)
                 break;
                 case MQTT_MSG_ROBOT_EVENT:
                 {
+                    DEBUGINFO("MQTT_MSG_ROBOT_EVENT start\n");
                     char* robot_json_str = (char*)msg->data;
                     if(robot_json_str != NULL)
                     {
@@ -60,6 +61,7 @@ void vMqttManagerTask(void *argument)
                         if(mqtt_isConnected)Mqtt_PublishMsg(MQTT_TOPIC_NAME, robot_json_str, XSTRLEN(robot_json_str), 1, 0);
                         vPortFree(robot_json_str);
                     }
+                    DEBUGINFO("MQTT_MSG_ROBOT_EVENT end\n");
                 }
                 break;
                 case MQTT_MSG_SUBSCRIBE:

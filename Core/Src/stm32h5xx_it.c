@@ -795,8 +795,10 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
   if (huart->Instance == USART1)
   {
+    #ifdef LOG_USE_MALLOC
     char* tx_data = (char*)huart->pTxBuffPtr;
     vPortFree(tx_data);
+    #endif
     osSemaphoreRelease(xPrintSemHandle);  // 释放信号量,允许下一次打印
   }
   else if (huart->Instance == USART6)
