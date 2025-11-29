@@ -198,17 +198,17 @@ typedef enum
 //----------小车状态结构体------------------------------
 typedef struct
 {
-    eDirectionType xSetDirection;			// 小车设置方向记录 0:Stop/1.Forward/2:Backward    
-    eDirectionType xRealDirection;		    // 小车实际方向记录 0:Stop/1.Forward/2:Backward  
-    eSpeedType xSetSpeed;					// 小车设置速度记录 0:停止/1:低速/2:额定速度/3:高速  
-    eSpeedType xRealSpeed;				    // 小车实际速度记录 0:停止/1:低速/2:额定速度/3:高速
-    eAutoModeType xAutoMode;                   // 自动模式标志 1:Manual/2:Auto
-    eCarRunningStatusType xIsCarRunning;       // 小车运行状态 0:CarStop/1:CarReadyToRun/2:CarRunning
-    eMotorStatusType xMotorEnable;             // 电机使能标志 0:MotorDisable/1:MotorEnable
-    uint16_t CarID;	  					// 小车车号
-    uint16_t Destination;				// 小车目的地
-    CarStationStatus xStationStatus;    // 小车当前在站状态 0：InStation 1：OutStation
-    eMotorStopReasonType xMotorStopReason; // 电机停止原因
+    eDirectionType xSetDirection;			    // 小车设置方向记录 0:Stop/1.Forward/2:Backward    
+    eDirectionType xRealDirection;		        // 小车实际方向记录 0:Stop/1.Forward/2:Backward  
+    eSpeedType xSetSpeed;					    // 小车设置速度记录 0:停止/1:低速/2:额定速度/3:高速  
+    eSpeedType xRealSpeed;				        // 小车实际速度记录 0:停止/1:低速/2:额定速度/3:高速
+    eAutoModeType xAutoMode;                    // 自动模式标志 1:Manual/2:Auto
+    eCarRunningStatusType xIsCarRunning;        // 小车运行状态 0:CarStop/1:CarReadyToRun/2:CarRunning
+    eMotorStatusType xMotorEnable;              // 电机使能标志 0:MotorDisable/1:MotorEnable
+    uint16_t usCarID;	  					    // 小车车号
+    uint16_t usDestination;				        // 小车目的地
+    CarStationStatus xStationStatus;            // 小车当前在站状态 0：InStation 1：OutStation
+    eMotorStopReasonType xMotorStopReason;      // 电机停止原因
 
     eSensorMotiontType ToggleSwtichPosition;	// 拨码开关位置 ToggleStop:停车/ToggleFront:前进/ToggleBack:后退
     eSensorMotiontType ServiceJoystickPosition; // 维修控杆位置 ServiceStop:停车/ServiceFront:前进/ServiceBack:后退
@@ -333,6 +333,12 @@ void Error_Handler(void);
 #define LOW_VOLTAGE_DET_Pin GPIO_PIN_14
 #define LOW_VOLTAGE_DET_GPIO_Port GPIOG
 #define LOW_VOLTAGE_DET_EXTI_IRQn EXTI14_IRQn
+#define Encoder_S2_4_Pin GPIO_PIN_4
+#define Encoder_S2_4_GPIO_Port GPIOB
+#define Encoder_S2_8_Pin GPIO_PIN_3
+#define Encoder_S2_8_GPIO_Port GPIOB
+#define Encoder_S3_4_Pin GPIO_PIN_15
+#define Encoder_S3_4_GPIO_Port GPIOA
 #define BOX_5V_Pin GPIO_PIN_4
 #define BOX_5V_GPIO_Port GPIOE
 #define ELOCK_EN1_Pin GPIO_PIN_5
@@ -348,6 +354,8 @@ void Error_Handler(void);
 #define NUMDISP_485_CTRL_GPIO_Port GPIOC
 #define UV_CLEAN_EN_Pin GPIO_PIN_8
 #define UV_CLEAN_EN_GPIO_Port GPIOI
+#define Encoder_S3_2_Pin GPIO_PIN_15
+#define Encoder_S3_2_GPIO_Port GPIOH
 #define USART1_RX_Pin GPIO_PIN_10
 #define USART1_RX_GPIO_Port GPIOA
 #define ELOCK_EN2_Pin GPIO_PIN_11
@@ -375,6 +383,8 @@ void Error_Handler(void);
 #define FC_L_EXTI_IRQn EXTI12_IRQn
 #define FC_H_Pin GPIO_PIN_5
 #define FC_H_GPIO_Port GPIOG
+#define Encoder_S2_2_Pin GPIO_PIN_3
+#define Encoder_S2_2_GPIO_Port GPIOG
 #define FP_H_Pin GPIO_PIN_11
 #define FP_H_GPIO_Port GPIOH
 #define FP_H_EXTI_IRQn EXTI11_IRQn
@@ -383,11 +393,15 @@ void Error_Handler(void);
 #define RC_H_EXTI_IRQn EXTI10_IRQn
 #define LED1_Pin GPIO_PIN_15
 #define LED1_GPIO_Port GPIOD
+#define Encoder_S2_1_Pin GPIO_PIN_2
+#define Encoder_S2_1_GPIO_Port GPIOG
 #define ELOCK1_STATUS_Pin GPIO_PIN_2
 #define ELOCK1_STATUS_GPIO_Port GPIOC
 #define ELOCK1_STATUS_EXTI_IRQn EXTI2_IRQn
 #define MOTOR_485_CTRL_Pin GPIO_PIN_3
 #define MOTOR_485_CTRL_GPIO_Port GPIOC
+#define Encoder_S3_8_Pin GPIO_PIN_2
+#define Encoder_S3_8_GPIO_Port GPIOB
 #define TOGGLE_BACK_Pin GPIO_PIN_1
 #define TOGGLE_BACK_GPIO_Port GPIOG
 #define TOGGLE_BACK_EXTI_IRQn EXTI1_IRQn
@@ -406,8 +420,8 @@ void Error_Handler(void);
 #define FP_L_GPIO_Port GPIOG
 #define Rfid_Car_Power_Pin GPIO_PIN_13
 #define Rfid_Car_Power_GPIO_Port GPIOE
-#define OUT_DIR_Pin GPIO_PIN_11
-#define OUT_DIR_GPIO_Port GPIOD
+#define Encoder_S1_1_Pin GPIO_PIN_11
+#define Encoder_S1_1_GPIO_Port GPIOD
 #define LED_BOX_B_Pin GPIO_PIN_12
 #define LED_BOX_B_GPIO_Port GPIOF
 #define RESET_Pin GPIO_PIN_15
@@ -432,10 +446,14 @@ void Error_Handler(void);
 #define LED_BOX_R_GPIO_Port GPIOB
 #define LED_BOX_G_Pin GPIO_PIN_0
 #define LED_BOX_G_GPIO_Port GPIOB
+#define Encoder_S1_2_Pin GPIO_PIN_14
+#define Encoder_S1_2_GPIO_Port GPIOF
 #define Motor_RX_Pin GPIO_PIN_7
 #define Motor_RX_GPIO_Port GPIOE
 #define LED5_Pin GPIO_PIN_10
 #define LED5_GPIO_Port GPIOE
+#define Encoder_S3_1_Pin GPIO_PIN_14
+#define Encoder_S3_1_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

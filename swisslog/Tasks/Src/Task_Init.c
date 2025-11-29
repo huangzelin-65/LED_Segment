@@ -7,6 +7,7 @@
 #include "adaptor_power.h"
 #include "SystemTime.h"
 #include "Task_BoxCtrl.h"
+#include "Encoder.h"
 
 
 extern osThreadId_t InitTaskHandle;
@@ -52,10 +53,7 @@ void vGetChipID(void)
   HAL_ICACHE_Enable();
 
   // 处理或输出UID（例如通过串口打印）
-  DEBUGINFO("STM32H563 Chip ID:\r\n");
-  DEBUGINFO("UID0: 0x%08X\r\n", uid0);
-  DEBUGINFO("UID1: 0x%08X\r\n", uid1);
-  DEBUGINFO("UID2: 0x%08X\r\n", uid2);
+  DEBUGINFO("STM32H563 Chip ID: UID0: 0x%08lX, UID1: 0x%08lX, UID2: 0x%08lX\r\n", uid0, uid1, uid2);
 }
 
 
@@ -65,15 +63,16 @@ void vInitTask(void *argument)
 
   vPower_Init();
   vEeprom_Data_Init();
+  // vEepromTest();
   vTime_Tracker_Init();
   vGetChipID();
 
-  //vEepromTest();
+  CarStatus.usCarID = usEncoder_Read_Number(); // 读取编码器编号
+  DEBUGINFO("CarID: %d", CarStatus.usCarID);
 
   // Car_Set_Station_Status(InStation);// 设置小车状态为InStation
   CarStatus.xSetDirection = Forward; //小车预设运行方向为前进
   CarStatus.xMotorStopReason = NoStopReason; //小车停止原因为无
-  DEBUGINFO("MotorStopReason: NoStopReason\r\n");
 
   osThreadResume(PrintTaskHandle);
   osThreadResume(IntProcessTaskHandle); 
