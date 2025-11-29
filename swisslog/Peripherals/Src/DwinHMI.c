@@ -613,7 +613,7 @@ void HMI_Update_LastUvDuration_Req(uint8_t LastUvDuration){
 }
 
 void _HMI_Update_CarNum_Req(uint8_t add, uint8_t carNum[2]){
-	DEBUGINFO("\r\n");
+	// DEBUGINFO("\r\n");
 	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(4);
 	sendSt->cmd = DwinWriteValue;
 	sendSt->length  = 5;

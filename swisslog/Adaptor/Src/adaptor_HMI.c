@@ -12,8 +12,8 @@ extern osSemaphoreId_t xHMITxSemHandle;
 
 void vSendToHMI(uint8_t * CmdDataArr,uint8_t len)
 {
-  DEBUGINFO("send len = %d ,data:",len);
-  vPrint_Array(CmdDataArr,len);
+  // DEBUGINFO("send len = %d ,data:",len);
+  // vPrint_Array(CmdDataArr,len);
 
 	// 获取HMI发送锁
   if (osSemaphoreAcquire(xHMITxSemHandle, osWaitForever) == osOK) 

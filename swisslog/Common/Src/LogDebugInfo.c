@@ -7,8 +7,12 @@
 #include "cmsis_os2.h"
 #include <stdlib.h>
 
-char printf_arr[LOG_ARRAY_LEN][LOG_LENGTH_LONG];
-int printf_pos = 0;
+// 静态缓冲区
+char printf_arr_long[LOG_ARRAY_LEN][LOG_LENGTH_LONG];
+char printf_arr_single[LOG_ARRAY_LEN][LOG_LENGTH_SINGLE];
+
+int printf_pos_long = 0;
+int printf_pos_single = 0;
 
 extern osMessageQueueId_t xPrint_QueueHandle;
 
@@ -20,12 +24,12 @@ void safe_printf_long(const char *format, ...) {
     #ifdef LOG_USE_MALLOC
     char *buffer  = pvPortMalloc(LOG_LENGTH_LONG * sizeof(char));
     #else
-    if(printf_pos >= LOG_ARRAY_LEN)
+    if(printf_pos_long >= LOG_ARRAY_LEN)
     {
-        printf_pos = 0;
+        printf_pos_long = 0;
     }
-    char *buffer = printf_arr[printf_pos];//取出对应位号的字符串数组
-    printf_pos = (printf_pos + 1) % LOG_ARRAY_LEN;
+    char *buffer = printf_arr_long[printf_pos_long];//取出对应位号的字符串数组
+    printf_pos_long = (printf_pos_long + 1) % LOG_ARRAY_LEN;
     #endif
     if(buffer == NULL)return;//防止malloc失败
     int len = vsnprintf(buffer, LOG_LENGTH_LONG, format, args);
@@ -47,12 +51,12 @@ void safe_printf_single(const char *format, ...) {
     #ifdef LOG_USE_MALLOC
     char *buffer  = pvPortMalloc(LOG_LENGTH_SINGLE * sizeof(char));
     #else
-    if(printf_pos >= LOG_ARRAY_LEN)
+    if(printf_pos_single >= LOG_ARRAY_LEN)
     {
-        printf_pos = 0;
+        printf_pos_single = 0;
     }
-    char *buffer = printf_arr[printf_pos];//取出对应位号的字符串数组
-    printf_pos = (printf_pos + 1) % LOG_ARRAY_LEN;
+    char *buffer = printf_arr_single[printf_pos_single];//取出对应位号的字符串数组
+    printf_pos_single = (printf_pos_single + 1) % LOG_ARRAY_LEN;
     #endif    
     int len = vsnprintf(buffer, LOG_LENGTH_SINGLE, format, args);
     // 手动添加终止符
