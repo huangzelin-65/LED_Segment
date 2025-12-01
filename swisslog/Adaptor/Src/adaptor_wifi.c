@@ -48,7 +48,10 @@ HAL_StatusTypeDef Wifi_SendATCmd(const char *cmd,int32_t timeout_ms)
 void Wifi_Init(void)
 {
     DEBUGINFO("Start\n");
-    wifi_status.rssi = 0;   
+    Wifi_SetPower(WIFI_POWER_OFF); //关闭wifi电源 
+    osDelay(pdMS_TO_TICKS(500));//wifi模块先掉电
+    Wifi_SetPower(WIFI_POWER_ON); //开启wifi电源 
+    osDelay(pdMS_TO_TICKS(3000));//wifi模块上电需要等待3秒才可以发送命令
 }
 //启动串口空闲中断，关闭DMA半传输中断和传输完成中断，只响应串口空闲完成中断；
 void Wifi_ReceiveInit(void)
@@ -308,6 +311,18 @@ void Wifi_ConnectAck(uint8_t* rbuf,int len)
         break;                    
         default:if(wifi_state != WIFI_IDLE)DEBUGINFO("error wifi_state:%d",wifi_state);
         break;        
+    }
+}
+
+void Wifi_SetPower(WifiPower_t power)
+{
+    if(power == WIFI_POWER_OFF)
+    {
+        GPIO_WRITE(Wifi_Power,GPIO_PIN_SET); 
+    }
+    else
+    {
+        GPIO_WRITE(Wifi_Power,GPIO_PIN_SET); 
     }
 }
 

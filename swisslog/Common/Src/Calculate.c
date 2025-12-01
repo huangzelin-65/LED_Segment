@@ -167,3 +167,15 @@ uint32_t substring_to_uint(char* str, uint16_t start, uint16_t length)
   
   return value;
 }
+
+bool waitforperiod(int *counter,int period)
+{
+    *counter = *counter + 1;
+    if(*counter >= period)
+    {
+        *counter = 0;
+        return true;
+    }
+    return false;
+}
+

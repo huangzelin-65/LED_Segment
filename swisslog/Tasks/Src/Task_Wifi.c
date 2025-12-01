@@ -11,16 +11,17 @@
 #include <stdbool.h>
 #include "queue.h"
 #include "adaptor_mqtt.h"
+#include "Calculate.h"
 
 extern osMessageQueueId_t xWifi_Parse_QueueHandle;
 
 /* WiFi管理任务入口函数 */
 void vWifiManagerTask(void *argument)
 {
-  int check_wifi_cnt = 0;  
+  int wifi_get_rssi_cnt = 0; 
+  int wifi_get_ip_cnt = 0;  
   DEBUGINFO("vWifiManagerTask\r\n");
   Wifi_Init();
-  osDelay(pdMS_TO_TICKS(3000));//wifi模块上电需要等待3秒才可以发送命令
   #ifdef MQTT_WIFI
   Wifi_ConnectStart();
   #endif
@@ -34,19 +35,18 @@ void vWifiManagerTask(void *argument)
     //增加wifi模块强度查询
     if(Wifi_IsConnected())
     {
-      if(check_wifi_cnt++ > 100)//10秒获取一次wifi信号强度
+      if(waitforperiod(&wifi_get_rssi_cnt,100))//10秒获取一次wifi信号强度
       {
-        check_wifi_cnt = 0;
-        // Wifi_SendATCmd("AT+RSSI",2000);
+        Wifi_SendATCmd("AT+RSSI",2000);
         DEBUGINFO("wifi status connect_state:%d rssi:%d ip:%s\n",wifi_status.connect_state,wifi_status.rssi,wifi_status.ip);
       }
-      if(check_wifi_cnt == 50)
+      if(waitforperiod(&wifi_get_ip_cnt,100))//10秒获取一次获取ip地址,如果没有获取
       {
-        if(wifi_status.ip[0] == 0)//获取ip地址
+        if(wifi_status.ip[0] == 0)
         {
           Wifi_SendATCmd("AT+LIP",2000);
-        }        
-      }
+        }
+      }   
     }    
 	  osDelay(pdMS_TO_TICKS(100));
   }

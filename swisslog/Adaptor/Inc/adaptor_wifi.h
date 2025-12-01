@@ -49,6 +49,12 @@ typedef struct
     char ip[36];    
 }WifiStatus_t;
 
+typedef enum
+{
+    WIFI_POWER_OFF = 0,
+    WIFI_POWER_ON,
+} WifiPower_t;
+
 extern WifiStatus_t wifi_status;
 extern WifiParseData_t wifi_parse_array[WIFI_ARRAY_LEN];
 
@@ -62,7 +68,7 @@ void Wifi_ConnectAck(uint8_t* rbuf,int len);
 bool Wifi_IsConnected(void);
 bool Wifi_IsChanged(void);
 void Wifi_Init(void);
-
+void Wifi_SetPower(WifiPower_t power);
 
 
 
