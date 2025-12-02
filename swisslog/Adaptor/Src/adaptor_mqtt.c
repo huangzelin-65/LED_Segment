@@ -472,6 +472,7 @@ static int Mqtt_MessageCb(MqttClient *client, MqttMessage *msg,byte msg_new, byt
         if(receive_data != NULL)
         {
             XMEMCPY(receive_data, msg->buffer, len);
+            receive_data[len] = '\0';
             Robot_SendMsg(ROBOT_MSG_PARSE,receive_data);
         }
         else
