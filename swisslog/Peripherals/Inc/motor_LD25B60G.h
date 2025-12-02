@@ -58,6 +58,8 @@ typedef enum
   MOTOR_SETTING_DECEL_1000,
 }eMotorSettingParam;
 
+void vMotorEnable(void);
+void vMotorDisable(void);
 void vMotorOps(u8 Direction, u8 Speed);
 void vMotorSetting(eMotorSetting xSetting, eMotorSettingParam xParam);
 void vMotorRead(u8 Cmd);

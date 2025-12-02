@@ -44,6 +44,9 @@ void vCarRunStatusInit()
 
 void vMotorInit()
 {
+  // 电机使能
+  vMotorEnable();
+
   osDelay(pdMS_TO_TICKS(500));
 
   // 设置电机加速度
@@ -80,7 +83,15 @@ void vMotionCtrlTask(void *argument)
             //CarStatus.RealDirection = NoDirection; //清除方向记录
             CarStatus.xMotorEnable = MotorDisable; //电机使能状态清除
             CarStatus.xIsCarRunning = CarStop; //小车状态记录为停止
-            vMotorOps(NoDirection, ZeroSpeed);  // 电机停止
+
+            // 若是由于rfid停止标签导致的停止，则不禁用电机
+            if(CarStatus.xMotorStopReason == ByStopTag)
+            {
+              vMotorOps(NoDirection, ZeroSpeed);  // 设置0速度
+            } else {
+              vMotorDisable();  // 禁用电机
+            }
+            
             GPIO_WRITE(LED4, GPIO_PIN_RESET); // 关闭LED4
             DEBUGINFO("disable LED4 \r\n");
             break;
@@ -113,7 +124,17 @@ void vMotionCtrlTask(void *argument)
                     // 电机按预设运行方向 和 预设速度运行
                     CarStatus.xIsCarRunning = CarRunning;
                     CarStatus.xRealDirection = CarStatus.xSetDirection;
-                    vMotorOps(CarStatus.xRealDirection, CarStatus.xSetSpeed);  
+
+                    // 若是由于rfid停止标签导致的停止，则不用再使能电机
+                    if(CarStatus.xMotorStopReason == ByStopTag)
+                    {
+                      vMotorOps(CarStatus.xRealDirection, CarStatus.xSetSpeed);  
+                    } else {
+                      vMotorEnable();  // 电机使能
+                      osDelay(pdMS_TO_TICKS(100));
+                      vMotorOps(CarStatus.xRealDirection, CarStatus.xSetSpeed); 
+                    }
+                    
                     GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
                     DEBUGINFO("LED4 ON\r\n");
                   }
@@ -128,6 +149,8 @@ void vMotionCtrlTask(void *argument)
                 DEBUGINFO("remote Manual mode\r\n");
                 // 电机按实际运行方向 和 普通速度运行（手动档下）
                 CarStatus.xIsCarRunning = CarRunning;
+                vMotorEnable();  // 电机使能
+                osDelay(pdMS_TO_TICKS(100));
                 vMotorOps(CarStatus.xRealDirection, CarStatus.xSetSpeed);  
                 GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
                 DEBUGINFO("LED4 ON\r\n");
@@ -148,6 +171,8 @@ void vMotionCtrlTask(void *argument)
                 {
                   // 电机按最低速度运行（手动档下）
                   CarStatus.xIsCarRunning = CarRunning;
+                  vMotorEnable();  // 电机使能
+                  osDelay(pdMS_TO_TICKS(100));
                   vMotorOps(CarStatus.xRealDirection, LowSpeed); 
                   GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
                   DEBUGINFO("LED4 ON\r\n");
@@ -179,7 +204,7 @@ void vMotorFeedbackTask(void *argument)
     {
       ucReciveLen = ulMotor_Get_DMA_Receive_Len();
 
-      DEBUGINFO("Motor received len:%d\r\n",ucReciveLen);
+      DEBUGINFO("Motor received len:%d",ucReciveLen);
       vPrint_Array(ucMotor_Task_Rx_Buffer, ucReciveLen);
 
       // 重启DMA接收(DMA单次模式下，重启后从缓冲区起始地址覆盖写入)

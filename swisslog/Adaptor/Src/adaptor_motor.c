@@ -19,6 +19,9 @@ extern osSemaphoreId_t xMotorTxSemHandle;
 
 void vSendToMotor(uint8_t * CmdDataArr,uint8_t len)
 {
+  // DEBUGINFO("send len = %d ,data:",len);
+  // vPrint_Array(CmdDataArr,len);
+
   // 获取RS485发送锁
   if (osSemaphoreAcquire(xMotorTxSemHandle, osWaitForever) == osOK) 
   {
