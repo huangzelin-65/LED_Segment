@@ -11,12 +11,14 @@
 #include <stdbool.h>
 #include "queue.h"
 #include "Robot.h"
+#include "Encoder.h"
 
-#define MQTT_TOPIC_NAME                 "tk/v1/slhc/tkv-1/state" 
-#define MQTT_HEARTBEAT_TOPIC_NAME       "tk/v1/slhc/tkv-1/connection" 
+#define MQTT_TOPIC_NAME                 "tk/v1/slhc/tkv-%d/state" 
+#define MQTT_HEARTBEAT_TOPIC_NAME       "tk/v1/slhc/tkv-%d/connection" 
 #define MQTT_PUBLISH_MSG                "HEARTBEAT"
 #define MQTT_CMD_TIMEOUT_MS             30000
 
+extern CarStatus_t CarStatus;
 extern osMessageQueueId_t xMqttManagerQueueHandle;
 //mqtt主任务，处理初始化，发送消息等
 void vMqttManagerTask(void *argument)
@@ -47,7 +49,9 @@ void vMqttManagerTask(void *argument)
                 case MQTT_MSG_HEARTBEAT:
                 {
                     char* robot_json_str = (char*)msg->data;
-                    if(mqtt_isConnected)Mqtt_PublishMsg(MQTT_HEARTBEAT_TOPIC_NAME, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
+                    char topic[64] = {0};
+                    snprintf(topic, sizeof(topic), MQTT_HEARTBEAT_TOPIC_NAME, CarStatus.usCarID);//usEncoder_Read_Number()                  
+                    if(mqtt_isConnected)Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
                     vPortFree(robot_json_str);
                 }
                 break;
@@ -58,7 +62,9 @@ void vMqttManagerTask(void *argument)
                     if(robot_json_str != NULL)
                     {
                         DEBUGINFO("robot_json_str:%s\n",robot_json_str);
-                        if(mqtt_isConnected)Mqtt_PublishMsg(MQTT_TOPIC_NAME, robot_json_str, XSTRLEN(robot_json_str), 1, 0);
+                        char topic[64] = {0};
+                        snprintf(topic, sizeof(topic), MQTT_TOPIC_NAME, CarStatus.usCarID);//usEncoder_Read_Number()
+                        if(mqtt_isConnected)Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 1, 0);
                         vPortFree(robot_json_str);
                     }
                     DEBUGINFO("MQTT_MSG_ROBOT_EVENT end\n");

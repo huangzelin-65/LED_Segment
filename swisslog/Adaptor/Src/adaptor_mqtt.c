@@ -22,7 +22,7 @@
 #define MQTT_CON_TIMEOUT_MS    1500
 #define MQTT_CLIENT_ID         "WolfMQTTClientSimple"
 #define MQTT_TOPIC_NAME        "bcss/v1/slhc/st_1/state"
-#define MQTT_SUB_TOPIC_NAME    "tk/v1/slhc/tkv-1/instantactions" 
+#define MQTT_SUB_TOPIC_NAME    "tk/v1/slhc/tkv-%d/instantactions" 
 #define MQTT_PUBLISH_MSG       "Test Publish"
 #define MQTT_USERNAME          "hcms_mqtt"
 #define MQTT_PASSWORD          "KM5zng23"
@@ -40,7 +40,7 @@
 #define MQTT_RX_BUF_SIZE       1024
 #define MQTT_SUBSCRIBE_COUNT     1
 // #define MQTT_STATIC_ARRAY
-
+extern CarStatus_t CarStatus;
 extern UART_HandleTypeDef huart6;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel2;
 extern osMutexId_t wifiUsartMutexHandle;
@@ -810,7 +810,9 @@ int Mqtt_SubscribeTopicInit(void)
         {
             case 0:
             {
-                subscribe_topics[i].topic_filter = MQTT_SUB_TOPIC_NAME;
+                char topic[64] = {0};
+                snprintf(topic, sizeof(topic), MQTT_SUB_TOPIC_NAME, CarStatus.usCarID);                
+                subscribe_topics[i].topic_filter = topic;
                 subscribe_topics[i].qos = MQTT_QOS;
             }
             break;

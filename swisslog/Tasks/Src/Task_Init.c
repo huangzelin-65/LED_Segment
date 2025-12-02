@@ -69,6 +69,7 @@ void vInitTask(void *argument)
 
   CarStatus.usCarID = usEncoder_Read_Number(); // 读取编码器编号
   DEBUGINFO("CarID: %d", CarStatus.usCarID);
+  // CarStatus.usCarID = 3;
 
   // Car_Set_Station_Status(InStation);// 设置小车状态为InStation
   CarStatus.xSetDirection = Forward; //小车预设运行方向为前进
