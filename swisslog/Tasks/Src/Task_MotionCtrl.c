@@ -80,9 +80,8 @@ void vMotionCtrlTask(void *argument)
               CarStatus.xIsCarRunning = CarStop; //小车状态记录为停止
               Robot_Event();
             }
-            //CarStatus.RealDirection = NoDirection; //清除方向记录
             CarStatus.xMotorEnable = MotorDisable; //电机使能状态清除
-            CarStatus.xIsCarRunning = CarStop; //小车状态记录为停止
+            // CarStatus.xIsCarRunning = CarStop; //小车状态记录为停止
 
             // 若是由于rfid停止标签导致的停止，则不禁用电机
             if(CarStatus.xMotorStopReason == ByStopTag)
@@ -178,6 +177,14 @@ void vMotionCtrlTask(void *argument)
                   DEBUGINFO("LED4 ON\r\n");
                 }
               }
+            }
+            // 拨动开关停止档
+            else if(CarStatus.ToggleSwtichPosition == ToggleStop)
+            {
+              CarStatus.xIsCarRunning = CarStop; //小车状态记录为停止
+              CarStatus.xMotorEnable = MotorDisable; //电机使能状态清除
+              CarStatus.xMotorStopReason = ByToggleStop;
+              DEBUGINFO("MotorStopReason: ByToggleStop\r\n");
             }
             Robot_Event();
             break;
