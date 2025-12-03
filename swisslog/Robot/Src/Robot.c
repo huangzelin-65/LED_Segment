@@ -9,6 +9,9 @@
 #include "queue.h"
 #include "common.h"
 #include "semphr.h"
+#include "Encoder.h"
+
+// #define USE_UID
 
 extern CarStatus_t CarStatus;
 extern ServerToCarData_t ServerToCarData;
@@ -65,6 +68,7 @@ RobotState_t robotSate = {
     .errors = {ERROR_TYPE_NONE, ERROR_LEVEL_LOW},
     .mutex = NULL,
     .heartbeat_cnt = 0,
+	.encode_number = 0, //编码器序号
     .robotActionAck = {
     .headerId = "h2:789",       // 示例headerId（不超过8字符，含结束符）
     .timestamp = "1731302345678", // 示例Unix毫秒时间戳字符串
@@ -769,6 +773,11 @@ void Robot_Init(void)
 
     Robot_CreateHeartBeatJson();
 
+    robotSate.encode_number = usEncoder_Read_Number();
+
+    DEBUGINFO("encode_number:%d",robotSate.encode_number);
+
+    #ifdef USE_UID
     //获取uid
     HAL_ICACHE_Disable();
     robotSate.UID[0] = HAL_GetUIDw0();
@@ -781,6 +790,13 @@ void Robot_Init(void)
     snprintf(robotSate.client_id, sizeof(robotSate.client_id), "%ld%ld%ld", robotSate.UID[0],robotSate.UID[1],robotSate.UID[2]);
 
     DEBUGINFO("client_id %s\n",robotSate.client_id);
+    #else
+
+    snprintf(robotSate.client_id, sizeof(robotSate.client_id), "tkcar-%d",robotSate.encode_number);
+
+    DEBUGINFO("client_id %s\n",robotSate.client_id);
+    
+    #endif
     //互斥锁创建
     robotSate.mutex = xSemaphoreCreateMutex();
     if (robotSate.mutex == NULL) {

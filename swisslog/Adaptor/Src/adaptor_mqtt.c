@@ -802,7 +802,7 @@ int Mqtt_SubscribeMsg(MqttTopic *topics,int count)
 }
 
 //需要订阅的话题初始化
-int Mqtt_SubscribeTopicInit(void)
+int Mqtt_SubscribeTopicInit(uint16_t id)
 {
     DEBUGINFO("start");
     for (int i = 0; i < MQTT_SUBSCRIBE_COUNT; i++)
@@ -812,7 +812,7 @@ int Mqtt_SubscribeTopicInit(void)
             case 0:
             {
                 char topic[64] = {0};
-                snprintf(topic, sizeof(topic), MQTT_SUB_TOPIC_NAME, CarStatus.usCarID);                
+                snprintf(topic, sizeof(topic), MQTT_SUB_TOPIC_NAME, id);                
                 subscribe_topics[i].topic_filter = topic;
                 subscribe_topics[i].qos = MQTT_QOS;
             }

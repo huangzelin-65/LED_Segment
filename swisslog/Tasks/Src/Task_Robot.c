@@ -182,7 +182,7 @@ void vRobotHeartBeatTask(void *argument)
         {
             cnt = 0;
             DEBUGINFO("xPortGetFreeHeapSize %u bytes\r\n", xPortGetFreeHeapSize());
-            DEBUGINFO("CarID: %d", CarStatus.usCarID);
+            DEBUGINFO("robotSate.encode_number: %d", robotSate.encode_number);
         }
         // 延时到下一个周期（关键：保证间隔准确）
         vTaskDelayUntil(&xLastWakeTime, xPeriod);        

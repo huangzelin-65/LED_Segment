@@ -99,6 +99,7 @@ typedef struct {
     RobotActionAck_t robotActionAck;
     void* mutex;           // 线程安全锁（FreeRTOS互斥锁）
     int heartbeat_cnt;
+    uint16_t encode_number;
 } RobotState_t;
 
 

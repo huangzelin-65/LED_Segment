@@ -77,7 +77,7 @@ void Mqtt_SendMsg(MqttMsgType_t msg,char *data);
 void Mqtt_ParseData(uint8_t* rbuf,int len);
 void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t qos, uint8_t retain);
 int Mqtt_SubscribeMsg(MqttTopic *topics,int count);
-int Mqtt_SubscribeTopicInit(void);
+int Mqtt_SubscribeTopicInit(uint16_t id);
 void Mqtt_SetMsgCb(MqttClient *client,MqttMsgCb msg_cb);
 void Mqtt_ListInit(void);
 int Mqtt_GetListSize(void);

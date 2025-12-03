@@ -50,7 +50,7 @@ void vMqttManagerTask(void *argument)
                 {
                     char* robot_json_str = (char*)msg->data;
                     char topic[64] = {0};
-                    snprintf(topic, sizeof(topic), MQTT_HEARTBEAT_TOPIC_NAME, CarStatus.usCarID);//usEncoder_Read_Number()                  
+                    snprintf(topic, sizeof(topic), MQTT_HEARTBEAT_TOPIC_NAME, robotSate.encode_number);                  
                     if(mqtt_isConnected)Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
                     vPortFree(robot_json_str);
                 }
@@ -63,7 +63,7 @@ void vMqttManagerTask(void *argument)
                     {
                         DEBUGINFO("robot_json_str:%s\n",robot_json_str);
                         char topic[64] = {0};
-                        snprintf(topic, sizeof(topic), MQTT_TOPIC_NAME, CarStatus.usCarID);//usEncoder_Read_Number()
+                        snprintf(topic, sizeof(topic), MQTT_TOPIC_NAME, robotSate.encode_number);
                         if(mqtt_isConnected)Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 1, 0);
                         vPortFree(robot_json_str);
                     }
@@ -72,7 +72,7 @@ void vMqttManagerTask(void *argument)
                 break;
                 case MQTT_MSG_SUBSCRIBE:
                 {
-                    int rc = Mqtt_SubscribeTopicInit();
+                    int rc = Mqtt_SubscribeTopicInit(robotSate.encode_number);
                     if (rc != MQTT_CODE_SUCCESS) {
                         DEBUGINFO("Mqtt_SubscribeTopicInit fail");
                         //订阅话题失败，尝试再次订阅
