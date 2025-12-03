@@ -45,7 +45,7 @@ void vSendToBoxRfid(uint8_t* ucBoxRfidSendBuffer, uint32_t ucLen)
   taskENTER_CRITICAL(); // 进入临界区
   HAL_UART_Transmit_IT(&huart8, ucBoxRfidSendBuffer, ucLen); // 启动中断发送
   taskEXIT_CRITICAL(); // 退出临界区
-  DEBUGINFO("ucBoxRfidSendBuffer:\r\n");
+  DEBUGINFO("ucBoxRfidSendBuffer:");
   vPrint_Array(ucBoxRfidSendBuffer, ucLen);
 }
 

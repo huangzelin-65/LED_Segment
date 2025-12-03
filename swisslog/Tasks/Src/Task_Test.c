@@ -36,7 +36,7 @@ void vTestTask(void *argument)
     if (osSemaphoreAcquire(xTestRxSemHandle, osWaitForever) == osOK)
     {
       ucReciveLen = ulTest_Get_DMA_Receive_Len();
-      DEBUGINFO("Test received len:%d\r\n",ucReciveLen);
+      DEBUGINFO("Test received len:%d",ucReciveLen);
       vPrint_Array(ucTest_Rx_Buffer, ucReciveLen);
 
       ServerToCarData.xAutoMode = ucTest_Rx_Buffer[0]; // 模式选择

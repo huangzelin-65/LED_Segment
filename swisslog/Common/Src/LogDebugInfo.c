@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include <stdarg.h>
@@ -71,16 +72,53 @@ void safe_printf_single(const char *format, ...) {
     }
 }
 
+/**
+ * @brief  uint8_t数组（十六进制数据）→ 带空格分隔的十六进制字符串（用于打印）
+ * @param  src:       源uint8_t数组（存储十六进制数据）
+ * @param  src_len:   源数组长度
+ * @param  dst:       目标字符串缓冲区（存储转换结果）
+ * @param  dst_len:   目标缓冲区最大长度（需≥3*src_len，否则转换失败）
+ * @return int:       0=成功，-1=失败（参数错误/缓冲区不足）
+ */
+int uint8_hex_to_space_str(const uint8_t* src, uint32_t src_len, char* dst, uint32_t dst_len) {
+    // 1. 参数校验（避免空指针、缓冲区不足）
+    if (src == NULL || dst == NULL || src_len == 0) {
+        DEBUGINFO("Error: Source array/target buffer is null or the array length is 0");
+        return -1;
+    }
+    // 缓冲区最小需求：3*src_len（3*n = 2位十六进制+1空格（最后1个字节无空格） + '\0'）
+    if (dst_len < 3 * src_len) {
+        DEBUGINFO("Error: Insufficient buffer! At least %d bytes are required, only %d bytes available", 3*src_len, dst_len);
+        return -1;
+    }
+
+    // 2. 清空缓冲区（避免残留脏数据）
+    memset(dst, 0, dst_len);
+
+    // 3. 循环转换每个字节（最后1个字节不加空格）
+    for (uint32_t i = 0; i < src_len; i++) {
+        if (i == src_len - 1) {
+            // 最后1个字节：仅格式化2位十六进制（无空格）
+            snprintf(dst + 3*i, 3, "%02X", src[i]);
+        } else {
+            // 中间字节：格式化2位十六进制 + 空格（占3个字符位置）
+            snprintf(dst + 3*i, 4, "%02X ", src[i]);
+        }
+    }
+
+    return 0;
+}
 
 
 void vPrint_Array(uint8_t *array, uint8_t len)
 {
-  uint8_t i;
-  for(i=0; i<len; i++)
-  {
-    safe_printf_single("%X ",array[i]);
-  }
-  safe_printf_single("\r\n");
+    // 目标字符串缓冲区
+    char print_str[3 * len];
+
+    // 转换并检查结果
+    if (uint8_hex_to_space_str(array, len, print_str, sizeof(print_str)) == 0) {
+        safe_printf_long("%s\r\n", print_str);
+    }
 }
 
 
