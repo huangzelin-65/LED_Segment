@@ -12,10 +12,19 @@ extern UART_HandleTypeDef huart5;
 
 
 void vCarRfid_Start_DMA_Receive(uint8_t* ucCarRfid_Rx_Buffer) {
+  // 1. 清除接收非空（RXNE）和溢出（ORE）标志
+  __HAL_UART_CLEAR_FLAG(&huart5, UART_FLAG_RXNE);
+  __HAL_UART_CLEAR_FLAG(&huart5, UART_FLAG_ORE);
+
+  // 2. 读取RDR寄存器（强制清空残留数据，即使无数据也不会阻塞）
+  uint8_t temp;
+  HAL_UART_Receive(&huart5, &temp, 1, 0); // 超时时间设为0，立即返回
+
+  // 3. 启动DMA接收（此时无残留数据，接收正常）
   if(HAL_UARTEx_ReceiveToIdle_DMA(&huart5, ucCarRfid_Rx_Buffer, CAR_RFID_RX_BUF_SIZE)!=HAL_OK)
   {
     DEBUGINFO("HAL_UARTEx_ReceiveToIdle_DMA() retry\r\n");
-    // 启动DMA接收
+    // 第一次启动DMA接收失败后，再次启动DMA接收
     HAL_UARTEx_ReceiveToIdle_DMA(&huart5, ucCarRfid_Rx_Buffer, CAR_RFID_RX_BUF_SIZE);
   }
   __HAL_DMA_DISABLE_IT(huart5.hdmarx, DMA_IT_HT);
@@ -41,10 +50,19 @@ void vSendToBoxRfid(uint8_t* ucBoxRfidSendBuffer, uint32_t ucLen)
 }
 
 void vBoxRfid_Start_DMA_Receive(uint8_t* ucBoxRfid_Rx_Buffer) {
+  // 1. 清除接收非空（RXNE）和溢出（ORE）标志
+  __HAL_UART_CLEAR_FLAG(&huart8, UART_FLAG_RXNE);
+  __HAL_UART_CLEAR_FLAG(&huart8, UART_FLAG_ORE);
+
+  // 2. 读取RDR寄存器（强制清空残留数据，即使无数据也不会阻塞）
+  uint8_t temp;
+  HAL_UART_Receive(&huart8, &temp, 1, 0); // 超时时间设为0，立即返回
+
+  // 3. 启动DMA接收（此时无残留数据，接收正常）
   if(HAL_UARTEx_ReceiveToIdle_DMA(&huart8, ucBoxRfid_Rx_Buffer, BOX_RFID_RX_BUF_SIZE)!=HAL_OK)
   {
     DEBUGINFO("HAL_UARTEx_ReceiveToIdle_DMA() retry\r\n");
-    // 启动DMA接收
+    // 第一次启动DMA接收失败后，再次启动DMA接收
     HAL_UARTEx_ReceiveToIdle_DMA(&huart8, ucBoxRfid_Rx_Buffer, BOX_RFID_RX_BUF_SIZE);
   }
   __HAL_DMA_DISABLE_IT(huart8.hdmarx, DMA_IT_HT);
