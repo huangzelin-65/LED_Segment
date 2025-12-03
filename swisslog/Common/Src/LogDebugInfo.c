@@ -71,46 +71,6 @@ void safe_printf_single(const char *format, ...) {
     }
 }
 
-//中断中打印函数
-void safe_printf_isr(const char *format, ...) {
-
-	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-
-    va_list args;
-    va_start(args, format);
-    char *buffer  = pvPortMalloc(LOG_LENGTH_LONG * sizeof(char));
-    int len = vsnprintf(buffer, LOG_LENGTH_LONG, format, args);
-    va_end(args);
-
-    if(xPrint_QueueHandle != NULL && len > 0) {
-    	if(xQueueSendFromISR(xPrint_QueueHandle, &buffer, &xHigherPriorityTaskWoken) != pdPASS)
-    	{
-
-    	}
-    }
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-}
-//普通和中断都可以使用的打印函数
-void safe_printf_all(const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    char *buffer  = pvPortMalloc(LOG_LENGTH_LONG * sizeof(char));
-    int len = vsnprintf(buffer, LOG_LENGTH_LONG, format, args);
-    va_end(args);
-
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    if(__get_IPSR() != 0) {//中断中
-		if(xPrint_QueueHandle != NULL && len > 0) {
-			xQueueSendFromISR(xPrint_QueueHandle, &buffer, &xHigherPriorityTaskWoken);
-		}
-    }
-    else
-    {
-		if(xPrint_QueueHandle != NULL && len > 0) {
-			xQueueSend(xPrint_QueueHandle, &buffer, portMAX_DELAY);//pdMS_TO_TICKS(100)
-		}
-    }
-}
 
 
 void vPrint_Array(uint8_t *array, uint8_t len)
