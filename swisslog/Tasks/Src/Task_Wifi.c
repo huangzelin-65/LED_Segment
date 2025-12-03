@@ -13,6 +13,8 @@
 #include "adaptor_mqtt.h"
 #include "Calculate.h"
 
+// #define WIFI_OTA
+
 extern osMessageQueueId_t xWifi_Parse_QueueHandle;
 
 /* WiFi管理任务入口函数 */
@@ -23,7 +25,11 @@ void vWifiManagerTask(void *argument)
   DEBUGINFO("vWifiManagerTask\r\n");
   Wifi_Init();
   #ifdef MQTT_WIFI
-  Wifi_ConnectStart();
+    #ifdef WIFI_OTA
+    Wifi_OtaProcess();
+    #else
+    Wifi_ConnectStart(); 
+    #endif
   #endif
   while (1)
   {

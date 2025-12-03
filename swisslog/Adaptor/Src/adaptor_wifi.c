@@ -325,4 +325,11 @@ void Wifi_SetPower(WifiPower_t power)
         GPIO_WRITE(Wifi_Power,GPIO_PIN_SET); 
     }
 }
-
+//wifi模块本身的ota
+void Wifi_OtaProcess(void)
+{
+    Wifi_SendATCmd("AT+RAP=dianys,88888888",2000);//开启手机热点给WiFi模块连接
+    osDelay(10000);
+    Wifi_SendATCmd("AT+HTTPOTA=http://120.78.6.197:8888/down/LqmWTlmwNdIU.bin",2000);//没讯提供ota连接
+    //等待ota结果
+}

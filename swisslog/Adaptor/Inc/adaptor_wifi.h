@@ -69,7 +69,7 @@ bool Wifi_IsConnected(void);
 bool Wifi_IsChanged(void);
 void Wifi_Init(void);
 void Wifi_SetPower(WifiPower_t power);
-
+void Wifi_OtaProcess(void);
 
 
 
