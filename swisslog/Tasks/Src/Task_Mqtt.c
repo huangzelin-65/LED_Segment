@@ -12,6 +12,8 @@
 #include "queue.h"
 #include "Robot.h"
 #include "Encoder.h"
+#include "semphr.h"
+#include <limits.h>
 
 #define MQTT_TOPIC_NAME                 "tk/v1/slhc/tkv-%d/state" 
 #define MQTT_HEARTBEAT_TOPIC_NAME       "tk/v1/slhc/tkv-%d/connection" 
@@ -20,6 +22,9 @@
 
 extern CarStatus_t CarStatus;
 extern osMessageQueueId_t xMqttManagerQueueHandle;
+
+int MqttReadReady = 0;
+
 //mqtt主任务，处理初始化，发送消息等
 void vMqttManagerTask(void *argument)
 {
@@ -42,17 +47,19 @@ void vMqttManagerTask(void *argument)
                         mqtt_isConnected = 1;
                         DEBUGINFO("mqtt_isConnected");
                         //服务器连接成功，需要订阅话题
-                        Mqtt_SendMsg(MQTT_MSG_SUBSCRIBE,NULL);
+                        Mqtt_Notify(MQTT_NOTIFY_SUBSCRIBE);
                     }
                 }
                 break;
                 case MQTT_MSG_HEARTBEAT:
                 {
+                    DEBUGINFO("MQTT_MSG_HEARTBEAT start\n");
                     char* robot_json_str = (char*)msg->data;
                     char topic[64] = {0};
                     snprintf(topic, sizeof(topic), MQTT_HEARTBEAT_TOPIC_NAME, robotSate.encode_number);                  
                     if(mqtt_isConnected)Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
                     vPortFree(robot_json_str);
+                    DEBUGINFO("MQTT_MSG_HEARTBEAT end\n");
                 }
                 break;
                 case MQTT_MSG_ROBOT_EVENT:
@@ -76,10 +83,29 @@ void vMqttManagerTask(void *argument)
                     if (rc != MQTT_CODE_SUCCESS) {
                         DEBUGINFO("Mqtt_SubscribeTopicInit fail");
                         //订阅话题失败，尝试再次订阅
-                        Mqtt_SendMsg(MQTT_MSG_SUBSCRIBE,NULL);                        
-                    }                    
+                        Mqtt_Notify(MQTT_NOTIFY_SUBSCRIBE);                        
+                    }  
+                    else
+                    {
+                        DEBUGINFO("Mqtt_SubscribeTopicInit success,start online");
+                        Mqtt_Notify(MQTT_NOTIFY_ONLINE);    
+                    }                                       
                 }
                 break;
+                case MQTT_MSG_ONLINE:
+                {
+                    DEBUGINFO("MQTT_MSG_ONLINE start\n");
+                    //此处需修改为online的具体内容
+                    char* robot_json_str = (char*)msg->data;
+                    char topic[64] = {0};
+                    snprintf(topic, sizeof(topic), MQTT_HEARTBEAT_TOPIC_NAME, robotSate.encode_number);                     
+                    if(mqtt_isConnected)Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
+                    vPortFree(robot_json_str);
+
+                    MqttReadReady = 1;//发布话题后既可正常等待话题
+                    DEBUGINFO("MQTT_MSG_ONLINE end\n");
+                }
+                break;                
                 default:break;
             }
             vPortFree(manage_data);
@@ -93,7 +119,7 @@ void vMqttReceiveTask(void *argument)
     int rc = 0;
     while (1)
     {
-        if(mqtt_isConnected)
+        if(MqttReadReady)
         {
             rc = MqttClient_WaitMessage_ex(&mClient, &mqttObj, MQTT_CMD_TIMEOUT_MS);
             if (rc == MQTT_CODE_ERROR_TIMEOUT) {
@@ -110,8 +136,43 @@ void vMqttReceiveTask(void *argument)
                 DEBUGINFO("MqttClient_WaitMessage_ex:%d",rc);
             }
         }
-        if(!mqtt_isConnected)osDelay(pdMS_TO_TICKS(100));
+        if(!MqttReadReady)osDelay(pdMS_TO_TICKS(100));
     }
 }
 
-
+//处理mqtt消息
+void vMqttNotifyTask(void *argument)
+{
+    uint32_t ulNotificationValue;
+    BaseType_t xResult;     
+    DEBUGINFO("vMqttNotifyTask\n"); 
+    while (1)
+    {
+      // 等待通知，超时时间为永远等待
+      // 清除方式: 收到通知后清除通知值
+      xResult = xTaskNotifyWait(0x00,    // 进入函数前不清除任何位
+                                ULONG_MAX,// 退出函数时清除所有位
+                                &ulNotificationValue, 
+                                portMAX_DELAY);
+      
+      if (xResult == pdPASS) 
+      {
+          DEBUGINFO("ulNotificationValue:%lx\n",ulNotificationValue);
+          if(ulNotificationValue & MQTT_NOTIFY_SUBSCRIBE)
+          {
+            DEBUGINFO("MQTT_NOTIFY_SUBSCRIBE\n");  
+            Mqtt_SendMsg(MQTT_MSG_SUBSCRIBE,NULL);
+          } 
+          if(ulNotificationValue & MQTT_NOTIFY_ONLINE)
+          {
+            DEBUGINFO("MQTT_NOTIFY_ONLINE\n");  
+            Mqtt_SendMsg(MQTT_MSG_ONLINE,Robot_GetHeartBeatJsonStr());//此处后续需要修改为online的内容
+          }          
+          if(ulNotificationValue & MQTT_NOTIFY_OFFLINE)
+          {
+            DEBUGINFO("MQTT_NOTIFY_OFFLINE\n");  
+            
+          }                                                           
+      }        
+    }
+}

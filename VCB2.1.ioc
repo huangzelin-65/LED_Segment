@@ -862,6 +862,7 @@ rtos.0.tasks.21=allocationType,Dynamic;bufferName,NULL;codeGen,As external;contr
 rtos.0.tasks.22=allocationType,Dynamic;bufferName,NULL;codeGen,As external;controlBlockName,NULL;entry,vTcpManagerTask;name,TcpManagerTask;parameter,NULL;priority,osPriorityNormal;stackSize,2048
 rtos.0.tasks.23=allocationType,Dynamic;bufferName,NULL;codeGen,As external;controlBlockName,NULL;entry,vTcpReceiveTask;name,TcpReceiveTask;parameter,NULL;priority,osPriorityNormal;stackSize,256
 rtos.0.tasks.24=allocationType,Dynamic;bufferName,NULL;codeGen,As external;controlBlockName,NULL;entry,vRobotHeartBeatTask;name,RobotHeartBeatTask;parameter,NULL;priority,osPriorityNormal;stackSize,256
+rtos.0.tasks.25=allocationType,Dynamic;bufferName,NULL;codeGen,As external;controlBlockName,NULL;entry,vMqttNotifyTask;name,MqttNotifyTask;parameter,NULL;priority,osPriorityNormal;stackSize,256
 rtos.0.tasks.3=allocationType,Dynamic;bufferName,NULL;codeGen,As external;controlBlockName,NULL;entry,vMotorFeedbackTask;name,MotorFeedbackTask;parameter,NULL;priority,osPriorityNormal;stackSize,256
 rtos.0.tasks.4=allocationType,Dynamic;bufferName,NULL;codeGen,As external;controlBlockName,NULL;entry,vCarRfidTask;name,CarRfidTask;parameter,NULL;priority,osPriorityNormal;stackSize,256
 rtos.0.tasks.5=allocationType,Dynamic;bufferName,NULL;codeGen,As external;controlBlockName,NULL;entry,vSensorTask;name,SensorTask;parameter,NULL;priority,osPriorityNormal;stackSize,256

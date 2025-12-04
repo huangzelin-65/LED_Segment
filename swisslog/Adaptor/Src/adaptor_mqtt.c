@@ -15,6 +15,8 @@
 #include "lwip.h"
 #include "Robot.h"
 #include "clist.h"
+#include "app_freertos.h"
+#include "semphr.h"
 
 #define MQTT_HOST              "192.168.1.10" 
 #define MQTT_QOS               MQTT_QOS_0
@@ -900,3 +902,23 @@ void Mqtt_PopListTail(void)
     DEBUGINFO("end");  
 }
 
+//Mqtt消息通知
+void Mqtt_Notify(uint32_t value)
+{
+    if(MqttNotifyTaskHandle != NULL)
+    {
+        DEBUGINFO("value:%lx",value);
+        BaseType_t xReturn = pdPASS;
+        xReturn = xTaskNotify(MqttNotifyTaskHandle, 
+                    value, 
+                    eSetValueWithoutOverwrite);
+        if(xReturn != pdPASS)
+        {
+            DEBUGINFO("xReturn is not pdPASS:%ld\n",xReturn);
+        } 
+    }
+    else
+    {
+        DEBUGINFO("MqttNotifyTaskHandle NULL");
+    }
+}

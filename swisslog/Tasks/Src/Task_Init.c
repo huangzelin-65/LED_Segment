@@ -35,6 +35,7 @@ extern osThreadId_t RobotReceiveTaskHandle;
 extern osThreadId_t TcpManagerTaskHandle;
 extern osThreadId_t TcpReceiveTaskHandle;
 extern osThreadId_t RobotHeartBeatTaskHandle;
+extern osThreadId_t MqttNotifyTaskHandle;
 extern CarStatus_t CarStatus;
 
 void vGetChipID(void)
@@ -98,7 +99,7 @@ void vInitTask(void *argument)
   osThreadResume(TcpManagerTaskHandle);
   osThreadResume(TcpReceiveTaskHandle);
   osThreadResume(RobotHeartBeatTaskHandle);     
-
+  osThreadResume(MqttNotifyTaskHandle);
 
 
   osThreadExit();

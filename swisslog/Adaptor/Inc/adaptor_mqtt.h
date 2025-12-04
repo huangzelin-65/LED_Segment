@@ -26,6 +26,8 @@ typedef enum
     MQTT_MSG_HEARTBEAT,
     MQTT_MSG_ROBOT_EVENT,
     MQTT_MSG_SUBSCRIBE,
+    MQTT_MSG_ONLINE,
+    MQTT_MSG_OFFLINE,    
 }MqttMsgType_t;
 
 typedef struct 
@@ -65,6 +67,11 @@ typedef struct
     int rest_len;//剩余长度
 }MqttReceiveData_t;
 
+typedef enum {
+    MQTT_NOTIFY_SUBSCRIBE = 0x01,
+    MQTT_NOTIFY_ONLINE = 0x02,
+    MQTT_NOTIFY_OFFLINE = 0x04,
+} MqttNotify_t;
 
 extern MqttObject mqttObj;//mqtt对象，用于连接客户端
 extern MqttNet mNetwork;//网络结构体
@@ -83,4 +90,5 @@ void Mqtt_ListInit(void);
 int Mqtt_GetListSize(void);
 void Mqtt_PopListTail(void);
 MqttReceiveData_t* Mqtt_GetListTail(void);
+void Mqtt_Notify(uint32_t value);
 #endif

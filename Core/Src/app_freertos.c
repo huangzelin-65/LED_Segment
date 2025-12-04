@@ -268,6 +268,13 @@ const osThreadAttr_t RobotHeartBeatTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 256 * 4
 };
+/* Definitions for MqttNotifyTask */
+osThreadId_t MqttNotifyTaskHandle;
+const osThreadAttr_t MqttNotifyTask_attributes = {
+  .name = "MqttNotifyTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
 /* Definitions for wifiUsartMutex */
 osMutexId_t wifiUsartMutexHandle;
 const osMutexAttr_t wifiUsartMutex_attributes = {
@@ -620,6 +627,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of RobotHeartBeatTask */
   RobotHeartBeatTaskHandle = osThreadNew(vRobotHeartBeatTask, NULL, &RobotHeartBeatTask_attributes);
 
+  /* creation of MqttNotifyTask */
+  MqttNotifyTaskHandle = osThreadNew(vMqttNotifyTask, NULL, &MqttNotifyTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   
@@ -647,7 +657,8 @@ void MX_FREERTOS_Init(void) {
   osThreadSuspend(RobotReceiveTaskHandle);
   osThreadSuspend(TcpManagerTaskHandle); 
   osThreadSuspend(TcpReceiveTaskHandle); 
-  osThreadSuspend(RobotHeartBeatTaskHandle); 
+  osThreadSuspend(RobotHeartBeatTaskHandle);
+  osThreadSuspend(MqttNotifyTaskHandle); 
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */

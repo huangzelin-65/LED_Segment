@@ -5,5 +5,5 @@
 
 void vMqttManagerTask(void *argument);
 void vMqttReceiveTask(void *argument);
-
+void vMqttNotifyTask(void *argument);
 #endif
