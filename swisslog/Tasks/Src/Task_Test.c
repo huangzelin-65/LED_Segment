@@ -67,7 +67,8 @@ void vPrintTask(void *argument)
       #ifdef LOG_USE_MALLOC
       vPrint_start_Transmit(rxData, strlen((char *)rxData));
       #else
-      HAL_UART_Transmit(&huart1, rxData, strlen((char *)rxData), HAL_MAX_DELAY);
+      vPrint_start_Transmit(rxData, strlen((char *)rxData));
+      // HAL_UART_Transmit(&huart1, rxData, strlen((char *)rxData), HAL_MAX_DELAY);
       // vPortFree(rxData);
       #endif
 		}
