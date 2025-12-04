@@ -87,6 +87,8 @@ typedef struct {
     const char *position;
     int car_running;
     uint32_t curPos;
+    bool lockState1;
+    bool lockState2;
     bool lockState;
     BumperState bumperState;
     HallState hallState;

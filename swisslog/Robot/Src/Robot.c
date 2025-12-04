@@ -59,6 +59,8 @@ RobotState_t robotSate = {
     .position = NULL,
     .curPos = 0,
     .car_running = 0,//一开始为停止
+    .lockState1 = false,
+    .lockState2 = false,
     .lockState = false,
     .bumperState = {false, false},
     .hallState = {false, false},
@@ -200,6 +202,8 @@ void Robot_CreateStateJson(void)
     cJSON_AddBoolToObject(RobotJson, "emergencyBtn", robotSate.emergencyBtn);
     cJSON_AddStringToObject(RobotJson, "rfid", robotSate.rfid);
     cJSON_AddStringToObject(RobotJson, "position", robotSate.position);
+    cJSON_AddBoolToObject(RobotJson, "lockState1", robotSate.lockState1);
+    cJSON_AddBoolToObject(RobotJson, "lockState2", robotSate.lockState2);
     cJSON_AddBoolToObject(RobotJson, "lockState", robotSate.lockState);
     cJSON_AddNumberToObject(RobotJson, "runtime", robotSate.runtime);
     cJSON_AddNumberToObject(RobotJson, "curPos", robotSate.curPos);
@@ -388,7 +392,20 @@ void Robot_UpdateStateJson(cJSON* robotJson, const RobotState_t* robotState) {
             cJSON_Delete(emergencyBtnItem);
         }
     }
-
+    cJSON* lockState1Item = robotState->lockState1 ? cJSON_CreateTrue() : cJSON_CreateFalse();
+    if (lockState1Item != NULL) {
+        cJSON_bool replaceRet = cJSON_ReplaceItemInObject(robotJson, "lockState1", lockState1Item);
+        if (!replaceRet) {
+            cJSON_Delete(lockState1Item);
+        }
+    }
+    cJSON* lockState2Item = robotState->lockState2 ? cJSON_CreateTrue() : cJSON_CreateFalse();
+    if (lockState2Item != NULL) {
+        cJSON_bool replaceRet = cJSON_ReplaceItemInObject(robotJson, "lockState2", lockState2Item);
+        if (!replaceRet) {
+            cJSON_Delete(lockState2Item);
+        }
+    }    
     cJSON* lockStateItem = robotState->lockState ? cJSON_CreateTrue() : cJSON_CreateFalse();
     if (lockStateItem != NULL) {
         cJSON_bool replaceRet = cJSON_ReplaceItemInObject(robotJson, "lockState", lockStateItem);
@@ -827,6 +844,8 @@ void Robot_SendMsg(RobotMsgType_t type,void *data)
 void Robot_UpdateState(void)
 {
     DEBUGINFO("curPos:%d xRealDirection:%d xRealSpeed:%d xAutoMode:%d",CarStatus.dwCurPos,CarStatus.xRealDirection,CarStatus.xRealSpeed,CarStatus.xAutoMode);
+    robotSate.lockState1 = (CarStatus.xBoxELockStatus1 == Locked ? true : false);
+    robotSate.lockState2 = (CarStatus.xBoxELockStatus2 == Locked ? true : false);
     robotSate.lockState = (CarStatus.xBoxLocked == Locked ? true : false);
     robotSate.bumperState.front = (CarStatus.FrontCrashStatus == SensorTrigger ? true : false);
     robotSate.bumperState.back = (CarStatus.RearCrashStatus == SensorTrigger ? true : false);
