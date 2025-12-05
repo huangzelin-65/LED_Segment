@@ -76,7 +76,6 @@ void vInitTask(void *argument)
   CarStatus.xMotorStopReason = NoStopReason; //小车停止原因为无
 
   osThreadResume(PrintTaskHandle);
-  osThreadResume(IntProcessTaskHandle); 
   osThreadResume(MotionCtrlTaskHandle); 
   osThreadResume(MotorFeedbackTaskHandle); 
   osThreadResume(CarRfidTaskHandle); 
@@ -100,6 +99,9 @@ void vInitTask(void *argument)
   osThreadResume(TcpReceiveTaskHandle);
   osThreadResume(RobotHeartBeatTaskHandle);     
   osThreadResume(MqttNotifyTaskHandle);
+
+  osDelay(pdMS_TO_TICKS(500));
+  osThreadResume(IntProcessTaskHandle); 
 
 
   osThreadExit();
