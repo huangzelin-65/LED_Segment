@@ -888,7 +888,7 @@ void Robot_SendMsg(RobotMsgType_t type,void *data)
         RobotMsg_t * robot_msg = pvPortMalloc(sizeof(RobotMsg_t));
         robot_msg->type = type;
         robot_msg->data = data;        
-        DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(xRobotQueueHandle),uxQueueSpacesAvailable(xRobotQueueHandle));
+        // DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(xRobotQueueHandle),uxQueueSpacesAvailable(xRobotQueueHandle));
         if (xQueueSend(xRobotQueueHandle, &robot_msg, portMAX_DELAY) == pdPASS) 
         {
             DEBUGINFO("type :%d\n",type);
@@ -918,12 +918,12 @@ void Robot_Action2Cmd(void)
     {
         if(robotAction.action.Type == ROBOT_IN_STATION)
         {
-            ServerToCarData.xStationStatus = 0x00; // 在站状态 
+            ServerToCarData.xStationStatus = InStation; // 在站状态 
             DEBUGINFO("in station\n"); 
         }
         else if(robotAction.action.Type == ROBOT_OUT_STATION)
         {
-            ServerToCarData.xStationStatus = 0x01; // 出站状态
+            ServerToCarData.xStationStatus = OutStation; // 出站状态
             DEBUGINFO("out station\n"); 
         }
         else
@@ -1089,7 +1089,7 @@ void Robot_UpdateAction(void)
 //获取当前机器状态，用队列形式上报
 void Robot_State(void)
 {
-    DEBUGINFO("start");
+    // DEBUGINFO("start");
     RobotState_t *robot_state_data = pvPortMalloc(sizeof(RobotState_t));
     if(robot_state_data != NULL)
     {
@@ -1098,7 +1098,7 @@ void Robot_State(void)
         Robot_SendMsg(ROBOT_MSG_STATE,robot_state_data);
     }
     robotSate.heartbeat_cnt = 0;//复位心跳包
-    DEBUGINFO("end");
+    // DEBUGINFO("end");
 }
 //回复action ack
 void Robot_ActionAck(void)
@@ -1109,7 +1109,7 @@ void Robot_ActionAck(void)
     Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_ACK);
     Robot_State(); 
     xSemaphoreGive(robotSate.mutex);  
-    DEBUGINFO("end"); 
+    // DEBUGINFO("end"); 
 }
 //事件发生，上报状态
 void Robot_Event(void)
@@ -1121,7 +1121,7 @@ void Robot_Event(void)
     Robot_UpdateAction();
     Robot_State();
     xSemaphoreGive(robotSate.mutex);
-    DEBUGINFO("end");
+    // DEBUGINFO("end");
 }
 //消息通知主线程
 void Robot_Notify(uint32_t value)

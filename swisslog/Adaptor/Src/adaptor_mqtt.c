@@ -82,7 +82,7 @@ void Mqtt_SendMsg(MqttMsgType_t msg,char *data)
         MqttMsgdata_t *msg_data = pvPortMalloc(sizeof(MqttMsgdata_t));
         msg_data->type = msg;
         msg_data->data = data;
-        DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(xMqttManagerQueueHandle),uxQueueSpacesAvailable(xMqttManagerQueueHandle));
+        // DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(xMqttManagerQueueHandle),uxQueueSpacesAvailable(xMqttManagerQueueHandle));
         if (xQueueSend(xMqttManagerQueueHandle, &msg_data, portMAX_DELAY) == pdPASS) 
         {
             DEBUGINFO("msg :%d\n",msg);
@@ -280,7 +280,7 @@ int Mqtt_NetRead(void *context, byte* buf, int buf_len, int timeout_ms)
                 {
                     rec_data->rest_len = 0;
                     // DEBUGINFO("Mqtt_PopListTail rec_data:%p data:%p\n",rec_data,rec_data->data);
-                    DEBUGINFO("mqtt_list size:%d\n",list_size(mqtt_list));
+                    // DEBUGINFO("mqtt_list size:%d\n",list_size(mqtt_list));
                     vPortFree(rec_data->data);
                     Mqtt_PopListTail();                    
                 }
@@ -677,7 +677,7 @@ void Mqtt_ParseData(uint8_t* rbuf,int len)
     Mqtt_ParseTcpData(rbuf,len);    
     if(mqtt_waitstate != MQTT_WAIT_STATE_IDLE)
     {
-        DEBUGINFO("mqtt_waitstate %d\n",mqtt_waitstate);
+        // DEBUGINFO("mqtt_waitstate %d\n",mqtt_waitstate);
     }
     switch(mqtt_waitstate)
     {

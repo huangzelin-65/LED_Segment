@@ -20,7 +20,7 @@ void Tcp_SendMsg(TcpMsgType_t type,char *data)
         TcpMsg_t * tcp_msg = pvPortMalloc(sizeof(TcpMsg_t));
         tcp_msg->type = type;
         tcp_msg->data = data;        
-        DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(xTcpManageQueueHandle),uxQueueSpacesAvailable(xTcpManageQueueHandle));
+        // DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(xTcpManageQueueHandle),uxQueueSpacesAvailable(xTcpManageQueueHandle));
         if (xQueueSend(xTcpManageQueueHandle, &tcp_msg, portMAX_DELAY) == pdPASS) 
         {
             DEBUGINFO("xTcpManageQueueHandle add success");
