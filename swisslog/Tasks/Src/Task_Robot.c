@@ -115,7 +115,7 @@ void vRobotReceiveTask(void *argument)
                     break;
                     case ROBOT_MSG_PARSE://代表从服务器获取到消息
                     {
-                        DEBUGINFO("ROBOT_MSG_PARSE start:%s\n",robot_msg->data); 
+                        // DEBUGINFO("ROBOT_MSG_PARSE start:%s\n",robot_msg->data); 
                         //解析来自mqtt的数据
                         int result = Robot_ParseJson(robot_msg->data,&robotAction);
 
@@ -125,7 +125,7 @@ void vRobotReceiveTask(void *argument)
 
                         Robot_Notify(ROBOT_ACTIONACK|ROBOT_ACTIONCMD);
 
-                        DEBUGINFO("ROBOT_MSG_PARSE end\n"); 
+                        // DEBUGINFO("ROBOT_MSG_PARSE end\n"); 
                     }
                     break;                                         
                     default:

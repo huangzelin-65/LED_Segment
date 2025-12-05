@@ -232,7 +232,7 @@ int Mqtt_NetConnect(void *context, const char* host, word16 port,int timeout_ms)
 int Mqtt_NetRead(void *context, byte* buf, int buf_len, int timeout_ms)
 {
     #ifdef MQTT_WIFI
-        DEBUGINFO("start\n");
+        // DEBUGINFO("start\n");
         #ifdef MQTT_STATIC_ARRAY
             static int cnt = 0;
             while(!mqtt_ready2read)
@@ -270,7 +270,7 @@ int Mqtt_NetRead(void *context, byte* buf, int buf_len, int timeout_ms)
                 cnt = 0;   
                 MqttReceiveData_t *rec_data = Mqtt_GetListTail();
                 if(rec_data == NULL)return MQTT_CODE_ERROR_BAD_ARG; 
-                DEBUGINFO("buf_len:%d len:%d rest_len:%d\n",buf_len,rec_data->len,rec_data->rest_len);
+                // DEBUGINFO("buf_len:%d len:%d rest_len:%d\n",buf_len,rec_data->len,rec_data->rest_len);
                 if(rec_data->len == rec_data->rest_len)
                 {
                     memcpy(mReadBuf,rec_data->data,rec_data->len);
@@ -279,7 +279,7 @@ int Mqtt_NetRead(void *context, byte* buf, int buf_len, int timeout_ms)
                 if(rec_data->rest_len <= 0)
                 {
                     rec_data->rest_len = 0;
-                    DEBUGINFO("Mqtt_PopListTail rec_data:%p data:%p\n",rec_data,rec_data->data);
+                    // DEBUGINFO("Mqtt_PopListTail rec_data:%p data:%p\n",rec_data,rec_data->data);
                     DEBUGINFO("mqtt_list size:%d\n",list_size(mqtt_list));
                     vPortFree(rec_data->data);
                     Mqtt_PopListTail();                    
@@ -589,7 +589,7 @@ void Mqtt_ParseData2List(uint8_t *result,int len)
     {                    
         if (mqttMutexHandle != NULL)
         {
-            DEBUGINFO("mqtt_list add start\n");
+            // DEBUGINFO("mqtt_list add start\n");
             if (osMutexAcquire(mqttMutexHandle, portMAX_DELAY) == osOK)
             {                            
                 MqttReceiveData_t *rec_data =  pvPortMalloc(sizeof(MqttReceiveData_t));
@@ -601,7 +601,7 @@ void Mqtt_ParseData2List(uint8_t *result,int len)
                     if(rec_data->data != NULL)
                     {
                         memcpy(rec_data->data, result + pos, data_len);
-                        DEBUGINFO("list_insert_head rec_data:%p data:%p\n",rec_data,rec_data->data);
+                        // DEBUGINFO("list_insert_head rec_data:%p data:%p\n",rec_data,rec_data->data);
                         int rc = list_insert_head(mqtt_list,rec_data);
                         if(rc == -1)
                         {
@@ -620,7 +620,7 @@ void Mqtt_ParseData2List(uint8_t *result,int len)
 
                 osMutexRelease(mqttMutexHandle); 
             }
-            DEBUGINFO("mqtt_list add end\n");
+            // DEBUGINFO("mqtt_list add end\n");
         }
     }
 }
@@ -662,9 +662,9 @@ void Mqtt_ParseTcpData(uint8_t* rbuf,int len)
         int found_count = Mqtt_FindAllStrPositions(rbuf,target_str,len,positions,10);
 
         if (found_count > 0) {
-            DEBUGINFO("found_count: %d\n", found_count);
+            // DEBUGINFO("found_count: %d\n", found_count);
             for (int i = 0; i < found_count; i++) {
-                DEBUGINFO("  position(%d): %d\n", i, positions[i]);
+                // DEBUGINFO("  position(%d): %d\n", i, positions[i]);
                 Mqtt_ParseData2List((rbuf + positions[i]),len);
             }
         } 
@@ -756,7 +756,7 @@ void Mqtt_ParseData(uint8_t* rbuf,int len)
             char target_mqtt_str[] = "OK";
             char *result = strstr((char *)rbuf, target_mqtt_str);
             if (result != NULL) {
-                DEBUGINFO("socket write ok\n");    
+                // DEBUGINFO("socket write ok\n");    
                 mqtt_result = MQTT_OK;        
             }            
         }
@@ -880,26 +880,26 @@ MqttReceiveData_t* Mqtt_GetListTail(void)
 {
     MqttReceiveData_t *rec_data = NULL;
     if (mqttMutexHandle == NULL)return rec_data;
-    DEBUGINFO("start");
+    // DEBUGINFO("start");
     if (osMutexAcquire(mqttMutexHandle, portMAX_DELAY) == osOK)
     {
         rec_data = list_get_last(mqtt_list); 
         osMutexRelease(mqttMutexHandle); 
     }
-    DEBUGINFO("end");
+    // DEBUGINFO("end");
     return rec_data;
 }
 
 void Mqtt_PopListTail(void)
 {
-    DEBUGINFO("start");
+    // DEBUGINFO("start");
     if (mqttMutexHandle == NULL)return;
     if (osMutexAcquire(mqttMutexHandle, portMAX_DELAY) == osOK)
     {
         list_pop_tail(mqtt_list,vPortFree);
         osMutexRelease(mqttMutexHandle); 
     }  
-    DEBUGINFO("end");  
+    // DEBUGINFO("end");  
 }
 
 //Mqtt消息通知

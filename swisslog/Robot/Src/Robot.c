@@ -552,7 +552,7 @@ void Robot_UpdateStateJson(cJSON* robotJson, const RobotState_t* robotState) {
 int Robot_ParseJson(char *json_str,RobotAction_t *robot) 
 {
     TickType_t start_tick = xTaskGetTickCount();
-    DEBUGINFO("start:%ld\n",start_tick);
+    // DEBUGINFO("start:%ld\n",start_tick);
     // 解析JSON数据
     if (json_str == NULL || robot == NULL) {
         DEBUGINFO("parameters null\n");
@@ -682,10 +682,10 @@ int Robot_ParseJson(char *json_str,RobotAction_t *robot)
     // 释放cJSON资源
     cJSON_Delete(root);
     //统计解析耗时
-    TickType_t end_tick = xTaskGetTickCount();
-    TickType_t elapsed_tick = end_tick - start_tick; 
-    uint32_t elapsed_ms = pdMS_TO_TICKS(elapsed_tick);    
-    DEBUGINFO("elapsed_ms:%ld\n",elapsed_ms);
+    // TickType_t end_tick = xTaskGetTickCount();
+    // TickType_t elapsed_tick = end_tick - start_tick; 
+    // uint32_t elapsed_ms = pdMS_TO_TICKS(elapsed_tick);    
+    // DEBUGINFO("elapsed_ms:%ld\n",elapsed_ms);
 
     // 打印顶层结构体成员
     DEBUGINFO("  headerId: %s\n", robot->headerId);
