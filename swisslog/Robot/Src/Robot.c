@@ -792,7 +792,7 @@ void Robot_Init(void)
 
     robotSate.encode_number = usEncoder_Read_Number();
 
-    robotSate.encode_number = 5;
+    // robotSate.encode_number = 5;
 
     DEBUGINFO("encode_number:%d",robotSate.encode_number);
 
