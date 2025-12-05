@@ -96,6 +96,9 @@ bool robot_init = false;
 //保留创建的heart beat json 的指针
 cJSON* Robot_HeartBeatJson = NULL;
 
+//保留创建的上线 ON_OFF_LINE json 的指针
+cJSON* Robot_OnOffLineJson = NULL;
+
 // 辅助函数：将Direction枚举转换为字符串
 const char* Robot_DirectionToString(Direction dir) 
 {
@@ -768,6 +771,54 @@ char* Robot_GetHeartBeatJsonStr(void)
     char* json_str = cJSON_PrintUnformatted(Robot_HeartBeatJson);
     return json_str;    
 }
+//创建上下线的json
+void Robot_CreateOnOffLineJson(void) 
+{
+    DEBUGINFO("start\n");
+
+    if(Robot_OnOffLineJson != NULL)   
+    {
+        DEBUGINFO("Robot_OnOffLineJson has been created\n");
+        return;
+    }
+    // 创建根JSON对象
+    Robot_OnOffLineJson = cJSON_CreateObject();
+    if (Robot_OnOffLineJson == NULL) {
+        DEBUGINFO("Robot_OnOffLineJson fail\n");
+        return;
+    }
+    // 向JSON对象添加键值对
+    // 添加整数类型：headerId
+    cJSON_AddNumberToObject(Robot_OnOffLineJson, "headerId", 125);
+    
+    // 添加整数类型：timestamp（大整数可正常存储为cJSON的number类型）
+    cJSON_AddNumberToObject(Robot_OnOffLineJson, "timestamp", 1);
+    
+    // 添加字符串类型：version
+    cJSON_AddStringToObject(Robot_OnOffLineJson, "version", "1.0.0");
+    
+    // 添加字符串类型：manufacturer
+    cJSON_AddStringToObject(Robot_OnOffLineJson, "manufacturer", "slhc");
+    
+    // 添加字符串类型：serialNumber
+    cJSON_AddStringToObject(Robot_OnOffLineJson, "serialNumber", "bcss.v1.0.0");
+    
+    // 添加字符串类型：on_off_line
+    cJSON_AddStringToObject(Robot_OnOffLineJson, "on_off_line", "ONLINE");  
+
+    DEBUGINFO("end\n");
+}
+//获取robot on off line json转成字符串的接口，返回值需要释放
+char* Robot_GetOnOffLineJsonStr(void) 
+{
+    if(Robot_OnOffLineJson == NULL)
+    {
+        DEBUGINFO("Robot_OnOffLineJson fail\n");
+        return NULL;
+    }    
+    char* json_str = cJSON_PrintUnformatted(Robot_OnOffLineJson);
+    return json_str;    
+}
 //ROBOT 相关的初始化
 void Robot_Init(void)
 {
@@ -789,6 +840,8 @@ void Robot_Init(void)
     Robot_CreateStateJson();
 
     Robot_CreateHeartBeatJson();
+
+    Robot_CreateOnOffLineJson();
 
     robotSate.encode_number = usEncoder_Read_Number();
 

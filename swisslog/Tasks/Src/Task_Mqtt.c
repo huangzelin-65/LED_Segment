@@ -17,6 +17,7 @@
 
 #define MQTT_TOPIC_NAME                 "tk/v1/slhc/tkv-%d/state" 
 #define MQTT_HEARTBEAT_TOPIC_NAME       "tk/v1/slhc/tkv-%d/connection" 
+#define MQTT_FACTSHEET_TOPIC_NAME       "tk/v1/slhc/tkv-%d/factsheet" 
 #define MQTT_PUBLISH_MSG                "HEARTBEAT"
 #define MQTT_CMD_TIMEOUT_MS             30000
 
@@ -98,7 +99,7 @@ void vMqttManagerTask(void *argument)
                     //此处需修改为online的具体内容
                     char* robot_json_str = (char*)msg->data;
                     char topic[64] = {0};
-                    snprintf(topic, sizeof(topic), MQTT_HEARTBEAT_TOPIC_NAME, robotSate.encode_number);                     
+                    snprintf(topic, sizeof(topic), MQTT_FACTSHEET_TOPIC_NAME, robotSate.encode_number);                     
                     if(mqtt_isConnected)Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
                     vPortFree(robot_json_str);
 
@@ -166,7 +167,7 @@ void vMqttNotifyTask(void *argument)
           if(ulNotificationValue & MQTT_NOTIFY_ONLINE)
           {
             DEBUGINFO("MQTT_NOTIFY_ONLINE\n");  
-            Mqtt_SendMsg(MQTT_MSG_ONLINE,Robot_GetHeartBeatJsonStr());//此处后续需要修改为online的内容
+            Mqtt_SendMsg(MQTT_MSG_ONLINE,Robot_GetOnOffLineJsonStr());
           }          
           if(ulNotificationValue & MQTT_NOTIFY_OFFLINE)
           {

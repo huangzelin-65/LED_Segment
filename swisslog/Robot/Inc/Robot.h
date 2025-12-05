@@ -169,6 +169,8 @@ void Robot_CreateStateJson(void);
 void Robot_UpdateStateJson(cJSON* robotJson, const RobotState_t* robotState);
 void Robot_CreateHeartBeatJson(void);
 char* Robot_GetHeartBeatJsonStr(void);
+void Robot_CreateOnOffLineJson(void);
+char* Robot_GetOnOffLineJsonStr(void); 
 int Robot_ParseJson(char* json_str,RobotAction_t *robot);
 char* Robot_GetStateJsonStr(void);
 void Robot_SendMsg(RobotMsgType_t type,void *data);
