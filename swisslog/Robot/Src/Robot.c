@@ -551,7 +551,7 @@ void Robot_UpdateStateJson(cJSON* robotJson, const RobotState_t* robotState) {
 //解析服务器发来的json数据
 int Robot_ParseJson(char *json_str,RobotAction_t *robot) 
 {
-    TickType_t start_tick = xTaskGetTickCount();
+//    TickType_t start_tick = xTaskGetTickCount();
     // DEBUGINFO("start:%ld\n",start_tick);
     // 解析JSON数据
     if (json_str == NULL || robot == NULL) {
