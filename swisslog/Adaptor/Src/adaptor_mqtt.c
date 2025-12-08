@@ -21,7 +21,7 @@
 #define MQTT_HOST              "192.168.1.10" 
 #define MQTT_QOS               MQTT_QOS_0
 #define MQTT_KEEP_ALIVE_SEC    60
-#define MQTT_CON_TIMEOUT_MS    1500
+#define MQTT_CON_TIMEOUT_MS    3000
 #define MQTT_CLIENT_ID         "WolfMQTTClientSimple"
 #define MQTT_TOPIC_NAME        "bcss/v1/slhc/st_1/state"
 #define MQTT_SUB_TOPIC_NAME    "tk/v1/slhc/tkv-%d/instantactions" 
@@ -57,7 +57,6 @@ int mqtt_rest2read = 0;//剩余需要区域读取得mqtt数据长度
 int mqtt_socket_id = 0;//mqtt底层tcp连接时，被分配得socket ip
 volatile word16 mPacketIdLast;//mqtt唯一id
 MqttTopic subscribe_topics[MQTT_SUBSCRIBE_COUNT];//订阅的话题
-MqttObject mqttObj;//mqtt对象，用于连接客户端
 MqttNet mNetwork;//网络结构体
 MqttClient mClient;//mqtt客户端
 int mSockFd = INVALID_SOCKET_FD;
@@ -263,6 +262,7 @@ int Mqtt_NetRead(void *context, byte* buf, int buf_len, int timeout_ms)
                     if(cnt++ >= timeout_ms)
                     {
                         cnt = 0;
+                        DEBUGINFO("MQTT_CODE_ERROR_TIMEOUT\n");
                         return MQTT_CODE_ERROR_TIMEOUT;
                     }
                     osDelay(pdMS_TO_TICKS(1));
@@ -493,6 +493,7 @@ static int Mqtt_TlsCb(MqttClient* client)
 //mqtt参数初始化，连接服务器、订阅话题
 int MqttInit(const char *client_id)
 {
+    MqttObject mqttObj;
     int rc = 0;
     //初始化客户端
     XMEMSET(&mNetwork, 0, sizeof(mNetwork));
@@ -536,10 +537,6 @@ int MqttInit(const char *client_id)
 exit:
     if (rc != MQTT_CODE_SUCCESS) {
         DEBUGINFO("MQTT Error %d: %s", rc, MqttClient_ReturnCodeToString(rc));
-    }
-    else
-    {
-        XMEMSET(&mqttObj, 0, sizeof(mqttObj));
     }
     return rc;
 }
@@ -777,7 +774,8 @@ void Mqtt_ParseData(uint8_t* rbuf,int len)
 //发布消息调用接口
 void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t qos, uint8_t retain)
 {
-    // XMEMSET(&mqttObj, 0, sizeof(mqttObj));
+    MqttObject mqttObj;
+    XMEMSET(&mqttObj, 0, sizeof(mqttObj));
     mqttObj.publish.qos = qos;
     mqttObj.publish.retain = retain;
     mqttObj.publish.topic_name = pub_topic;
@@ -793,6 +791,8 @@ void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t 
 //订阅话题调用接口
 int Mqtt_SubscribeMsg(MqttTopic *topics,int count)
 {
+    MqttObject mqttObj;
+    XMEMSET(&mqttObj, 0, sizeof(mqttObj));
     mqttObj.subscribe.packet_id = Mqtt_GetPacketid();
     mqttObj.subscribe.topic_count = count;
     mqttObj.subscribe.topics = topics;

@@ -73,7 +73,6 @@ typedef enum {
     MQTT_NOTIFY_OFFLINE = 0x04,
 } MqttNotify_t;
 
-extern MqttObject mqttObj;//mqtt对象，用于连接客户端
 extern MqttNet mNetwork;//网络结构体
 extern MqttClient mClient;//mqtt客户端
 extern int mqtt_isConnected;

@@ -60,7 +60,7 @@ void vMqttManagerTask(void *argument)
                     snprintf(topic, sizeof(topic), MQTT_HEARTBEAT_TOPIC_NAME, robotSate.encode_number);                  
                     if(mqtt_isConnected)Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
                     vPortFree(robot_json_str);
-                    DEBUGINFO("MQTT_MSG_HEARTBEAT end\n");
+                    // DEBUGINFO("MQTT_MSG_HEARTBEAT end\n");
                 }
                 break;
                 case MQTT_MSG_ROBOT_EVENT:
@@ -116,6 +116,8 @@ void vMqttManagerTask(void *argument)
 //mqtt接收任务，处理接收消息
 void vMqttReceiveTask(void *argument)
 {
+    MqttObject mqttObj;
+    XMEMSET(&mqttObj, 0, sizeof(mqttObj));
     DEBUGINFO("vMqttReceiveTask\r\n");
     int rc = 0;
     while (1)
