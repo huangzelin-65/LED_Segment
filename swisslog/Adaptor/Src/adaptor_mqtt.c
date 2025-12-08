@@ -24,7 +24,6 @@
 #define MQTT_CON_TIMEOUT_MS    3000
 #define MQTT_CLIENT_ID         "WolfMQTTClientSimple"
 #define MQTT_TOPIC_NAME        "bcss/v1/slhc/st_1/state"
-#define MQTT_SUB_TOPIC_NAME    "tk/v1/slhc/tkv-%d/instantactions" 
 #define MQTT_PUBLISH_MSG       "Test Publish"
 #define MQTT_USERNAME          "hcms_mqtt"
 #define MQTT_PASSWORD          "KM5zng23"
@@ -40,7 +39,7 @@
 #define PRINT_BUFFER_SIZE      1024
 #define MQTT_TX_BUF_SIZE       1024
 #define MQTT_RX_BUF_SIZE       1024
-#define MQTT_SUBSCRIBE_COUNT     1
+#define MQTT_SUBSCRIBE_COUNT     2
 // #define MQTT_STATIC_ARRAY
 extern CarStatus_t CarStatus;
 extern UART_HandleTypeDef huart6;
@@ -470,12 +469,32 @@ static int Mqtt_MessageCb(MqttClient *client, MqttMessage *msg,byte msg_new, byt
 
     if (msg_done) {
         DEBUGINFO("MQTT Message: Done");
-        char *receive_data = pvPortMalloc(len + 1);
-        if(receive_data != NULL)
+
+        MqttRcMsg_t *mqtt_msg = pvPortMalloc(sizeof(MqttRcMsg_t));
+        if(mqtt_msg != NULL)
         {
-            XMEMCPY(receive_data, msg->buffer, len);
-            receive_data[len] = '\0';
-            Robot_SendMsg(ROBOT_MSG_PARSE,receive_data);
+            mqtt_msg->topic_name = pvPortMalloc(msg->topic_name_len + 1);
+            if(mqtt_msg->topic_name != NULL)
+            {
+                XMEMCPY(mqtt_msg->topic_name, msg->topic_name, msg->topic_name_len);
+                mqtt_msg->topic_name[msg->topic_name_len] = '\0';
+
+                mqtt_msg->data = pvPortMalloc(msg->buffer_len + 1);
+                if(mqtt_msg->data != NULL)
+                {
+                    XMEMCPY(mqtt_msg->data, msg->buffer, msg->buffer_len);
+                    mqtt_msg->data[msg->buffer_len] = '\0';
+                    Robot_SendMsg(ROBOT_MSG_PARSE,mqtt_msg);                    
+                }
+                else
+                {
+                    DEBUGINFO("pvPortMalloc Message fail!!!");
+                }
+            }
+            else
+            {
+                DEBUGINFO("pvPortMalloc Message fail!!!");
+            }
         }
         else
         {
@@ -807,27 +826,28 @@ int Mqtt_SubscribeMsg(MqttTopic *topics,int count)
 int Mqtt_SubscribeTopicInit(uint16_t id)
 {
     DEBUGINFO("start");
+    char sub_topic[MQTT_SUBSCRIBE_COUNT][64];
     for (int i = 0; i < MQTT_SUBSCRIBE_COUNT; i++)
     {
         switch (i)
         {
             case 0:
             {
-                char topic[64] = {0};
-                snprintf(topic, sizeof(topic), MQTT_SUB_TOPIC_NAME, id);                
-                subscribe_topics[i].topic_filter = topic;
+                snprintf(sub_topic[i], 64, MQTT_SUB_ACTION, id);                
+                subscribe_topics[i].topic_filter = sub_topic[i];
                 subscribe_topics[i].qos = MQTT_QOS;
             }
             break;
             case 1:
             {
-                subscribe_topics[i].topic_filter = MQTT_SUB_TOPIC_NAME;//此处话题需要根据实际需要更换
+                snprintf(sub_topic[i], 64, MQTT_SUB_CONN_ACK, id);                
+                subscribe_topics[i].topic_filter = sub_topic[i];
                 subscribe_topics[i].qos = MQTT_QOS;
             }
             break;
             case 2:
             {
-                subscribe_topics[i].topic_filter = MQTT_SUB_TOPIC_NAME;//此处话题需要根据实际需要更换
+                subscribe_topics[i].topic_filter = MQTT_SUB_ACTION;//此处话题需要根据实际需要更换
                 subscribe_topics[i].qos = MQTT_QOS;
             }
             break;                    

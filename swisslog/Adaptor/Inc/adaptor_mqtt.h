@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include "wolfmqtt/mqtt_client.h"
 
+#define MQTT_SUB_ACTION        "tk/v1/slhc/tkv-%d/instantactions"
+#define MQTT_SUB_CONN_ACK      "tk/v1/slhc/tkv-%d/connection/ack"  
 typedef enum
 {
     MQTT_OK = 0,
@@ -72,6 +74,11 @@ typedef enum {
     MQTT_NOTIFY_ONLINE = 0x02,
     MQTT_NOTIFY_OFFLINE = 0x04,
 } MqttNotify_t;
+
+typedef struct {
+    char *topic_name;
+    char *data;
+}MqttRcMsg_t;
 
 extern MqttNet mNetwork;//网络结构体
 extern MqttClient mClient;//mqtt客户端

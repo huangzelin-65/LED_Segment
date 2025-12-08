@@ -10,7 +10,7 @@
 #include "common.h"
 #include "semphr.h"
 #include "Encoder.h"
-
+#include "adaptor_mqtt.h"
 // #define USE_UID
 
 extern CarStatus_t CarStatus;
@@ -18,6 +18,12 @@ extern ServerToCarData_t ServerToCarData;
 extern osMessageQueueId_t xRobotQueueHandle;//该消息队列处理事件上报
 extern osThreadId_t RobotReceiveTaskHandle;//该任务处理事件上报
 extern osThreadId_t RobotManagerTaskHandle;//主任务句柄
+
+RobotConnect_t robotConnect = {
+    .headerId = "h0:123",       // 示例：headerId（不超过8字符）
+    .timestamp = "1731300000000", // 示例：Unix毫秒时间戳字符串
+    .version = "1.0.0" 
+};
 //保存服务器下发的动作消息
 RobotAction_t robotAction = {
     .headerId = "h0:123",       // 示例：headerId（不超过8字符）
@@ -549,7 +555,32 @@ void Robot_UpdateStateJson(cJSON* robotJson, const RobotState_t* robotState) {
     }  
 }
 //解析服务器发来的json数据
-int Robot_ParseJson(char *json_str,RobotAction_t *robot) 
+void Robot_ParseJson(char* topic,char* data)
+{
+    char sub_topic[64] = {0};
+    memset(sub_topic,0,sizeof(sub_topic));
+    snprintf(sub_topic, sizeof(sub_topic), MQTT_SUB_ACTION, robotSate.encode_number); 
+    char *result = strstr(topic, sub_topic);
+    if (result != NULL) {
+        DEBUGINFO("MQTT_SUB_ACTION");
+        int result = Robot_ParseActionJson(data,&robotAction);
+        DEBUGINFO("parse result:%d\n",result); 
+        Robot_Notify(ROBOT_ACTIONACK|ROBOT_ACTIONCMD);
+    }
+    else
+    {
+        memset(sub_topic,0,sizeof(sub_topic));
+        snprintf(sub_topic, sizeof(sub_topic), MQTT_SUB_CONN_ACK, robotSate.encode_number);
+        char *result = strstr(topic, sub_topic);
+        if (result != NULL) {
+            DEBUGINFO("MQTT_SUB_CONN_ACK");
+            int result = Robot_ParseConnectJson(data,&robotConnect);
+            DEBUGINFO("parse result:%d\n",result);
+        }         
+    }    
+}
+//解析action json
+int Robot_ParseActionJson(char *json_str,RobotAction_t *robot) 
 {
 //    TickType_t start_tick = xTaskGetTickCount();
     // DEBUGINFO("start:%ld\n",start_tick);
@@ -704,6 +735,61 @@ int Robot_ParseJson(char *json_str,RobotAction_t *robot)
         DEBUGINFO("      params.model: %s\n", robot->action.cmds[i].params.model);
         DEBUGINFO("      params.speedLevel: %s\n", robot->action.cmds[i].params.speedLevel);
     }
+
+    return 0;
+}
+//解析Connect json
+int Robot_ParseConnectJson(char *json_str,RobotConnect_t *robot) 
+{
+    // 解析JSON数据
+    if (json_str == NULL || robot == NULL) {
+        DEBUGINFO("parameters null\n");
+        return -1;
+    }
+
+    // 1. 解析整个JSON
+    cJSON *root = cJSON_Parse(json_str);
+    if (root == NULL) {
+        DEBUGINFO("cJSON_Parse fail\n");
+        return -1;
+    }
+
+    // 2. 解析顶层字段: headerId
+    cJSON *headerId = cJSON_GetObjectItem(root, "headerId");
+    if (headerId == NULL || !cJSON_IsString(headerId)) {
+        DEBUGINFO("headerId Not find\n");
+        cJSON_Delete(root);
+        return -1;
+    }
+    strncpy(robot->headerId, headerId->valuestring, sizeof(robot->headerId)-1);
+    robot->headerId[sizeof(robot->headerId)-1] = '\0';  // 确保字符串终止
+
+    // 3. 解析顶层字段: timestamp
+    cJSON *timestamp = cJSON_GetObjectItem(root, "timestamp");
+    if (timestamp == NULL || !cJSON_IsString(timestamp)) {
+        DEBUGINFO("timestamp Not find\n");
+        cJSON_Delete(root);
+        return -1;
+    }
+    strncpy(robot->timestamp, timestamp->valuestring, sizeof(robot->timestamp)-1);
+    robot->timestamp[sizeof(robot->timestamp)-1] = '\0';
+
+    // 4. 解析顶层字段: version
+    cJSON *version = cJSON_GetObjectItem(root, "version");
+    if (version == NULL || !cJSON_IsString(version)) {
+        DEBUGINFO("version Not find\n");
+        cJSON_Delete(root);
+        return -1;
+    }
+    strncpy(robot->version, version->valuestring, sizeof(robot->version)-1);
+    robot->version[sizeof(robot->version)-1] = '\0';
+
+   // 释放cJSON资源
+    cJSON_Delete(root);
+    // 打印顶层结构体成员
+    DEBUGINFO("  headerId: %s\n", robot->headerId);
+    DEBUGINFO("  timestamp: %s\n", robot->timestamp);
+    DEBUGINFO("  version: %s\n", robot->version);
 
     return 0;
 }
