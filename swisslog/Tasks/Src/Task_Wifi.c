@@ -43,8 +43,8 @@ void vWifiManagerTask(void *argument)
     {
       if(waitforperiod(&wifi_get_rssi_cnt,100))//10秒获取一次wifi信号强度
       {
-        Wifi_SendATCmd("AT+RSSI",2000);
-        DEBUGINFO("wifi status connect_state:%d rssi:%d ip:%s\n",wifi_status.connect_state,wifi_status.rssi,wifi_status.ip);
+        // Wifi_SendATCmd("AT+RSSI",2000);
+        // DEBUGINFO("wifi status connect_state:%d rssi:%d ip:%s\n",wifi_status.connect_state,wifi_status.rssi,wifi_status.ip);
       }
       if(waitforperiod(&wifi_get_ip_cnt,50))//5秒获取一次获取ip地址,如果没有获取
       {
