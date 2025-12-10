@@ -20,9 +20,6 @@
 uint8_t ucHMI_Rx_Buffer[2][HMI_RX_BUF_SIZE]; // 接收缓冲区
 uint8_t ucHMI_current_buf_idx = 0;  // 当前使用的缓冲区索引
 
-extern uint8_t startFinishedFlag;
-extern uint8_t hmiVersion;
-
 extern eDwinPage currentPage;
 extern eDwinPage lastPage;
 
@@ -278,7 +275,7 @@ void vHmiWaitTask(void *argument)
 		sendSt->data[0]=addRegVersion;
 		sendSt->data[1]=1;
 		HMI_Send_Msg_To_SendTask(sendSt);
-		osDelay(pdMS_TO_TICKS(200));	
+		osDelay(pdMS_TO_TICKS(300));	
 		if(startFinishedFlag == 1){
 			break;
 		}

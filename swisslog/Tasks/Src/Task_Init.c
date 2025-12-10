@@ -75,6 +75,8 @@ void vInitTask(void *argument)
   CarStatus.xSetDirection = Forward; //小车预设运行方向为前进
   CarStatus.xMotorStopReason = NoStopReason; //小车停止原因为无
 
+  osDelay(pdMS_TO_TICKS(100));
+
   osThreadResume(PrintTaskHandle);
   osThreadResume(MotionCtrlTaskHandle); 
   osThreadResume(MotorFeedbackTaskHandle); 
@@ -89,6 +91,7 @@ void vInitTask(void *argument)
   osThreadResume(HmiRecvTaskHandle);
   osThreadResume(HmiWaitTaskHandle);
   osThreadResume(BoxLEDTaskHandle);
+  osThreadResume(IntProcessTaskHandle); 
   osThreadResume(WifiManagerTaskHandle);
   osThreadResume(WifiReceiveTaskHandle);
   osThreadResume(MqttManagerTaskHandle);
@@ -100,8 +103,8 @@ void vInitTask(void *argument)
   osThreadResume(RobotHeartBeatTaskHandle);     
   osThreadResume(MqttNotifyTaskHandle);
 
-  osDelay(pdMS_TO_TICKS(500));
-  osThreadResume(IntProcessTaskHandle); 
+
+
 
 
   osThreadExit();

@@ -18,6 +18,7 @@
 //小车在站状态
 static CarStationStatus mCarStationStatus=InStation;
 
+extern uint8_t startFinishedFlag;
 extern CarStatus_t CarStatus;
 extern ServerToCarData_t ServerToCarData;
 extern osMessageQueueId_t xBox_Ctrl_QueueHandle;
@@ -67,30 +68,29 @@ static CarStationStatus Car_Read_Station_Status(void)
 
 void vBoxCtrlTask(void *argument)
 {
-  eBoxCtrlType box_msg;
+	DEBUGINFO("start");
 
-  //初始化数码管显示
-  NumDisp_Init();
+	eBoxCtrlType box_msg;
 
-  // //设置数码管显示的数字
-  // NumDisp_SetNumber((uint16_t)111);
-  // NumDisp_BlueShan();
+	//初始化数码管显示
+	NumDisp_Init();
 
-  // vUV_Clean_enable();
-  // osDelay(pdMS_TO_TICKS(2000));
-  // vUV_Clean_disable();
+	// //设置数码管显示的数字
+	// NumDisp_SetNumber((uint16_t)111);
+	// NumDisp_BlueShan();
 
-  // vRGB_LED(RED)
-  // osDelay(pdMS_TO_TICKS(2000));
-  // vRGB_LED(GREEN);
-  // osDelay(pdMS_TO_TICKS(2000));
-  // vRGB_LED(BLUE);
-  // osDelay(pdMS_TO_TICKS(2000));
-  // vRGB_LED(YELLOW);
-  // osDelay(pdMS_TO_TICKS(2000));
-  // vRGB_LED(WHITE);
-  // osDelay(pdMS_TO_TICKS(2000));
-  // vRGB_LED(LED_OFF);
+	// vUV_Clean_enable();
+	// osDelay(pdMS_TO_TICKS(2000));
+	// vUV_Clean_disable();
+
+  	while(1)
+	{
+		if(startFinishedFlag == 1){
+			break;
+		}
+		DEBUGINFO("waiting for HMI start");
+		osDelay(pdMS_TO_TICKS(300));	
+	}
 
 	mCarStationStatus = Car_Read_Station_Status();
 
@@ -104,10 +104,8 @@ void vBoxCtrlTask(void *argument)
 		HMI_Force_Home_Page();	// 强制跳转到home页面
 	}
 
-	DEBUGINFO("start\n");
-
-  while(1)
-  {
+	while(1)
+	{
 		if(osMessageQueueGet(xBox_Ctrl_QueueHandle, &box_msg, NULL, osWaitForever) == osOK)
 		{
 			DEBUGINFO("box_msg = %d\r\n",box_msg);
@@ -149,8 +147,8 @@ void vBoxCtrlTask(void *argument)
 							Car_Set_Station_Status(OutStation);// 设置小车状态为OutStation
 							HMI_Set_RFCardPage();	// 发送命令切换到”请刷rfid卡“页面;
 						} else {
-              DEBUGINFO("Can't Set OutStation!! Box not Locked!!\r\n");
-            }
+							DEBUGINFO("Can't Set OutStation!! Box not Locked!!\r\n");
+						}
 					}
 					
 					// car in检测
