@@ -165,10 +165,19 @@ typedef struct {
     char version[16];     // 版本号（如"1.0.0"）
 } RobotConnect_t;
 
+typedef struct {
+    char headerId[8];     // 最多4字符+":"+Long，预留长度
+    char timestamp[32];   // Unix毫秒时间戳（字符串形式）
+    char version[16];     // 版本号（如"1.0.0"）
+    char onoffline[32];     
+} RobotOnOffLine_t;
+
 extern RobotAction_t robotAction;
 extern RobotState_t robotSate;
 extern bool robot_init;
 extern cJSON* RobotJson;
+extern cJSON* Robot_OnOffLineJson;
+extern RobotOnOffLine_t robotOnOffLine;
 
 void Robot_Init(void);
 void Robot_CreateStateJson(void);
@@ -177,6 +186,7 @@ void Robot_CreateHeartBeatJson(void);
 char* Robot_GetHeartBeatJsonStr(void);
 void Robot_CreateOnOffLineJson(void);
 char* Robot_GetOnOffLineJsonStr(void); 
+void Robot_UpdateOnOffLineJson(cJSON* robotJson, const RobotOnOffLine_t *OnOffLine); 
 void Robot_ParseJson(char* topic,char* data);
 int Robot_ParseActionJson(char *json_str,RobotAction_t *robot); 
 int Robot_ParseConnectJson(char *json_str,RobotConnect_t *robot); 

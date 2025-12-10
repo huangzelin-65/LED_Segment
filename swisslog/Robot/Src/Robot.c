@@ -19,6 +19,14 @@ extern osMessageQueueId_t xRobotQueueHandle;//该消息队列处理事件上报
 extern osThreadId_t RobotReceiveTaskHandle;//该任务处理事件上报
 extern osThreadId_t RobotManagerTaskHandle;//主任务句柄
 
+RobotOnOffLine_t robotOnOffLine = {
+    .headerId = "h0:123",       // 示例：headerId（不超过8字符）
+    .timestamp = "1731300000000", // 示例：Unix毫秒时间戳字符串
+    .version = "1.0.0",
+    .onoffline = "ONLINE"
+};
+
+//保存服务器返回心跳包的ack状态
 RobotConnect_t robotConnect = {
     .headerId = "h0:123",       // 示例：headerId（不超过8字符）
     .timestamp = "1731300000000", // 示例：Unix毫秒时间戳字符串
@@ -904,6 +912,46 @@ char* Robot_GetOnOffLineJsonStr(void)
     }    
     char* json_str = cJSON_PrintUnformatted(Robot_OnOffLineJson);
     return json_str;    
+}
+// 更新已有cJSON对象（Robot_OnOffLineJson）为robotOnOffLine的最新状态
+void Robot_UpdateOnOffLineJson(cJSON* robotJson, const RobotOnOffLine_t *OnOffLine) 
+{
+    if (robotJson == NULL || OnOffLine == NULL) {
+        return; // 入参无效，直接返回
+    }
+    // 1. 更新string类型成员
+    cJSON* headeridItem = cJSON_CreateString(OnOffLine->headerId);
+    if (headeridItem != NULL) {
+        cJSON_bool replaceRet = cJSON_ReplaceItemInObject(robotJson, "headerId", headeridItem);
+        if (!replaceRet) {
+            DEBUGINFO("headeridItem fail\n");
+            cJSON_Delete(headeridItem);
+        }        
+    }
+
+    cJSON* timestampItem = cJSON_CreateString(OnOffLine->timestamp);
+    if (timestampItem != NULL) {
+        cJSON_bool replaceRet = cJSON_ReplaceItemInObject(robotJson, "timestamp", timestampItem);
+        if (!replaceRet) {
+            cJSON_Delete(timestampItem);
+        }        
+    }
+
+    cJSON* versionItem = cJSON_CreateString(OnOffLine->version);
+    if (versionItem != NULL) {
+        cJSON_bool replaceRet = cJSON_ReplaceItemInObject(robotJson, "version", versionItem);
+        if (!replaceRet) {
+            cJSON_Delete(versionItem);
+        }        
+    } 
+    
+    cJSON* onofflineItem = cJSON_CreateString(OnOffLine->onoffline);
+    if (onofflineItem != NULL) {
+        cJSON_bool replaceRet = cJSON_ReplaceItemInObject(robotJson, "on_off_line", onofflineItem);
+        if (!replaceRet) {
+            cJSON_Delete(onofflineItem);
+        }        
+    }     
 }
 //ROBOT 相关的初始化
 void Robot_Init(void)

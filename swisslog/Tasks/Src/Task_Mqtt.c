@@ -92,7 +92,7 @@ void vMqttManagerTask(void *argument)
                         Mqtt_Notify(MQTT_NOTIFY_ONLINE);    
                     }                                       
                 }
-                break;
+                break; 
                 case MQTT_MSG_ONLINE:
                 {
                     DEBUGINFO("MQTT_MSG_ONLINE start\n");
@@ -106,7 +106,21 @@ void vMqttManagerTask(void *argument)
                     MqttReadReady = 1;//发布话题后既可正常等待话题
                     DEBUGINFO("MQTT_MSG_ONLINE end\n");
                 }
-                break;                
+                break;
+                case MQTT_MSG_OFFLINE:
+                {
+                    DEBUGINFO("MQTT_MSG_OFFLINE start\n");
+                    //此处需修改为online的具体内容
+                    char* robot_json_str = (char*)msg->data;
+                    char topic[64] = {0};
+                    snprintf(topic, sizeof(topic), MQTT_FACTSHEET_TOPIC_NAME, robotSate.encode_number);                     
+                    if(mqtt_isConnected)Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
+                    vPortFree(robot_json_str);
+
+                    MqttReadReady = 1;//发布话题后既可正常等待话题
+                    DEBUGINFO("MQTT_MSG_OFFLINE end\n");
+                }
+                break;                                                
                 default:break;
             }
             vPortFree(manage_data);
@@ -168,13 +182,19 @@ void vMqttNotifyTask(void *argument)
           } 
           if(ulNotificationValue & MQTT_NOTIFY_ONLINE)
           {
-            DEBUGINFO("MQTT_NOTIFY_ONLINE\n");  
+            DEBUGINFO("MQTT_NOTIFY_ONLINE\n");
+            char src[] = "ONLINE";
+            memcpy(robotOnOffLine.onoffline,src,strlen(src) + 1);
+            Robot_UpdateOnOffLineJson(Robot_OnOffLineJson,&robotOnOffLine); 
             Mqtt_SendMsg(MQTT_MSG_ONLINE,Robot_GetOnOffLineJsonStr());
           }          
           if(ulNotificationValue & MQTT_NOTIFY_OFFLINE)
           {
             DEBUGINFO("MQTT_NOTIFY_OFFLINE\n");  
-            
+            char src[] = "OFFLINE";
+            memcpy(robotOnOffLine.onoffline,src,strlen(src) + 1);
+            Robot_UpdateOnOffLineJson(Robot_OnOffLineJson,&robotOnOffLine); 
+            Mqtt_SendMsg(MQTT_MSG_OFFLINE,Robot_GetOnOffLineJsonStr());            
           }                                                           
       }        
     }
