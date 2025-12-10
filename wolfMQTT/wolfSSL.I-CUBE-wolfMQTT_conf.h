@@ -43,7 +43,7 @@
 #define WOLFMQTT_CONF_TIMEOUT      0
 
 /*---------- WOLFMQTT_CONF_MULTITHREAD -----------*/
-#define WOLFMQTT_CONF_MULTITHREAD      0
+#define WOLFMQTT_CONF_MULTITHREAD      1
 
 /*---------- WOLFMQTT_CONF_DEBUG -----------*/
 #define WOLFMQTT_CONF_DEBUG      1
