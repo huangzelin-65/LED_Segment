@@ -72,6 +72,7 @@ static void dhcp_status_callback(struct netif *netif) {
            ip4_addr3(&netif->gw),
            ip4_addr4(&netif->gw));
     Tcp_SendMsg(TCP_MSG_MQTT,NULL);
+    Tcp_SendMsg(TCP_MSG_NTP,NULL);
   } else {
     // DHCP失败或断开
     DEBUGINFO("DHCP failed or disconnected\n");

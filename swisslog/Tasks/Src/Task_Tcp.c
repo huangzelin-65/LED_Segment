@@ -12,6 +12,7 @@
 #include "lwip.h"
 #include "adaptor_tcp.h"
 #include "adaptor_mqtt.h"
+#include "adaptor_ntp.h"
 
 extern osMessageQueueId_t xTcpManageQueueHandle;
 
@@ -40,7 +41,13 @@ void vTcpManagerTask(void *argument)
             {
                 DEBUGINFO("TCP_MSG_SERVER\n");                      
             }
-            break;                                       
+            break;   
+            case TCP_MSG_NTP://启动NTP服务，用于与服务器做时间同步
+            {
+                DEBUGINFO("TCP_MSG_NTP\n");
+                sntp_normal_init();
+            }
+            break;                                                  
             default:
             break;
         }

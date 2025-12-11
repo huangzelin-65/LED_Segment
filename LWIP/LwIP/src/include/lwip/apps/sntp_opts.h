@@ -39,7 +39,7 @@
 
 #include "lwip/opt.h"
 #include "lwip/prot/iana.h"
-
+#include "adaptor_ntp.h"
 /**
  * @defgroup sntp_opts Options
  * @ingroup sntp
@@ -53,7 +53,7 @@
  * NTP timestamps instead.
  */
 #if !defined SNTP_SET_SYSTEM_TIME || defined __DOXYGEN__
-#define SNTP_SET_SYSTEM_TIME(sec)   LWIP_UNUSED_ARG(sec)
+#define SNTP_SET_SYSTEM_TIME(sec)   sntp_set_system_time(sec)//LWIP_UNUSED_ARG(sec)
 #endif
 
 /** The maximum number of SNTP servers that can be set */
@@ -72,7 +72,8 @@
  * \#define SNTP_SERVER_ADDRESS "pool.ntp.org"
  */
 #if !defined SNTP_SERVER_DNS || defined __DOXYGEN__
-#define SNTP_SERVER_DNS            0
+#define SNTP_SERVER_DNS            1
+#define SNTP_SERVER_ADDRESS "192.168.1.10"
 #endif
 
 /**
