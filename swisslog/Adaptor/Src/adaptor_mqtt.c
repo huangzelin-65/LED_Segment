@@ -53,7 +53,7 @@ MqttResult_t mqtt_result = MQTT_ERROR;
 MqttWaitState_t mqtt_waitstate = MQTT_WAIT_STATE_IDLE;
 int mqtt_ready2read = 0;//接收到mqtt数据，可以开始读取
 int mqtt_rest2read = 0;//剩余需要区域读取得mqtt数据长度
-int mqtt_socket_id = 0;//mqtt底层tcp连接时，被分配得socket ip
+int mqtt_socket_id = -1;//mqtt底层tcp连接时，被分配得socket ip
 volatile word16 mPacketIdLast;//mqtt唯一id
 MqttTopic subscribe_topics[MQTT_SUBSCRIBE_COUNT];//订阅的话题
 MqttNet mNetwork;//网络结构体
@@ -63,6 +63,7 @@ int mSockFd = INVALID_SOCKET_FD;
 char mqtt_readbuffer[MQTT_RX_BUF_SIZE];
 #endif
 int mqtt_isConnected = 0;//mqtt连接状态
+int MqttReadReady = 0;//mqtt开始接收数据
 extern osMessageQueueId_t xMqttManagerQueueHandle;//处理mqtt任务的消息队列
 MqttSocket_t mqtt_socket = {
     .ip_addr[0] = 0,
@@ -643,6 +644,26 @@ void Mqtt_ParseData2List(uint8_t *result,int len)
 //解析mqtt数据包,搜索是否有"+WFDATA="开头的，有则解析
 void Mqtt_ParseTcpData(uint8_t* rbuf,int len)
 {
+    {
+        char target_mqtt_str[] = "+SOCKET_OPEN:";
+        // 查找目标前缀在rbuf中的位置
+        char *result = strstr((char *)rbuf, target_mqtt_str);
+        if (result != NULL) {
+            DEBUGINFO("find:%s\n", target_mqtt_str);    
+            int sid, error;
+            // 1. 从result（目标前缀的起始位置）开始解析，确保格式匹配
+            // 2. 修改变量名，避免与char* result冲突（用ret接收sscanf返回值）
+            int ret = sscanf(result, "+SOCKET_OPEN:%d,%d", &sid, &error);
+            if (ret == 2) {  // 检查是否成功提取2个整数
+                DEBUGINFO("sid:%d mqtt_socket_id:%d\n", sid,mqtt_socket_id); 
+                if((mqtt_socket_id == sid) && (error == 48))//socket 从连接状态变为未连接
+                {
+                    DEBUGINFO("need to restart mqtt"); 
+                    Mqtt_Restart();                   
+                }
+            }                
+        }
+    }    
     #ifdef MQTT_STATIC_ARRAY
         char target_str[] = "+WFDATA=";
         // 查找目标前缀在rbuf中的位置
@@ -942,3 +963,14 @@ void Mqtt_Notify(uint32_t value)
         DEBUGINFO("MqttNotifyTaskHandle NULL");
     }
 }
+//重启mqtt服务
+void Mqtt_Restart(void)
+{
+    DEBUGINFO("start");
+    mqtt_isConnected = 0;
+    MqttReadReady = 0;
+    Mqtt_SendMsg(MQTT_MSG_START,NULL); 
+}
+
+
+

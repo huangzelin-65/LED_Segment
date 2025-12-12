@@ -24,8 +24,6 @@
 extern CarStatus_t CarStatus;
 extern osMessageQueueId_t xMqttManagerQueueHandle;
 
-int MqttReadReady = 0;
-
 //mqtt主任务，处理初始化，发送消息等
 void vMqttManagerTask(void *argument)
 {

@@ -242,7 +242,19 @@ void Wifi_ConnectAck(uint8_t* rbuf,int len)
                 }          
             }                
         }        
-    }      
+    }  
+    {
+        char target_mqtt_str[] = "WIFI_DISCONNECT";
+        char *result = strstr((char *)rbuf, target_mqtt_str);
+        if (result != NULL) {   
+            if(wifi_status.connect_state == WIFI_OK)
+            {
+                DEBUGINFO("WIFI_DISCONNECT,restart wifi connection\n"); 
+                wifi_status.connect_state = WIFI_ERROR;
+                Wifi_ConnectStart(); 
+            }     
+        }           
+    }        
     if(wifi_state <= WIFI_AT) 
     {
         return;

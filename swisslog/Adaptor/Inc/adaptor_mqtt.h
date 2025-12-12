@@ -83,7 +83,7 @@ typedef struct {
 extern MqttNet mNetwork;//网络结构体
 extern MqttClient mClient;//mqtt客户端
 extern int mqtt_isConnected;
-
+extern int MqttReadReady;
 
 int MqttInit(const char *client_id);
 void Mqtt_SendMsg(MqttMsgType_t msg,char *data);
@@ -97,4 +97,5 @@ int Mqtt_GetListSize(void);
 void Mqtt_PopListTail(void);
 MqttReceiveData_t* Mqtt_GetListTail(void);
 void Mqtt_Notify(uint32_t value);
+void Mqtt_Restart(void);
 #endif
