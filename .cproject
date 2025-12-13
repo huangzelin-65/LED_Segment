@@ -50,6 +50,7 @@
 									<listOptionValue builtIn="false" value="../wolfSSL"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/wolfSSL_wolfSSL_wolfSSL/wolfssl/"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/wolfSSL_wolfMQTT_wolfMQTT/wolfmqtt/"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/swisslog}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input.1202731300" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input"/>
 							</tool>
@@ -98,6 +99,7 @@
 									<listOptionValue builtIn="false" value="../LWIP/LwIP/src/include/netif/ppp/polarssl"/>
 									<listOptionValue builtIn="false" value="../LWIP/lan8742"/>
 									<listOptionValue builtIn="false" value="../swisslog/Robot/Inc"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/swisslog}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1865227280" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -182,6 +184,7 @@
 									<listOptionValue builtIn="false" value="../wolfSSL"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/wolfSSL_wolfSSL_wolfSSL/wolfssl/"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/wolfSSL_wolfMQTT_wolfMQTT/wolfmqtt/"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/swisslog}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input.1073508501" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input"/>
 							</tool>
@@ -210,6 +213,7 @@
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/wolfSSL_wolfSSL_wolfSSL/wolfssl/"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/wolfSSL_wolfMQTT_wolfMQTT/wolfmqtt/"/>
 									<listOptionValue builtIn="false" value="../wolfSSL"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/swisslog}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.555642077" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -292,6 +296,7 @@
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/wolfSSL_wolfSSL_wolfSSL/wolfssl/"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/wolfSSL_wolfMQTT_wolfMQTT/wolfmqtt/"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/swisslog/Common/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/swisslog}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input.58133675" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input"/>
 							</tool>
@@ -318,6 +323,7 @@
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/wolfSSL_wolfSSL_wolfSSL/wolfssl/"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/wolfSSL_wolfMQTT_wolfMQTT/wolfmqtt/"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/swisslog/Common/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/swisslog}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1990852427" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -396,6 +402,7 @@
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/wolfSSL_wolfSSL_wolfSSL/wolfssl/"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/wolfSSL_wolfMQTT_wolfMQTT/wolfmqtt/"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/swisslog/Common/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/swisslog}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input.234773928" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input"/>
 							</tool>
@@ -421,6 +428,7 @@
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/wolfSSL_wolfSSL_wolfSSL/wolfssl/"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/wolfSSL_wolfMQTT_wolfMQTT/wolfmqtt/"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/swisslog/Common/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/swisslog}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.469759712" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>

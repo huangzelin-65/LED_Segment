@@ -3,6 +3,8 @@
 #include "task.h"
 #include "cmsis_os2.h"
 #include "LogDebugInfo.h"
+#include "Project_Config.h"
+#include "app_freertos.h"
 #include "adaptor_eeprom.h"
 #include "adaptor_power.h"
 #include "SystemTime.h"
@@ -83,6 +85,7 @@ void vInitTask(void *argument)
   osThreadResume(CarRfidTaskHandle); 
   osThreadResume(SensorTaskHandle);
   osThreadResume(TestTaskHandle);
+#ifdef  BOX_CTRL
   osThreadResume(BoxCtrlTaskHandle);
   osThreadResume(BoxRfidTaskHandle);
   osThreadResume(BoxRfidEventTaskHandle);
@@ -91,7 +94,9 @@ void vInitTask(void *argument)
   osThreadResume(HmiRecvTaskHandle);
   osThreadResume(HmiWaitTaskHandle);
   osThreadResume(BoxLEDTaskHandle);
-  osThreadResume(IntProcessTaskHandle); 
+#endif
+
+#ifdef  USE_WIFI
   osThreadResume(WifiManagerTaskHandle);
   osThreadResume(WifiReceiveTaskHandle);
   osThreadResume(MqttManagerTaskHandle);
@@ -102,6 +107,15 @@ void vInitTask(void *argument)
   osThreadResume(TcpReceiveTaskHandle);
   osThreadResume(RobotHeartBeatTaskHandle);     
   osThreadResume(MqttNotifyTaskHandle);
+#endif
+
+#ifdef  USE_CAN
+  osThreadResume(FDCANTxTaskHandle);
+  osThreadResume(FDCAN1RxTaskHandle);
+  osThreadResume(FDCAN2RxTaskHandle);
+#endif
+
+  osThreadResume(IntProcessTaskHandle); 
 
 
 

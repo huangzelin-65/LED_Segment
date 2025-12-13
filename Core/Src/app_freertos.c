@@ -26,6 +26,7 @@
 #include "adaptor_test.h"
 #include "adaptor_motor.h"
 #include "adaptor_rfid.h"
+#include "adaptor_can.h"
 #include "queue.h"
 #include "sensors.h"
 #include "LogDebugInfo.h"
@@ -80,6 +81,18 @@ const osSemaphoreAttr_t xMotorRxSem_attributes = {
 osSemaphoreId_t xHmiRxSemHandle;
 const osSemaphoreAttr_t xHmiRxSem_attributes = {
   .name = "xHmiRxSem"
+};
+
+
+/* Definitions for xCAN1_Rx_Queue */
+osMessageQueueId_t xCAN1_Rx_QueueHandle;
+const osMessageQueueAttr_t xCAN1_Rx_Queue_attributes = {
+  .name = "xCAN1_Rx_Queue"
+};
+/* Definitions for xCAN2_Rx_Queue */
+osMessageQueueId_t xCAN2_Rx_QueueHandle;
+const osMessageQueueAttr_t xCAN2_Rx_Queue_attributes = {
+  .name = "xCAN2_Rx_Queue"
 };
 
 /* USER CODE END PD */
@@ -272,6 +285,27 @@ const osThreadAttr_t RobotHeartBeatTask_attributes = {
 osThreadId_t MqttNotifyTaskHandle;
 const osThreadAttr_t MqttNotifyTask_attributes = {
   .name = "MqttNotifyTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
+/* Definitions for FDCANTxTask */
+osThreadId_t FDCANTxTaskHandle;
+const osThreadAttr_t FDCANTxTask_attributes = {
+  .name = "FDCANTxTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
+/* Definitions for FDCAN2RxTask */
+osThreadId_t FDCAN2RxTaskHandle;
+const osThreadAttr_t FDCAN2RxTask_attributes = {
+  .name = "FDCAN2RxTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
+/* Definitions for FDCAN1RxTask */
+osThreadId_t FDCAN1RxTaskHandle;
+const osThreadAttr_t FDCAN1RxTask_attributes = {
+  .name = "FDCAN1RxTask",
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 256 * 4
 };
@@ -539,6 +573,12 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+  /* creation of xCan1_Rx_Queue */
+  xCAN1_Rx_QueueHandle = osMessageQueueNew (16, sizeof(CAN_Recv_Msg_t), &xCAN1_Rx_Queue_attributes);
+  /* creation of xCan2_Rx_Queue */
+  xCAN2_Rx_QueueHandle = osMessageQueueNew (16, sizeof(CAN_Recv_Msg_t), &xCAN2_Rx_Queue_attributes);
+
+  /* Register queues, ... */
   vQueueAddToRegistry(xInterrupt_QueueHandle, "Interrupt_Queue");
   vQueueAddToRegistry(xSensor_QueueHandle, "Sensor_Queue");
   vQueueAddToRegistry(xWifi_Rx_QueueHandle, "Wifi_Rx_Queue");
@@ -551,6 +591,8 @@ void MX_FREERTOS_Init(void) {
   vQueueAddToRegistry(xMqttManagerQueueHandle, "MqttManagerQueue");
   vQueueAddToRegistry(xRobotQueueHandle, "RobotQueue");
   vQueueAddToRegistry(xTcpManageQueueHandle, "TcpManageQueue");
+  vQueueAddToRegistry(xCAN1_Rx_QueueHandle, "xCAN1_Rx_Queue");
+  vQueueAddToRegistry(xCAN2_Rx_QueueHandle, "xCAN2_Rx_Queue");
   /* USER CODE END RTOS_QUEUES */
   /* creation of InitTask */
   InitTaskHandle = osThreadNew(vInitTask, NULL, &InitTask_attributes);
@@ -630,6 +672,15 @@ void MX_FREERTOS_Init(void) {
   /* creation of MqttNotifyTask */
   MqttNotifyTaskHandle = osThreadNew(vMqttNotifyTask, NULL, &MqttNotifyTask_attributes);
 
+  /* creation of FDCANTxTask */
+  FDCANTxTaskHandle = osThreadNew(vFDCANTxTask, NULL, &FDCANTxTask_attributes);
+
+  /* creation of FDCAN2RxTask */
+  FDCAN2RxTaskHandle = osThreadNew(vFDCAN2RxTask, NULL, &FDCAN2RxTask_attributes);
+
+  /* creation of FDCAN1RxTask */
+  FDCAN1RxTaskHandle = osThreadNew(vFDCAN1RxTask, NULL, &FDCAN1RxTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   
@@ -659,6 +710,9 @@ void MX_FREERTOS_Init(void) {
   osThreadSuspend(TcpReceiveTaskHandle); 
   osThreadSuspend(RobotHeartBeatTaskHandle);
   osThreadSuspend(MqttNotifyTaskHandle); 
+  osThreadSuspend(FDCANTxTaskHandle);
+  osThreadSuspend(FDCAN1RxTaskHandle);
+  osThreadSuspend(FDCAN2RxTaskHandle);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
