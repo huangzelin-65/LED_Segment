@@ -10,6 +10,6 @@
 
 #define BOX_CTRL
 #define USE_WIFI
-#define USE_CAN
+// #define USE_CAN
 
 #endif /* PROJECT_CONFIG_H_ */
