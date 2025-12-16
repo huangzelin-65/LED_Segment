@@ -157,6 +157,7 @@ typedef enum {
     ROBOT_HEARTBEAT = 0x01,
     ROBOT_ACTIONACK = 0x02,
     ROBOT_ACTIONCMD = 0x04,
+    ROBOT_ACTIONNTF = 0X08
 } RobotNotify_t;
 
 typedef struct {
@@ -199,4 +200,5 @@ void Robot_Event(void);
 void Robot_State(void);
 void Robot_ActionAck(void);
 void Robot_Notify(uint32_t value);
+void Robot_ActionNotify(void);
 #endif

@@ -62,7 +62,12 @@ void vRobotManagerTask(void *argument)
           {
             DEBUGINFO("ROBOT_HEARTBEAT\n");  
             Robot_SendMsg(ROBOT_MSG_HEART,NULL);            
-          }                     
+          }
+          if(ulNotificationValue & ROBOT_ACTIONNTF)
+          {
+            DEBUGINFO("ROBOT_ACTIONNTF\n");  
+            Robot_ActionNotify();              
+          }                   
         }        
       }        
     }

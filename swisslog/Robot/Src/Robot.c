@@ -11,7 +11,10 @@
 #include "semphr.h"
 #include "Encoder.h"
 #include "adaptor_mqtt.h"
+#include "app_freertos.h"
 // #define USE_UID
+
+extern CarStationStatus Car_Get_Station_Status(void);
 
 extern CarStatus_t CarStatus;
 extern ServerToCarData_t ServerToCarData;
@@ -573,7 +576,18 @@ void Robot_ParseJson(char* topic,char* data)
         DEBUGINFO("MQTT_SUB_ACTION");
         int result = Robot_ParseActionJson(data,&robotAction);
         DEBUGINFO("parse result:%d\n",result); 
-        Robot_Notify(ROBOT_ACTIONACK|ROBOT_ACTIONCMD);
+        if(result == 1)
+        {
+            Robot_Notify(ROBOT_ACTIONACK|ROBOT_ACTIONNTF);
+        }
+        else if(result == 0)
+        {
+            Robot_Notify(ROBOT_ACTIONACK|ROBOT_ACTIONCMD);
+        }
+        else
+        {
+             DEBUGINFO("Robot_ParseActionJson error\n");
+        }        
     }
     else
     {
@@ -664,86 +678,88 @@ int Robot_ParseActionJson(char *json_str,RobotAction_t *robot)
     if (robot->action.cmd_count <= 0 || robot->action.cmd_count > 8) {
         DEBUGINFO("cmds Not find\n");
         cJSON_Delete(root);
-        return -1;
+        DEBUGINFO("  Type: %d\n", robot->action.Type);
+        return 1;
     }
+    else
+    {
+        // 遍历cmds数组，解析每个命令
+        for (int i = 0; i < robot->action.cmd_count; i++) {
+            cJSON *cmd_obj = cJSON_GetArrayItem(cmds_array, i);
+            if (cmd_obj == NULL || !cJSON_IsObject(cmd_obj)) {
+                DEBUGINFO("cmds %d is not object\n", i);
+                cJSON_Delete(root);
+                return -1;
+            }
 
-    // 遍历cmds数组，解析每个命令
-    for (int i = 0; i < robot->action.cmd_count; i++) {
-        cJSON *cmd_obj = cJSON_GetArrayItem(cmds_array, i);
-        if (cmd_obj == NULL || !cJSON_IsObject(cmd_obj)) {
-            DEBUGINFO("cmds %d is not object\n", i);
-            cJSON_Delete(root);
-            return -1;
-        }
+            // 解析cmd字段
+            cJSON *cmd = cJSON_GetObjectItem(cmd_obj, "cmd");
+            if (cmd == NULL || !cJSON_IsString(cmd)) {
+                DEBUGINFO("cmd [%d] is not string\n", i);
+                cJSON_Delete(root);
+                return -1;
+            }
+            strncpy(robot->action.cmds[i].cmd, cmd->valuestring, sizeof(robot->action.cmds[i].cmd)-1);
+            robot->action.cmds[i].cmd[sizeof(robot->action.cmds[i].cmd)-1] = '\0';
 
-        // 解析cmd字段
-        cJSON *cmd = cJSON_GetObjectItem(cmd_obj, "cmd");
-        if (cmd == NULL || !cJSON_IsString(cmd)) {
-            DEBUGINFO("cmd [%d] is not string\n", i);
-            cJSON_Delete(root);
-            return -1;
-        }
-        strncpy(robot->action.cmds[i].cmd, cmd->valuestring, sizeof(robot->action.cmds[i].cmd)-1);
-        robot->action.cmds[i].cmd[sizeof(robot->action.cmds[i].cmd)-1] = '\0';
+            // 解析cmdId字段
+            cJSON *cmdId = cJSON_GetObjectItem(cmd_obj, "cmdId");
+            if (cmdId == NULL || !cJSON_IsString(cmdId)) {
+                DEBUGINFO("cmdId[%d] is not string\n", i);
+                cJSON_Delete(root);
+                return -1;
+            }
+            strncpy(robot->action.cmds[i].cmdId, cmdId->valuestring, sizeof(robot->action.cmds[i].cmdId)-1);
+            robot->action.cmds[i].cmdId[sizeof(robot->action.cmds[i].cmdId)-1] = '\0';
 
-        // 解析cmdId字段
-        cJSON *cmdId = cJSON_GetObjectItem(cmd_obj, "cmdId");
-        if (cmdId == NULL || !cJSON_IsString(cmdId)) {
-            DEBUGINFO("cmdId[%d] is not string\n", i);
-            cJSON_Delete(root);
-            return -1;
+            // 解析params对象（model字段）
+            cJSON *params_obj = cJSON_GetObjectItem(cmd_obj, "params");
+            if (params_obj == NULL || !cJSON_IsObject(params_obj)) {
+                DEBUGINFO("params[%d] is not object\n", i);
+                cJSON_Delete(root);
+                return -1;
+            }
+            cJSON *model = cJSON_GetObjectItem(params_obj, "model");
+            if (model != NULL && cJSON_IsString(model)) {  // model可能在非runModel命令中不存在
+                strncpy(robot->action.cmds[i].params.model, model->valuestring, sizeof(robot->action.cmds[i].params.model)-1);
+                robot->action.cmds[i].params.model[sizeof(robot->action.cmds[i].params.model)-1] = '\0';
+            } else {
+                robot->action.cmds[i].params.model[0] = '\0';  // 空字符串表示无参数
+            }
+            cJSON *speedLevel = cJSON_GetObjectItem(params_obj, "speedLevel");
+            if (speedLevel != NULL && cJSON_IsString(speedLevel)) { 
+                strncpy(robot->action.cmds[i].params.speedLevel, speedLevel->valuestring, sizeof(robot->action.cmds[i].params.speedLevel)-1);
+                robot->action.cmds[i].params.speedLevel[sizeof(robot->action.cmds[i].params.speedLevel)-1] = '\0';
+            } else {
+                robot->action.cmds[i].params.speedLevel[0] = '\0';  // 空字符串表示无参数
+            }        
         }
-        strncpy(robot->action.cmds[i].cmdId, cmdId->valuestring, sizeof(robot->action.cmds[i].cmdId)-1);
-        robot->action.cmds[i].cmdId[sizeof(robot->action.cmds[i].cmdId)-1] = '\0';
+        // 释放cJSON资源
+        cJSON_Delete(root);
+        //统计解析耗时
+        // TickType_t end_tick = xTaskGetTickCount();
+        // TickType_t elapsed_tick = end_tick - start_tick; 
+        // uint32_t elapsed_ms = pdMS_TO_TICKS(elapsed_tick);    
+        // DEBUGINFO("elapsed_ms:%ld\n",elapsed_ms);
 
-        // 解析params对象（model字段）
-        cJSON *params_obj = cJSON_GetObjectItem(cmd_obj, "params");
-        if (params_obj == NULL || !cJSON_IsObject(params_obj)) {
-            DEBUGINFO("params[%d] is not object\n", i);
-            cJSON_Delete(root);
-            return -1;
+        // 打印顶层结构体成员
+        DEBUGINFO("  headerId: %s\n", robot->headerId);
+        DEBUGINFO("  timestamp: %s\n", robot->timestamp);
+        DEBUGINFO("  version: %s\n", robot->version);
+        
+        // 打印RobotAction成员
+        DEBUGINFO("  Type: %d\n", robot->action.Type);
+        DEBUGINFO("  cmd_count: %d\n", robot->action.cmd_count);
+        
+        // 打印命令数组（cmds）中的每个命令
+        for (int i = 0; i < robot->action.cmd_count; i++) {
+            DEBUGINFO("      cmd number %d\n", i + 1);
+            DEBUGINFO("      cmd: %s\n", robot->action.cmds[i].cmd);
+            DEBUGINFO("      cmdId: %s\n", robot->action.cmds[i].cmdId);
+            DEBUGINFO("      params.model: %s\n", robot->action.cmds[i].params.model);
+            DEBUGINFO("      params.speedLevel: %s\n", robot->action.cmds[i].params.speedLevel);
         }
-        cJSON *model = cJSON_GetObjectItem(params_obj, "model");
-        if (model != NULL && cJSON_IsString(model)) {  // model可能在非runModel命令中不存在
-            strncpy(robot->action.cmds[i].params.model, model->valuestring, sizeof(robot->action.cmds[i].params.model)-1);
-            robot->action.cmds[i].params.model[sizeof(robot->action.cmds[i].params.model)-1] = '\0';
-        } else {
-            robot->action.cmds[i].params.model[0] = '\0';  // 空字符串表示无参数
-        }
-        cJSON *speedLevel = cJSON_GetObjectItem(params_obj, "speedLevel");
-        if (speedLevel != NULL && cJSON_IsString(speedLevel)) { 
-            strncpy(robot->action.cmds[i].params.speedLevel, speedLevel->valuestring, sizeof(robot->action.cmds[i].params.speedLevel)-1);
-            robot->action.cmds[i].params.speedLevel[sizeof(robot->action.cmds[i].params.speedLevel)-1] = '\0';
-        } else {
-            robot->action.cmds[i].params.speedLevel[0] = '\0';  // 空字符串表示无参数
-        }        
     }
-    // 释放cJSON资源
-    cJSON_Delete(root);
-    //统计解析耗时
-    // TickType_t end_tick = xTaskGetTickCount();
-    // TickType_t elapsed_tick = end_tick - start_tick; 
-    // uint32_t elapsed_ms = pdMS_TO_TICKS(elapsed_tick);    
-    // DEBUGINFO("elapsed_ms:%ld\n",elapsed_ms);
-
-    // 打印顶层结构体成员
-    DEBUGINFO("  headerId: %s\n", robot->headerId);
-    DEBUGINFO("  timestamp: %s\n", robot->timestamp);
-    DEBUGINFO("  version: %s\n", robot->version);
-    
-    // 打印RobotAction成员
-    DEBUGINFO("  Type: %d\n", robot->action.Type);
-    DEBUGINFO("  cmd_count: %d\n", robot->action.cmd_count);
-    
-    // 打印命令数组（cmds）中的每个命令
-    for (int i = 0; i < robot->action.cmd_count; i++) {
-        DEBUGINFO("      cmd number %d\n", i + 1);
-        DEBUGINFO("      cmd: %s\n", robot->action.cmds[i].cmd);
-        DEBUGINFO("      cmdId: %s\n", robot->action.cmds[i].cmdId);
-        DEBUGINFO("      params.model: %s\n", robot->action.cmds[i].params.model);
-        DEBUGINFO("      params.speedLevel: %s\n", robot->action.cmds[i].params.speedLevel);
-    }
-
     return 0;
 }
 //解析Connect json
@@ -1145,6 +1161,24 @@ void Robot_Action2Cmd(void)
         vParseCommandToCar(); 
     }   
 }
+//处理通知信息
+void Robot_ActionNotify(void)
+{
+    DEBUGINFO("Type:%d\n",robotAction.action.Type);
+    if(robotAction.action.Type == ROBOT_IN_STATION)
+    {
+        ServerToCarData.xStationStatus = InStation;
+        if(ServerToCarData.xStationStatus != Car_Get_Station_Status())
+        {
+            // 发送进出站消息
+            eBoxCtrlType box_msg = UpdateStationStatus;
+            if(osMessageQueuePut(xBox_Ctrl_QueueHandle, &box_msg, 0, pdMS_TO_TICKS(100)) != osOK)
+            {
+                DEBUGINFO("send motion msg error\r\n");
+            }
+        }        
+    }
+}
 //回复action的ack
 void Robot_ActionAckUpdate(RobotActionStatus_t status)
 { 
@@ -1243,7 +1277,7 @@ void Robot_ActionAck(void)
     Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_ACK);
     Robot_State(); 
     xSemaphoreGive(robotSate.mutex);  
-    // DEBUGINFO("end"); 
+    DEBUGINFO("end"); 
 }
 //事件发生，上报状态
 void Robot_Event(void)
@@ -1255,7 +1289,7 @@ void Robot_Event(void)
     Robot_UpdateAction();
     Robot_State();
     xSemaphoreGive(robotSate.mutex);
-    // DEBUGINFO("end");
+    DEBUGINFO("end");
 }
 //消息通知主线程
 void Robot_Notify(uint32_t value)
