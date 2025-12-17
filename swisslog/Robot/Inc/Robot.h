@@ -59,7 +59,7 @@ typedef struct {
 } RobotCmdAck;
 
 typedef struct {
-    char headerId[8];     // 最多4字符+":"+Long，预留长度
+    char headerId[64];     // 最多4字符+":"+Long，预留长度
     char timestamp[32];   // Unix毫秒时间戳（字符串形式）
     char version[16];     // 版本号（如"1.0.0"）
     RobotCmdAck actionStates[8];   // 动作内容，最多8组命令
@@ -67,7 +67,7 @@ typedef struct {
 } RobotActionAck_t;
 
 typedef struct {
-    char headerId[8];
+    char headerId[64];
     char timestamp[32];   // Unix毫秒时间戳（字符串形式）
     char version[16];     // 版本号（如"1.0.0"）
     const char *manufacturer;
@@ -115,7 +115,7 @@ typedef struct {
 // 命令结构体（对应cmds数组中的元素）
 typedef struct {
     char cmd[16];     // 存储"forward"/"back"/"stop"/"runModel"
-    char cmdId[16];   // 存储命令ID（如"1"）
+    char cmdId[64];   // 存储命令ID（如"1"）
     RobotCmdParams params;  // 命令参数
 } RobotCmd;
 
@@ -128,7 +128,7 @@ typedef struct {
 
 // 顶层结构体（对应整个JSON）
 typedef struct {
-    char headerId[8];     // 最多4字符+":"+Long，预留长度
+    char headerId[64];     // 最多4字符+":"+Long，预留长度
     char timestamp[32];   // Unix毫秒时间戳（字符串形式）
     char version[16];     // 版本号（如"1.0.0"）
     RobotAction action;   // 动作内容
@@ -161,13 +161,13 @@ typedef enum {
 } RobotNotify_t;
 
 typedef struct {
-    char headerId[8];     // 最多4字符+":"+Long，预留长度
+    char headerId[64];     // 最多4字符+":"+Long，预留长度
     char timestamp[32];   // Unix毫秒时间戳（字符串形式）
     char version[16];     // 版本号（如"1.0.0"）
 } RobotConnect_t;
 
 typedef struct {
-    char headerId[8];     // 最多4字符+":"+Long，预留长度
+    char headerId[64];     // 最多4字符+":"+Long，预留长度
     char timestamp[32];   // Unix毫秒时间戳（字符串形式）
     char version[16];     // 版本号（如"1.0.0"）
     char onoffline[32];     
