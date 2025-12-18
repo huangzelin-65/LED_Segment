@@ -27,18 +27,18 @@
  *
  */
 
-#include <time.h>
-
 #include "lwip/opt.h"
 #include "lwip/apps/sntp.h"
 #include "adaptor_ntp.h"
 #include "lwip/netif.h"
 #include "LogDebugInfo.h"
+#include "app_freertos.h"
+
+struct tm current_time_val;
 
 void sntp_set_system_time(u32_t sec)
 {
   char buf[32];
-  struct tm current_time_val;
   sec += (8 * 60 * 60);
   time_t current_time = (time_t)sec;//北京时间是东8区需偏移8小时
 #ifdef _MSC_VER
@@ -49,6 +49,13 @@ void sntp_set_system_time(u32_t sec)
   
   strftime(buf, sizeof(buf), "%d.%m.%Y %H:%M:%S", &current_time_val);
   DEBUGINFO("SNTP time: %s\n", buf);
+
+  sntp_notify(NTP_NOTIFY_UPDATE);
+}
+
+struct tm sntp_get_system_time(void)
+{
+    return current_time_val;
 }
 
 void sntp_normal_init(void)
@@ -64,4 +71,25 @@ void sntp_normal_init(void)
 #endif /* LWIP_DHCP */
   sntp_init();
   DEBUGINFO("end");  
+}
+
+//消息通知主线程
+void sntp_notify(uint32_t value)
+{
+    if(NtpManagerTaskHandle != NULL)
+    {
+        DEBUGINFO("value:%lx",value);
+        BaseType_t xReturn = pdPASS;
+        xReturn = xTaskNotify(NtpManagerTaskHandle, 
+                    value, 
+                    eSetValueWithoutOverwrite);
+        if(xReturn != pdPASS)
+        {
+            DEBUGINFO("xReturn is not pdPASS:%ld\n",xReturn);
+        } 
+    }
+    else
+    {
+        DEBUGINFO("NtpManagerTaskHandle NULL");
+    }
 }

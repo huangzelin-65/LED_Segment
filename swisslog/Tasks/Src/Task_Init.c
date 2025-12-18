@@ -107,6 +107,7 @@ void vInitTask(void *argument)
   osThreadResume(TcpReceiveTaskHandle);
   osThreadResume(RobotHeartBeatTaskHandle);     
   osThreadResume(MqttNotifyTaskHandle);
+  osThreadResume(NtpManagerTaskHandle);
 #endif
 
 #ifdef  USE_CAN

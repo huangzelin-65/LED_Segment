@@ -309,6 +309,13 @@ const osThreadAttr_t FDCAN1RxTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 256 * 4
 };
+/* Definitions for NtpManagerTask */
+osThreadId_t NtpManagerTaskHandle;
+const osThreadAttr_t NtpManagerTask_attributes = {
+  .name = "NtpManagerTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
 /* Definitions for wifiUsartMutex */
 osMutexId_t wifiUsartMutexHandle;
 const osMutexAttr_t wifiUsartMutex_attributes = {
@@ -681,6 +688,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of FDCAN1RxTask */
   FDCAN1RxTaskHandle = osThreadNew(vFDCAN1RxTask, NULL, &FDCAN1RxTask_attributes);
 
+  /* creation of NtpManagerTask */
+  NtpManagerTaskHandle = osThreadNew(vNtpManagerTask, NULL, &NtpManagerTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   
@@ -713,6 +723,7 @@ void MX_FREERTOS_Init(void) {
   osThreadSuspend(FDCANTxTaskHandle);
   osThreadSuspend(FDCAN1RxTaskHandle);
   osThreadSuspend(FDCAN2RxTaskHandle);
+  osThreadSuspend(NtpManagerTaskHandle);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
