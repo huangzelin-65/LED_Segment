@@ -78,7 +78,6 @@ void vMotionCtrlTask(void *argument)
             if(CarStatus.xIsCarRunning != CarStop)
             {
               CarStatus.xIsCarRunning = CarStop; //小车状态记录为停止
-              Robot_Event();
             }
             CarStatus.xMotorEnable = MotorDisable; //电机使能状态清除
             // CarStatus.xIsCarRunning = CarStop; //小车状态记录为停止
@@ -186,10 +185,9 @@ void vMotionCtrlTask(void *argument)
               CarStatus.xMotorStopReason = ByToggleStop;
               DEBUGINFO("MotorStopReason: ByToggleStop\r\n");
             }
-            Robot_Event();
             break;
-
         }
+        Robot_Event(); // 上报小车状态
       }
     }
 }

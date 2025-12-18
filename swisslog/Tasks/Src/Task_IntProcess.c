@@ -37,6 +37,10 @@ void LowVoltageDetect_Test(void)
   while (1)
   {
     DEBUGINFO("%d",i);
+    // if(50 == i)
+    // {
+    //   break;
+    // }
     i++;
     osDelay(pdMS_TO_TICKS(100));
   }
@@ -113,26 +117,30 @@ void vIntProcessTask(void *argument)
           sensor_msg = ResetButtonTrigger;
           if(osMessageQueuePut(xSensor_QueueHandle, &sensor_msg, 0, pdMS_TO_TICKS(100)) != osOK)
           {
-            DEBUGINFO("vIntProcessTask() send sensor msg error\r\n");
+            DEBUGINFO("vIntProcessTask() send sensor msg error");
           }
           break;
 
         case SensorDebounce:
+          DEBUGINFO("sensor trigger");
           SensorDebounce_flag = 0;
           vSensorStatusCheck();     //检测传感器状态
           break;
 
         case ToggleDebounce:
+          DEBUGINFO("Toggle trigger");
           ToggleDebounce_flag = 0;
           vToggleSwitchStatusCheck();   //检测开关状态
           break;
         
         case BoxELockDebounce:
+          DEBUGINFO("BoxELock trigger");
           BoxELockDebounce_flag = 0;
           vBoxELockStatusCheck();       //检测车厢锁状态
           break;
 
         case ServiceJoystickDebounce:
+          DEBUGINFO("ServiceJoystick trigger");
           ServiceJoystickDebounce_flag = 0;
           vServiceJoystickStatusCheck();   //检测维修控杆状态
           break;

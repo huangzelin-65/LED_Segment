@@ -51,6 +51,7 @@ void UvClean_Start(uint8_t timeMin,uint8_t startTime[6])
 		//HMI_Check_Uv_Clean(UvTimeCnt);
 	}
 	vUV_Clean_enable();
+	Robot_Event(); //上报小车状态
 }
 
 /**
@@ -61,6 +62,7 @@ void UvClean_Stop(void)
 	uvCleanRunning=0;
     osTimerStop(xUVTimerHandle);
 	vUV_Clean_disable();
+	Robot_Event(); //上报小车状态
 }
 
 // 保存本次消毒开始的rtc时间 + 消毒时长

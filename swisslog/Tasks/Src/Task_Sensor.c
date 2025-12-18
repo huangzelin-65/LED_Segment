@@ -312,6 +312,7 @@ void vSensorTask(void *argument)
         default:
           break;
       }
+      Robot_Event(); //上报小车状态
     }
   }
 }

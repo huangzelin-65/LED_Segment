@@ -248,6 +248,7 @@ void vCarRfidTask(void *argument)
         memset(pcCardNum, 0, sizeof(pcCardNum));
       }
 
+      Robot_Event(); //上报小车状态
     }
     
   }
