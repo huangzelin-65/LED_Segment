@@ -1209,7 +1209,12 @@ void Robot_ActionAckUpdate(RobotActionStatus_t status)
             {
                 strcpy(robotSate.robotActionAck.actionStates[i].status,"failed");
             }
-            break;                    
+            break; 
+        case ROBOT_ACTION_STATUS_PAUSE:
+            {
+                strcpy(robotSate.robotActionAck.actionStates[i].status,"pause");
+            }
+            break;                                
         default:
             break;
         }
@@ -1239,7 +1244,15 @@ void Robot_UpdateAction(void)
                     CarStatus.xMotorStopReason == ByMotorError
                 ) 
                 {
-                    Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_FAILED);
+                    DEBUGINFO("FrontProxStatus:%d RearProxStatus:%d",CarStatus.FrontProxStatus,CarStatus.RearProxStatus);
+                    if(CarStatus.FrontProxStatus == SensorTrigger || CarStatus.RearProxStatus == SensorTrigger)
+                    {
+                        Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_PAUSE);
+                    }
+                    else
+                    {
+                        Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_FAILED);
+                    }
                 }
                 else
                 {
