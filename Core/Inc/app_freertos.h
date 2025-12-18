@@ -115,6 +115,7 @@ extern osMessageQueueId_t xWifi_Parse_QueueHandle;
 extern osMessageQueueId_t xMqttManagerQueueHandle;
 extern osMessageQueueId_t xRobotQueueHandle;
 extern osMessageQueueId_t xTcpManageQueueHandle;
+extern osMessageQueueId_t xRobotNotifyQueueHandle;
 extern osSemaphoreId_t xMotorTxSemHandle;
 extern osSemaphoreId_t xWifiTxSemHandle;
 extern osSemaphoreId_t xPrintSemHandle;

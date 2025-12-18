@@ -1038,7 +1038,7 @@ void Robot_SendMsg(RobotMsgType_t type,void *data)
         RobotMsg_t * robot_msg = pvPortMalloc(sizeof(RobotMsg_t));
         robot_msg->type = type;
         robot_msg->data = data;        
-        // DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(xRobotQueueHandle),uxQueueSpacesAvailable(xRobotQueueHandle));
+        DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(xRobotQueueHandle),uxQueueSpacesAvailable(xRobotQueueHandle));
         if (xQueueSend(xRobotQueueHandle, &robot_msg, portMAX_DELAY) == pdPASS) 
         {
             DEBUGINFO("type :%d\n",type);
@@ -1265,7 +1265,7 @@ void Robot_State(void)
 
         Robot_SendMsg(ROBOT_MSG_STATE,robot_state_data);
     }
-    robotSate.heartbeat_cnt = 0;//复位心跳包
+    // robotSate.heartbeat_cnt = 0;//复位心跳包
     // DEBUGINFO("end");
 }
 //回复action ack
@@ -1294,21 +1294,18 @@ void Robot_Event(void)
 //消息通知主线程
 void Robot_Notify(uint32_t value)
 {
-    if(RobotManagerTaskHandle != NULL)
+    if(xRobotNotifyQueueHandle != NULL)
     {
-        DEBUGINFO("value:%lx",value);
-        BaseType_t xReturn = pdPASS;
-        xReturn = xTaskNotify(RobotManagerTaskHandle, 
-                    value, 
-                    eSetValueWithoutOverwrite);
-        if(xReturn != pdPASS)
+        uint32_t * ntf_value = pvPortMalloc(sizeof(uint32_t));  
+        if(ntf_value != NULL)
         {
-            DEBUGINFO("xReturn is not pdPASS:%ld\n",xReturn);
-        } 
-    }
-    else
-    {
-        DEBUGINFO("RobotManagerTaskHandle NULL");
-    }
+            *ntf_value = value;     
+            DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(xRobotNotifyQueueHandle),uxQueueSpacesAvailable(xRobotNotifyQueueHandle));
+            if (xQueueSend(xRobotNotifyQueueHandle, &ntf_value, portMAX_DELAY) == pdPASS) 
+            {
+                DEBUGINFO("ntf_value :%d\n",*ntf_value);
+            } 
+        }
+    }     
 }
 

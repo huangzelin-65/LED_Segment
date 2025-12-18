@@ -895,6 +895,7 @@ rtos.0.queues.12=allocationType,Dynamic;bufferName,NULL;controlBlockName,NULL;it
 rtos.0.queues.13=allocationType,Dynamic;bufferName,NULL;controlBlockName,NULL;itemNumber,16;itemSize,uint32_t;name,xMqttManagerQueue
 rtos.0.queues.14=allocationType,Dynamic;bufferName,NULL;controlBlockName,NULL;itemNumber,16;itemSize,uint32_t;name,xRobotQueue
 rtos.0.queues.15=allocationType,Dynamic;bufferName,NULL;controlBlockName,NULL;itemNumber,16;itemSize,uint32_t;name,xTcpManageQueue
+rtos.0.queues.16=allocationType,Dynamic;bufferName,NULL;controlBlockName,NULL;itemNumber,16;itemSize,uint32_t;name,xRobotNotifyQueue
 rtos.0.queues.2=allocationType,Dynamic;bufferName,NULL;controlBlockName,NULL;itemNumber,16;itemSize,uint32_t;name,xWifi_Rx_Queue
 rtos.0.queues.3=allocationType,Dynamic;bufferName,NULL;controlBlockName,NULL;itemNumber,16;itemSize,uint32_t;name,xTest_Rx_Queue
 rtos.0.queues.4=allocationType,Dynamic;bufferName,NULL;controlBlockName,NULL;itemNumber,16;itemSize,uint32_t;name,xMotor_Rx_Queue
