@@ -25,6 +25,7 @@
 /* USER CODE BEGIN Includes */
 #include "LogDebugInfo.h"
 #include "adaptor_eeprom.h"
+#include "adaptor_rtc.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -141,7 +142,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  Rtc_PowerEnable();  
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -176,6 +177,8 @@ int main(void)
 
   // PB14 属于 UCPD（USB Type‑C PD）CC 引脚，默认被内部下拉拉低, 此处禁用UCPD的默认下拉
   SET_BIT(PWR->UCPDR, PWR_UCPDR_UCPD_DBDIS); 
+
+  Rtc_Init();
   /* USER CODE END 2 */
 
   /* Init scheduler */
