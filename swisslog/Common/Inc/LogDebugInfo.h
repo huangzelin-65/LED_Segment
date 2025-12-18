@@ -5,6 +5,7 @@
 #include "main.h"
 #include "FreeRTOS.h" 
 #include "task.h"
+#include "adaptor_rtc.h"
 
 #define LOG_USE_MALLOC 
 #define LOG_ARRAY_LEN   8
@@ -12,8 +13,8 @@
 #define LOG_LENGTH_SINGLE 4
 
 #define DEBUGINFO(fmt, ...) \
-    safe_printf_long("[%lu]%s(%d) " fmt"\r\n", \
-                     xTaskGetTickCount(), \
+    safe_printf_long("[%s]%s(%d) " fmt"\r\n", \
+                     Rtc_GetTimeStr(), \
                      __func__, \
                      __LINE__, \
                      ##__VA_ARGS__)
