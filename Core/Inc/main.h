@@ -383,6 +383,8 @@ void Error_Handler(void);
 #define NUMDISP_TX_GPIO_Port GPIOF
 #define NUMDISP_RX_Pin GPIO_PIN_4
 #define NUMDISP_RX_GPIO_Port GPIOF
+#define LED_RED_Pin GPIO_PIN_7
+#define LED_RED_GPIO_Port GPIOG
 #define SERVICE_FRONT_Pin GPIO_PIN_5
 #define SERVICE_FRONT_GPIO_Port GPIOF
 #define SERVICE_FRONT_EXTI_IRQn EXTI5_IRQn
@@ -391,6 +393,8 @@ void Error_Handler(void);
 #define FC_L_EXTI_IRQn EXTI12_IRQn
 #define FC_H_Pin GPIO_PIN_5
 #define FC_H_GPIO_Port GPIOG
+#define LED_YELLOW_Pin GPIO_PIN_4
+#define LED_YELLOW_GPIO_Port GPIOG
 #define Encoder_S2_2_Pin GPIO_PIN_3
 #define Encoder_S2_2_GPIO_Port GPIOG
 #define FP_H_Pin GPIO_PIN_11
@@ -430,6 +434,8 @@ void Error_Handler(void);
 #define Rfid_Car_Power_GPIO_Port GPIOE
 #define Encoder_S1_1_Pin GPIO_PIN_11
 #define Encoder_S1_1_GPIO_Port GPIOD
+#define LED_GREEN_Pin GPIO_PIN_10
+#define LED_GREEN_GPIO_Port GPIOD
 #define LED_BOX_B_Pin GPIO_PIN_12
 #define LED_BOX_B_GPIO_Port GPIOF
 #define RESET_Pin GPIO_PIN_15
