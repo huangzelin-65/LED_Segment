@@ -79,9 +79,10 @@ void Mqtt_SendMsg(MqttMsgType_t msg,char *data)
     if(xMqttManagerQueueHandle != NULL)
     {
         MqttMsgdata_t *msg_data = pvPortMalloc(sizeof(MqttMsgdata_t));
+        if(msg_data == NULL)return;
         msg_data->type = msg;
         msg_data->data = data;
-        // DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(xMqttManagerQueueHandle),uxQueueSpacesAvailable(xMqttManagerQueueHandle));
+        DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(xMqttManagerQueueHandle),uxQueueSpacesAvailable(xMqttManagerQueueHandle));
         if (xQueueSend(xMqttManagerQueueHandle, &msg_data, portMAX_DELAY) == pdPASS) 
         {
             DEBUGINFO("msg :%d\n",msg);

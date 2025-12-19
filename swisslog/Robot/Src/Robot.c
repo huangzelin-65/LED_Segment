@@ -1036,6 +1036,7 @@ void Robot_SendMsg(RobotMsgType_t type,void *data)
     if(xRobotQueueHandle != NULL)
     {
         RobotMsg_t * robot_msg = pvPortMalloc(sizeof(RobotMsg_t));
+        if(robot_msg == NULL)return;
         robot_msg->type = type;
         robot_msg->data = data;        
         DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(xRobotQueueHandle),uxQueueSpacesAvailable(xRobotQueueHandle));
