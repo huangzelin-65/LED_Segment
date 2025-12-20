@@ -112,7 +112,7 @@ HAL_StatusTypeDef Mqtt_SendATCmd(const char *cmd,int32_t timeout_ms)
 //mqtt底层连接服务器函数
 int Mqtt_NetConnect(void *context, const char* host, word16 port,int timeout_ms)
 {
-    #ifdef MQTT_WIFI
+    #ifdef MQTT_USE_WIFI
     static int cnt = 0;
     //检测socket连接情况
     mqtt_result = MQTT_ERROR;
@@ -231,7 +231,7 @@ int Mqtt_NetConnect(void *context, const char* host, word16 port,int timeout_ms)
 //mqtt底层读取数据接口函数
 int Mqtt_NetRead(void *context, byte* buf, int buf_len, int timeout_ms)
 {
-    #ifdef MQTT_WIFI
+    #ifdef MQTT_USE_WIFI
         // DEBUGINFO("start\n");
         #ifdef MQTT_STATIC_ARRAY
             static int cnt = 0;
@@ -331,7 +331,7 @@ int Mqtt_NetRead(void *context, byte* buf, int buf_len, int timeout_ms)
 int Mqtt_NetWrite(void *context, const byte* buf, int buf_len,int timeout_ms)
 {
     DEBUGINFO("Mqtt_NetWrite timeout_ms:%d",timeout_ms);
-    #ifdef MQTT_WIFI
+    #ifdef MQTT_USE_WIFI
     memset(Mqtt_SendBuffer,0,1024);
     int prefix_len = snprintf(Mqtt_SendBuffer, MQTT_TX_BUF_SIZE, "AT+SOCKETSENDLINE=%d,%d,", mqtt_socket_id, buf_len);
     // 检查前缀生成是否正常，以及剩余空间是否足够容纳 buf
@@ -397,7 +397,7 @@ int Mqtt_NetWrite(void *context, const byte* buf, int buf_len,int timeout_ms)
 //mqtt底层断开服务器函数
 int Mqtt_NetDisconnect(void *context)
 {
-    #ifdef MQTT_WIFI
+    #ifdef MQTT_USE_WIFI
     mqtt_result = MQTT_ERROR;
     mqtt_waitstate = MQTT_WAIT_STATE_SOCKET_CLOSE;
     memset(Mqtt_SendBuffer,0,1024);

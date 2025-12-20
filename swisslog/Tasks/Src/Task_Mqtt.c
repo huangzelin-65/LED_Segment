@@ -58,7 +58,7 @@ void vMqttManagerTask(void *argument)
                     snprintf(topic, sizeof(topic), MQTT_HEARTBEAT_TOPIC_NAME, robotSate.encode_number);                  
                     if(mqtt_isConnected)Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
                     vPortFree(robot_json_str);
-                    // DEBUGINFO("MQTT_MSG_HEARTBEAT end\n");
+                    DEBUGINFO("MQTT_MSG_HEARTBEAT end\n");
                 }
                 break;
                 case MQTT_MSG_ROBOT_EVENT:

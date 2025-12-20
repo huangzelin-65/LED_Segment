@@ -24,7 +24,7 @@ void vWifiManagerTask(void *argument)
   int wifi_get_ip_cnt = 0;  
   DEBUGINFO("vWifiManagerTask\r\n");
   Wifi_Init();
-  #ifdef MQTT_WIFI
+  #ifdef MQTT_USE_WIFI
     #ifdef WIFI_OTA
     Wifi_OtaProcess();
     #else
@@ -38,7 +38,9 @@ void vWifiManagerTask(void *argument)
     {
       if(Wifi_IsConnected())
       {
+        #ifdef MQTT_ENABLE
         Mqtt_SendMsg(MQTT_MSG_START,NULL);
+        #endif
       }
     }
     //增加wifi模块强度查询
