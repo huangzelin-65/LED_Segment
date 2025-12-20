@@ -34,6 +34,7 @@
 #include "LogDebugInfo.h"
 #include "sockets.h"
 #include "adaptor_tcp.h"
+#include "adaptor_ntp.h"
 /* USER CODE END 0 */
 /* Private function prototypes -----------------------------------------------*/
 static void ethernet_link_status_updated(struct netif *netif);
@@ -72,7 +73,7 @@ static void dhcp_status_callback(struct netif *netif) {
            ip4_addr3(&netif->gw),
            ip4_addr4(&netif->gw));
     Tcp_SendMsg(TCP_MSG_MQTT,NULL);
-    Tcp_SendMsg(TCP_MSG_NTP,NULL);
+    sntp_notify(NTP_NOTIFY_UPDATE);
   } else {
     // DHCP失败或断开
     DEBUGINFO("DHCP failed or disconnected\n");

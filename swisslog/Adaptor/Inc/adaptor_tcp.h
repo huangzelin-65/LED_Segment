@@ -10,7 +10,6 @@
 typedef enum {
     TCP_MSG_MQTT = 0,//发送心跳包到服务器
     TCP_MSG_SERVER,
-    TCP_MSG_NTP,
 } TcpMsgType_t;
 
 typedef struct {

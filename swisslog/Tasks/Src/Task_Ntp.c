@@ -32,6 +32,11 @@ void vNtpManagerTask(void *argument)
         if (xResult == pdPASS) 
         {
             DEBUGINFO("ulNotificationValue:%lx\n",ulNotificationValue);
+            if(ulNotificationValue & NTP_NOTIFY_INIT)
+            {
+                DEBUGINFO("NTP_NOTIFY_INIT\n");
+                sntp_normal_init();
+            }            
             if(ulNotificationValue & NTP_NOTIFY_UPDATE)
             {
                 DEBUGINFO("NTP_NOTIFY_UPDATE\n");  

@@ -6,7 +6,8 @@ extern "C" {
 #endif
 
 typedef enum {
-    NTP_NOTIFY_UPDATE = 0x01,
+    NTP_NOTIFY_INIT =   0x01,
+    NTP_NOTIFY_UPDATE = 0x02
 } NtpNotify_t;
 
 void sntp_normal_init(void);
