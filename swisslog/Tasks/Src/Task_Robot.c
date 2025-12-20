@@ -15,6 +15,7 @@
 #include "semphr.h"
 #include <limits.h>
 #include "app_freertos.h"
+#include "Calculate.h"
 
 extern CarStatus_t CarStatus;
 extern osMessageQueueId_t xRobotQueueHandle;//该消息队列处理事件上报
@@ -65,63 +66,58 @@ void vRobotReceiveTask(void *argument)
     {
         if(xQueueReceive(xRobotQueueHandle, &robot_msg, portMAX_DELAY) == pdTRUE)
         {
-            if(robot_init)//保证robot json已经被创建
+            DEBUGINFO("type:%d\n",robot_msg->type); 
+            switch (robot_msg->type)
             {
-                DEBUGINFO("type:%d\n",robot_msg->type); 
-                switch (robot_msg->type)
+                case ROBOT_MSG_HEART://发送心跳包到服务器
                 {
-                    case ROBOT_MSG_HEART://发送心跳包到服务器
-                    {
-                        DEBUGINFO("ROBOT_MSG_HEART start\n"); 
-                        Mqtt_SendMsg(MQTT_MSG_HEARTBEAT,Robot_GetHeartBeatJsonStr());
-                        DEBUGINFO("ROBOT_MSG_HEART end\n"); 
-                    }
-                    break;
-                    case ROBOT_MSG_STATE://代表需要把消息发送到服务器
-                    {
-                        //此处需增加一个更新robot state 的接口
-                        DEBUGINFO("ROBOT_MSG_STATE start\n");  
-                        //根据robot state更新对应的json字段
-                        RobotState_t *robot_state_data = (RobotState_t *)robot_msg->data; 
-
-                        Robot_UpdateStateJson(RobotJson,robot_state_data);
-                        //发送消息给mqtt队列，让最新robot状态发布给服务器
-                        char* json_str = Robot_GetStateJsonStr();
-                        if(json_str != NULL)
-                        {
-                            Mqtt_SendMsg(MQTT_MSG_ROBOT_EVENT,json_str);
-                        }
-                        else
-                        {
-                            DEBUGINFO("Robot_GetStateJsonStr fail\n");  
-                            DEBUGINFO("xPortGetFreeHeapSize %u bytes\r\n", xPortGetFreeHeapSize()); 
-                        }
-                        //释放内存
-                        vPortFree(robot_msg->data);
-
-                        DEBUGINFO("ROBOT_MSG_STATE end\n"); 
-                    }
-                    break;
-                    case ROBOT_MSG_PARSE://代表从服务器获取到消息
-                    {
-                        MqttRcMsg_t *mqtt_msg = (MqttRcMsg_t *)robot_msg->data;
-                        DEBUGINFO("ROBOT_MSG_PARSE start:%s\n",mqtt_msg->data); 
-                        //解析来自mqtt的数据
-                        Robot_ParseJson(mqtt_msg->topic_name,mqtt_msg->data);
-
-                        vPortFree(mqtt_msg->topic_name);
-
-                        vPortFree(mqtt_msg->data);
-
-                        vPortFree(mqtt_msg);
-                        
-                        DEBUGINFO("ROBOT_MSG_PARSE end\n"); 
-                    }
-                    break;                                         
-                    default:
-                    break;
+                    DEBUGINFO("ROBOT_MSG_HEART start\n"); 
+                    Mqtt_SendMsg(MQTT_MSG_HEARTBEAT,Robot_GetHeartBeatJsonStr());
+                    DEBUGINFO("ROBOT_MSG_HEART end\n"); 
                 }
+                break;
+                case ROBOT_MSG_STATE://代表需要把消息发送到服务器
+                {
+                    //此处需增加一个更新robot state 的接口
+                    DEBUGINFO("ROBOT_MSG_STATE start\n");  
+                    //根据robot state更新对应的json字段
+                    RobotState_t *robot_state_data = (RobotState_t *)robot_msg->data; 
 
+                    Robot_UpdateStateJson(RobotJson,robot_state_data);
+                    //发送消息给mqtt队列，让最新robot状态发布给服务器
+                    char* json_str = Robot_GetStateJsonStr();
+                    if(json_str != NULL)
+                    {
+                        Mqtt_SendMsg(MQTT_MSG_ROBOT_EVENT,json_str);
+                    }
+                    else
+                    {
+                        DEBUGINFO("Robot_GetStateJsonStr fail\n");   
+                    }
+                    //释放内存
+                    vPortFree(robot_msg->data);
+
+                    DEBUGINFO("ROBOT_MSG_STATE end\n"); 
+                }
+                break;
+                case ROBOT_MSG_PARSE://代表从服务器获取到消息
+                {
+                    MqttRcMsg_t *mqtt_msg = (MqttRcMsg_t *)robot_msg->data;
+                    DEBUGINFO("ROBOT_MSG_PARSE start:%s\n",mqtt_msg->data); 
+                    //解析来自mqtt的数据
+                    Robot_ParseJson(mqtt_msg->topic_name,mqtt_msg->data);
+
+                    vPortFree(mqtt_msg->topic_name);
+
+                    vPortFree(mqtt_msg->data);
+
+                    vPortFree(mqtt_msg);
+                    
+                    DEBUGINFO("ROBOT_MSG_PARSE end\n"); 
+                }
+                break;                                         
+                default:
+                break;
             }
             vPortFree(robot_msg);
         }
@@ -129,29 +125,24 @@ void vRobotReceiveTask(void *argument)
 }
 
 void vRobotHeartBeatTask(void *argument)
-{      
+{  
+    int prinrf_info_cnt = 0;    
     DEBUGINFO("vRobotHeartBeatTask\n"); 
     while (1)
     {
         if(Mqtt_IsConnected())
         {
-            if(robot_init)
+            if(waitforperiod(&robotSate.heartbeat_cnt,10))//10秒一次心跳
             {
-                // DEBUGINFO("heartbeat_cnt:%d\n",robotSate.heartbeat_cnt); 
-                if(robotSate.heartbeat_cnt++ >= 10)//10秒一次心跳
-                {
-                    DEBUGINFO("heartbeat\n");
-                    robotSate.heartbeat_cnt = 0;
-                    Robot_Notify(ROBOT_HEARTBEAT);
-                }
+                DEBUGINFO("heartbeat\n");
+                Robot_Notify(ROBOT_HEARTBEAT);
             }
         }
-        static int cnt = 0;
-        if(cnt++ >= 10)
+        if(waitforperiod(&prinrf_info_cnt,3))
         {
-            cnt = 0;
-            DEBUGINFO("xPortGetFreeHeapSize %u bytes\r\n", xPortGetFreeHeapSize());
-            DEBUGINFO("robotSate.encode_number: %d", robotSate.encode_number);
+            DEBUGINFO("FreeHeapSize %u bytes", xPortGetFreeHeapSize());
+            DEBUGINFO("encode_number: %d", robotSate.encode_number);
+            DEBUGINFO("mqtt connect state: %d", Mqtt_IsConnected());
         }
         osDelay(1000);
     }    
