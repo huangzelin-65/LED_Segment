@@ -554,6 +554,7 @@ int MqttInit(const char *client_id)
         client_id,
         (MQTT_USERNAME == NULL) ? "Null" : MQTT_USERNAME,
         (MQTT_PASSWORD == NULL) ? "Null" : MQTT_PASSWORD);
+    mqtt_isConnected = 1;
     return rc;
 exit:
     if (rc != MQTT_CODE_SUCCESS) {
@@ -815,6 +816,7 @@ void Mqtt_ParseData(uint8_t* rbuf,int len)
 //发布消息调用接口
 void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t qos, uint8_t retain)
 {
+    if(!mqtt_isConnected)return;
     MqttObject mqttObj;
     XMEMSET(&mqttObj, 0, sizeof(mqttObj));
     mqttObj.publish.qos = qos;
@@ -971,6 +973,11 @@ void Mqtt_Restart(void)
     mqtt_isConnected = 0;
     MqttReadReady = 0;
     Mqtt_SendMsg(MQTT_MSG_START,NULL); 
+}
+//获取mqtt服务连接状态
+int Mqtt_IsConnected(void)
+{
+    return mqtt_isConnected;
 }
 
 

@@ -42,9 +42,8 @@ void vMqttManagerTask(void *argument)
                 {
                     int rc = MqttInit(robotSate.client_id);
                     if(rc == MQTT_CODE_SUCCESS)
-                    {
-                        mqtt_isConnected = 1;
-                        DEBUGINFO("mqtt_isConnected");
+                    {  
+                        DEBUGINFO("MqttInit SUCCESS");
                         //服务器连接成功，需要订阅话题
                         Mqtt_Notify(MQTT_NOTIFY_SUBSCRIBE);
                     }
@@ -56,7 +55,7 @@ void vMqttManagerTask(void *argument)
                     char* robot_json_str = (char*)msg->data;
                     char topic[64] = {0};
                     snprintf(topic, sizeof(topic), MQTT_HEARTBEAT_TOPIC_NAME, robotSate.encode_number);                  
-                    if(mqtt_isConnected)Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
+                    Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
                     vPortFree(robot_json_str);
                     DEBUGINFO("MQTT_MSG_HEARTBEAT end\n");
                 }
@@ -70,7 +69,7 @@ void vMqttManagerTask(void *argument)
                         DEBUGINFO("robot_json_str:%s\n",robot_json_str);
                         char topic[64] = {0};
                         snprintf(topic, sizeof(topic), MQTT_TOPIC_NAME, robotSate.encode_number);
-                        if(mqtt_isConnected)Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 1, 0);
+                        Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 1, 0);
                         vPortFree(robot_json_str);
                     }
                     DEBUGINFO("MQTT_MSG_ROBOT_EVENT end\n");
@@ -98,7 +97,7 @@ void vMqttManagerTask(void *argument)
                     char* robot_json_str = (char*)msg->data;
                     char topic[64] = {0};
                     snprintf(topic, sizeof(topic), MQTT_FACTSHEET_TOPIC_NAME, robotSate.encode_number);                     
-                    if(mqtt_isConnected)Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
+                    Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
                     vPortFree(robot_json_str);
 
                     MqttReadReady = 1;//发布话题后既可正常等待话题
@@ -112,7 +111,7 @@ void vMqttManagerTask(void *argument)
                     char* robot_json_str = (char*)msg->data;
                     char topic[64] = {0};
                     snprintf(topic, sizeof(topic), MQTT_FACTSHEET_TOPIC_NAME, robotSate.encode_number);                     
-                    if(mqtt_isConnected)Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
+                    Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
                     vPortFree(robot_json_str);
 
                     MqttReadReady = 1;//发布话题后既可正常等待话题

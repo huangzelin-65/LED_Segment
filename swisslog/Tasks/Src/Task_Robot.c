@@ -133,7 +133,7 @@ void vRobotHeartBeatTask(void *argument)
     DEBUGINFO("vRobotHeartBeatTask\n"); 
     while (1)
     {
-        if(mqtt_isConnected)
+        if(Mqtt_IsConnected())
         {
             if(robot_init)
             {

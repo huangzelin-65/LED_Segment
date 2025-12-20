@@ -98,4 +98,5 @@ void Mqtt_PopListTail(void);
 MqttReceiveData_t* Mqtt_GetListTail(void);
 void Mqtt_Notify(uint32_t value);
 void Mqtt_Restart(void);
+int Mqtt_IsConnected(void);
 #endif
