@@ -15,13 +15,10 @@
 #include "semphr.h"
 #include <limits.h>
 #include "app_freertos.h"
-// #define   TEST_MONITOR
+
 extern CarStatus_t CarStatus;
 extern osMessageQueueId_t xRobotQueueHandle;//该消息队列处理事件上报
 
-#ifdef TEST_MONITOR
-int test_cnt = 0;
-#endif
 //处理robot相关任务，心跳包等
 void vRobotManagerTask(void *argument)
 {
@@ -38,9 +35,6 @@ void vRobotManagerTask(void *argument)
                 DEBUGINFO("ROBOT_ACTIONACK\n");  
                 //需要回复服务器ack，在state中的actionstate回复状态
                 Robot_ActionAck();
-                #ifdef TEST_MONITOR
-                test_cnt = 6;
-                #endif
             } 
             if(*ntf_value & ROBOT_ACTIONCMD)
             {
@@ -143,23 +137,6 @@ void vRobotHeartBeatTask(void *argument)
         {
             if(robot_init)
             {
-                #ifdef TEST_MONITOR
-                if(test_cnt)
-                {
-                    test_cnt--;
-                    DEBUGINFO("test_cnt:%d\n",test_cnt); 
-                    if(test_cnt == 5)
-                    {
-                        Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_RUNNING);
-                        Robot_State();
-                    }
-                    if(test_cnt == 1)
-                    {
-                        Robot_ActionAckUpdate(ROBOT_ACTION_STATUS_FINISHED);
-                        Robot_State();
-                    }
-                }
-                #endif
                 // DEBUGINFO("heartbeat_cnt:%d\n",robotSate.heartbeat_cnt); 
                 if(robotSate.heartbeat_cnt++ >= 10)//10秒一次心跳
                 {
