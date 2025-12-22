@@ -19,7 +19,7 @@
 #include "semphr.h"
 
 #define MQTT_HOST              "192.168.1.10" 
-#define MQTT_QOS               MQTT_QOS_0
+#define MQTT_QOS               MQTT_QOS_1
 #define MQTT_KEEP_ALIVE_SEC    60
 #define MQTT_CON_TIMEOUT_MS    3000
 #define MQTT_CLIENT_ID         "WolfMQTTClientSimple"
@@ -271,7 +271,7 @@ int Mqtt_NetRead(void *context, byte* buf, int buf_len, int timeout_ms)
                 cnt = 0;   
                 MqttReceiveData_t *rec_data = Mqtt_GetListTail();
                 if(rec_data == NULL)return MQTT_CODE_ERROR_BAD_ARG; 
-                // DEBUGINFO("buf_len:%d len:%d rest_len:%d\n",buf_len,rec_data->len,rec_data->rest_len);
+                DEBUGINFO("buf_len:%d len:%d rest_len:%d\n",buf_len,rec_data->len,rec_data->rest_len);
                 if(rec_data->len == rec_data->rest_len)
                 {
                     memcpy(mReadBuf,rec_data->data,rec_data->len);
@@ -330,7 +330,7 @@ int Mqtt_NetRead(void *context, byte* buf, int buf_len, int timeout_ms)
 //mqtt底层写数据接口函数
 int Mqtt_NetWrite(void *context, const byte* buf, int buf_len,int timeout_ms)
 {
-    DEBUGINFO("Mqtt_NetWrite timeout_ms:%d",timeout_ms);
+    DEBUGINFO("start timeout_ms:%d",timeout_ms);
     #ifdef MQTT_USE_WIFI
     memset(Mqtt_SendBuffer,0,1024);
     int prefix_len = snprintf(Mqtt_SendBuffer, MQTT_TX_BUF_SIZE, "AT+SOCKETSENDLINE=%d,%d,", mqtt_socket_id, buf_len);
@@ -363,11 +363,13 @@ int Mqtt_NetWrite(void *context, const byte* buf, int buf_len,int timeout_ms)
         if(cnt++ >= timeout_ms)
         {
             cnt = 0;
+            DEBUGINFO("MQTT_CODE_ERROR_TIMEOUT");
             return MQTT_CODE_ERROR_TIMEOUT;
         }
         osDelay(pdMS_TO_TICKS(1));
     };
     cnt = 0;
+    DEBUGINFO("end");
     return MQTT_CODE_SUCCESS; 
     #else
 
@@ -620,7 +622,8 @@ void Mqtt_ParseData2List(uint8_t *result,int len)
                     if(rec_data->data != NULL)
                     {
                         memcpy(rec_data->data, result + pos, data_len);
-                        // DEBUGINFO("list_insert_head rec_data:%p data:%p\n",rec_data,rec_data->data);
+                        vPrint_Array(rec_data->data,data_len);
+                        DEBUGINFO("list_insert_head rec_data:%p data:%p\n",rec_data,rec_data->data);
                         int rc = list_insert_head(mqtt_list,rec_data);
                         if(rc == -1)
                         {
@@ -701,9 +704,9 @@ void Mqtt_ParseTcpData(uint8_t* rbuf,int len)
         int found_count = Mqtt_FindAllStrPositions(rbuf,target_str,len,positions,10);
 
         if (found_count > 0) {
-            // DEBUGINFO("found_count: %d\n", found_count);
+            DEBUGINFO("found_count: %d\n", found_count);
             for (int i = 0; i < found_count; i++) {
-                // DEBUGINFO("  position(%d): %d\n", i, positions[i]);
+                DEBUGINFO("  position(%d): %d\n", i, positions[i]);
                 Mqtt_ParseData2List((rbuf + positions[i]),len);
             }
         } 
@@ -829,7 +832,9 @@ void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t 
     int rc = MqttClient_Publish(&mClient, &mqttObj.publish);
     // int rc = MqttClient_Publish_WriteOnly(&mClient, &mqttObj.publish,wolfmqtt_PublishCb);
     // int rc = MqttClient_Publish_ex(&mClient, &mqttObj.publish,wolfmqtt_PublishCb);
-    DEBUGINFO("MqttClient_Publish rc:%d\n",rc);  
+    DEBUGINFO("rc:%d\n",rc);  
+    DEBUGINFO("pub_topic:%s\n",pub_topic);
+    DEBUGINFO("pub_buf:%s\n",pub_buf);
 }
 //订阅话题调用接口
 int Mqtt_SubscribeMsg(MqttTopic *topics,int count)

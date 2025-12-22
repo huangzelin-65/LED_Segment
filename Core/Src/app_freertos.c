@@ -243,7 +243,7 @@ const osThreadAttr_t MqttManagerTask_attributes = {
 osThreadId_t MqttReceiveTaskHandle;
 const osThreadAttr_t MqttReceiveTask_attributes = {
   .name = "MqttReceiveTask",
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityAboveNormal3,
   .stack_size = 512 * 4
 };
 /* Definitions for RobotManagerTask */

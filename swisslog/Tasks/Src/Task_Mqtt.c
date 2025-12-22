@@ -55,7 +55,7 @@ void vMqttManagerTask(void *argument)
                     char* robot_json_str = (char*)msg->data;
                     char topic[64] = {0};
                     snprintf(topic, sizeof(topic), MQTT_HEARTBEAT_TOPIC_NAME, robotSate.encode_number);                  
-                    Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
+                    Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 1, 0);
                     vPortFree(robot_json_str);
                     DEBUGINFO("MQTT_MSG_HEARTBEAT end\n");
                 }
@@ -135,7 +135,10 @@ void vMqttReceiveTask(void *argument)
     {
         if(MqttReadReady)
         {
+            DEBUGINFO("start");
             rc = MqttClient_WaitMessage_ex(&mClient, &mqttObj, MQTT_CMD_TIMEOUT_MS);
+            DEBUGINFO("rc:%d",rc);
+            DEBUGINFO("end");
             if (rc == MQTT_CODE_ERROR_TIMEOUT) {
                 rc = MqttClient_Ping_ex(&mClient, &mqttObj.ping);
                 if (rc != MQTT_CODE_SUCCESS) {

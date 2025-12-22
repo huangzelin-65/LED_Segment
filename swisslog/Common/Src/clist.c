@@ -1,12 +1,13 @@
 #include "clist.h"
-
+#include "FreeRTOS.h"
+#include "LogDebugInfo.h"
 /**
  * @brief 创建一个新的链表节点
  * @param data 节点数据
  * @return 节点指针（失败返回 NULL）
  */
 static ListNode* list_node_create(void* data) {
-    ListNode* node = (ListNode*)malloc(sizeof(ListNode));
+    ListNode* node = (ListNode*)pvPortMalloc(sizeof(ListNode));
     if (node == NULL) {
         perror("list_node_create: malloc failed");
         return NULL;
@@ -20,7 +21,7 @@ static ListNode* list_node_create(void* data) {
  * @brief 初始化链表
  */
 List* list_init(void) {
-    List* list = (List*)malloc(sizeof(List));
+    List* list = (List*)pvPortMalloc(sizeof(List));
     if (list == NULL) {
         perror("list_init: malloc failed");
         return NULL;
@@ -28,7 +29,7 @@ List* list_init(void) {
     // 创建哨兵头节点（不存储实际数据，简化边界处理）
     list->head = list_node_create(NULL);
     if (list->head == NULL) {
-        free(list);
+        vPortFree(list);
         return NULL;
     }
     list->tail = list->head; // 空链表时，尾节点指向头节点
@@ -52,11 +53,11 @@ void list_destroy(List* list, DestroyFunc destroy) {
         if (curr != list->head && destroy != NULL) {
             destroy(curr->data);
         }
-        free(curr);
+        vPortFree(curr);
         curr = next;
     }
 
-    free(list); // 释放链表管理结构
+    vPortFree(list); // 释放链表管理结构
 }
 
 /**
@@ -158,7 +159,7 @@ void* list_remove_at(List* list, int index, DestroyFunc destroy) {
     }
 
     // 释放节点内存
-    free(to_remove);
+    vPortFree(to_remove);
     list->size--;
 
     // 可选释放数据内存
@@ -205,10 +206,11 @@ void* list_pop_tail(List* list, DestroyFunc destroy) {
     list->size--;
 
     // 释放节点本身的内存
-    free(node_to_remove);
+    vPortFree(node_to_remove);
 
     // 根据需要释放数据内存
     if (destroy != NULL) {
+        DEBUGINFO("destroy:%p\n",data);  
         destroy(data);
         return NULL; // 数据已被释放，返回 NULL
     }
@@ -239,7 +241,7 @@ void* list_remove_by_value(List* list, const void* data, CompareFunc compare, De
             }
 
             void* removed_data = curr->data;
-            free(curr); // 释放节点内存
+            vPortFree(curr); // 释放节点内存
             list->size--;
 
             // 可选释放数据内存

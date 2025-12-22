@@ -586,7 +586,7 @@ void Robot_ParseJson(char* topic,char* data)
         }
         else
         {
-             DEBUGINFO("Robot_ParseActionJson error\n");
+            DEBUGINFO("Robot_ParseActionJson error\n");
         }        
     }
     else
@@ -1279,7 +1279,7 @@ void Robot_State(void)
 
         Robot_SendMsg(ROBOT_MSG_STATE,robot_state_data);
     }
-    // robotSate.heartbeat_cnt = 0;//复位心跳包
+    robotSate.heartbeat_cnt = 0;//复位心跳包
     // DEBUGINFO("end");
 }
 //回复action ack

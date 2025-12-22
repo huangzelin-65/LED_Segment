@@ -89,7 +89,7 @@ void vWifiReceiveTask(void *argument)
           read_buffer[i - wifi_data->last_read_id] = wifi_data->rx_buffer[i];
           dataLength++;
         }
-        // DEBUGINFO("read_buffer 1:%s dataLength:%d\n",read_buffer,dataLength);
+        DEBUGINFO("read_buffer 1:%s dataLength:%d\n",read_buffer,dataLength);
         parse_rbuf = true;
       }
       else if(wifi_data->last_read_id > wifi_data->size)
@@ -106,7 +106,7 @@ void vWifiReceiveTask(void *argument)
           read_buffer[j + i] = wifi_data->rx_buffer[i];
           dataLength++;
         } 
-        // DEBUGINFO("read_buffer 2:%s dataLength:%d\n",read_buffer,dataLength);
+        DEBUGINFO("read_buffer 2:%s dataLength:%d\n",read_buffer,dataLength);
         parse_rbuf = true;      
       }
 
@@ -119,9 +119,9 @@ void vWifiReceiveTask(void *argument)
                 printf_buffer[i] = ' ';
             }
         }
-        // DEBUGINFO("printf_buffer:%s\n",printf_buffer);
-        // vPrint_Array(read_buffer,dataLength);
-        if(read_buffer[0] == '\0')
+        DEBUGINFO("printf_buffer:%s\n",printf_buffer);
+        vPrint_Array(read_buffer,dataLength);
+        if(read_buffer[0] == '\0')  
         {
           read_buffer[0] = ' ';//去掉字符串起始的结束符
           // DEBUGINFO("remove start zero\n");

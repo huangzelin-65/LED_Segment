@@ -7,7 +7,7 @@
 #include "task.h"
 #include "adaptor_rtc.h"
 
-#define LOG_USE_MALLOC 
+// #define LOG_USE_MALLOC 
 #define LOG_ARRAY_LEN   8
 #define LOG_LENGTH_LONG 400
 #define LOG_LENGTH_SINGLE 4
