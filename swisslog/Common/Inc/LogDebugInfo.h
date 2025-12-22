@@ -8,8 +8,8 @@
 #include "adaptor_rtc.h"
 
 // #define LOG_USE_MALLOC 
-#define LOG_ARRAY_LEN   8
-#define LOG_LENGTH_LONG 400
+#define LOG_ARRAY_LEN   10
+#define LOG_LENGTH_LONG 1000
 #define LOG_LENGTH_SINGLE 4
 
 #define DEBUGINFO(fmt, ...) \

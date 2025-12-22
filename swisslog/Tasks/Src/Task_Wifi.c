@@ -48,7 +48,7 @@ void vWifiManagerTask(void *argument)
     {
       if(waitforperiod(&wifi_get_rssi_cnt,100))//10秒获取一次wifi信号强度
       {
-        // Wifi_SendATCmd("AT+RSSI",2000);
+        Wifi_SendATCmd("AT+RSSI",2000);
         DEBUGINFO("wifi status connect_state:%d rssi:%d ip:%s\n",wifi_status.connect_state,wifi_status.rssi,wifi_status.ip);
       }
       if(waitforperiod(&wifi_get_ip_cnt,50))//5秒获取一次获取ip地址,如果没有获取
@@ -65,11 +65,11 @@ void vWifiManagerTask(void *argument)
     
 
 /* wifi接收任务入口函数 */
+uint8_t read_buffer[WIFI_RX_BUF_SIZE];
+uint8_t printf_buffer[LOG_LENGTH_LONG]; 
 void vWifiReceiveTask(void *argument)
 {
-  DEBUGINFO("vWifiReceiveTask\r\n");
-  uint8_t read_buffer[WIFI_RX_BUF_SIZE];
-  uint8_t printf_buffer[LOG_LENGTH_LONG];    
+  DEBUGINFO("vWifiReceiveTask\r\n");   
   WifiParseData_t *wifi_data = NULL;
   Wifi_ReceiveInit();//启动串口空闲中断，DMA接收数据
   while (1)

@@ -135,10 +135,7 @@ void vMqttReceiveTask(void *argument)
     {
         if(MqttReadReady)
         {
-            DEBUGINFO("start");
             rc = MqttClient_WaitMessage_ex(&mClient, &mqttObj, MQTT_CMD_TIMEOUT_MS);
-            DEBUGINFO("rc:%d",rc);
-            DEBUGINFO("end");
             if (rc == MQTT_CODE_ERROR_TIMEOUT) {
                 rc = MqttClient_Ping_ex(&mClient, &mqttObj.ping);
                 if (rc != MQTT_CODE_SUCCESS) {
