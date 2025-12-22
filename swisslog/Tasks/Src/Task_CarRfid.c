@@ -238,6 +238,9 @@ void vCarRfidTask(void *argument)
 
           //获取标签速度设置，并设置速度
           vGetTagSpeed(pcCardNum);
+
+          //上报小车状态
+          Robot_Event(); 
         }
       }
       else
@@ -247,8 +250,6 @@ void vCarRfidTask(void *argument)
         // 可以清零pcCardNum或者做其他错误处理
         memset(pcCardNum, 0, sizeof(pcCardNum));
       }
-
-      Robot_Event(); //上报小车状态
     }
     
   }
