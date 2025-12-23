@@ -12,6 +12,7 @@
 #include "Encoder.h"
 #include "adaptor_mqtt.h"
 #include "app_freertos.h"
+#include "adaptor_rtc.h"
 // #define USE_UID
 
 extern CarStationStatus Car_Get_Station_Status(void);
@@ -814,7 +815,14 @@ int Robot_ParseConnectJson(char *json_str,RobotConnect_t *robot)
     DEBUGINFO("  headerId: %s\n", robot->headerId);
     DEBUGINFO("  timestamp: %s\n", robot->timestamp);
     DEBUGINFO("  version: %s\n", robot->version);
-
+    long long temp_timestamp = atoll(robot->timestamp);
+    DEBUGINFO("temp_timestamp:%ld\n", temp_timestamp/1000);
+    static int rtc_syc = 1;//暂时利用心跳包同步时间，用于测试，后续需要注释
+    if(rtc_syc)
+    {
+        rtc_syc = 0;
+        Rtc_SetDateTimeStamp((uint32_t)(temp_timestamp/1000));
+    }
     return 0;
 }
 //获取robot json转成字符串的接口，返回值需要释放

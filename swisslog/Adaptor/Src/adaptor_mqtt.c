@@ -622,7 +622,7 @@ void Mqtt_ParseData2List(uint8_t *result,int len)
                     if(rec_data->data != NULL)
                     {
                         memcpy(rec_data->data, result + pos, data_len);
-                        vPrint_Array(rec_data->data,data_len);
+//                        vPrint_Array((char *)rec_data->data,data_len);
                         DEBUGINFO("list_insert_head rec_data:%p data:%p\n",rec_data,rec_data->data);
                         int rc = list_insert_head(mqtt_list,rec_data);
                         if(rc == -1)

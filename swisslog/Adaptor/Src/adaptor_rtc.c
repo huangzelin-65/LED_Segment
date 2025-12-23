@@ -123,8 +123,8 @@ char* Rtc_GetTimeStr(void)
 
   // 格式化时间字符串（snprintf避免缓冲区溢出）
   snprintf(rtc_time_buf, sizeof(rtc_time_buf),
-           "20%02d-%02d-%02d %02d:%02d:%02d",
-           sDate.Year,    // 年（00-99，对应2000-2099）
+           "%02d-%02d-%02d %02d:%02d:%02d",
+           sDate.Year + 1970,    //年
            sDate.Month,   // 月（1-12）
            sDate.Date,    // 日（1-31）
            sTime.Hours,   // 时（0-23）
@@ -165,3 +165,25 @@ uint32_t Rtc_GetTimeStamp(void)
   DEBUGINFO("time:%lld\n", (uint32_t)timestamp);
   return (uint32_t)timestamp;  
 }
+
+//利用时间戳设置rtc
+void Rtc_SetDateTimeStamp(uint32_t time_stamp)
+{
+    DEBUGINFO("time_stamp:%d\n",time_stamp);
+    char buf[32];
+    struct tm current_time_val;
+    uint32_t sec = time_stamp + (8 * 60 * 60);
+    time_t current_time = (time_t)sec;//北京时间是东8区需偏移8小时
+  #ifdef _MSC_VER
+    localtime_s(&current_time_val, &current_time);
+  #else
+    localtime_r(&current_time, &current_time_val);
+  #endif
+    
+    strftime(buf, sizeof(buf), "%d.%m.%Y %H:%M:%S", &current_time_val);
+    DEBUGINFO("time: %s\n", buf);
+    DEBUGINFO("tm_year: %d tm_mon:%d tm_mday:%d tm_wday:%d tm_hour:%d tm_min:%d tm_sec:%d\n", current_time_val.tm_year,current_time_val.tm_mon,current_time_val.tm_mday,current_time_val.tm_wday,current_time_val.tm_hour,current_time_val.tm_min,current_time_val.tm_sec);
+    Rtc_SetDate(current_time_val.tm_year + 1900 - 1970,current_time_val.tm_mon + 1,current_time_val.tm_mday,current_time_val.tm_wday);
+    Rtc_SetTime(current_time_val.tm_hour,current_time_val.tm_min,current_time_val.tm_sec);  
+}
+

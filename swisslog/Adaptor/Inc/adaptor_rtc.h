@@ -10,4 +10,5 @@ int Rtc_SetDate(uint8_t Year,uint8_t Month,uint8_t Date,uint8_t WeekDay);
 int Rtc_SetTime(uint8_t Hours,uint8_t Minutes,uint8_t Seconds);
 char* Rtc_GetTimeStr(void);
 uint32_t Rtc_GetTimeStamp(void);
+void Rtc_SetDateTimeStamp(uint32_t time_stamp);
 #endif 
