@@ -182,6 +182,7 @@ void vMqttNotifyTask(void *argument)
             DEBUGINFO("MQTT_NOTIFY_ONLINE\n");
             char src[] = "ONLINE";
             memcpy(robotOnOffLine.onoffline,src,strlen(src) + 1);
+            Robot_UpdateTimeStamp(robotOnOffLine.timestamp); 
             Robot_UpdateOnOffLineJson(Robot_OnOffLineJson,&robotOnOffLine); 
             Mqtt_SendMsg(MQTT_MSG_ONLINE,Robot_GetOnOffLineJsonStr());
           }          
@@ -190,6 +191,7 @@ void vMqttNotifyTask(void *argument)
             DEBUGINFO("MQTT_NOTIFY_OFFLINE\n");  
             char src[] = "OFFLINE";
             memcpy(robotOnOffLine.onoffline,src,strlen(src) + 1);
+            Robot_UpdateTimeStamp(robotOnOffLine.timestamp);
             Robot_UpdateOnOffLineJson(Robot_OnOffLineJson,&robotOnOffLine); 
             Mqtt_SendMsg(MQTT_MSG_OFFLINE,Robot_GetOnOffLineJsonStr());            
           }                                                           

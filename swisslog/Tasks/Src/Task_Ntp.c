@@ -41,7 +41,7 @@ void vNtpManagerTask(void *argument)
             {
                 DEBUGINFO("NTP_NOTIFY_UPDATE\n");  
                 struct tm current_time_val = sntp_get_system_time();
-                Rtc_SetDate(current_time_val.tm_year,current_time_val.tm_mon,current_time_val.tm_mday,current_time_val.tm_wday); 
+                Rtc_SetDate(current_time_val.tm_year + 1900 - 1970,current_time_val.tm_mon + 1,current_time_val.tm_mday,current_time_val.tm_wday); 
                 Rtc_SetTime(current_time_val.tm_hour,current_time_val.tm_min,current_time_val.tm_sec);                
             }                             
         }  

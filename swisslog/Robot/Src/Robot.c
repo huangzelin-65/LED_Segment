@@ -859,22 +859,13 @@ void Robot_CreateHeartBeatJson(void)
     }
     // 向JSON对象添加键值对
     // 添加整数类型：headerId
-    cJSON_AddNumberToObject(Robot_HeartBeatJson, "headerId", 125);
+    cJSON_AddStringToObject(Robot_HeartBeatJson, "headerId", "125");
     
     // 添加整数类型：timestamp（大整数可正常存储为cJSON的number类型）
-    cJSON_AddNumberToObject(Robot_HeartBeatJson, "timestamp", 1);
+    cJSON_AddStringToObject(Robot_HeartBeatJson, "timestamp", "1");
     
     // 添加字符串类型：version
-    cJSON_AddStringToObject(Robot_HeartBeatJson, "version", "1.0.0");
-    
-    // 添加字符串类型：manufacturer
-    cJSON_AddStringToObject(Robot_HeartBeatJson, "manufacturer", "slhc");
-    
-    // 添加字符串类型：serialNumber
-    cJSON_AddStringToObject(Robot_HeartBeatJson, "serialNumber", "bcss.v1.0.0");
-    
-    // 添加字符串类型：connectionState
-    cJSON_AddStringToObject(Robot_HeartBeatJson, "connectionState", "ONLINE");  
+    cJSON_AddStringToObject(Robot_HeartBeatJson, "version", "1.0.0"); 
 
     DEBUGINFO("end\n");
 }
@@ -888,6 +879,38 @@ char* Robot_GetHeartBeatJsonStr(void)
     }    
     char* json_str = cJSON_PrintUnformatted(Robot_HeartBeatJson);
     return json_str;    
+}
+// 更新已有cJSON对象（Robot_HeartBeatJson）
+void Robot_UpdateHeartBeatJson(cJSON* robotJson, const RobotConnect_t *connect) 
+{
+    if (robotJson == NULL || connect == NULL) {
+        return; // 入参无效，直接返回
+    }
+    // 1. 更新string类型成员
+    cJSON* headeridItem = cJSON_CreateString(connect->headerId);
+    if (headeridItem != NULL) {
+        cJSON_bool replaceRet = cJSON_ReplaceItemInObject(robotJson, "headerId", headeridItem);
+        if (!replaceRet) {
+            DEBUGINFO("headeridItem fail\n");
+            cJSON_Delete(headeridItem);
+        }        
+    }
+
+    cJSON* timestampItem = cJSON_CreateString(connect->timestamp);
+    if (timestampItem != NULL) {
+        cJSON_bool replaceRet = cJSON_ReplaceItemInObject(robotJson, "timestamp", timestampItem);
+        if (!replaceRet) {
+            cJSON_Delete(timestampItem);
+        }        
+    }
+
+    cJSON* versionItem = cJSON_CreateString(connect->version);
+    if (versionItem != NULL) {
+        cJSON_bool replaceRet = cJSON_ReplaceItemInObject(robotJson, "version", versionItem);
+        if (!replaceRet) {
+            cJSON_Delete(versionItem);
+        }        
+    }      
 }
 //创建上下线的json
 void Robot_CreateOnOffLineJson(void) 
@@ -1285,6 +1308,8 @@ void Robot_State(void)
     {
         memcpy(robot_state_data, &robotSate, sizeof(RobotState_t));                        
 
+        Robot_UpdateTimeStamp(robot_state_data->timestamp);
+
         Robot_SendMsg(ROBOT_MSG_STATE,robot_state_data);
     }
     robotSate.heartbeat_cnt = 0;//复位心跳包
@@ -1330,4 +1355,10 @@ void Robot_Notify(uint32_t value)
         }
     }     
 }
-
+//更新时间戳接口
+void Robot_UpdateTimeStamp(char* timestamp)
+{
+    // long long time_stamp = Rtc_GetTimeStamp() * 1000;
+    snprintf(timestamp, 32, "%ld", Rtc_GetTimeStamp());
+    DEBUGINFO("timestamp:%s\n", timestamp);     
+}

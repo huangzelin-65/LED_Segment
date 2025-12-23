@@ -178,7 +178,9 @@ extern RobotAction_t robotAction;
 extern RobotState_t robotSate;
 extern bool robot_init;
 extern cJSON* RobotJson;
+extern cJSON* Robot_HeartBeatJson;
 extern cJSON* Robot_OnOffLineJson;
+extern RobotConnect_t robotConnect;
 extern RobotOnOffLine_t robotOnOffLine;
 
 void Robot_Init(void);
@@ -186,6 +188,7 @@ void Robot_CreateStateJson(void);
 void Robot_UpdateStateJson(cJSON* robotJson, const RobotState_t* robotState);
 void Robot_CreateHeartBeatJson(void);
 char* Robot_GetHeartBeatJsonStr(void);
+void Robot_UpdateHeartBeatJson(cJSON* robotJson, const RobotConnect_t *connect); 
 void Robot_CreateOnOffLineJson(void);
 char* Robot_GetOnOffLineJsonStr(void); 
 void Robot_UpdateOnOffLineJson(cJSON* robotJson, const RobotOnOffLine_t *OnOffLine); 
@@ -202,4 +205,5 @@ void Robot_State(void);
 void Robot_ActionAck(void);
 void Robot_Notify(uint32_t value);
 void Robot_ActionNotify(void);
+void Robot_UpdateTimeStamp(char* timestamp);
 #endif

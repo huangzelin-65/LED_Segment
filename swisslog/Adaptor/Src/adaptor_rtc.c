@@ -150,8 +150,8 @@ uint32_t Rtc_GetTimeStamp(void)
   current_time_val.tm_min  = sTime.Minutes;   // 分
   current_time_val.tm_hour = sTime.Hours;   // 时
   current_time_val.tm_mday = sDate.Date;   // 日
-  current_time_val.tm_mon  = sDate.Month;   // 月（11=12月）
-  current_time_val.tm_year = sDate.Year;  // 年（2025-1900=125）
+  current_time_val.tm_mon  = sDate.Month - 1;   // 月（11=12月）
+  current_time_val.tm_year = sDate.Year + 1970 - 1900;  // 年（2025-1900=125）
   // tm_wday/tm_yday 无需设置，会被自动计算
 
   // 2. 转换为时间戳（本地时区）
@@ -160,9 +160,9 @@ uint32_t Rtc_GetTimeStamp(void)
       DEBUGINFO("fail\n");
       return 0;
   }
-
+  timestamp -= (8 * 60 * 60);
   // 3. 输出结果
-  DEBUGINFO("time:%lld\n", (uint32_t)timestamp);
+  DEBUGINFO("time:%ld\n", (uint32_t)timestamp);
   return (uint32_t)timestamp;  
 }
 

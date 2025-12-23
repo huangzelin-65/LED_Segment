@@ -71,7 +71,9 @@ void vRobotReceiveTask(void *argument)
             {
                 case ROBOT_MSG_HEART://发送心跳包到服务器
                 {
-                    DEBUGINFO("ROBOT_MSG_HEART start\n"); 
+                    DEBUGINFO("ROBOT_MSG_HEART start\n");  
+                    Robot_UpdateTimeStamp(robotConnect.timestamp);                 
+                    Robot_UpdateHeartBeatJson(Robot_HeartBeatJson,&robotConnect);
                     Mqtt_SendMsg(MQTT_MSG_HEARTBEAT,Robot_GetHeartBeatJsonStr());
                     DEBUGINFO("ROBOT_MSG_HEART end\n"); 
                 }
