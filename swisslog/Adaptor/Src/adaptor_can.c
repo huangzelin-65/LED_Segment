@@ -7,6 +7,7 @@
 #include "LogDebugInfo.h"
 #include "Task_Can.h"
 #include "adaptor_can.h"
+#include "CAN_Car.h"
 
 
 extern FDCAN_HandleTypeDef hfdcan1;
@@ -15,10 +16,11 @@ extern FDCAN_HandleTypeDef hfdcan2;
 
 // CAN1 配置接收过滤器
 void CAN_FilterConfig(FDCAN_HandleTypeDef *hfdcan, 
-                        uint16_t Rx_id, 
+                        uint16_t u16_Rx_id, 
+                        uint16_t u16_MaskID,
                         eFifoType xFifo)
 {
-    DEBUGINFO("Rx_id = 0x%lX, FIFO = %d",Rx_id, xFifo);
+    DEBUGINFO("u16_Rx_id = 0x%lX, u16_MaskID = 0x%lX, FIFO = %d",u16_Rx_id, u16_MaskID);
 
     FDCAN_FilterTypeDef sFilterConfig;
     sFilterConfig.IdType       = FDCAN_STANDARD_ID;
@@ -33,8 +35,9 @@ void CAN_FilterConfig(FDCAN_HandleTypeDef *hfdcan,
         sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO1;
     }
 
-    sFilterConfig.FilterID1    = Rx_id;
-    sFilterConfig.FilterID2    = 0x7FF;
+    sFilterConfig.FilterID1    = u16_Rx_id;
+    sFilterConfig.FilterID2    = u16_MaskID; 
+
     if (HAL_FDCAN_ConfigFilter(hfdcan, &sFilterConfig) != HAL_OK)
     {
         Error_Handler();
@@ -127,10 +130,15 @@ void CAN_AddMsgToTxFifo(FDCAN_HandleTypeDef *hfdcan,
 }
 
 
-void CAN_Init(FDCAN_HandleTypeDef *hfdcan, uint16_t Rx_id, eFifoType xFifo)
+void CAN_Init(FDCAN_HandleTypeDef *hfdcan, 
+                        uint16_t u16_Rx_id, 
+                        uint16_t u16_MaskID, 
+                        eFifoType xFifo, 
+                        uint16_t u16_car_id)
 {
     DEBUGINFO("start");
-    CAN_FilterConfig(hfdcan, Rx_id, xFifo);
+    CAN_FilterConfig(hfdcan, u16_Rx_id, u16_MaskID, xFifo);
     CAN_RxFifoNotify_Activate(hfdcan, xFifo);
     CAN_Start(hfdcan);
+    CAN_Car_Init(u16_car_id);
 }

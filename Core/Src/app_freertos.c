@@ -95,6 +95,12 @@ const osMessageQueueAttr_t xCAN2_Rx_Queue_attributes = {
   .name = "xCAN2_Rx_Queue"
 };
 
+/* Definitions for xCAN1_Tx_Queue */
+osMessageQueueId_t xCAN1_Tx_QueueHandle;
+const osMessageQueueAttr_t xCAN1_Tx_Queue_attributes = {
+  .name = "xCAN1_Tx_Queue"
+};
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -313,6 +319,34 @@ const osThreadAttr_t FDCAN1RxTask_attributes = {
 osThreadId_t NtpManagerTaskHandle;
 const osThreadAttr_t NtpManagerTask_attributes = {
   .name = "NtpManagerTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
+/* Definitions for CANCarTxTask */
+osThreadId_t CANCarTxTaskHandle;
+const osThreadAttr_t CANCarTxTask_attributes = {
+  .name = "CANCarTxTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
+/* Definitions for CANCarRxTask */
+osThreadId_t CANCarRxTaskHandle;
+const osThreadAttr_t CANCarRxTask_attributes = {
+  .name = "CANCarRxTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
+/* Definitions for CANCarHBTask */
+osThreadId_t CANCarHBTaskHandle;
+const osThreadAttr_t CANCarHBTask_attributes = {
+  .name = "CANCarHBTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
+/* Definitions for CANManagerTask */
+osThreadId_t CANManagerTaskHandle;
+const osThreadAttr_t CANManagerTask_attributes = {
+  .name = "CANManagerTask",
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 256 * 4
 };
@@ -591,6 +625,8 @@ void MX_FREERTOS_Init(void) {
   xCAN1_Rx_QueueHandle = osMessageQueueNew (16, sizeof(CAN_Recv_Msg_t), &xCAN1_Rx_Queue_attributes);
   /* creation of xCan2_Rx_Queue */
   xCAN2_Rx_QueueHandle = osMessageQueueNew (16, sizeof(CAN_Recv_Msg_t), &xCAN2_Rx_Queue_attributes);
+    /* creation of xCAN1_Tx_Queue */
+  xCAN1_Tx_QueueHandle = osMessageQueueNew (16, sizeof(CAN_Send_Msg_t), &xCAN1_Tx_Queue_attributes);
 
   /* Register queues, ... */
   vQueueAddToRegistry(xInterrupt_QueueHandle, "Interrupt_Queue");
@@ -607,6 +643,7 @@ void MX_FREERTOS_Init(void) {
   vQueueAddToRegistry(xTcpManageQueueHandle, "TcpManageQueue");
   vQueueAddToRegistry(xCAN1_Rx_QueueHandle, "xCAN1_Rx_Queue");
   vQueueAddToRegistry(xCAN2_Rx_QueueHandle, "xCAN2_Rx_Queue");
+  vQueueAddToRegistry(xCAN1_Tx_QueueHandle, "xCAN1_Tx_Queue");
   /* USER CODE END RTOS_QUEUES */
   /* creation of InitTask */
   InitTaskHandle = osThreadNew(vInitTask, NULL, &InitTask_attributes);
@@ -698,6 +735,18 @@ void MX_FREERTOS_Init(void) {
   /* creation of NtpManagerTask */
   NtpManagerTaskHandle = osThreadNew(vNtpManagerTask, NULL, &NtpManagerTask_attributes);
 
+  /* creation of CANCarTxTask */
+  CANCarTxTaskHandle = osThreadNew(vCANCarTxTask, NULL, &CANCarTxTask_attributes);
+
+  /* creation of CANCarRxTask */
+  CANCarRxTaskHandle = osThreadNew(vCANCarRxTask, NULL, &CANCarRxTask_attributes);
+
+  /* creation of CANCarHBTask */
+  CANCarHBTaskHandle = osThreadNew(vCANCarHBTask, NULL, &CANCarHBTask_attributes);
+
+  /* creation of CANManagerTask */
+  CANManagerTaskHandle = osThreadNew(vCANManagerTask, NULL, &CANManagerTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   
@@ -731,6 +780,10 @@ void MX_FREERTOS_Init(void) {
   osThreadSuspend(FDCAN1RxTaskHandle);
   osThreadSuspend(FDCAN2RxTaskHandle);
   osThreadSuspend(NtpManagerTaskHandle);
+  osThreadSuspend(CANCarTxTaskHandle);
+  osThreadSuspend(CANCarRxTaskHandle);
+  osThreadSuspend(CANCarHBTaskHandle);
+  osThreadSuspend(CANManagerTaskHandle);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */

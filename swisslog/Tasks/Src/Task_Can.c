@@ -4,8 +4,13 @@
 #include "queue.h"
 #include <string.h>
 #include "LogDebugInfo.h"
+#include "app_freertos.h"
 #include "Task_Can.h"
 #include "adaptor_can.h"
+#include "CAN_Car.h"
+
+#define FILTER_MASK_ALL          (0x0)   // CAN接收所有ID的帧
+#define FILTER_MASK_SPECIFIC     (0x7FF) // CAN接收指定ID的帧
 
 #define TX_ID_1          (0x444)
 #define RX_ID_1          (0x555)
@@ -13,22 +18,102 @@
 #define TX_ID_2          (0x555)
 #define RX_ID_2          (0x444)
 
+extern osMessageQueueId_t xCAN1_Tx_QueueHandle;
 extern osMessageQueueId_t xCAN1_Rx_QueueHandle;
 extern osMessageQueueId_t xCAN2_Rx_QueueHandle;
 
 extern FDCAN_HandleTypeDef hfdcan1;
 extern FDCAN_HandleTypeDef hfdcan2;
+extern CarStatus_t CarStatus;
 
 uint8_t txData1[8] = {0x01,0x02,0x03,0x04,0x05,0x06,0x55,0xFF};
 uint8_t txData2[8] = {0xFF,0x55,0x06,0x05,0x04,0x03,0x02,0x01};
 
+// CAN管理任务
+void vCANManagerTask(void *argument)
+{
+    DEBUGINFO("start");
+    
+    CAN_Init(&hfdcan1, 0, FILTER_MASK_ALL, CAN_RX_FIFO0, CarStatus.usCarID); 
+    #ifdef CAN_TEST
+     osThreadResume(FDCANTxTaskHandle);
+     osThreadResume(FDCAN1RxTaskHandle);
+     osThreadResume(FDCAN2RxTaskHandle);
+     #endif
+    osThreadResume(CANCarTxTaskHandle);
+    osThreadResume(CANCarRxTaskHandle);
+    osThreadResume(CANCarHBTaskHandle);
+
+    while (1)
+    {
+        osDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
+// CAN小车发送任务
+void vCANCarTxTask(void *argument)
+{
+    DEBUGINFO("start");
+
+    while (1)
+    {
+        Car_Send_Status(STATUS_TYPE_RUN);
+        Car_Send_Status(STATUS_TYPE_SPEED);
+        osDelay(pdMS_TO_TICKS(STATUS_REPORT_INTERVAL_MS));
+    }
+}
+
+// CAN小车接收任务
+void vCANCarRxTask(void *argument)
+{
+    DEBUGINFO("start");
+    CAN_Recv_Msg_t recv_msg = {0};
+
+    while (1)
+    {
+        if(xQueueReceive(xCAN1_Tx_QueueHandle, &recv_msg, portMAX_DELAY) == pdPASS)
+        {
+            switch (recv_msg.u32_frame_id) {
+                case CAN_ID_AUTH_RESP:
+                    Car_Process_AuthRespFrame(recv_msg.u8_data);
+                    break;
+                case CAN_ID_MASTER_HEART:
+                    Car_Process_MasterHeartFrame(recv_msg.u8_data);
+                    break;
+                case CAN_ID_MASTER_CMD:
+                    Car_Process_MasterCmdFrame(recv_msg.u8_data);
+                    break;
+                default:
+                    break;
+            }
+        }
+        osDelay(pdMS_TO_TICKS(10));
+    }
+}
+
+// CAN小车心跳发送任务
+void vCANCarHBTask(void *argument)
+{
+    DEBUGINFO("start");
+
+    while (1)
+    {
+        Car_Send_Heartbeat();
+        Car_Track_Check();
+        // osDelay(pdMS_TO_TICKS(200));
+        osDelay(pdMS_TO_TICKS(2000));
+    }
+}
+
+
+/* =========================================仅测试使用======================================== */
 void vFDCANTxTask(void *argument)
 {
     int swit = 1;
 
     DEBUGINFO("start");
     // CAN_Init(&hfdcan1, 0x111, CAN_RX_FIFO0); // A
-    CAN_Init(&hfdcan1, 0x555, CAN_RX_FIFO0); // B
+    CAN_Init(&hfdcan1, 0, FILTER_MASK_ALL, CAN_RX_FIFO0, CarStatus.usCarID);  // B
     // CAN_Init(&hfdcan2, 0x111, CAN_RX_FIFO1);  // A
     // CAN_Init(&hfdcan2, 0x555, CAN_RX_FIFO1); // B
 
@@ -63,8 +148,8 @@ void vFDCAN2RxTask(void *argument)
         // 打印接收信息（可替换为自定义解析逻辑）
         DEBUGINFO("FDCAN%d Recv <- ID:0x%03lX, Len:%d, "
             "Data:0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X\r\n",
-                recv_msg.can_id, recv_msg.std_id, recv_msg.len, 
-                recv_msg.data[0],recv_msg.data[1],recv_msg.data[2],recv_msg.data[3],recv_msg.data[4],recv_msg.data[5],recv_msg.data[6],recv_msg.data[7]);
+                recv_msg.u8_can_id, recv_msg.u32_frame_id, recv_msg.u8_len, 
+                recv_msg.u8_data[0],recv_msg.u8_data[1],recv_msg.u8_data[2],recv_msg.u8_data[3],recv_msg.u8_data[4],recv_msg.u8_data[5],recv_msg.u8_data[6],recv_msg.u8_data[7]);
         }
     }
 }
@@ -82,11 +167,13 @@ void vFDCAN1RxTask(void *argument)
         // 打印接收信息（可替换为自定义解析逻辑）
         DEBUGINFO("FDCAN%d Recv <- ID:0x%03lX, Len:%d, "
             "Data:0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X\r\n",
-                recv_msg.can_id, recv_msg.std_id, recv_msg.len, 
-                recv_msg.data[0],recv_msg.data[1],recv_msg.data[2],recv_msg.data[3],recv_msg.data[4],recv_msg.data[5],recv_msg.data[6],recv_msg.data[7]);
+                recv_msg.u8_can_id, recv_msg.u32_frame_id, recv_msg.u8_len, 
+                recv_msg.u8_data[0],recv_msg.u8_data[1],recv_msg.u8_data[2],recv_msg.u8_data[3],recv_msg.u8_data[4],recv_msg.u8_data[5],recv_msg.u8_data[6],recv_msg.u8_data[7]);
         }
     }
 }
+/* =========================================仅测试使用======================================== */
+
 
 // FIFO0 接收队列回调函数
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
@@ -106,17 +193,17 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
         // 2. 区分FDCAN外设，标记报文来源
         if(hfdcan->Instance == FDCAN1)
         {
-            recv_msg.can_id = 1;
+            recv_msg.u8_can_id = 1;
         }
         else if(hfdcan->Instance == FDCAN2)
         {
-            recv_msg.can_id = 2;
+            recv_msg.u8_can_id = 2;
         }
 
         // 3. 填充报文信息
-        recv_msg.std_id = RxHeader.Identifier;       // 标准ID
-        recv_msg.len = RxHeader.DataLength; 
-        memcpy(recv_msg.data, RxData, recv_msg.len); // 数据域
+        recv_msg.u32_frame_id = RxHeader.Identifier;       // 标准ID
+        recv_msg.u8_len = RxHeader.DataLength; 
+        memcpy(recv_msg.u8_data, RxData, recv_msg.u8_len); // 数据域
 
         // 4. 发送到FreeRTOS队列（中断安全版本）
         if(xCAN1_Rx_QueueHandle != NULL)
@@ -145,17 +232,17 @@ void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo1ITs)
         // 2. 区分FDCAN外设，标记报文来源
         if(hfdcan->Instance == FDCAN1)
         {
-            recv_msg.can_id = 1;
+            recv_msg.u8_can_id = 1;
         }
         else if(hfdcan->Instance == FDCAN2)
         {
-            recv_msg.can_id = 2;
+            recv_msg.u8_can_id = 2;
         }
 
         // 3. 填充报文信息
-        recv_msg.std_id = RxHeader.Identifier;       // 标准ID
-        recv_msg.len = RxHeader.DataLength;
-        memcpy(recv_msg.data, RxData, recv_msg.len); // 数据域
+        recv_msg.u32_frame_id = RxHeader.Identifier;       // 标准ID
+        recv_msg.u8_len = RxHeader.DataLength;
+        memcpy(recv_msg.u8_data, RxData, recv_msg.u8_len); // 数据域
 
         // 4. 发送到FreeRTOS队列（中断安全版本）
         if(xCAN1_Rx_QueueHandle != NULL)

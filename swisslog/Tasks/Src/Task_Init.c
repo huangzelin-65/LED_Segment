@@ -99,7 +99,8 @@ void vInitTask(void *argument)
 #ifdef  USE_WIFI
   osThreadResume(WifiManagerTaskHandle);
   osThreadResume(WifiReceiveTaskHandle);
-#endif  
+#endif
+
 #ifdef MQTT_ENABLE
   osThreadResume(MqttManagerTaskHandle);
   osThreadResume(MqttReceiveTaskHandle); 
@@ -110,20 +111,13 @@ void vInitTask(void *argument)
   osThreadResume(RobotHeartBeatTaskHandle);     
   osThreadResume(MqttNotifyTaskHandle);
   osThreadResume(NtpManagerTaskHandle);
-#endif  
-
+#endif
 
 #ifdef  USE_CAN
-  osThreadResume(FDCANTxTaskHandle);
-  osThreadResume(FDCAN1RxTaskHandle);
-  osThreadResume(FDCAN2RxTaskHandle);
+  osThreadResume(CANManagerTaskHandle);
 #endif
 
   osThreadResume(IntProcessTaskHandle); 
-
-
-
-
 
   osThreadExit();
 }
