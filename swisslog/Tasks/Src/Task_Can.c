@@ -34,32 +34,49 @@ void vCANManagerTask(void *argument)
 {
     DEBUGINFO("start");
     
-    CAN_Init(&hfdcan1, 0, FILTER_MASK_ALL, CAN_RX_FIFO0, CarStatus.usCarID); 
-    #ifdef CAN_TEST
-     osThreadResume(FDCANTxTaskHandle);
-     osThreadResume(FDCAN1RxTaskHandle);
-     osThreadResume(FDCAN2RxTaskHandle);
-     #endif
+    CAN_Init(&hfdcan1, 0, FILTER_MASK_ALL, CAN_RX_FIFO0); 
+
+#ifdef CAN_TEST
+    osThreadResume(FDCANTxTaskHandle);
+    osThreadResume(FDCAN1RxTaskHandle);
+    osThreadResume(FDCAN2RxTaskHandle);
+#else
     osThreadResume(CANCarTxTaskHandle);
     osThreadResume(CANCarRxTaskHandle);
-    osThreadResume(CANCarHBTaskHandle);
+    // osThreadResume(CANCarHBTaskHandle);
 
-    while (1)
+    CAN_Car_Init(CarStatus.usCarID);
+    osDelay(pdMS_TO_TICKS(50));
+
+    while (g_CAN_car_ctx.en_online_status != ONLINE_STATUS_ONLINE)
     {
+        // 上电发送发现帧
+        Car_Send_DiscoverFrame();
         osDelay(pdMS_TO_TICKS(1000));
     }
+#endif
+
+    osThreadExit();
 }
 
 // CAN小车发送任务
 void vCANCarTxTask(void *argument)
 {
     DEBUGINFO("start");
+    CAN_Send_Msg_t CAN_Send_Msg = {0};
 
     while (1)
     {
-        Car_Send_Status(STATUS_TYPE_RUN);
-        Car_Send_Status(STATUS_TYPE_SPEED);
-        osDelay(pdMS_TO_TICKS(STATUS_REPORT_INTERVAL_MS));
+        if(xQueueReceive(xCAN1_Tx_QueueHandle, &CAN_Send_Msg, portMAX_DELAY) == pdPASS)
+        {
+            CAN_AddMsgToTxFifo(&hfdcan1, CAN_Send_Msg.u32_frame_id, CAN_Send_Msg.u8_data);
+        }
+        // if(g_CAN_car_ctx.en_online_status == ONLINE_STATUS_ONLINE)
+        // {
+        //     Car_Send_Status(STATUS_TYPE_RUN);
+        //     // Car_Send_Status(STATUS_TYPE_SPEED);
+        //     osDelay(pdMS_TO_TICKS(STATUS_REPORT_INTERVAL_MS));
+        // }
     }
 }
 
@@ -67,21 +84,21 @@ void vCANCarTxTask(void *argument)
 void vCANCarRxTask(void *argument)
 {
     DEBUGINFO("start");
-    CAN_Recv_Msg_t recv_msg = {0};
+    CAN_Recv_Msg_t CAN_recv_msg = {0};
 
     while (1)
     {
-        if(xQueueReceive(xCAN1_Tx_QueueHandle, &recv_msg, portMAX_DELAY) == pdPASS)
+        if(xQueueReceive(xCAN1_Rx_QueueHandle, &CAN_recv_msg, portMAX_DELAY) == pdPASS)
         {
-            switch (recv_msg.u32_frame_id) {
+            switch (CAN_recv_msg.u32_frame_id) {
                 case CAN_ID_AUTH_RESP:
-                    Car_Process_AuthRespFrame(recv_msg.u8_data);
+                    Car_Process_AuthRespFrame(CAN_recv_msg.u8_data);
                     break;
                 case CAN_ID_MASTER_HEART:
-                    Car_Process_MasterHeartFrame(recv_msg.u8_data);
+                    Car_Process_MasterHeartFrame(CAN_recv_msg.u8_data);
                     break;
                 case CAN_ID_MASTER_CMD:
-                    Car_Process_MasterCmdFrame(recv_msg.u8_data);
+                    Car_Process_MasterCmdFrame(CAN_recv_msg.u8_data);
                     break;
                 default:
                     break;
@@ -113,7 +130,7 @@ void vFDCANTxTask(void *argument)
 
     DEBUGINFO("start");
     // CAN_Init(&hfdcan1, 0x111, CAN_RX_FIFO0); // A
-    CAN_Init(&hfdcan1, 0, FILTER_MASK_ALL, CAN_RX_FIFO0, CarStatus.usCarID);  // B
+    // CAN_Init(&hfdcan1, 0, FILTER_MASK_ALL, CAN_RX_FIFO0, CarStatus.usCarID);  // B
     // CAN_Init(&hfdcan2, 0x111, CAN_RX_FIFO1);  // A
     // CAN_Init(&hfdcan2, 0x555, CAN_RX_FIFO1); // B
 

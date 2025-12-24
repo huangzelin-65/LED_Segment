@@ -133,12 +133,10 @@ void CAN_AddMsgToTxFifo(FDCAN_HandleTypeDef *hfdcan,
 void CAN_Init(FDCAN_HandleTypeDef *hfdcan, 
                         uint16_t u16_Rx_id, 
                         uint16_t u16_MaskID, 
-                        eFifoType xFifo, 
-                        uint16_t u16_car_id)
+                        eFifoType xFifo)
 {
     DEBUGINFO("start");
     CAN_FilterConfig(hfdcan, u16_Rx_id, u16_MaskID, xFifo);
     CAN_RxFifoNotify_Activate(hfdcan, xFifo);
     CAN_Start(hfdcan);
-    CAN_Car_Init(u16_car_id);
 }

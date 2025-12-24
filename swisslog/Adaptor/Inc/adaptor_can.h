@@ -31,8 +31,7 @@ typedef enum
 void CAN_Init(FDCAN_HandleTypeDef *hfdcan, 
                         uint16_t u16_Rx_id, 
                         uint16_t u16_MaskID, 
-                        eFifoType xFifo,
-                        uint16_t u16_car_id);
+                        eFifoType xFifo);
                         
 void CAN_FilterConfig(FDCAN_HandleTypeDef *hfdcan, 
                         uint16_t u16_Rx_id, 

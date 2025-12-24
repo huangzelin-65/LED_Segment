@@ -66,14 +66,11 @@ void Car_Send_DiscoverFrame(void) {
     CAN_Send_Msg.u8_data[1] = g_CAN_car_ctx.u16_fixed_id & 0xFF;
     CAN_Send_Msg.u8_data[7] = Calc_CheckSum(CAN_Send_Msg.u8_data, 7);
 
-    // 连续发送2次（33Kbps适配）
-    for (uint8_t u8_i = 0; u8_i < 2; u8_i++) {
-        // 放入发送队列
-        if(xQueueSend(xCAN1_Tx_QueueHandle, &CAN_Send_Msg, pdMS_TO_TICKS(100)) != pdTRUE) {
-            // 发送失败
-            DEBUGINFO("CAN Send DiscoverFrame Fail");
-        }
-        osDelay(pdMS_TO_TICKS(80));
+
+    // 放入发送队列
+    if(xQueueSend(xCAN1_Tx_QueueHandle, &CAN_Send_Msg, pdMS_TO_TICKS(100)) != pdTRUE) {
+        // 发送失败
+        DEBUGINFO("CAN Send DiscoverFrame Fail");
     }
 }
 
@@ -97,6 +94,8 @@ void Car_Process_AuthRespFrame(uint8_t *pu8_rx_data) {
         g_CAN_car_ctx.u16_cur_master_id = Decode_MasterID(pu8_rx_data[3], pu8_rx_data[4]);
         g_CAN_car_ctx.en_auth_status = AUTH_STATUS_SUCCESS;
         g_CAN_car_ctx.en_online_status = ONLINE_STATUS_ONLINE;
+        DEBUGINFO("Auth Success !!");
+        DEBUGINFO("temp ID: %d, Master ID: %d", g_CAN_car_ctx.u8_temp_id, g_CAN_car_ctx.u16_cur_master_id);
     } else {
         g_CAN_car_ctx.en_auth_status = AUTH_STATUS_FAILED;
     }
@@ -309,8 +308,5 @@ void CAN_Car_Init(uint16_t u16_fixed_id) {
 
     // 初始化CAN和FreeRTOS资源
     g_car_mutex = xSemaphoreCreateMutex();
-
-    // 上电发送发现帧
-    Car_Send_DiscoverFrame();
 
 }

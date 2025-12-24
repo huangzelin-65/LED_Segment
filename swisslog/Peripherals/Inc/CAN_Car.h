@@ -28,7 +28,7 @@
 #define HEARTBEAT_TIMEOUT_MS           900
 #define CMD_ACK_TIMEOUT_MS             200
 #define CMD_RETRY_CNT                  2       // 指令重试次数
-#define STATUS_REPORT_INTERVAL_MS      1000    // 状态定时上报间隔
+#define STATUS_REPORT_INTERVAL_MS      2000    // 状态定时上报间隔
 
 // CAN帧ID定义
 #define CAN_ID_CAR_DISCOVER            0x001   // 小车发现帧（小→主）
