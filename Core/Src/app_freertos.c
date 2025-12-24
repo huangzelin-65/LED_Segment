@@ -350,6 +350,20 @@ const osThreadAttr_t CANManagerTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 256 * 4
 };
+/* Definitions for JsonGenerateTask */
+osThreadId_t JsonGenerateTaskHandle;
+const osThreadAttr_t JsonGenerateTask_attributes = {
+  .name = "JsonGenerateTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
+/* Definitions for JsonParseTask */
+osThreadId_t JsonParseTaskHandle;
+const osThreadAttr_t JsonParseTask_attributes = {
+  .name = "JsonParseTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
 /* Definitions for wifiUsartMutex */
 osMutexId_t wifiUsartMutexHandle;
 const osMutexAttr_t wifiUsartMutex_attributes = {
@@ -479,6 +493,16 @@ const osMessageQueueAttr_t xTcpManageQueue_attributes = {
 osMessageQueueId_t xRobotNotifyQueueHandle;
 const osMessageQueueAttr_t xRobotNotifyQueue_attributes = {
   .name = "xRobotNotifyQueue"
+};
+/* Definitions for JsonGenerateQueue */
+osMessageQueueId_t JsonGenerateQueueHandle;
+const osMessageQueueAttr_t JsonGenerateQueue_attributes = {
+  .name = "JsonGenerateQueue"
+};
+/* Definitions for JsonParseQueue */
+osMessageQueueId_t JsonParseQueueHandle;
+const osMessageQueueAttr_t JsonParseQueue_attributes = {
+  .name = "JsonParseQueue"
 };
 /* Definitions for xMotorTxSem */
 osSemaphoreId_t xMotorTxSemHandle;
@@ -618,6 +642,10 @@ void MX_FREERTOS_Init(void) {
   xTcpManageQueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xTcpManageQueue_attributes);
   /* creation of xRobotNotifyQueue */
   xRobotNotifyQueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xRobotNotifyQueue_attributes);
+  /* creation of JsonGenerateQueue */
+  JsonGenerateQueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &JsonGenerateQueue_attributes);
+  /* creation of JsonParseQueue */
+  JsonParseQueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &JsonParseQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -747,6 +775,12 @@ void MX_FREERTOS_Init(void) {
   /* creation of CANManagerTask */
   CANManagerTaskHandle = osThreadNew(vCANManagerTask, NULL, &CANManagerTask_attributes);
 
+  /* creation of JsonGenerateTask */
+  JsonGenerateTaskHandle = osThreadNew(vJsonGenerateTask, NULL, &JsonGenerateTask_attributes);
+
+  /* creation of JsonParseTask */
+  JsonParseTaskHandle = osThreadNew(vJsonParseTask, NULL, &JsonParseTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   
@@ -784,6 +818,8 @@ void MX_FREERTOS_Init(void) {
   osThreadSuspend(CANCarRxTaskHandle);
   osThreadSuspend(CANCarHBTaskHandle);
   osThreadSuspend(CANManagerTaskHandle);
+  osThreadSuspend(JsonGenerateTaskHandle);
+  osThreadSuspend(JsonParseTaskHandle);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */

@@ -111,6 +111,8 @@ void vInitTask(void *argument)
   osThreadResume(RobotHeartBeatTaskHandle);     
   osThreadResume(MqttNotifyTaskHandle);
   osThreadResume(NtpManagerTaskHandle);
+  osThreadResume(JsonGenerateTaskHandle);
+  osThreadResume(JsonParseTaskHandle);  
 #endif
 
 #ifdef  USE_CAN
