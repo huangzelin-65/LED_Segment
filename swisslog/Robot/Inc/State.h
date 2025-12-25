@@ -37,6 +37,7 @@ typedef struct {
     const char *manufacturer;
     const char *serialNumber;
     const char *operatingMode;
+    int id;//流水号
     int runtime;
     int car_running;
     uint32_t curPos;
@@ -54,6 +55,8 @@ typedef struct {
 
 
 void State_ListInit(void);
-
-
+void State_Init(void);
+void State_Event(int id);
+void State_DeleteId(int id);
+void State_Test(void);
 #endif

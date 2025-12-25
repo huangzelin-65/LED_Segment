@@ -13,7 +13,10 @@ void Action_ListInit(void)
     }
 }
 
-
+void Action_Init(void)
+{
+    Action_ListInit();
+}
 
 
 
