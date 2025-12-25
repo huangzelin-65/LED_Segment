@@ -4,7 +4,7 @@
 #include "queue.h"
 #include "semphr.h"
 #include "State.h"
-
+#include "HeartBeat.h"
 
 void Json_GenerateMsg(JsonGenerateType_t type,void *data)
 {
@@ -75,3 +75,34 @@ char* Json_Generate_State(void *state)
 
     return json_str;
 }
+
+char* Json_Generate_HeartBeat(void *heart_beat)
+{
+    HeartBeat_t *data = (HeartBeat_t *)heart_beat;
+    cJSON* root = cJSON_CreateObject();
+    if(root == NULL)
+    {
+        DEBUGINFO("cJSON_CreateObject fail\n");
+        return NULL;
+    }
+    //创建单字段json对象
+    cJSON_AddStringToObject(root, "headerId", data->headerId);
+    cJSON_AddStringToObject(root, "timestamp", data->timestamp);
+    cJSON_AddStringToObject(root, "version", data->version);
+
+    char* json_str = cJSON_PrintUnformatted(root);//需free
+
+    cJSON_Delete(root);
+
+    return json_str;
+}
+
+
+
+
+
+
+
+
+
+
