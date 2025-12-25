@@ -14,6 +14,7 @@
 #include "app_freertos.h"
 #include "JsonCommon.h"
 #include "State.h"
+#include "Action.h"
 #include "HeartBeat.h"
 
 void vJsonGenerateTask(void *argument)
@@ -36,7 +37,7 @@ void vJsonGenerateTask(void *argument)
                     DEBUGINFO("JSON_G_HEART end\n"); 
                 }
                 break;
-                case ROBOT_MSG_STATE:
+                case JSON_G_STATE:
                 {
                     State_t* state = (State_t*)(json_data->data);
                     DEBUGINFO("JSON_G_STATE start\n");  
@@ -44,7 +45,16 @@ void vJsonGenerateTask(void *argument)
                     Mqtt_SendMsg(MQTT_MSG_ROBOT_EVENT,json_str);//mqtt发送完则释放内存
                     DEBUGINFO("JSON_G_STATE end\n"); 
                 }
-                break;                                        
+                break;  
+                case JSON_G_ACTION:
+                {
+                    Action_t* action = (Action_t*)(json_data->data);
+                    DEBUGINFO("JSON_G_ACTION start\n");  
+                    char* json_str = Json_Generate_Action(action);
+                    Mqtt_SendMsg(MQTT_MSG_ROBOT_EVENT,json_str);//mqtt发送完则释放内存
+                    DEBUGINFO("JSON_G_ACTION end\n"); 
+                }
+                break;                                                       
                 default:
                 break;
             }
@@ -55,11 +65,33 @@ void vJsonGenerateTask(void *argument)
 
 void vJsonParseTask(void *argument)
 {
+    JsonParse_t *json_data = NULL;
     DEBUGINFO("vJsonParseTask\n");
     while (1)
     {
-        State_Event(0);
-        osDelay(3000);
+        if(xQueueReceive(JsonParseQueueHandle, &json_data, portMAX_DELAY) == pdTRUE)
+        {
+            DEBUGINFO("type:%d\n",json_data->type); 
+            switch (json_data->type)
+            {
+                case JSON_ACTION:
+                {
+                    DEBUGINFO("JSON_ACTION start\n");                     
+                    DEBUGINFO("JSON_ACTION end\n"); 
+                }
+                break;
+                case JSON_HEARTBEAT_ACK:
+                {
+                    DEBUGINFO("JSON_HEARTBEAT_ACK start\n");  
+                    DEBUGINFO("JSON_HEARTBEAT_ACK end\n"); 
+                }
+                break;                                        
+                default:
+                break;
+            }
+            vPortFree(json_data);            
+        }
+
     }
 }
 

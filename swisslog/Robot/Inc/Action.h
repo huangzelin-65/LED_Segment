@@ -12,6 +12,7 @@ typedef struct {
     char cmd[16];     // 存储"forward"/"back"/"stop"/"runModel"
     char cmdId[64];   // 存储命令ID（如"1"）
     CmdParams params;  // 命令参数
+    char status[24];  //执行结果
 } Cmd_t;
 
 typedef struct {
@@ -25,7 +26,9 @@ typedef struct {
     char timestamp[32];   // Unix毫秒时间戳（字符串形式）
     char version[16];     // 版本号（如"1.0.0"）
     int id;//流水号
-    ActionParams action;   // 动作内容
+    int Type; 
+    Cmd_t cmd;
+    int execute;//代表是否执行。0：待执行 1：已经执行
 } Action_t;	
 
 typedef enum {
@@ -38,5 +41,6 @@ typedef enum {
 
 void Action_ListInit(void);
 void Action_Init(void);
-
+void Action_Event(Action_t *action);
+void Action_Execute(void);
 #endif

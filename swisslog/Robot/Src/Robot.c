@@ -1214,7 +1214,7 @@ void Robot_ActionNotify(void)
 //回复action的ack
 void Robot_ActionAckUpdate(RobotActionStatus_t status)
 { 
-    memcpy(robotSate.headerId,robotAction.headerId,8);
+    memcpy(robotSate.headerId,robotAction.headerId,64);
     robotSate.robotActionAck.states_count = robotAction.action.cmd_count;
     DEBUGINFO("status:%d states_count:%d\n",status,robotSate.robotActionAck.states_count);
     for (int i = 0; i < robotSate.robotActionAck.states_count; i++) {
