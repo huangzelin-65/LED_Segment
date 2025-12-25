@@ -12,7 +12,7 @@
 #include "adaptor_mqtt.h"
 #include "adaptor_ntp.h"
 #include "app_freertos.h"
-#include "JsonGenerate.h"
+#include "JsonCommon.h"
 
 void vJsonGenerateTask(void *argument)
 {

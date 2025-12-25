@@ -1,5 +1,5 @@
-#ifndef INC_JSONGENERATE_H_
-#define INC_JSONGENERATE_H_
+#ifndef INC_JSON_COMMON_H_
+#define INC_JSON_COMMON_H_
 #include <stdbool.h>
 #include <stdio.h>
 #include "cJSON.h"
