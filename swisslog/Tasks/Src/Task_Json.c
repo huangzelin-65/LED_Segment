@@ -4,23 +4,44 @@
 #include "cmsis_os2.h"
 #include <string.h>
 #include <stdio.h>
-#include "Task_Tcp.h"
+#include "Task_Json.h"
 #include "LogDebugInfo.h"
-// #include "Common.h"
-#include <stdbool.h>
+#include "semphr.h"
 #include "queue.h"
 #include "lwip.h"
 #include "adaptor_mqtt.h"
 #include "adaptor_ntp.h"
 #include "app_freertos.h"
-#include "adaptor_rtc.h"
+#include "JsonGenerate.h"
 
 void vJsonGenerateTask(void *argument)
 {
+    JsonGenerate_t *json_data = NULL;
     DEBUGINFO("vJsonGenerateTask\n");
     while (1)
     {
-        osDelay(1000);
+        if(xQueueReceive(JsonGenerateQueueHandle, &json_data, portMAX_DELAY) == pdTRUE)
+        {
+            DEBUGINFO("type:%d\n",json_data->type); 
+            switch (json_data->type)
+            {
+                case JSON_G_HEART:
+                {
+                    DEBUGINFO("JSON_G_HEART start\n");  
+                    DEBUGINFO("JSON_G_HEART end\n"); 
+                }
+                break;
+                case ROBOT_MSG_STATE:
+                {
+                    DEBUGINFO("JSON_G_STATE start\n");  
+                    DEBUGINFO("JSON_G_STATE end\n"); 
+                }
+                break;                                        
+                default:
+                break;
+            }
+            vPortFree(json_data);            
+        }
     }
 }
 

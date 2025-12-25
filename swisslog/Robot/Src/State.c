@@ -178,14 +178,15 @@ void State_Event(int id)
             memcpy(state,new_state,sizeof(State_t));
             vPortFree(new_state);//赋值完释放内存
 
-            //需发送到队列中，更新json数据
+            //需发送到队列中，创建json数据
         }        
         break;
         case 2: //数据不存在，需要添加到链表中
         {
             list_insert_tail(state_list,new_state);
             
-            //需发送到队列中，更新json数据
+            //需发送到队列中，创建json数据
+            
         }
         break;        
         default:break;
