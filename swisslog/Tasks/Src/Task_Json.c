@@ -13,6 +13,7 @@
 #include "adaptor_ntp.h"
 #include "app_freertos.h"
 #include "JsonCommon.h"
+#include "State.h"
 
 void vJsonGenerateTask(void *argument)
 {
@@ -28,12 +29,17 @@ void vJsonGenerateTask(void *argument)
                 case JSON_G_HEART:
                 {
                     DEBUGINFO("JSON_G_HEART start\n");  
+
                     DEBUGINFO("JSON_G_HEART end\n"); 
                 }
                 break;
                 case ROBOT_MSG_STATE:
                 {
+                    State_t* state = (State_t*)(json_data->data);
                     DEBUGINFO("JSON_G_STATE start\n");  
+                    char* json_str = Json_Generate_State(state);
+                    DEBUGINFO("json_str:%s\n",json_str);
+                    vPortFree(json_str);
                     DEBUGINFO("JSON_G_STATE end\n"); 
                 }
                 break;                                        
@@ -50,7 +56,8 @@ void vJsonParseTask(void *argument)
     DEBUGINFO("vJsonParseTask\n");
     while (1)
     {
-        osDelay(1000);
+        State_Event(0);
+        osDelay(3000);
     }
 }
 

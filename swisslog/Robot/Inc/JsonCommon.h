@@ -16,5 +16,6 @@ typedef struct {
 
 
 void Json_GenerateMsg(JsonGenerateType_t type,void *data);
+char* Json_Generate_State(void *data);
 
 #endif

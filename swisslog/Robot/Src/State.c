@@ -1,4 +1,5 @@
 #include "LogDebugInfo.h"
+#include "JsonCommon.h"
 #include "State.h"
 #include "clist.h"
 
@@ -179,6 +180,7 @@ void State_Event(int id)
             vPortFree(new_state);//赋值完释放内存
 
             //需发送到队列中，创建json数据
+            Json_GenerateMsg(JSON_G_STATE,state);
         }        
         break;
         case 2: //数据不存在，需要添加到链表中
@@ -186,7 +188,7 @@ void State_Event(int id)
             list_insert_tail(state_list,new_state);
             
             //需发送到队列中，创建json数据
-            
+            Json_GenerateMsg(JSON_G_STATE,new_state);
         }
         break;        
         default:break;
