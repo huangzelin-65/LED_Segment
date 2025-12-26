@@ -43,4 +43,5 @@ void Action_ListInit(void);
 void Action_Init(void);
 void Action_Event(Action_t *action);
 void Action_Execute(void);
+void Action_ToCmd(Action_t *action);
 #endif

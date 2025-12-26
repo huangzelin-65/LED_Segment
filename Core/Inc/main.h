@@ -299,6 +299,10 @@ typedef struct {
 
 #pragma pack(pop)
 
+extern ServerToCarData_t ServerToCarData;
+extern CarToServerData_t CarToServerData;
+extern CarStatus_t CarStatus;
+
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/

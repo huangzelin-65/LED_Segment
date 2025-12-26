@@ -76,13 +76,16 @@ void vJsonParseTask(void *argument)
             {
                 case JSON_ACTION:
                 {
-                    DEBUGINFO("JSON_ACTION start\n");                     
+                    DEBUGINFO("JSON_ACTION start\n"); 
+                    // DEBUGINFO("data:%s\n",json_data->data); 
+                    Json_ParseAction(json_data->data);
                     DEBUGINFO("JSON_ACTION end\n"); 
                 }
                 break;
                 case JSON_HEARTBEAT_ACK:
                 {
                     DEBUGINFO("JSON_HEARTBEAT_ACK start\n");  
+
                     DEBUGINFO("JSON_HEARTBEAT_ACK end\n"); 
                 }
                 break;                                        

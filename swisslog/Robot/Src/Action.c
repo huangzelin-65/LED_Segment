@@ -2,6 +2,8 @@
 #include "LogDebugInfo.h"
 #include "Action.h"
 #include "clist.h"
+#include "main.h"
+#include "common.h"
 
 List *action_list = NULL;
 
@@ -73,13 +75,89 @@ void Action_Execute(void)
             memcpy(action->cmd.status,"ack",4);
             Json_GenerateMsg(JSON_G_ACTION,action);
             //执行动作
-
+            Action_ToCmd(action);
             //标记动作已经执行
             action->execute = 1;
         }
     }
 }
+//动作实际执行
+void Action_ToCmd(Action_t *action)
+{
+    ServerToCarData.xStationStatus = OutStation;//测试用
 
+    char *res = strstr(action->cmd.cmd, "forward");
+    if (res != NULL) {
+        DEBUGINFO("forward\n"); 
+        ServerToCarData.xDirection = Forward; // 小车运行方向 1=正转 2=反转 
+        ServerToCarData.xMotorEnable = MotorEnable;                                                      
+    } 
+    else
+    {
+        char *res = strstr(action->cmd.cmd, "back");
+        if (res != NULL) {
+            DEBUGINFO("backward\n"); 
+            ServerToCarData.xDirection = Backward; // 小车运行方向 1=正转 2=反转 
+            ServerToCarData.xMotorEnable = MotorEnable;
+        }
+        else
+        {
+            char *res = strstr(action->cmd.cmd, "stop");
+            if (res != NULL) {
+                DEBUGINFO("stop\n"); 
+                ServerToCarData.xDirection = NoDirection;
+                ServerToCarData.xMotorEnable = MotorDisable;
+            }
+        }
+    }
+    {
+        char *res = strstr(action->cmd.params.model, "auto");
+        if(res != NULL)
+        {
+            ServerToCarData.xAutoMode = Auto; // 自动模式 
+        }
+        else
+        {
+            ServerToCarData.xAutoMode = Manual; // 手动模式 
+        }            
+    }
+    {
+        char *res = strstr(action->cmd.params.speedLevel, "0");
+        if(res != NULL)
+        {
+            DEBUGINFO("speed level 0\n"); 
+            ServerToCarData.xSetSpeed = ZeroSpeed;
+        }
+        else
+        {
+            char *res = strstr(action->cmd.params.speedLevel, "1");
+            if(res != NULL)
+            {
+                DEBUGINFO("speed level 1\n");
+                ServerToCarData.xSetSpeed = LowSpeed; 
+            }
+            else
+            {
+                char *res = strstr(action->cmd.params.speedLevel, "2");
+                if(res != NULL)
+                {
+                    DEBUGINFO("speed level 2\n"); 
+                    ServerToCarData.xSetSpeed = NormalSpeed;
+                }
+                else
+                {
+                    char *res = strstr(action->cmd.params.speedLevel, "3");
+                    if(res != NULL)
+                    {
+                        DEBUGINFO("speed level 3\n"); 
+                        ServerToCarData.xSetSpeed = HighSpeed;
+                    }                      
+                }
+            }
+        }
+    }
+    vParseCommandToCar();     
+}
 
 
 

@@ -17,6 +17,7 @@
 #include "clist.h"
 #include "app_freertos.h"
 #include "semphr.h"
+#include "JsonCommon.h"
 
 #define MQTT_HOST              "192.168.1.10" 
 #define MQTT_QOS               MQTT_QOS_1
@@ -474,35 +475,50 @@ static int Mqtt_MessageCb(MqttClient *client, MqttMessage *msg,byte msg_new, byt
     if (msg_done) {
         DEBUGINFO("MQTT Message: Done");
 
-        MqttRcMsg_t *mqtt_msg = pvPortMalloc(sizeof(MqttRcMsg_t));
-        if(mqtt_msg != NULL)
-        {
-            mqtt_msg->topic_name = pvPortMalloc(msg->topic_name_len + 1);
-            if(mqtt_msg->topic_name != NULL)
-            {
-                XMEMCPY(mqtt_msg->topic_name, msg->topic_name, msg->topic_name_len);
-                mqtt_msg->topic_name[msg->topic_name_len] = '\0';
+        // MqttRcMsg_t *mqtt_msg = pvPortMalloc(sizeof(MqttRcMsg_t));
+        // if(mqtt_msg != NULL)
+        // {
+        //     mqtt_msg->topic_name = pvPortMalloc(msg->topic_name_len + 1);
+        //     if(mqtt_msg->topic_name != NULL)
+        //     {
+        //         XMEMCPY(mqtt_msg->topic_name, msg->topic_name, msg->topic_name_len);
+        //         mqtt_msg->topic_name[msg->topic_name_len] = '\0';
 
-                mqtt_msg->data = pvPortMalloc(msg->buffer_len + 1);
-                if(mqtt_msg->data != NULL)
-                {
-                    XMEMCPY(mqtt_msg->data, msg->buffer, msg->buffer_len);
-                    mqtt_msg->data[msg->buffer_len] = '\0';
-                    Robot_SendMsg(ROBOT_MSG_PARSE,mqtt_msg);                    
-                }
-                else
-                {
-                    DEBUGINFO("pvPortMalloc Message fail!!!");
-                }
-            }
-            else
-            {
-                DEBUGINFO("pvPortMalloc Message fail!!!");
-            }
-        }
-        else
+        //         mqtt_msg->data = pvPortMalloc(msg->buffer_len + 1);
+        //         if(mqtt_msg->data != NULL)
+        //         {
+        //             XMEMCPY(mqtt_msg->data, msg->buffer, msg->buffer_len);
+        //             mqtt_msg->data[msg->buffer_len] = '\0';
+        //             Robot_SendMsg(ROBOT_MSG_PARSE,mqtt_msg);                    
+        //         }
+        //         else
+        //         {
+        //             DEBUGINFO("pvPortMalloc Message fail!!!");
+        //         }
+        //     }
+        //     else
+        //     {
+        //         DEBUGINFO("pvPortMalloc Message fail!!!");
+        //     }
+        // }
+        // else
+        // {
+        //     DEBUGINFO("pvPortMalloc Message fail!!!");
+        // }
+
+        char* parse_data = pvPortMalloc(msg->buffer_len + 1);
+        if(parse_data != NULL)
         {
-            DEBUGINFO("pvPortMalloc Message fail!!!");
+            XMEMCPY(parse_data, msg->buffer, msg->buffer_len);
+            parse_data[msg->buffer_len] = '\0';  
+            char* topic_name = pvPortMalloc(msg->topic_name_len + 1);
+            if(topic_name != NULL)
+            {
+                XMEMCPY(topic_name, msg->topic_name, msg->topic_name_len);
+                topic_name[msg->topic_name_len] = '\0';                
+                Json_ParseMsg(Json_ParseTopic(topic_name),parse_data);
+                vPortFree(topic_name);
+            } 
         }
     }
     return MQTT_CODE_SUCCESS;

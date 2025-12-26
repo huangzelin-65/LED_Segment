@@ -12,6 +12,17 @@
 #define TOPIC_ACTION        "tk/v1/slhc/tkv-%d/instantactions"
 #define TOPIC_CONN_ACK      "tk/v1/slhc/tkv-%d/connection/ack"
 
+/*解析时，字段存储使用以下数组*/
+char headerId[64]; 
+char timestamp[32];
+char version[16];
+char cmd[16];
+char cmdId[64];
+char model[16];
+char speedLevel[16];
+char sub_topic[64] = {0};
+Action_t temp_action;
+
 void Json_GenerateMsg(JsonGenerateType_t type,void *data)
 {
     if(JsonGenerateQueueHandle != NULL)
@@ -152,10 +163,10 @@ void Json_ParseMsg(JsonParseType_t type,void *data)
     }     
 }
 
-int Json_ParseTopic(char* topic)
+int Json_ParseTopic(const char* topic)
 {
-    {
-        char sub_topic[64] = {0};
+    DEBUGINFO("topic:%s\n",topic);
+    { 
         memset(sub_topic,0,sizeof(sub_topic));
         snprintf(sub_topic, sizeof(sub_topic), TOPIC_ACTION, usEncoder_Read_Number()); 
         char *result = strstr(topic, sub_topic);
@@ -163,17 +174,14 @@ int Json_ParseTopic(char* topic)
             return JSON_ACTION;
         }
     }
-
     {
-        char sub_topic[64] = {0};
         memset(sub_topic,0,sizeof(sub_topic));
         snprintf(sub_topic, sizeof(sub_topic), TOPIC_CONN_ACK, usEncoder_Read_Number());
         char *result = strstr(topic, sub_topic);
         if (result != NULL) {
             return JSON_HEARTBEAT_ACK;
         }  
-    }
-          
+    }        
     return JSON_NONE;
 }
 
@@ -188,7 +196,6 @@ int Json_ParseAction(char* json_str)
         DEBUGINFO("cJSON_Parse fail\n");
         return -1;
     }
-
     // 2. 解析顶层字段: headerId
     cJSON *headerid = cJSON_GetObjectItem(root, "headerId");
     if (headerid == NULL || !cJSON_IsString(headerid)) {
@@ -197,7 +204,6 @@ int Json_ParseAction(char* json_str)
         return -1;
     }
 
-    char headerId[64]; 
     strncpy(headerId, headerid->valuestring, sizeof(headerId)-1);
     headerId[sizeof(headerId)-1] = '\0';  
 
@@ -208,8 +214,7 @@ int Json_ParseAction(char* json_str)
         cJSON_Delete(root);
         return -1;
     }
-
-    char timestamp[32]; 
+ 
     strncpy(timestamp, time_stamp->valuestring, sizeof(timestamp)-1);
     timestamp[sizeof(timestamp)-1] = '\0';
 
@@ -221,7 +226,6 @@ int Json_ParseAction(char* json_str)
         return -1;
     }
 
-    char version[16];
     strncpy(version, version_js->valuestring, sizeof(version)-1);
     version[sizeof(version)-1] = '\0';
 
@@ -275,7 +279,6 @@ int Json_ParseAction(char* json_str)
                 return -1;
             }
 
-            char cmd[16];
             strncpy(cmd, cmd_js->valuestring, sizeof(cmd)-1);
             cmd[sizeof(cmd)-1] = '\0';
 
@@ -287,7 +290,6 @@ int Json_ParseAction(char* json_str)
                 return -1;
             }
 
-            char cmdId[64];
             strncpy(cmdId, cmdId_js->valuestring, sizeof(cmdId)-1);
             cmdId[sizeof(cmdId)-1] = '\0';
 
@@ -299,7 +301,6 @@ int Json_ParseAction(char* json_str)
                 return -1;
             }
 
-            char model[16];
             cJSON *model_js = cJSON_GetObjectItem(params_obj, "model");
             if (model_js != NULL && cJSON_IsString(model_js)) {  
                 strncpy(model, model_js->valuestring, sizeof(model)-1);
@@ -308,7 +309,6 @@ int Json_ParseAction(char* json_str)
                 model[0] = '\0'; 
             }
 
-            char speedLevel[16];
             cJSON *speedLevel_js = cJSON_GetObjectItem(params_obj, "speedLevel");
             if (speedLevel_js != NULL && cJSON_IsString(speedLevel_js)) { 
                 strncpy(speedLevel, speedLevel_js->valuestring, sizeof(speedLevel)-1);
@@ -317,7 +317,6 @@ int Json_ParseAction(char* json_str)
                 speedLevel[0] = '\0';  
             }
             
-            Action_t temp_action;
             memcpy(temp_action.headerId,headerId,sizeof(headerId));
             memcpy(temp_action.timestamp,timestamp,sizeof(timestamp));
             memcpy(temp_action.version,version,sizeof(version));

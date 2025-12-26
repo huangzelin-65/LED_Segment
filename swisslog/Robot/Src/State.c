@@ -2,8 +2,7 @@
 #include "JsonCommon.h"
 #include "State.h"
 #include "clist.h"
-
-extern CarStatus_t CarStatus;
+#include "main.h"
 
 List *state_list = NULL;
 //链表初始化
