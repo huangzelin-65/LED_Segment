@@ -8,6 +8,8 @@
 #include "HeartBeat.h"
 #include "Encoder.h"
 #include <string.h>
+#include "adaptor_ntp.h"
+#include <stdlib.h>
 
 #define TOPIC_ACTION        "tk/v1/slhc/tkv-%d/instantactions"
 #define TOPIC_CONN_ACK      "tk/v1/slhc/tkv-%d/connection/ack"
@@ -390,6 +392,9 @@ int Json_ParseHeartBeat(char* data)
     DEBUGINFO("  headerId: %s\n", headerId);
     DEBUGINFO("  timestamp: %s\n",timestamp);
     DEBUGINFO("  version: %s\n", version);
+
+    long long temp_timestamp = atoll(timestamp);
+    sntp_set_system_time(temp_timestamp/1000);
 
     return 0;
 }

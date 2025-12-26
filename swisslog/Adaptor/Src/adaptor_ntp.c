@@ -36,7 +36,7 @@
 
 struct tm current_time_val;
 
-void sntp_set_system_time(u32_t sec)
+void sntp_set_system_time(uint32_t sec)
 {
   char buf[32];
   sec += (8 * 60 * 60);
