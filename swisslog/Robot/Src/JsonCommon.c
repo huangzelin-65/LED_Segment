@@ -23,6 +23,9 @@ char cmdId[64];
 char model[16];
 char speedLevel[16];
 char sub_topic[64] = {0};
+char name[32];
+char value[32];
+int Type;
 Action_t temp_action;
 
 void Json_GenerateMsg(JsonGenerateType_t type,void *data)
@@ -235,110 +238,175 @@ int Json_ParseAction(char* data)
     cJSON *action_obj = cJSON_GetObjectItem(root, "action");
     if (action_obj == NULL || !cJSON_IsObject(action_obj)) {
         DEBUGINFO("action Not find\n");
-        cJSON_Delete(root);
-        return -1;
-    }
-
-    // 5.1 解析action.Type
-    cJSON *type = cJSON_GetObjectItem(action_obj, "Type");
-    if (type == NULL || !cJSON_IsNumber(type)) {
-        DEBUGINFO("action.Type Not find\n");
-        cJSON_Delete(root);
-        return -1;
-    }
-    int Type = type->valueint;
-
-    // 5.2 解析action.cmds数组
-    cJSON *cmds_array = cJSON_GetObjectItem(action_obj, "cmds");
-    if (cmds_array == NULL || !cJSON_IsArray(cmds_array)) {
-        DEBUGINFO("action.cmds Not find\n");
-        cJSON_Delete(root);
-        return -1;
-    }
-    //限制最多八条命令
-    int cmd_count = cJSON_GetArraySize(cmds_array);
-    if (cmd_count <= 0 || cmd_count > 8) {
-        DEBUGINFO("cmds Not find\n");
-        cJSON_Delete(root);
-        return -1;
     }
     else
     {
-        // 遍历cmds数组，解析每个命令
-        for (int i = 0; i < cmd_count; i++) {
-            cJSON *cmd_obj = cJSON_GetArrayItem(cmds_array, i);
-            if (cmd_obj == NULL || !cJSON_IsObject(cmd_obj)) {
-                DEBUGINFO("cmds %d is not object\n", i);
-                cJSON_Delete(root);
-                return -1;
-            }
-
-            // 解析cmd字段
-            cJSON *cmd_js = cJSON_GetObjectItem(cmd_obj, "cmd");
-            if (cmd_js == NULL || !cJSON_IsString(cmd_js)) {
-                DEBUGINFO("cmd [%d] is not string\n", i);
-                cJSON_Delete(root);
-                return -1;
-            }
-
-            strncpy(cmd, cmd_js->valuestring, sizeof(cmd)-1);
-            cmd[sizeof(cmd)-1] = '\0';
-
-            // 解析cmdId字段
-            cJSON *cmdId_js = cJSON_GetObjectItem(cmd_obj, "cmdId");
-            if (cmdId_js == NULL || !cJSON_IsString(cmdId_js)) {
-                DEBUGINFO("cmdId[%d] is not string\n", i);
-                cJSON_Delete(root);
-                return -1;
-            }
-
-            strncpy(cmdId, cmdId_js->valuestring, sizeof(cmdId)-1);
-            cmdId[sizeof(cmdId)-1] = '\0';
-
-            // 解析params对象（model字段）
-            cJSON *params_obj = cJSON_GetObjectItem(cmd_obj, "params");
-            if (params_obj == NULL || !cJSON_IsObject(params_obj)) {
-                DEBUGINFO("params[%d] is not object\n", i);
-                cJSON_Delete(root);
-                return -1;
-            }
-
-            cJSON *model_js = cJSON_GetObjectItem(params_obj, "model");
-            if (model_js != NULL && cJSON_IsString(model_js)) {  
-                strncpy(model, model_js->valuestring, sizeof(model)-1);
-                model[sizeof(model)-1] = '\0';
-            } else {
-                model[0] = '\0'; 
-            }
-
-            cJSON *speedLevel_js = cJSON_GetObjectItem(params_obj, "speedLevel");
-            if (speedLevel_js != NULL && cJSON_IsString(speedLevel_js)) { 
-                strncpy(speedLevel, speedLevel_js->valuestring, sizeof(speedLevel)-1);
-                speedLevel[sizeof(speedLevel)-1] = '\0';
-            } else {
-                speedLevel[0] = '\0';  
-            }
-            
-            memcpy(temp_action.headerId,headerId,sizeof(headerId));
-            memcpy(temp_action.timestamp,timestamp,sizeof(timestamp));
-            memcpy(temp_action.version,version,sizeof(version));
-            memcpy(temp_action.cmd.cmd,cmd,sizeof(cmd));
-            memcpy(temp_action.cmd.cmdId,cmdId,sizeof(cmdId));
-            memcpy(temp_action.cmd.params.model,model,sizeof(model));
-            memcpy(temp_action.cmd.params.speedLevel,speedLevel,sizeof(speedLevel));
-            temp_action.id = 0;//后续有多个机器时这里有多个id,需要根据解析的id赋值
-            Action_Event(&temp_action);
+        // 5.1 解析action.Type
+        cJSON *type = cJSON_GetObjectItem(action_obj, "Type");
+        if (type == NULL || !cJSON_IsNumber(type)) {
+            DEBUGINFO("action.Type Not find\n");
+            cJSON_Delete(root);
+            return -1;
         }
-        // 释放cJSON资源
-        cJSON_Delete(root);
-        // 打印顶层结构体成员
-        DEBUGINFO("  headerId: %s\n", headerId);
-        DEBUGINFO("  timestamp: %s\n",timestamp);
-        DEBUGINFO("  version: %s\n", version);
-        // 打印RobotAction成员
-        DEBUGINFO("  Type: %d\n", Type);
-        DEBUGINFO("  cmd_count: %d\n", cmd_count);  
+        Type = type->valueint;
+        // 5.2 解析action.cmds数组
+        cJSON *cmds_array = cJSON_GetObjectItem(action_obj, "cmds");
+        if (cmds_array == NULL || !cJSON_IsArray(cmds_array)) {
+            DEBUGINFO("action.cmds Not find\n");
+            cJSON_Delete(root);
+            return -1;
+        } 
+        //限制最多八条命令
+        int cmd_count = cJSON_GetArraySize(cmds_array);
+        if (cmd_count <= 0 || cmd_count > 8) {
+            DEBUGINFO("cmds Not find or over size \n");
+            cJSON_Delete(root);
+            return -1;
+        }
+        else
+        {
+            // 遍历cmds数组，解析每个命令
+            for (int i = 0; i < cmd_count; i++) {
+                cJSON *cmd_obj = cJSON_GetArrayItem(cmds_array, i);
+                if (cmd_obj == NULL || !cJSON_IsObject(cmd_obj)) {
+                    DEBUGINFO("cmds %d is not object\n", i);
+                    cJSON_Delete(root);
+                    return -1;
+                }
+
+                // 解析cmd字段
+                cJSON *cmd_js = cJSON_GetObjectItem(cmd_obj, "cmd");
+                if (cmd_js == NULL || !cJSON_IsString(cmd_js)) {
+                    DEBUGINFO("cmd [%d] is not string\n", i);
+                    cJSON_Delete(root);
+                    return -1;
+                }
+
+                strncpy(cmd, cmd_js->valuestring, sizeof(cmd)-1);
+                cmd[sizeof(cmd)-1] = '\0';
+
+                // 解析cmdId字段
+                cJSON *cmdId_js = cJSON_GetObjectItem(cmd_obj, "cmdId");
+                if (cmdId_js == NULL || !cJSON_IsString(cmdId_js)) {
+                    DEBUGINFO("cmdId[%d] is not string\n", i);
+                    cJSON_Delete(root);
+                    return -1;
+                }
+
+                strncpy(cmdId, cmdId_js->valuestring, sizeof(cmdId)-1);
+                cmdId[sizeof(cmdId)-1] = '\0';
+
+                // 解析params对象（model字段）
+                cJSON *params_obj = cJSON_GetObjectItem(cmd_obj, "params");
+                if (params_obj == NULL || !cJSON_IsObject(params_obj)) {
+                    DEBUGINFO("params[%d] is not object\n", i);
+                    cJSON_Delete(root);
+                    return -1;
+                }
+
+                cJSON *model_js = cJSON_GetObjectItem(params_obj, "model");
+                if (model_js != NULL && cJSON_IsString(model_js)) {  
+                    strncpy(model, model_js->valuestring, sizeof(model)-1);
+                    model[sizeof(model)-1] = '\0';
+                } else {
+                    model[0] = '\0'; 
+                }
+
+                cJSON *speedLevel_js = cJSON_GetObjectItem(params_obj, "speedLevel");
+                if (speedLevel_js != NULL && cJSON_IsString(speedLevel_js)) { 
+                    strncpy(speedLevel, speedLevel_js->valuestring, sizeof(speedLevel)-1);
+                    speedLevel[sizeof(speedLevel)-1] = '\0';
+                } else {
+                    speedLevel[0] = '\0';  
+                }
+                
+                memcpy(temp_action.headerId,headerId,sizeof(headerId));
+                memcpy(temp_action.timestamp,timestamp,sizeof(timestamp));
+                memcpy(temp_action.version,version,sizeof(version));
+                memcpy(temp_action.cmd.cmd,cmd,sizeof(cmd));
+                memcpy(temp_action.cmd.cmdId,cmdId,sizeof(cmdId));
+                memcpy(temp_action.cmd.params.model,model,sizeof(model));
+                memcpy(temp_action.cmd.params.speedLevel,speedLevel,sizeof(speedLevel));
+
+                temp_action.Type = Type;
+                temp_action.id = 0;//后续有多个机器时这里有多个id,需要根据解析的id赋值
+                Action_Event(&temp_action);                
+            }               
+        }
     }
+    // 6. 解析feature对象
+    cJSON *feature_obj = cJSON_GetObjectItem(root, "feature");
+    if (feature_obj == NULL || !cJSON_IsObject(feature_obj)) {
+        DEBUGINFO("feature Not find\n");
+    }
+    else
+    {
+        // 5.2 解析action.cmds数组
+        cJSON *items_array = cJSON_GetObjectItem(feature_obj, "items");
+        if (items_array == NULL || !cJSON_IsArray(items_array)) {
+            DEBUGINFO("items_array Not find\n");
+            cJSON_Delete(root);
+            return -1;
+        }
+        else
+        {
+            //限制最多八条命令
+            int items_count = cJSON_GetArraySize(items_array);
+            if (items_count <= 0 || items_count > 8) {
+                DEBUGINFO("items Not find or over size \n");
+                cJSON_Delete(root);
+                return -1;
+            } 
+            else
+            {
+                // 遍历cmds数组，解析每个命令
+                for (int i = 0; i < items_count; i++) {
+                    cJSON *feature_obj = cJSON_GetArrayItem(items_array, i);
+                    if (feature_obj == NULL || !cJSON_IsObject(feature_obj)) {
+                        DEBUGINFO("feature_obj %d is not object\n", i);
+                        cJSON_Delete(root);
+                        return -1;
+                    }
+                    // 解析name字段
+                    cJSON *name_js = cJSON_GetObjectItem(feature_obj, "name");
+                    if (name_js == NULL || !cJSON_IsString(name_js)) {
+                        DEBUGINFO("name [%d] is not string\n", i);
+                        cJSON_Delete(root);
+                        return -1;
+                    }
+                    strncpy(name, name_js->valuestring, sizeof(name)-1);
+                    name[sizeof(name)-1] = '\0';
+                    // 解析value字段
+                    cJSON *value_js = cJSON_GetObjectItem(feature_obj, "value");
+                    if (value_js == NULL || !cJSON_IsString(value_js)) {
+                        DEBUGINFO("value [%d] is not string\n", i);
+                        cJSON_Delete(root);
+                        return -1;
+                    }
+                    strncpy(value, value_js->valuestring, sizeof(value)-1);
+                    value[sizeof(value)-1] = '\0';
+
+                    // 解析params对象
+                    cJSON *params_obj = cJSON_GetObjectItem(feature_obj, "params");
+                    if (params_obj == NULL || !cJSON_IsArray(params_obj)) {
+                        DEBUGINFO("params[%d] is not array\n", i);
+                        cJSON_Delete(root);
+                        return -1;
+                    }
+                    //feature中参数数组暂时没有
+                    DEBUGINFO("  name: %s\n", name);
+                    DEBUGINFO("  value: %s\n", value);    
+                }                
+            }           
+        }
+    }
+
+    // 释放cJSON资源
+    cJSON_Delete(root);
+    // 打印顶层结构体成员
+    DEBUGINFO("  headerId: %s\n", headerId);
+    DEBUGINFO("  timestamp: %s\n",timestamp);
+    DEBUGINFO("  version: %s\n", version);    
     return 0;
 }
 
