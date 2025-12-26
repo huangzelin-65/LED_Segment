@@ -58,6 +58,7 @@ void vJsonGenerateTask(void *argument)
                 default:
                 break;
             }
+            if(json_data->data != NULL)vPortFree(json_data->data);
             vPortFree(json_data);            
         }
     }
@@ -74,27 +75,22 @@ void vJsonParseTask(void *argument)
             DEBUGINFO("type:%d\n",json_data->type); 
             switch (json_data->type)
             {
-                case JSON_ACTION:
+                case JSON_PARSE_ACTION:
                 {
-                    DEBUGINFO("JSON_ACTION start\n"); 
-                    // DEBUGINFO("data:%s\n",json_data->data); 
                     Json_ParseAction(json_data->data);
-                    DEBUGINFO("JSON_ACTION end\n"); 
                 }
                 break;
-                case JSON_HEARTBEAT_ACK:
+                case JSON_PARSE_HEARTBEAT_ACK:
                 {
-                    DEBUGINFO("JSON_HEARTBEAT_ACK start\n");  
-
-                    DEBUGINFO("JSON_HEARTBEAT_ACK end\n"); 
+                    
                 }
                 break;                                        
                 default:
                 break;
             }
+            if(json_data->data != NULL)vPortFree(json_data->data);
             vPortFree(json_data);            
         }
-
     }
 }
 

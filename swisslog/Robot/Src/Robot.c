@@ -13,6 +13,8 @@
 #include "adaptor_mqtt.h"
 #include "app_freertos.h"
 #include "adaptor_rtc.h"
+#include "Action.h"
+#include "State.h"
 // #define USE_UID
 
 extern CarStationStatus Car_Get_Station_Status(void);
@@ -1330,13 +1332,15 @@ void Robot_ActionAck(void)
 void Robot_Event(void)
 {
     DEBUGINFO("start");
-    if (robotSate.mutex == NULL)return;
-    if (xSemaphoreTake(robotSate.mutex, portMAX_DELAY) != pdPASS) return;
-    Robot_UpdateState();
-    Robot_UpdateAction();
-    Robot_State();
-    xSemaphoreGive(robotSate.mutex);
-    DEBUGINFO("end");
+    // if (robotSate.mutex == NULL)return;
+    // if (xSemaphoreTake(robotSate.mutex, portMAX_DELAY) != pdPASS) return;
+    // Robot_UpdateState();
+    // Robot_UpdateAction();
+    // Robot_State();
+    // xSemaphoreGive(robotSate.mutex);
+    // DEBUGINFO("end");
+    State_Event(0);
+    Action_Update(0);
 }
 //消息通知主线程
 void Robot_Notify(uint32_t value)

@@ -171,7 +171,7 @@ int Json_ParseTopic(const char* topic)
         snprintf(sub_topic, sizeof(sub_topic), TOPIC_ACTION, usEncoder_Read_Number()); 
         char *result = strstr(topic, sub_topic);
         if (result != NULL) {
-            return JSON_ACTION;
+            return JSON_PARSE_ACTION;
         }
     }
     {
@@ -179,19 +179,19 @@ int Json_ParseTopic(const char* topic)
         snprintf(sub_topic, sizeof(sub_topic), TOPIC_CONN_ACK, usEncoder_Read_Number());
         char *result = strstr(topic, sub_topic);
         if (result != NULL) {
-            return JSON_HEARTBEAT_ACK;
+            return JSON_PARSE_HEARTBEAT_ACK;
         }  
     }        
-    return JSON_NONE;
+    return JSON_PARSE_NONE;
 }
 
-int Json_ParseAction(char* json_str)
+int Json_ParseAction(char* data)
 {
-    if (json_str == NULL) {
+    if (data == NULL) {
         return -1;
     }
     // 1. 解析整个JSON
-    cJSON *root = cJSON_Parse(json_str);
+    cJSON *root = cJSON_Parse(data);
     if (root == NULL) {
         DEBUGINFO("cJSON_Parse fail\n");
         return -1;

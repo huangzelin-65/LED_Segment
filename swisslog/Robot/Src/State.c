@@ -179,7 +179,9 @@ void State_Event(int id)
             vPortFree(new_state);//赋值完释放内存
 
             //需发送到队列中，创建json数据
-            Json_GenerateMsg(JSON_G_STATE,state);
+            State_t* json_state = pvPortMalloc(sizeof(State_t));
+            memcpy(json_state,state,sizeof(State_t));
+            Json_GenerateMsg(JSON_G_STATE,json_state);
         }        
         break;
         case 2: //数据不存在，需要添加到链表中
@@ -187,7 +189,9 @@ void State_Event(int id)
             list_insert_tail(state_list,new_state);
             
             //需发送到队列中，创建json数据
-            Json_GenerateMsg(JSON_G_STATE,new_state);
+            State_t* json_state = pvPortMalloc(sizeof(State_t));
+            memcpy(json_state,new_state,sizeof(State_t));            
+            Json_GenerateMsg(JSON_G_STATE,json_state);
         }
         break;        
         default:break;

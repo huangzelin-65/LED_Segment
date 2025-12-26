@@ -16,9 +16,9 @@ typedef struct {
 }JsonGenerate_t;
 
 typedef enum {
-    JSON_NONE = 0,
-    JSON_ACTION, 
-    JSON_HEARTBEAT_ACK,
+    JSON_PARSE_NONE = 0,
+    JSON_PARSE_ACTION, 
+    JSON_PARSE_HEARTBEAT_ACK,
 } JsonParseType_t;
 
 typedef struct {
@@ -32,5 +32,5 @@ char* Json_Generate_HeartBeat(void *heart_beat);
 char* Json_Generate_Action(void *action);
 void Json_ParseMsg(JsonParseType_t type,void *data);
 int Json_ParseTopic(const char* topic);
-int Json_ParseAction(char* json_str);
+int Json_ParseAction(char* data);
 #endif

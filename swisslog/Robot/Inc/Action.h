@@ -29,6 +29,7 @@ typedef struct {
     int Type; 
     Cmd_t cmd;
     int execute;//代表是否执行。0：待执行 1：已经执行
+    int running;//代表机器是否在执行动作
 } Action_t;	
 
 typedef enum {
@@ -44,4 +45,5 @@ void Action_Init(void);
 void Action_Event(Action_t *action);
 void Action_Execute(void);
 void Action_ToCmd(Action_t *action);
+void Action_Update(int id);
 #endif
