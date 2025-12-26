@@ -82,7 +82,7 @@ void vJsonParseTask(void *argument)
                 break;
                 case JSON_PARSE_HEARTBEAT_ACK:
                 {
-                    
+                    Json_ParseHeartBeat(json_data->data);
                 }
                 break;                                        
                 default:

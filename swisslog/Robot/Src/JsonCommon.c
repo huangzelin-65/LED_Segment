@@ -336,14 +336,62 @@ int Json_ParseAction(char* data)
         // 打印RobotAction成员
         DEBUGINFO("  Type: %d\n", Type);
         DEBUGINFO("  cmd_count: %d\n", cmd_count);  
-        // 打印命令数组（cmds）中的每个命令
-        // for (int i = 0; i < cmd_count; i++) {
-        //     DEBUGINFO("      cmd number %d\n", i + 1);
-        //     DEBUGINFO("      cmd: %s\n", robot->action.cmds[i].cmd);
-        //     DEBUGINFO("      cmdId: %s\n", robot->action.cmds[i].cmdId);
-        //     DEBUGINFO("      params.model: %s\n", robot->action.cmds[i].params.model);
-        //     DEBUGINFO("      params.speedLevel: %s\n", robot->action.cmds[i].params.speedLevel);
-        // }
     }
     return 0;
 }
+
+int Json_ParseHeartBeat(char* data)
+{
+    if (data == NULL) {
+        return -1;
+    }
+    // 1. 解析整个JSON
+    cJSON *root = cJSON_Parse(data);
+    if (root == NULL) {
+        DEBUGINFO("cJSON_Parse fail\n");
+        return -1;
+    }
+    // 2. 解析顶层字段: headerId
+    cJSON *headerid = cJSON_GetObjectItem(root, "headerId");
+    if (headerid == NULL || !cJSON_IsString(headerid)) {
+        DEBUGINFO("headerId Not find\n");
+        cJSON_Delete(root);
+        return -1;
+    }
+
+    strncpy(headerId, headerid->valuestring, sizeof(headerId)-1);
+    headerId[sizeof(headerId)-1] = '\0';  
+
+    // 3. 解析顶层字段: timestamp
+    cJSON *time_stamp = cJSON_GetObjectItem(root, "timestamp");
+    if (time_stamp == NULL || !cJSON_IsString(time_stamp)) {
+        DEBUGINFO("timestamp Not find\n");
+        cJSON_Delete(root);
+        return -1;
+    }
+
+    strncpy(timestamp, time_stamp->valuestring, sizeof(timestamp)-1);
+    timestamp[sizeof(timestamp)-1] = '\0';
+
+    // 4. 解析顶层字段: version
+    cJSON *version_js = cJSON_GetObjectItem(root, "version");
+    if (version_js == NULL || !cJSON_IsString(version_js)) {
+        DEBUGINFO("version Not find\n");
+        cJSON_Delete(root);
+        return -1;
+    }
+
+    strncpy(version, version_js->valuestring, sizeof(version)-1);
+    version[sizeof(version)-1] = '\0';
+
+    // 释放cJSON资源
+    cJSON_Delete(root);    
+
+    DEBUGINFO("  headerId: %s\n", headerId);
+    DEBUGINFO("  timestamp: %s\n",timestamp);
+    DEBUGINFO("  version: %s\n", version);
+
+    return 0;
+}
+
+

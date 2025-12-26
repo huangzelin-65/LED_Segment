@@ -33,4 +33,5 @@ char* Json_Generate_Action(void *action);
 void Json_ParseMsg(JsonParseType_t type,void *data);
 int Json_ParseTopic(const char* topic);
 int Json_ParseAction(char* data);
+int Json_ParseHeartBeat(char* data);
 #endif

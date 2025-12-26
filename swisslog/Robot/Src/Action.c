@@ -45,7 +45,7 @@ int Action_FindCmdId(const void* action, const void* input_action)
 //事件发生，需更新动作，id为0，针对于单机器状态使用 (此接口json解析函数中使用)
 void Action_Event(Action_t *action)
 {
-    DEBUGINFO("id:%d",action->id);
+    DEBUGINFO("id:%d headerId:%s cmd:%s cmdId:%s",action->id,action->headerId,action->cmd.cmd,action->cmd.cmdId);
     //第一次使用需创建链表
     if(action_list == NULL)
     {
