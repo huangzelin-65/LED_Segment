@@ -33,7 +33,15 @@ int Feature_FindId(const void* featrue, const void* input_featrue)
     }
     return -1;
 }
+//寻找对应name的数据
+int Feature_FindName(const void* featrue, const void* input_featrue)
+{
+    // 强制类型转换为int*，取值后比较
+    const  Feature_t* val_featrue = (const  Feature_t*)featrue;
+    const  Feature_t* val_input_featrue = (const  Feature_t*)input_featrue;
 
+    return strcmp(val_featrue->name,val_input_featrue->name);
+}
 //事件发生，需更新功能，id为0，针对于单机器状态使用 (此接口json解析函数中使用)
 void Feature_Event(Feature_t *feature)
 {
@@ -101,9 +109,10 @@ void Feature_Execute(void)
         if(feature->execute == 0)
         {   
             //需要回复ack
-            // Action_t* json_action = pvPortMalloc(sizeof(Action_t));
-            // memcpy(json_action,action,sizeof(Action_t));            
-            // Json_GenerateMsg(JSON_G_ACTION,json_action);
+            Feature_t* json_feature = pvPortMalloc(sizeof(Feature_t));
+            feature->code = 0;//默认回复执行成功
+            memcpy(json_feature,feature,sizeof(Feature_t));            
+            Json_GenerateMsg(JSON_G_FEATURE,json_feature);
             //执行动作
             Feature_ToCmd(feature);
             //标记动作已经执行
@@ -170,7 +179,31 @@ void Feature_Edit(Feature_t *feature)
         }
     }
 
+    //更新模式状态
+    {
+        char *res = strstr(feature->name, "runModel");
+        if (res != NULL) {
+            DEBUGINFO("runModel\n");
 
+            //这里需要从全局变量或接口中获取
+            feature->mode = CarStatus.xAutoMode;
+            //更新完回复最新状态到服务器
+            if(CarStatus.xAutoMode == Manual)
+            {
+                memcpy(feature->value,"manual",7);
+            }
+            else
+            {
+                memcpy(feature->value,"auto",5);
+            }
+            Feature_t* json_feature = pvPortMalloc(sizeof(Feature_t));
+            feature->code = 0;//默认回复执行成功
+            memcpy(json_feature,feature,sizeof(Feature_t));            
+            Json_GenerateMsg(JSON_G_FEATURE,json_feature);            
+            //删除链表中的状态，释放内存
+            list_remove_by_value(feature_list,feature,Feature_FindName,vPortFree);
+        }        
+    }
 }
 //功能的更新(根据流水号)
 void Feature_Update(int id)

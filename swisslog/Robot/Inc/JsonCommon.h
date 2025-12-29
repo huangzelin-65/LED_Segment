@@ -8,6 +8,7 @@ typedef enum {
     JSON_G_HEART = 0,
     JSON_G_STATE,
     JSON_G_ACTION,
+    JSON_G_FEATURE,
 } JsonGenerateType_t;
 
 typedef struct {
@@ -30,6 +31,7 @@ void Json_GenerateMsg(JsonGenerateType_t type,void *data);
 char* Json_Generate_State(void *data);
 char* Json_Generate_HeartBeat(void *heart_beat);
 char* Json_Generate_Action(void *action);
+char* Json_Generate_Feature(void *feature);
 void Json_ParseMsg(JsonParseType_t type,void *data);
 int Json_ParseTopic(const char* topic);
 int Json_ParseAction(char* data);

@@ -15,6 +15,7 @@
 #include "adaptor_rtc.h"
 #include "Action.h"
 #include "State.h"
+#include "Feature.h"
 // #define USE_UID
 
 extern CarStationStatus Car_Get_Station_Status(void);
@@ -1341,6 +1342,7 @@ void Robot_Event(void)
     // DEBUGINFO("end");
     State_Event(0);
     Action_Update(0);
+    Feature_Update(0);
 }
 //消息通知主线程
 void Robot_Notify(uint32_t value)

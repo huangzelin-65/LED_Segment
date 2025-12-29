@@ -10,8 +10,12 @@ typedef struct {
     char name[32];//功能名称
     char value[32];//功能参数
     char params[32];//功能单位
+    char cause[32];//执行出错时的原因
+    int mode;//小车模式
+    int screen_lock;//车厢屏幕状态
     int id;//流水号
-    int execute;//代表是否执行。0：待执行 1：已经执行    
+    int execute;//代表是否执行。0：待执行 1：已经执行   
+    int code;//执行结果 
 } Feature_t;
 
 void Feature_Event(Feature_t *feature);
