@@ -377,7 +377,7 @@ int Json_ParseAction(char* data)
     }
     else
     {
-        // 5.2 解析action.cmds数组
+        // 5.2 解析items数组
         cJSON *items_array = cJSON_GetObjectItem(feature_obj, "items");
         if (items_array == NULL || !cJSON_IsArray(items_array)) {
             DEBUGINFO("items_array Not find\n");
@@ -444,7 +444,7 @@ int Json_ParseAction(char* data)
                         DEBUGINFO("  params: %s\n", params);
                     }
 
-                    //feature中参数数组暂时没有
+                    //feature中参数数组暂时没有params
                     DEBUGINFO("  name: %s\n", name);
                     DEBUGINFO("  value: %s\n", value);
                     
@@ -461,7 +461,97 @@ int Json_ParseAction(char* data)
             }           
         }
     }
+    // 6. 解析config对象
+    cJSON *config_obj = cJSON_GetObjectItem(root, "config");
+    if (config_obj == NULL || !cJSON_IsObject(config_obj)) {
+        DEBUGINFO("config Not find\n");
+    }
+    else
+    {
+        // 5.2 解析items数组
+        cJSON *items_array = cJSON_GetObjectItem(config_obj, "items");
+        if (items_array == NULL || !cJSON_IsArray(items_array)) {
+            DEBUGINFO("items_array Not find\n");
+            cJSON_Delete(root);
+            return -1;
+        }
+        else
+        {
+            //限制最多八条命令
+            int items_count = cJSON_GetArraySize(items_array);
+            if (items_count <= 0 || items_count > 8) {
+                DEBUGINFO("items Not find or over size \n");
+                cJSON_Delete(root);
+                return -1;
+            } 
+            else
+            {
+                // 遍历cmds数组，解析每个命令
+                for (int i = 0; i < items_count; i++) {
+                    cJSON *config_obj = cJSON_GetArrayItem(items_array, i);
+                    if (config_obj == NULL || !cJSON_IsObject(config_obj)) {
+                        DEBUGINFO("feature_obj %d is not object\n", i);
+                        cJSON_Delete(root);
+                        return -1;
+                    }
+                    // 解析name字段
+                    cJSON *name_js = cJSON_GetObjectItem(config_obj, "name");
+                    if (name_js == NULL || !cJSON_IsString(name_js)) {
+                        DEBUGINFO("name [%d] is not string\n", i);
+                        cJSON_Delete(root);
+                        return -1;
+                    }
+                    strncpy(name, name_js->valuestring, sizeof(name)-1);
+                    name[sizeof(name)-1] = '\0';
+                    // 解析value字段
+                    cJSON *value_js = cJSON_GetObjectItem(config_obj, "value");
+                    if (value_js == NULL || !cJSON_IsString(value_js)) {
+                        DEBUGINFO("value [%d] is not string\n", i);
+                        cJSON_Delete(root);
+                        return -1;
+                    }
+                    strncpy(value, value_js->valuestring, sizeof(value)-1);
+                    value[sizeof(value)-1] = '\0';
 
+                    // 解析params对象
+                    cJSON *params_array = cJSON_GetObjectItem(config_obj, "params");
+                    if (params_array == NULL || !cJSON_IsArray(params_array)) {
+                        DEBUGINFO("params[%d] is not array\n", i);
+                        cJSON_Delete(root);
+                        return -1;
+                    }
+
+                    int params_count = cJSON_GetArraySize(params_array);
+                    for (int i = 0; i < params_count; i++)
+                    {
+                        cJSON *params_js = cJSON_GetArrayItem(params_array, i);
+                        if (params_js == NULL || !cJSON_IsObject(params_js)) {
+                            DEBUGINFO("params_js %d is not object\n", i);
+                            cJSON_Delete(root);
+                            return -1;
+                        }   
+                        strncpy(params, params_js->valuestring, sizeof(params)-1);
+                        params[sizeof(params)-1] = '\0';                        
+                        DEBUGINFO("  params: %s\n", params);
+                    }
+
+                    //config
+                    DEBUGINFO("  name: %s\n", name);
+                    DEBUGINFO("  value: %s\n", value);
+                    
+
+                    // memcpy(temp_feature.headerId,headerId,sizeof(headerId));
+                    // memcpy(temp_feature.timestamp,timestamp,sizeof(timestamp));
+                    // memcpy(temp_feature.version,version,sizeof(version));
+                    // memcpy(temp_feature.name,name,sizeof(name));
+                    // memcpy(temp_feature.value,value,sizeof(value));   
+                    // memcpy(temp_feature.params,params,sizeof(params)); 
+                    // temp_feature.id = 0;
+                    // Feature_Event(&temp_feature);
+                }                
+            }           
+        }
+    }
     // 释放cJSON资源
     cJSON_Delete(root);
     // 打印顶层结构体成员
