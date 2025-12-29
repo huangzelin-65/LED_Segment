@@ -16,6 +16,7 @@
 #include <limits.h>
 #include "app_freertos.h"
 #include "Calculate.h"
+#include "HeartBeat.h"
 
 extern CarStatus_t CarStatus;
 extern osMessageQueueId_t xRobotQueueHandle;//该消息队列处理事件上报
@@ -137,7 +138,8 @@ void vRobotHeartBeatTask(void *argument)
             if(waitforperiod(&robotSate.heartbeat_cnt,10))//10秒一次心跳
             {
                 DEBUGINFO("heartbeat\n");
-                Robot_Notify(ROBOT_HEARTBEAT);
+                // Robot_Notify(ROBOT_HEARTBEAT);
+                Heart_Event();
             }
         }
         if(waitforperiod(&prinrf_info_cnt,3))

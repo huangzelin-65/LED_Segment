@@ -36,7 +36,7 @@ void vJsonGenerateTask(void *argument)
                     HeartBeat_t* heart_beat = (HeartBeat_t*)(json_data->data);
                     StrCommon_CreateHeadId(heart_beat->headerId);
                     StrCommon_CreateVersion(heart_beat->version);
-                    StrCommon_CreateTimeStamp(heart_beat->version);
+                    StrCommon_CreateTimeStamp(heart_beat->timestamp);
                     char* json_str = Json_Generate_HeartBeat(heart_beat);
                     Mqtt_SendMsg(MQTT_MSG_HEARTBEAT,json_str);//mqtt发送完则释放内存                    
                     DEBUGINFO("JSON_G_HEART end\n"); 
