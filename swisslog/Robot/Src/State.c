@@ -169,8 +169,10 @@ void State_Event(int id)
     DEBUGINFO("change_state:%d",change_state);
     switch(change_state)
     {
-        case 0:
-                //数据没有变化
+        case 0://数据没有变化
+        {
+            vPortFree(new_state);//赋值完释放内存
+        }          
         break;
         case 1: //数据有变化，链表中的数据重新赋值
         {
