@@ -175,7 +175,11 @@ char* Json_Generate_Feature(void *feature)
     cJSON *obj = cJSON_CreateObject();
     cJSON_AddStringToObject(obj, "name", data->name);
     cJSON_AddNumberToObject(obj, "code", data->code);
-    cJSON_AddStringToObject(obj, "cause", data->cause);
+
+    cJSON *cause_array = cJSON_CreateArray();
+    cJSON *cause_str = cJSON_CreateString(data->cause);
+    cJSON_AddItemToArray(cause_array, cause_str);
+    cJSON_AddItemToObject(obj, "cause", cause_array);
 
     cJSON *items = cJSON_CreateArray();
     cJSON_AddItemToArray(items, obj);
