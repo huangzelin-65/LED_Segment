@@ -204,6 +204,8 @@ void Feature_Edit(Feature_t *feature)
             list_remove_by_value(feature_list,feature,Feature_FindName,vPortFree);
         }        
     }
+    //其他功能设置
+    
 }
 //功能的更新(根据流水号)
 void Feature_Update(int id)
@@ -220,8 +222,12 @@ void Feature_Update(int id)
         Feature_t* feature = list_find_at(feature_list, i);
         if(feature->id == id)//更新所有对应id(流水号)的动作状态
         {   
-            //获取id对应的实际状态
-            Feature_Edit(feature);
+            //执行过后才可以更新状态，防止其他事件出现，提前更新状态
+            if(feature->execute == 1)
+            {
+                //获取id对应的实际状态
+                Feature_Edit(feature);
+            }
         }
     }    
 }
