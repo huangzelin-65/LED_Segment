@@ -10,6 +10,7 @@
 #include <string.h>
 #include "adaptor_ntp.h"
 #include <stdlib.h>
+#include "Feature.h"
 
 #define TOPIC_ACTION        "tk/v1/slhc/tkv-%d/instantactions"
 #define TOPIC_CONN_ACK      "tk/v1/slhc/tkv-%d/connection/ack"
@@ -25,8 +26,10 @@ char speedLevel[16];
 char sub_topic[64] = {0};
 char name[32];
 char value[32];
+char params[32];
 int Type;
 Action_t temp_action;
+Feature_t temp_feature;
 
 void Json_GenerateMsg(JsonGenerateType_t type,void *data)
 {
@@ -387,15 +390,40 @@ int Json_ParseAction(char* data)
                     value[sizeof(value)-1] = '\0';
 
                     // 解析params对象
-                    cJSON *params_obj = cJSON_GetObjectItem(feature_obj, "params");
-                    if (params_obj == NULL || !cJSON_IsArray(params_obj)) {
+                    cJSON *params_array = cJSON_GetObjectItem(feature_obj, "params");
+                    if (params_array == NULL || !cJSON_IsArray(params_array)) {
                         DEBUGINFO("params[%d] is not array\n", i);
                         cJSON_Delete(root);
                         return -1;
                     }
+
+                    int params_count = cJSON_GetArraySize(params_array);
+                    for (int i = 0; i < params_count; i++)
+                    {
+                        cJSON *params_js = cJSON_GetArrayItem(params_array, i);
+                        if (params_js == NULL || !cJSON_IsObject(params_js)) {
+                            DEBUGINFO("params_js %d is not object\n", i);
+                            cJSON_Delete(root);
+                            return -1;
+                        }   
+                        strncpy(params, params_js->valuestring, sizeof(params)-1);
+                        params[sizeof(params)-1] = '\0';                        
+                        DEBUGINFO("  params: %s\n", params);
+                    }
+
                     //feature中参数数组暂时没有
                     DEBUGINFO("  name: %s\n", name);
-                    DEBUGINFO("  value: %s\n", value);    
+                    DEBUGINFO("  value: %s\n", value);
+                    
+
+                    memcpy(temp_feature.headerId,headerId,sizeof(headerId));
+                    memcpy(temp_feature.timestamp,timestamp,sizeof(timestamp));
+                    memcpy(temp_feature.version,version,sizeof(version));
+                    memcpy(temp_feature.name,name,sizeof(name));
+                    memcpy(temp_feature.value,value,sizeof(value));   
+                    memcpy(temp_feature.params,params,sizeof(params)); 
+                    temp_feature.id = 0;
+                    Feature_Event(&temp_feature);
                 }                
             }           
         }
