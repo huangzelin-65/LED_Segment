@@ -1365,6 +1365,6 @@ void Robot_Notify(uint32_t value)
 void Robot_UpdateTimeStamp(char* timestamp)
 {
     // long long time_stamp = Rtc_GetTimeStamp() * 1000;
-    snprintf(timestamp, 32, "%ld", Rtc_GetTimeStamp());
+    snprintf(timestamp, 32, "%lu", Rtc_GetTimeStamp());
     DEBUGINFO("timestamp:%s\n", timestamp);     
 }

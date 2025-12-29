@@ -4,9 +4,10 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-char* StrCommon_CreateHeadId(void);
-char* StrCommon_CreateVersion(void);
-char* StrCommon_CreateTimeStamp(void);
+void StrCommon_CreateHeadId(char* headerId);
+void StrCommon_CreateVersion(char* version);
+void StrCommon_CreateTimeStamp(char* timestamp);
+
 
 #endif
 

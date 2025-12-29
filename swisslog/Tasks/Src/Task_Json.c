@@ -17,6 +17,7 @@
 #include "Action.h"
 #include "HeartBeat.h"
 #include "Feature.h"
+#include "StringCommon.h"
 
 void vJsonGenerateTask(void *argument)
 {
@@ -33,6 +34,9 @@ void vJsonGenerateTask(void *argument)
                 {
                     DEBUGINFO("JSON_G_HEART start\n");  
                     HeartBeat_t* heart_beat = (HeartBeat_t*)(json_data->data);
+                    StrCommon_CreateHeadId(heart_beat->headerId);
+                    StrCommon_CreateVersion(heart_beat->version);
+                    StrCommon_CreateTimeStamp(heart_beat->version);
                     char* json_str = Json_Generate_HeartBeat(heart_beat);
                     Mqtt_SendMsg(MQTT_MSG_HEARTBEAT,json_str);//mqtt发送完则释放内存                    
                     DEBUGINFO("JSON_G_HEART end\n"); 
@@ -42,6 +46,9 @@ void vJsonGenerateTask(void *argument)
                 {
                     State_t* state = (State_t*)(json_data->data);
                     DEBUGINFO("JSON_G_STATE start\n");  
+                    StrCommon_CreateHeadId(state->headerId);
+                    StrCommon_CreateVersion(state->version);
+                    StrCommon_CreateTimeStamp(state->timestamp);                                        
                     char* json_str = Json_Generate_State(state);
                     Mqtt_SendMsg(MQTT_MSG_ROBOT_EVENT,json_str);//mqtt发送完则释放内存
                     DEBUGINFO("JSON_G_STATE end\n"); 
