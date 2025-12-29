@@ -84,7 +84,11 @@ void vInitTask(void *argument)
   osThreadResume(MotorFeedbackTaskHandle); 
   osThreadResume(CarRfidTaskHandle); 
   osThreadResume(SensorTaskHandle);
-  // osThreadResume(TestTaskHandle);
+  
+#ifdef UART1_TEST
+  osThreadResume(TestTaskHandle);
+#endif
+
 #ifdef  BOX_CTRL
   osThreadResume(BoxCtrlTaskHandle);
   osThreadResume(BoxRfidTaskHandle);
