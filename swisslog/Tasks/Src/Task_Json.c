@@ -17,6 +17,7 @@
 #include "Action.h"
 #include "HeartBeat.h"
 #include "Feature.h"
+#include "Config.h"
 #include "StringCommon.h"
 
 void vJsonGenerateTask(void *argument)
@@ -71,7 +72,16 @@ void vJsonGenerateTask(void *argument)
                     Mqtt_SendMsg(MQTT_MSG_ROBOT_EVENT,json_str);//mqtt发送完则释放内存
                     DEBUGINFO("JSON_G_FEATURE end\n"); 
                 }
-                break;                                                                     
+                break;  
+                case JSON_G_CONFIG:
+                {
+                    Config_t* config = (Config_t*)(json_data->data);
+                    DEBUGINFO("JSON_G_CONFIG start\n");  
+                    char* json_str = Json_Generate_Config(config);
+                    Mqtt_SendMsg(MQTT_MSG_ROBOT_EVENT,json_str);//mqtt发送完则释放内存
+                    DEBUGINFO("JSON_G_CONFIG end\n"); 
+                }
+                break;                                                                                                  
                 default:
                 break;
             }

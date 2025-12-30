@@ -194,6 +194,43 @@ char* Json_Generate_Feature(void *feature)
     return json_str;
 }
 
+char* Json_Generate_Config(void *config)
+{
+    Config_t *data = (Config_t *)config;
+    cJSON* root = cJSON_CreateObject();
+    if(root == NULL)
+    {
+        DEBUGINFO("cJSON_CreateObject fail\n");
+        return NULL;
+    }
+    //创建单字段json对象
+    cJSON_AddStringToObject(root, "headerId", data->headerId);
+    cJSON_AddStringToObject(root, "timestamp", data->timestamp);
+    cJSON_AddStringToObject(root, "version", data->version);
+ 
+    cJSON *configStates = cJSON_CreateObject();
+    cJSON_AddItemToObject(root, "configStates", configStates);
+
+    cJSON *obj = cJSON_CreateObject();
+    cJSON_AddStringToObject(obj, "name", data->name);
+    cJSON_AddNumberToObject(obj, "code", data->code);
+
+    cJSON *cause_array = cJSON_CreateArray();
+    cJSON *cause_str = cJSON_CreateString(data->cause);
+    cJSON_AddItemToArray(cause_array, cause_str);
+    cJSON_AddItemToObject(obj, "cause", cause_array);
+
+    cJSON *items = cJSON_CreateArray();
+    cJSON_AddItemToArray(items, obj);
+    cJSON_AddItemToObject(configStates, "items", items);
+    
+    char* json_str = cJSON_PrintUnformatted(root);//需free
+
+    cJSON_Delete(root);
+
+    return json_str;
+}
+
 void Json_ParseMsg(JsonParseType_t type,void *data)
 {
     if(JsonParseQueueHandle != NULL)
