@@ -68,8 +68,8 @@ void Feature_Event(Feature_t *feature)
         if(feature->id == new_feature->id)
         {   
             if(strcmp(feature->name,new_feature->name) == 0
-            && strcmp(feature->name,new_feature->value) == 0
-            && strcmp(feature->name,new_feature->params) == 0)
+            && strcmp(feature->value,new_feature->value) == 0
+            && strcmp(feature->params,new_feature->params) == 0)
             {
                 DEBUGINFO("feature has exist,all params same");
                 vPortFree(new_feature);
@@ -77,7 +77,7 @@ void Feature_Event(Feature_t *feature)
             }
             //相同的功能，则覆盖
             if(strcmp(feature->name,new_feature->name) == 0
-            &&(strcmp(feature->name,new_feature->value) != 0 || strcmp(feature->name,new_feature->params) != 0))
+            &&(strcmp(feature->value,new_feature->value) != 0 || strcmp(feature->params,new_feature->params) != 0))
             {
                 DEBUGINFO("feature has exist,but something change");
                 memcpy(feature,new_feature,sizeof(Feature_t));
@@ -176,7 +176,7 @@ void Feature_Edit(Feature_t *feature)
             //更新完回复最新状态到服务器
 
             //删除链表中的状态，释放内存
-            
+
         }
     }
 

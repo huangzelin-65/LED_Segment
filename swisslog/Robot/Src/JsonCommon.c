@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include "Feature.h"
 #include "Config.h"
+#include "Notify.h"
 
 #define TOPIC_ACTION        "tk/v1/slhc/tkv-%d/instantactions"
 #define TOPIC_CONN_ACK      "tk/v1/slhc/tkv-%d/connection/ack"
@@ -28,10 +29,14 @@ char sub_topic[64] = {0};
 char name[32];
 char value[32];
 char params[32];
+char type[32];
+char message[32];
 int Type;
+int code;
 Action_t temp_action;
 Feature_t temp_feature;
 Config_t temp_config;
+Notify_t temp_notify;
 
 void Json_GenerateMsg(JsonGenerateType_t type,void *data)
 {
@@ -223,6 +228,38 @@ char* Json_Generate_Config(void *config)
     cJSON *items = cJSON_CreateArray();
     cJSON_AddItemToArray(items, obj);
     cJSON_AddItemToObject(configStates, "items", items);
+    
+    char* json_str = cJSON_PrintUnformatted(root);//需free
+
+    cJSON_Delete(root);
+
+    return json_str;
+}
+
+char* Json_Generate_Notify(void *notify)
+{
+    Notify_t *data = (Notify_t *)notify;
+    cJSON* root = cJSON_CreateObject();
+    if(root == NULL)
+    {
+        DEBUGINFO("cJSON_CreateObject fail\n");
+        return NULL;
+    }
+    //创建单字段json对象
+    cJSON_AddStringToObject(root, "headerId", data->headerId);
+    cJSON_AddStringToObject(root, "timestamp", data->timestamp);
+    cJSON_AddStringToObject(root, "version", data->version);
+ 
+    cJSON *notifyStates = cJSON_CreateObject();
+    cJSON_AddItemToObject(root, "notifyStates", notifyStates);
+
+    cJSON *obj = cJSON_CreateObject();
+    cJSON_AddStringToObject(obj, "type", data->type);
+    cJSON_AddNumberToObject(obj, "code", data->code);
+
+    cJSON *items = cJSON_CreateArray();
+    cJSON_AddItemToArray(items, obj);
+    cJSON_AddItemToObject(notifyStates, "items", items);
     
     char* json_str = cJSON_PrintUnformatted(root);//需free
 
@@ -438,7 +475,7 @@ int Json_ParseAction(char* data)
             } 
             else
             {
-                // 遍历cmds数组，解析每个命令
+                // 遍历数组，解析每个命令
                 for (int i = 0; i < items_count; i++) {
                     cJSON *feature_obj = cJSON_GetArrayItem(items_array, i);
                     if (feature_obj == NULL || !cJSON_IsObject(feature_obj)) {
@@ -529,11 +566,11 @@ int Json_ParseAction(char* data)
             } 
             else
             {
-                // 遍历cmds数组，解析每个命令
+                // 遍历数组，解析每个命令
                 for (int i = 0; i < items_count; i++) {
                     cJSON *config_obj = cJSON_GetArrayItem(items_array, i);
                     if (config_obj == NULL || !cJSON_IsObject(config_obj)) {
-                        DEBUGINFO("feature_obj %d is not object\n", i);
+                        DEBUGINFO("config_obj %d is not object\n", i);
                         cJSON_Delete(root);
                         return -1;
                     }
@@ -595,6 +632,86 @@ int Json_ParseAction(char* data)
             }           
         }
     }
+
+    // 解析notify对象
+    cJSON *notify_obj = cJSON_GetObjectItem(root, "notify");
+    if (notify_obj == NULL || !cJSON_IsObject(notify_obj)) {
+        DEBUGINFO("notify Not find\n");
+    }
+    else
+    {
+        // 5.2 解析items数组
+        cJSON *items_array = cJSON_GetObjectItem(notify_obj, "items");
+        if (items_array == NULL || !cJSON_IsArray(items_array)) {
+            DEBUGINFO("items_array Not find\n");
+            cJSON_Delete(root);
+            return -1;
+        }
+        else
+        {
+            //限制最多八条命令
+            int items_count = cJSON_GetArraySize(items_array);
+            if (items_count <= 0 || items_count > 8) {
+                DEBUGINFO("items Not find or over size \n");
+                cJSON_Delete(root);
+                return -1;
+            } 
+            else
+            {
+                // 遍历cmds数组，解析每个命令
+                for (int i = 0; i < items_count; i++) {
+                    cJSON *notify_obj = cJSON_GetArrayItem(items_array, i);
+                    if (notify_obj == NULL || !cJSON_IsObject(notify_obj)) {
+                        DEBUGINFO("notify_obj %d is not object\n", i);
+                        cJSON_Delete(root);
+                        return -1;
+                    }
+                    // 解析type字段
+                    cJSON *type_js = cJSON_GetObjectItem(notify_obj, "type");
+                    if (type_js == NULL || !cJSON_IsString(type_js)) {
+                        DEBUGINFO("type_js [%d] is not string\n", i);
+                        cJSON_Delete(root);
+                        return -1;
+                    }
+                    strncpy(type, type_js->valuestring, sizeof(type)-1);
+                    type[sizeof(type)-1] = '\0';
+                    // 解析code字段
+                    cJSON *code_js = cJSON_GetObjectItem(notify_obj, "code");
+                    if (code_js == NULL || !cJSON_IsNumber(code_js)) {
+                        DEBUGINFO("code [%d] is not number\n", i);
+                        cJSON_Delete(root);
+                        return -1;
+                    }
+
+                    code = code_js->valueint;
+
+                    // 解析message对象
+                    cJSON *msg_js = cJSON_GetObjectItem(notify_obj, "message");
+                    if (msg_js == NULL || !cJSON_IsString(msg_js)) {
+                        DEBUGINFO("message [%d] is not string\n", i);
+                        cJSON_Delete(root);
+                        return -1;
+                    }
+                    strncpy(message, msg_js->valuestring, sizeof(message)-1);
+                    message[sizeof(message)-1] = '\0';
+
+                    //config
+                    DEBUGINFO("  type: %s\n", type);
+                    DEBUGINFO("  code: %d\n", code);
+                    DEBUGINFO("  message: %s\n", message);
+
+                    memcpy(temp_notify.headerId,headerId,sizeof(headerId));
+                    memcpy(temp_notify.timestamp,timestamp,sizeof(timestamp));
+                    memcpy(temp_notify.version,version,sizeof(version));
+                    memcpy(temp_notify.type,type,sizeof(type));  
+                    memcpy(temp_notify.message,message,sizeof(message)); 
+                    temp_notify.code = code;
+                    temp_notify.id = 0;
+                    Notify_Event(&temp_notify);
+                }                
+            }           
+        }
+    }    
     // 释放cJSON资源
     cJSON_Delete(root);
     // 打印顶层结构体成员
