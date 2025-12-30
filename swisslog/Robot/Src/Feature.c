@@ -21,26 +21,26 @@ void Feature_Init(void)
 }
 
 //寻找对应流水号的数据
-int Feature_FindId(const void* featrue, const void* input_featrue)
+int Feature_FindId(const void* feature, const void* input_feature)
 {
     // 强制类型转换为int*，取值后比较
-    const  Feature_t* val_featrue = (const  Feature_t*)featrue;
-    const  Feature_t* val_input_featrue = (const  Feature_t*)input_featrue;
+    const  Feature_t* val_feature = (const  Feature_t*)feature;
+    const  Feature_t* val_input_feature = (const  Feature_t*)input_feature;
 
-    if(val_featrue->id == val_input_featrue->id)
+    if(val_feature->id == val_input_feature->id)
     {
         return 0;
     }
     return -1;
 }
 //寻找对应name的数据
-int Feature_FindName(const void* featrue, const void* input_featrue)
+int Feature_FindName(const void* feature, const void* input_feature)
 {
     // 强制类型转换为int*，取值后比较
-    const  Feature_t* val_featrue = (const  Feature_t*)featrue;
-    const  Feature_t* val_input_featrue = (const  Feature_t*)input_featrue;
+    const  Feature_t* val_feature = (const  Feature_t*)feature;
+    const  Feature_t* val_input_feature = (const  Feature_t*)input_feature;
 
-    return strcmp(val_featrue->name,val_input_featrue->name);
+    return strcmp(val_feature->name,val_input_feature->name);
 }
 //事件发生，需更新功能，id为0，针对于单机器状态使用 (此接口json解析函数中使用)
 void Feature_Event(Feature_t *feature)
@@ -176,6 +176,7 @@ void Feature_Edit(Feature_t *feature)
             //更新完回复最新状态到服务器
 
             //删除链表中的状态，释放内存
+            
         }
     }
 

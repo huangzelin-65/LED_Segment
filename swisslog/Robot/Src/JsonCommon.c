@@ -11,6 +11,7 @@
 #include "adaptor_ntp.h"
 #include <stdlib.h>
 #include "Feature.h"
+#include "Config.h"
 
 #define TOPIC_ACTION        "tk/v1/slhc/tkv-%d/instantactions"
 #define TOPIC_CONN_ACK      "tk/v1/slhc/tkv-%d/connection/ack"
@@ -30,6 +31,7 @@ char params[32];
 int Type;
 Action_t temp_action;
 Feature_t temp_feature;
+Config_t temp_config;
 
 void Json_GenerateMsg(JsonGenerateType_t type,void *data)
 {
@@ -544,14 +546,14 @@ int Json_ParseAction(char* data)
                     DEBUGINFO("  value: %s\n", value);
                     
 
-                    // memcpy(temp_feature.headerId,headerId,sizeof(headerId));
-                    // memcpy(temp_feature.timestamp,timestamp,sizeof(timestamp));
-                    // memcpy(temp_feature.version,version,sizeof(version));
-                    // memcpy(temp_feature.name,name,sizeof(name));
-                    // memcpy(temp_feature.value,value,sizeof(value));   
-                    // memcpy(temp_feature.params,params,sizeof(params)); 
-                    // temp_feature.id = 0;
-                    // Feature_Event(&temp_feature);
+                    memcpy(temp_config.headerId,headerId,sizeof(headerId));
+                    memcpy(temp_config.timestamp,timestamp,sizeof(timestamp));
+                    memcpy(temp_config.version,version,sizeof(version));
+                    memcpy(temp_config.name,name,sizeof(name));
+                    memcpy(temp_config.value,value,sizeof(value));   
+                    memcpy(temp_config.params,params,sizeof(params)); 
+                    temp_config.id = 0;
+                    Config_Event(&temp_config);
                 }                
             }           
         }

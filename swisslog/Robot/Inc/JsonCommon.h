@@ -9,6 +9,7 @@ typedef enum {
     JSON_G_STATE,
     JSON_G_ACTION,
     JSON_G_FEATURE,
+    JSON_G_CONFIG,
 } JsonGenerateType_t;
 
 typedef struct {
