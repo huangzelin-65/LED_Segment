@@ -130,7 +130,7 @@ void vIntProcessTask(void *argument)
         case ToggleDebounce:
           DEBUGINFO("Toggle trigger");
           ToggleDebounce_flag = 0;
-          vToggleSwitchStatusCheck();   //检测开关状态
+          vToggleSwitchStatusCheck();   //检测拨动开关状态
           break;
         
         case BoxELockDebounce:

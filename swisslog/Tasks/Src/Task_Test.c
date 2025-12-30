@@ -8,6 +8,7 @@
 #include "LogDebugInfo.h"
 #include "Common.h"
 #include "adaptor_test.h"
+#include "Task_MotionCtrl.h"
 
 #define BASE_COUNT 6
 
@@ -25,34 +26,40 @@ extern osSemaphoreId_t xTestRxSemHandle;
 void vTestTask(void *argument)
 {
   
-  //启动DMA接收
-  vTest_Start_DMA_Receive(ucTest_Rx_Buffer);
+    //启动DMA接收
+    vTest_Start_DMA_Receive(ucTest_Rx_Buffer);
 
-  while (1)
-  {
-    uint32_t ucReciveLen = 0;
-
-    // 等待RX接收完成十六进制信号
-    if (osSemaphoreAcquire(xTestRxSemHandle, osWaitForever) == osOK)
+    while (1)
     {
-      ucReciveLen = ulTest_Get_DMA_Receive_Len();
-      DEBUGINFO("Test received len:%d",ucReciveLen);
-      vPrint_Array(ucTest_Rx_Buffer, ucReciveLen);
+        uint32_t ucReciveLen = 0;
 
-      ServerToCarData.xAutoMode = ucTest_Rx_Buffer[0]; // 模式选择
-      ServerToCarData.xDirection = ucTest_Rx_Buffer[1]; // 方向
-      ServerToCarData.xSetSpeed = ucTest_Rx_Buffer[2]; // 速度
-      ServerToCarData.xMotorEnable = ucTest_Rx_Buffer[3]; // 电机使能运行
-      ServerToCarData.xStationStatus = ucTest_Rx_Buffer[4]; // 到站状态
-      DEBUGINFO("xAutoMode : %X, xDirection : %X, xSetSpeed : %X, xMotorEnable : %X, xStationStatus : %X",
-        ServerToCarData.xAutoMode, ServerToCarData.xDirection, ServerToCarData.xSetSpeed, ServerToCarData.xMotorEnable, ServerToCarData.xStationStatus);
+        // 等待RX接收完成十六进制信号
+        if (osSemaphoreAcquire(xTestRxSemHandle, osWaitForever) == osOK)
+        {
+            ucReciveLen = ulTest_Get_DMA_Receive_Len();
+            DEBUGINFO("Test received len:%d",ucReciveLen);
+            vPrint_Array(ucTest_Rx_Buffer, ucReciveLen);
 
-      vParseCommandToCar();
+            ServerToCarData.xAutoMode = ucTest_Rx_Buffer[0]; // 模式选择
+            ServerToCarData.xDirection = ucTest_Rx_Buffer[1]; // 方向
+            ServerToCarData.xSetSpeed = ucTest_Rx_Buffer[2]; // 速度
+            // ServerToCarData.xMotorEnable = ucTest_Rx_Buffer[3]; // 电机使能运行
+            // ServerToCarData.xStationStatus = ucTest_Rx_Buffer[4]; // 到站状态
+            // DEBUGINFO("xAutoMode : %X, xDirection : %X, xSetSpeed : %X, xMotorEnable : %X, xStationStatus : %X",
+            //   ServerToCarData.xAutoMode, ServerToCarData.xDirection, ServerToCarData.xSetSpeed, ServerToCarData.xMotorEnable, ServerToCarData.xStationStatus);
 
-      // 重启RX接收
-      vTest_Start_DMA_Receive(ucTest_Rx_Buffer);
+            DEBUGINFO("xAutoMode : %X, xDirection : %X, xSetSpeed : %X",
+              ServerToCarData.xAutoMode, ServerToCarData.xDirection, ServerToCarData.xSetSpeed);
+
+            // vParseCommandToCar();
+            vRemoteModeSet(ServerToCarData.xAutoMode);
+            vRemoteMotionCmd(ServerToCarData.xDirection, ServerToCarData.xSetSpeed);
+
+
+            // 重启RX接收
+            vTest_Start_DMA_Receive(ucTest_Rx_Buffer);
+        }
     }
-  }
 }
 
 

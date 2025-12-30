@@ -29,12 +29,12 @@ extern u8 Beep_enable;
 
 void vCarInStation(void)
 {
-  DEBUGINFO("Car In Station\r\n");
+  DEBUGINFO("Car In Station ");
 }
 
 void vCarOutStation(void)
 {
-  DEBUGINFO("Car Out Station\r\n");
+  DEBUGINFO("Car Out Station ");
 }
 
 
@@ -54,7 +54,7 @@ void vSensorTask(void *argument)
 
   if (xSensor_QueueHandle == NULL) {
     // 队列创建失败，处理错误
-    DEBUGINFO("xSensor_QueueHandle == NULL\r\n");
+    DEBUGINFO("xSensor_QueueHandle == NULL ");
   }
   
   // //蜂鸣器响0.5s
@@ -81,19 +81,19 @@ void vSensorTask(void *argument)
           {
             if(CarStatus.xRealDirection == Forward)
             {
-              DEBUGINFO("Forward\r\n");
+              DEBUGINFO("Forward");
               
               // 传感器异常
               if(((CarStatus.FrontCrashStatus == SensorError) \
                 || (CarStatus.FrontProxStatus == SensorError)))
               {
                 GPIO_WRITE(LED1, GPIO_PIN_SET); // 使能LED1
-                DEBUGINFO("sensors Error\r\n");
-                DEBUGINFO("enable LED1\r\n");
+                DEBUGINFO("sensors Error");
+                DEBUGINFO("enable LED1");
               
                 // 电机停止原因
                 CarStatus.xMotorStopReason = BySensorError;
-                DEBUGINFO("MotorStopReason: BySensorError\r\n");
+                DEBUGINFO("MotorStopReason: BySensorError");
                 // 请求停止电机
                 ucMotion_msg = CarStop;
               }
@@ -103,12 +103,12 @@ void vSensorTask(void *argument)
                 || (CarStatus.FrontProxStatus == SensorTrigger)))
               {
                 GPIO_WRITE(LED1, GPIO_PIN_SET); // 使能LED1
-                DEBUGINFO("sensors Trigger\r\n");
-                DEBUGINFO("enable LED1\r\n");
+                DEBUGINFO("sensors Trigger ");
+                DEBUGINFO("enable LED1 ");
 
                 // 电机停止原因
                 CarStatus.xMotorStopReason = BySensorTrigger;
-                DEBUGINFO("MotorStopReason: BySensorTrigger\r\n");
+                DEBUGINFO("MotorStopReason: BySensorTrigger");
                 // 请求停止电机
                 ucMotion_msg = CarStop;
               }
@@ -117,8 +117,8 @@ void vSensorTask(void *argument)
                 && (CarStatus.FrontProxStatus == SensorRelease))
               {
                 GPIO_WRITE(LED1, GPIO_PIN_RESET); // 关闭LED1
-                DEBUGINFO("sensors release\r\n");
-                DEBUGINFO("disable LED1\r\n");
+                DEBUGINFO("sensors release ");
+                DEBUGINFO("disable LED1 ");
 
                 //请求启动电机
                 ucMotion_msg = CarRunning;
@@ -127,19 +127,19 @@ void vSensorTask(void *argument)
             //向后运动时
             else if(CarStatus.xRealDirection == Backward)
             {
-              DEBUGINFO("Backward\r\n");
+              DEBUGINFO("Backward ");
 
               // 传感器异常
               if(((CarStatus.RearCrashStatus == SensorError) \
                 || (CarStatus.RearProxStatus == SensorError)))
               {
                 GPIO_WRITE(LED1, GPIO_PIN_SET); // 使能LED1
-                DEBUGINFO("sensors Error\r\n");
-                DEBUGINFO("enable LED1\r\n");
+                DEBUGINFO("sensors Error ");
+                DEBUGINFO("enable LED1 ");
 
                 // 电机停止原因
                 CarStatus.xMotorStopReason = BySensorError;
-                DEBUGINFO("MotorStopReason: BySensorError\r\n");
+                DEBUGINFO("MotorStopReason: BySensorError ");
                 // 请求停止电机
                 ucMotion_msg = CarStop;
               }
@@ -149,12 +149,12 @@ void vSensorTask(void *argument)
                 || (CarStatus.RearProxStatus == SensorTrigger)))
               {
                 GPIO_WRITE(LED1, GPIO_PIN_SET); // 使能LED1
-                DEBUGINFO("sensors Trigger\r\n");
-                DEBUGINFO("enable LED1\r\n");
+                DEBUGINFO("sensors Trigger ");
+                DEBUGINFO("enable LED1 ");
 
                 // 电机停止原因
                 CarStatus.xMotorStopReason = BySensorTrigger;
-                DEBUGINFO("MotorStopReason: BySensorTrigger\r\n");
+                DEBUGINFO("MotorStopReason: BySensorTrigger ");
                 // 请求停止电机
                 ucMotion_msg = CarStop;
               }
@@ -163,8 +163,8 @@ void vSensorTask(void *argument)
                 && (CarStatus.RearProxStatus == SensorRelease))
               {
                 GPIO_WRITE(LED1, GPIO_PIN_RESET); // 关闭LED1
-                DEBUGINFO("sensors release\r\n");
-                DEBUGINFO("disable LED1\r\n");
+                DEBUGINFO("sensors release ");
+                DEBUGINFO("disable LED1 ");
 
                 //请求启动电机
                 ucMotion_msg = CarRunning;
@@ -173,7 +173,7 @@ void vSensorTask(void *argument)
           }
           if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
           {
-            DEBUGINFO("SensorEvent send motion msg error\r\n");
+            DEBUGINFO("SensorEvent send motion msg error ");
           }
           break;
 
@@ -231,12 +231,12 @@ void vSensorTask(void *argument)
           CarStatus.xAutoMode = Manual;
           // 电机停止原因
           CarStatus.xMotorStopReason = ByToggleStop;
-          DEBUGINFO("MotorStopReason: ByToggleStop\r\n");
+          DEBUGINFO("MotorStopReason: ByToggleStop ");
           // 停止电机
           ucMotion_msg = CarStop;
           if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
           {
-            DEBUGINFO("ToggleStop send motion msg error\r\n");
+            DEBUGINFO("ToggleStop send motion msg error ");
           }
           break;
 
@@ -262,12 +262,12 @@ void vSensorTask(void *argument)
         case ServiceStop:
           // 停止电机
           CarStatus.xMotorStopReason = ByServiceMode;
-          DEBUGINFO("MotorStopReason: ByServiceMode\r\n");
+          DEBUGINFO("MotorStopReason: ByServiceMode ");
 
           ucMotion_msg = CarStop;
           if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
           {
-            DEBUGINFO("ServiceStop send motion msg error\r\n");
+            DEBUGINFO("ServiceStop send motion msg error ");
           }
           break;
 
@@ -278,17 +278,17 @@ void vSensorTask(void *argument)
           if(GPIO_READ(RESET) == GPIO_PIN_RESET)
           {
             GPIO_WRITE(LED_RESET, GPIO_PIN_SET); // 使能LED_RESET
-            DEBUGINFO("reset button trigger\r\n");
+            DEBUGINFO("reset button trigger ");
 
             // 电机停止原因
             CarStatus.xMotorStopReason = ByReset;
-            DEBUGINFO("MotorStopReason: ByReset\r\n");
+            DEBUGINFO("MotorStopReason: ByReset ");
 
             // 请求停止电机
             ucMotion_msg = CarStop;
             if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
             {
-              DEBUGINFO("send motion msg error3\r\n");
+              DEBUGINFO("send motion msg error3 ");
             }
             osTimerStart(xResetButtonTimerHandle, pdMS_TO_TICKS(ResetDuration));// 回调vResetButtonCallback
           }
@@ -296,14 +296,14 @@ void vSensorTask(void *argument)
           else
           {
             GPIO_WRITE(LED_RESET, GPIO_PIN_RESET); // 关闭LED_RESET
-            DEBUGINFO("reset button release\r\n");
+            DEBUGINFO("reset button release ");
           }
           break;
         
 
         //*********************** 开始复位（复位按钮持续触发1秒） **********************
         case Reset:
-          DEBUGINFO("SystemReset\r\n");
+          DEBUGINFO("SystemReset ");
           vPower_DeInit(); // 关闭电源
           osDelay(pdMS_TO_TICKS(1000));  // 等待电源关闭
           NVIC_SystemReset();
