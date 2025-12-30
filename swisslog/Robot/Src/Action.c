@@ -4,6 +4,7 @@
 #include "clist.h"
 #include "main.h"
 #include "common.h"
+#include "Task_MotionCtrl.h"
 
 List *action_list = NULL;
 
@@ -108,39 +109,39 @@ void Action_ToCmd(Action_t *action)
 {
     DEBUGINFO("id:%d",action->id);//执行动作需要根据流水号发到对应机器中
 
-    ServerToCarData.xAutoMode = Auto; //默认为自动
-    ServerToCarData.xStationStatus = OutStation;//测试用
+    vRemoteModeSet(Auto);//默认自动模式处理
+
+    eDirectionType  dir = NoDirection; 
 
     char *res = strstr(action->cmd.cmd, "forward");
     if (res != NULL) {
         DEBUGINFO("forward\n"); 
-        ServerToCarData.xDirection = Forward; // 小车运行方向 1=正转 2=反转 
-        ServerToCarData.xMotorEnable = MotorEnable;                                                      
+        dir = Forward;                                                     
     } 
     else
     {
         char *res = strstr(action->cmd.cmd, "back");
         if (res != NULL) {
             DEBUGINFO("backward\n"); 
-            ServerToCarData.xDirection = Backward; // 小车运行方向 1=正转 2=反转 
-            ServerToCarData.xMotorEnable = MotorEnable;
+            dir = Backward;
         }
         else
         {
             char *res = strstr(action->cmd.cmd, "stop");
             if (res != NULL) {
                 DEBUGINFO("stop\n"); 
-                ServerToCarData.xDirection = NoDirection;
-                ServerToCarData.xMotorEnable = MotorDisable;
+                dir = NoDirection;
             }
         }
     }
+
+    eSpeedType speed = ZeroSpeed;
     {
         char *res = strstr(action->cmd.params.speedLevel, "0");
         if(res != NULL)
         {
             DEBUGINFO("speed level 0\n"); 
-            ServerToCarData.xSetSpeed = ZeroSpeed;
+            speed = ZeroSpeed;
         }
         else
         {
@@ -148,7 +149,7 @@ void Action_ToCmd(Action_t *action)
             if(res != NULL)
             {
                 DEBUGINFO("speed level 1\n");
-                ServerToCarData.xSetSpeed = LowSpeed; 
+                speed = LowSpeed; 
             }
             else
             {
@@ -156,7 +157,7 @@ void Action_ToCmd(Action_t *action)
                 if(res != NULL)
                 {
                     DEBUGINFO("speed level 2\n"); 
-                    ServerToCarData.xSetSpeed = NormalSpeed;
+                    speed = NormalSpeed;
                 }
                 else
                 {
@@ -164,13 +165,13 @@ void Action_ToCmd(Action_t *action)
                     if(res != NULL)
                     {
                         DEBUGINFO("speed level 3\n"); 
-                        ServerToCarData.xSetSpeed = HighSpeed;
+                        speed = HighSpeed;
                     }                      
                 }
             }
         }
     }
-    vParseCommandToCar();     
+    vRemoteMotionCmd(dir,speed);   
 }
 //根据实际机器状态编辑action状态
 void Action_Edit(Action_t *action)
