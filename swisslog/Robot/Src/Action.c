@@ -109,7 +109,7 @@ void Action_ToCmd(Action_t *action)
 {
     DEBUGINFO("id:%d",action->id);//执行动作需要根据流水号发到对应机器中
 
-    vRemoteModeSet(Auto);//默认自动模式处理
+    // vRemoteModeSet(Auto);//默认自动模式处理
 
     eDirectionType  dir = NoDirection; 
 

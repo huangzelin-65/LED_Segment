@@ -3,6 +3,7 @@
 #include "clist.h"
 #include "JsonCommon.h"
 #include "main.h"
+#include "Task_MotionCtrl.h"
 
 List *feature_list = NULL;
 //链表初始化
@@ -113,10 +114,10 @@ void Feature_Execute(void)
             feature->code = 0;//默认回复执行成功
             memcpy(json_feature,feature,sizeof(Feature_t));            
             Json_GenerateMsg(JSON_G_FEATURE,json_feature);
-            //执行动作
-            Feature_ToCmd(feature);
             //标记动作已经执行
             feature->execute = 1;
+            //执行动作
+            Feature_ToCmd(feature);
         }
     }
 }
@@ -151,12 +152,12 @@ void Feature_ToCmd(Feature_t* feature)
             char *res = strstr(feature->value, "auto");  
             if (res != NULL) {
                 DEBUGINFO("auto\n"); 
-
+                vRemoteModeSet(Auto);
             }
             else
             {
                 DEBUGINFO("manual\n"); 
-
+                vRemoteModeSet(Manual);
             }                                                   
         }
     }
@@ -218,12 +219,14 @@ void Feature_Update(int id)
         Feature_ListInit();
     }  
     if(feature_list == NULL) return;   
+    DEBUGINFO("size:%d",feature_list->size);
     for(int i = 0; i < feature_list->size;i++)
     {
         Feature_t* feature = list_find_at(feature_list, i);
         if(feature->id == id)//更新所有对应id(流水号)的动作状态
         {   
             //执行过后才可以更新状态，防止其他事件出现，提前更新状态
+            DEBUGINFO("execute:%d",feature->execute);
             if(feature->execute == 1)
             {
                 //获取id对应的实际状态

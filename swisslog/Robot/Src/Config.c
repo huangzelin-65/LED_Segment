@@ -113,10 +113,10 @@ void Config_Execute(void)
             config->code = 0;//默认回复执行成功
             memcpy(json_config,config,sizeof(Config_t));            
             Json_GenerateMsg(JSON_G_CONFIG,json_config);
-            //执行动作
-            Config_ToCmd(config);
             //标记动作已经执行
             config->execute = 1;
+            //执行动作
+            Config_ToCmd(config);            
         }
     }
     //如不等待配置结果，此处直接释放内存

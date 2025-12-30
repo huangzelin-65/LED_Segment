@@ -54,6 +54,11 @@ void vMotorInit()
 // 设置小车 远程手动模式/远程自动模式
 void vRemoteModeSet(eAutoModeType xAutoMode)
 {
+    uint8_t mode_change = 0;
+    if(xAutoMode != CarStatus.xAutoMode)
+    {
+        mode_change = 1;
+    }
     switch (xAutoMode)
     {
         // 远程手动模式
@@ -71,6 +76,7 @@ void vRemoteModeSet(eAutoModeType xAutoMode)
         default:
             break;
     }
+    if(mode_change)Robot_Event();
 }
 
 void vRemoteMotionCmd(eDirectionType xDirection, eSpeedType xSpeed)
