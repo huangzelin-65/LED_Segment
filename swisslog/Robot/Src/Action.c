@@ -108,6 +108,7 @@ void Action_ToCmd(Action_t *action)
 {
     DEBUGINFO("id:%d",action->id);//执行动作需要根据流水号发到对应机器中
 
+    ServerToCarData.xAutoMode = Auto; //默认为自动
     ServerToCarData.xStationStatus = OutStation;//测试用
 
     char *res = strstr(action->cmd.cmd, "forward");
@@ -133,17 +134,6 @@ void Action_ToCmd(Action_t *action)
                 ServerToCarData.xMotorEnable = MotorDisable;
             }
         }
-    }
-    {
-        char *res = strstr(action->cmd.params.model, "auto");
-        if(res != NULL)
-        {
-            ServerToCarData.xAutoMode = Auto; // 自动模式 
-        }
-        else
-        {
-            ServerToCarData.xAutoMode = Manual; // 手动模式 
-        }            
     }
     {
         char *res = strstr(action->cmd.params.speedLevel, "0");
