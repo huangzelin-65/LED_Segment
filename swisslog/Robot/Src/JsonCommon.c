@@ -440,8 +440,8 @@ int Json_ParseAction(char* data)
                     for (int i = 0; i < params_count; i++)
                     {
                         cJSON *params_js = cJSON_GetArrayItem(params_array, i);
-                        if (params_js == NULL || !cJSON_IsObject(params_js)) {
-                            DEBUGINFO("params_js %d is not object\n", i);
+                        if (params_js == NULL || !cJSON_IsString(params_js)) {
+                            DEBUGINFO("params_js %d is not string\n", i);
                             cJSON_Delete(root);
                             return -1;
                         }   
@@ -531,8 +531,8 @@ int Json_ParseAction(char* data)
                     for (int i = 0; i < params_count; i++)
                     {
                         cJSON *params_js = cJSON_GetArrayItem(params_array, i);
-                        if (params_js == NULL || !cJSON_IsObject(params_js)) {
-                            DEBUGINFO("params_js %d is not object\n", i);
+                        if (params_js == NULL || !cJSON_IsString(params_js)) {
+                            DEBUGINFO("params_js %d is not string\n", i);
                             cJSON_Delete(root);
                             return -1;
                         }   
