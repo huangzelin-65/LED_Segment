@@ -44,9 +44,6 @@ uint8_t UserPswd_Get_Encry_Status(){
 }
 
 void UserPswd_Set_Encry_Status(uint8_t flag){
-	if(flag == 0){
-		Car_Set_Station_Status(InStation);
-	}
 	if(isEncryed == flag)
 		return;
 	isEncryed = flag;	

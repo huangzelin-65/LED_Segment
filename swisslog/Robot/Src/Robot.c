@@ -18,7 +18,7 @@
 #include "Feature.h"
 // #define USE_UID
 
-extern CarStationStatus Car_Get_Station_Status(void);
+// extern CarStationStatus Car_Get_Station_Status(void);
 
 extern CarStatus_t CarStatus;
 extern ServerToCarData_t ServerToCarData;
@@ -1101,21 +1101,21 @@ void Robot_Action2Cmd(void)
 {
     for (int i = 0; i < robotAction.action.cmd_count; i++) 
     {
-        if(robotAction.action.Type == ROBOT_IN_STATION)
-        {
-            ServerToCarData.xStationStatus = InStation; // 在站状态 
-            DEBUGINFO("in station\n"); 
-        }
-        else if(robotAction.action.Type == ROBOT_OUT_STATION)
-        {
-            ServerToCarData.xStationStatus = OutStation; // 出站状态
-            DEBUGINFO("out station\n"); 
-        }
-        else
-        {
-            ServerToCarData.xStationStatus = 0x00;//默认为在站状态
-            DEBUGINFO("type:%d\n"); 
-        }
+        // if(robotAction.action.Type == ROBOT_IN_STATION)
+        // {
+        //     ServerToCarData.xStationStatus = InStation; // 在站状态 
+        //     DEBUGINFO("in station\n"); 
+        // }
+        // else if(robotAction.action.Type == ROBOT_OUT_STATION)
+        // {
+        //     ServerToCarData.xStationStatus = OutStation; // 出站状态
+        //     DEBUGINFO("out station\n"); 
+        // }
+        // else
+        // {
+        //     ServerToCarData.xStationStatus = 0x00;//默认为在站状态
+        //     DEBUGINFO("type:%d\n"); 
+        // }
         char *res = strstr(robotAction.action.cmds[i].cmd, "forward");
         if (res != NULL) {
             DEBUGINFO("forward\n"); 
@@ -1200,19 +1200,19 @@ void Robot_Action2Cmd(void)
 void Robot_ActionNotify(void)
 {
     DEBUGINFO("Type:%d\n",robotAction.action.Type);
-    if(robotAction.action.Type == ROBOT_IN_STATION)
-    {
-        ServerToCarData.xStationStatus = InStation;
-        if(ServerToCarData.xStationStatus != Car_Get_Station_Status())
-        {
-            // 发送进出站消息
-            eBoxCtrlType box_msg = UpdateStationStatus;
-            if(osMessageQueuePut(xBox_Ctrl_QueueHandle, &box_msg, 0, pdMS_TO_TICKS(100)) != osOK)
-            {
-                DEBUGINFO("send motion msg error\r\n");
-            }
-        }        
-    }
+    // if(robotAction.action.Type == ROBOT_IN_STATION)
+    // {
+    //     ServerToCarData.xStationStatus = InStation;
+    //     if(ServerToCarData.xStationStatus != Car_Get_Station_Status())
+    //     {
+    //         // 发送进出站消息
+    //         eBoxCtrlType box_msg = UpdateStationStatus;
+    //         if(osMessageQueuePut(xBox_Ctrl_QueueHandle, &box_msg, 0, pdMS_TO_TICKS(100)) != osOK)
+    //         {
+    //             DEBUGINFO("send motion msg error\r\n");
+    //         }
+    //     }        
+    // }
 }
 //回复action的ack
 void Robot_ActionAckUpdate(RobotActionStatus_t status)

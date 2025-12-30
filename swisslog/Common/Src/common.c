@@ -81,7 +81,7 @@ void vParseCommandToCar()
 
     case MotorEnable:
       //车厢锁上且未到站才能发车
-      if( CarStatus.xBoxLocked == Locked && ServerToCarData.xStationStatus == OutStation )
+      if( CarStatus.xBoxLocked == Locked )
       {
         //启动电机
         CarStatus.xMotorEnable = MotorEnable;
@@ -94,13 +94,10 @@ void vParseCommandToCar()
         if(CarStatus.xBoxLocked == UnLock){
           CarStatus.xMotorStopReason = ByBoxUnlock;
           DEBUGINFO("MotorStopReason: ByBoxUnlock\r\n");
-        } else if(ServerToCarData.xStationStatus == InStation){
-          CarStatus.xMotorStopReason = ByInstation;
-          DEBUGINFO("MotorStopReason: ByInstation\r\n");
         }
         
         ucMotion_msg = CarStop;
-        DEBUGINFO("Can't Run!! check Box LockStatus or StationStatus!!\r\n");
+        DEBUGINFO("Can't Run!! check Box LockStatus !!\r\n");
       }
       break;
     
@@ -115,17 +112,6 @@ void vParseCommandToCar()
     DEBUGINFO("send motion msg error\r\n");
   }
 
-
-  //*********************************小车到站状态解析**********************************
-  if(ServerToCarData.xStationStatus != Car_Get_Station_Status())
-  {
-    // 发送进出站消息
-    eBoxCtrlType box_msg = UpdateStationStatus;
-    if(osMessageQueuePut(xBox_Ctrl_QueueHandle, &box_msg, 0, pdMS_TO_TICKS(100)) != osOK)
-    {
-      DEBUGINFO("send motion msg error\r\n");
-    }
-  }
 
 }
 

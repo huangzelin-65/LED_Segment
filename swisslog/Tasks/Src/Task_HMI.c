@@ -290,7 +290,7 @@ void vHmiWaitTask(void *argument)
 
 	//GET CURRENT POSTION
 	bEeprom_Check_Conn();
-	CarStationStatus stationSt=Car_Get_Station_Status();
+	// CarStationStatus stationSt=Car_Get_Station_Status();
 	
 	UserPswd_Init();
 
@@ -323,26 +323,18 @@ void vHmiWaitTask(void *argument)
 	HMI_Update_DestStation_Req(666);
 
 	
-	if(stationSt == OutStation)
+	if( UserPswd_Get_Encry_Status())
 	{
-		//out station				
+	//encryed
 		RFID_Scan_Enable(1);
 		hmiEnButton = 0;
 		HMI_Show_Rf_Page();
 	}else{
-		//in station
-		if( UserPswd_Get_Encry_Status())
-		{
-		//encryed
-			RFID_Scan_Enable(1);
-			hmiEnButton = 0;
-			HMI_Show_Rf_Page();
-		}else{
-			RFID_Scan_Enable(0); 
-			hmiEnButton = 1;
-			HMI_Change_Page(pgHome);
-		}
+		RFID_Scan_Enable(0); 
+		hmiEnButton = 1;
+		HMI_Change_Page(pgHome);
 	}
+
 	HMI_Update_CarNum_Req(carNum);
 
 	vBoxELockStatusCheck();

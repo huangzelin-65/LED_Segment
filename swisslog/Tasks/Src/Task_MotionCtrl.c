@@ -51,7 +51,7 @@ void vMotorInit()
     vMotorSetting(MOTOR_SETTING_DECEL, MOTOR_SETTING_DECEL_8000); // 设置电机减速度
 }
 
-// 设置小车 远程手动模式/远程自动模式
+// 设置小车“远程手动模式”/“远程自动模式”
 void vRemoteModeSet(eAutoModeType xAutoMode)
 {
     uint8_t mode_change = 0;
@@ -79,6 +79,7 @@ void vRemoteModeSet(eAutoModeType xAutoMode)
     if(mode_change)Robot_Event();
 }
 
+// 远程设置小车“运行方向”和“运行速度”
 void vRemoteMotionCmd(eDirectionType xDirection, eSpeedType xSpeed)
 {
     uint8_t u8_Motion_msg;

@@ -744,12 +744,6 @@ void HMI_Check_Uv_Clean(uint8_t time){
 void HMI_CheckRFCard(uint8_t en){
 	DEBUGINFO("HMI_CheckRFCard en:%d\r\n",en);
 	if(en>0	){
-		if(en!=0x35){
-			if(Car_Get_Station_Status() !=InStation)
-			{
-				return;
-			}		
-		}
 		// 密码状态检查（未加密/空密码/管理员权限）
 		if(UserPswd_Get_Encry_Status() == 0||(UserPswd_Get_Encry_Len() == 0 )|| en == 0x35){	
 				
@@ -993,11 +987,7 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 		case btVirtualRfCard:
 			DEBUGINFO("btVirtualRfCard\r\n");
 			if(currentVirtualButtonEn >0){
-				// if((currentInStationEn == 0)||(Car_Get_Station_Status() ==InStation))
-				if(Car_Get_Station_Status() ==InStation)
-				{
-					HMI_CheckRFCard(1);
-				}
+				HMI_CheckRFCard(1);
 			}
 			break;
 		case btVirtualUnlock:

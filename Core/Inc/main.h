@@ -220,6 +220,7 @@ typedef struct
     eLockStatusType xBoxELockStatus1;           // 车厢电子锁1状态 UnLock:未锁上/Locked:已锁上
     eLockStatusType xBoxELockStatus2;           // 车厢电子锁2状态 UnLock:未锁上/Locked:已锁上
     eLockStatusType xBoxLocked;		            // 车厢是否锁上 UnLock:未锁上/Locked:已锁上
+    eLockStatusType xScreenLockStatus;          // 车厢屏幕是否锁上 UnLock:未锁上/Locked:已锁上
     uint32_t dwCurPos;                          // 小车当前位置地址编号0-99999
     uint32_t dwPrevPos;                         // 小车上一位置地址编号
     uint8_t ucUVTimeRemain;                     // 剩余消毒时间
@@ -272,6 +273,7 @@ typedef struct {
     eSpeedType xSetSpeed;            // 小车速度设置 0:停止/1:低速/2:额定速度/3:高速  
     eMotorStatusType xMotorEnable;   // 电机使能标志 0:MotorDisable/1:MotorEnable
     CarStationStatus xStationStatus; // 小车当前在站状态 0：InStation 1：OutStation
+    eLockStatusType xScreenLockStatus; // 车厢屏幕是否锁上 UnLock:未锁上/Locked:已锁上
 } ServerToCarData_t;
 
 typedef struct {

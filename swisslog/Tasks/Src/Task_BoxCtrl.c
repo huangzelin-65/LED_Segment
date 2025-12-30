@@ -1,4 +1,3 @@
-#include "main.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "cmsis_os2.h"
@@ -16,7 +15,7 @@
 #define FENMU	6
 
 //小车在站状态
-static CarStationStatus mCarStationStatus=InStation;
+// static CarStationStatus mCarStationStatus=InStation;
 
 extern uint8_t startFinishedFlag;
 extern CarStatus_t CarStatus;
@@ -24,44 +23,55 @@ extern ServerToCarData_t ServerToCarData;
 extern osMessageQueueId_t xBox_Ctrl_QueueHandle;
 
 
-/**
-外部获取进站状态
-*/
-CarStationStatus Car_Get_Station_Status(void){
-	return mCarStationStatus;
-}
 
 /**
-保存进站状态
+保存屏幕锁定状态
 */
-void Car_Set_Station_Status(CarStationStatus value)
+void vSet_Screen_LockStatus(eLockStatusType value)
 {
 	DEBUGINFO("%d\n",value);
-	if(mCarStationStatus == value){
+
+	if(Locked == value)
+	{
+		if(CarStatus.xBoxLocked == Locked){
+			DEBUGINFO("Lock Screen");
+			HMI_Set_RFCardPage();	// 发送命令切换到”请刷rfid卡“页面;
+		} else {
+			DEBUGINFO("Can't Lock Screen!! Box not Locked!!\r\n");
+		}
+	}
+	else if (UnLock == value)
+	{
+		DEBUGINFO("UnLock Screen");
+		HMI_Force_Home_Page(); 		// 跳转到home页面
+	}
+	else
+	{
+		DEBUGINFO("Unknow Lock Status");
 		return;
 	}
-	mCarStationStatus = value;
-	CarStatus.xStationStatus = value; // 更新全局变量的在站状态
+
+	CarStatus.xScreenLockStatus = value; // 更新全局变量的在站状态
 	bEeprom_Check_Conn();
-	bEeprom_Write_Byte(EEP_ADD_CAR_STATION_STATUS,value);
+	bEeprom_Write_Byte(EEP_ADD_SCREEN_LOCK_STATUS,value); // 保存到eeprom
 }
 
 /**
-从eeprom获取进站状态
+从eeprom获取屏幕锁定状态
 */
-static CarStationStatus Car_Read_Station_Status(void)
+static eLockStatusType xRead_Screen_LockStatus(void)
 {
 	uint8_t result = 0;
 	bEeprom_Check_Conn();
-	bEeprom_Read_Byte(EEP_ADD_CAR_STATION_STATUS,&result);	
-	DEBUGINFO("result:%d\n",result);
+	bEeprom_Read_Byte(EEP_ADD_SCREEN_LOCK_STATUS,&result);	
+	DEBUGINFO("Read Status:%d\n",result);
+	
 	// 有时候读出来的值变为160，原因未知，暂时强制限制范围
-	if(result > 1)
-	{
+	if(result > 1){
 		result = 1;
 	}
-	CarStatus.xStationStatus = result; // 更新全局变量的在站状态
-	return (CarStationStatus)result;
+	
+	return (eLockStatusType)result;
 }
 
 
@@ -92,17 +102,9 @@ void vBoxCtrlTask(void *argument)
 		osDelay(pdMS_TO_TICKS(300));	
 	}
 
-	mCarStationStatus = Car_Read_Station_Status();
+	CarStatus.xScreenLockStatus = xRead_Screen_LockStatus(); // 读取屏幕锁定状态
+	vSet_Screen_LockStatus(CarStatus.xScreenLockStatus); // 设置屏幕锁定状态
 
-	// car out检测
-	if( mCarStationStatus == OutStation ){
-		HMI_Set_RFCardPage();	// 发送命令切换到”请刷rfid卡“页面;
-	}
-	
-	// car in检测
-	if( mCarStationStatus == InStation ){
-		HMI_Force_Home_Page();	// 强制跳转到home页面
-	}
 
 	while(1)
 	{
@@ -113,10 +115,10 @@ void vBoxCtrlTask(void *argument)
 			{
 				//*********************************** 车厢电子锁操作 **************************************
 				case BoxElockOps:
-					DEBUGINFO("UvClean_IsRunning=%d, mCarStationStatus=%d, xBoxLocked=%d, HMI_Is_Button_En=%d\r\n",
-						UvClean_IsRunning(),mCarStationStatus,CarStatus.xBoxLocked,HMI_Is_Button_En());
+					DEBUGINFO("UvClean_IsRunning=%d, xIsCarRunning=%d, xBoxLocked=%d, HMI_Is_Button_En=%d\r\n",
+						UvClean_IsRunning(),CarStatus.xIsCarRunning,CarStatus.xBoxLocked,HMI_Is_Button_En());
 					if( !UvClean_IsRunning()&&
-						( mCarStationStatus == InStation ) && 
+						( CarStatus.xIsCarRunning == CarStop ) &&
 						( CarStatus.xBoxLocked == Locked ) && 
 						HMI_Is_Button_En()) // 检测HMI是否允许按键操作
 					{		
@@ -130,34 +132,6 @@ void vBoxCtrlTask(void *argument)
 				case RfidLoginTimeout:
 					RFID_ResetLoginStatus();
 					HMI_CheckRFCard(0); 
-					break;
-
-
-				//*********************************** 更新进出站状态 **************************************
-				case UpdateStationStatus:
-
-					DEBUGINFO("ServerToCarData.xStationStatus=%d, mCarStationStatus=%d\r\n",ServerToCarData.xStationStatus,mCarStationStatus);
-
-					// car out检测
-					if(( ServerToCarData.xStationStatus == OutStation ) && ( mCarStationStatus == InStation ) )
-					{
-						if( CarStatus.xBoxLocked == Locked )
-						{
-							DEBUGINFO("Update to OutStation\r\n");
-							Car_Set_Station_Status(OutStation);// 设置小车状态为OutStation
-							HMI_Set_RFCardPage();	// 发送命令切换到”请刷rfid卡“页面;
-						} else {
-							DEBUGINFO("Can't Set OutStation!! Box not Locked!!\r\n");
-						}
-					}
-					
-					// car in检测
-					if( (ServerToCarData.xStationStatus == InStation) && (mCarStationStatus == OutStation) )
-					{
-						DEBUGINFO("Update to InStation\r\n");
-						Car_Set_Station_Status(InStation);// 设置小车状态为InStation
-						HMI_Force_Home_Page(); 					// 跳转到home页面
-					}
 					break;
 
 
@@ -212,15 +186,12 @@ void vBoxLEDTask(void *argument)
 		//light control
 		/*
 		1、消毒中，黄灯
-		2、in statation,且电子锁关闭，蓝灯闪烁
-		3、in statation,且电子锁打开，红蓝闪烁
-		4、out statation,且电子锁关闭，蓝灯常亮
-		5、out statation,且电子锁打开，红蓝闪烁
+		2、电子锁关闭，蓝灯闪烁
+		3、电子锁打开，红蓝闪烁
 		*/
 		if(UvClean_IsRunning()){
 			vRGB_LED(YELLOW);
-		}else if(mCarStationStatus == InStation){	
-			// 小车进站
+		}else{	
 			if(CarStatus.xBoxLocked == Locked){
 				// 车厢锁上
 				if(Counter%FENZI == 0){
@@ -231,19 +202,6 @@ void vBoxLEDTask(void *argument)
 			}else{
 				// 车厢解锁
 				if(Counter%FENZI==0){
-					vRGB_LED(RED);
-				}else if(Counter%FENZI == FENMU){
-					vRGB_LED(BLUE);
-				}
-			}
-		}else{
-			// 小车出站
-			if(CarStatus.xBoxLocked == Locked){
-				// 车厢锁上
-				vRGB_LED(BLUE);
-			}else{
-				// 车厢解锁
-				if(Counter%FENZI == 0){
 					vRGB_LED(RED);
 				}else if(Counter%FENZI == FENMU){
 					vRGB_LED(BLUE);

@@ -5,7 +5,8 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define EEP_ADD_CAR_STATION_STATUS    		10  // 1bytes
+#define EEP_ADD_SCREEN_LOCK_STATUS    		10  // 1bytes
+// #define EEP_ADD_CAR_STATION_STATUS    		10  // 1bytes
 #define EEP_ADD_CAR_NUMBER		    		12  // 2bytes
 #define EEP_ADD_EEPROM_NEED_INIT		    16  // 2bytes
 #define EEP_ADD_IDCARD_PASSWORD_NUM		  	20 //1 bytes

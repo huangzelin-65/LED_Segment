@@ -9,6 +9,7 @@
 #include "Common.h"
 #include "adaptor_test.h"
 #include "Task_MotionCtrl.h"
+#include "Task_BoxCtrl.h"
 
 #define BASE_COUNT 6
 
@@ -43,18 +44,19 @@ void vTestTask(void *argument)
             ServerToCarData.xAutoMode = ucTest_Rx_Buffer[0]; // 模式选择
             ServerToCarData.xDirection = ucTest_Rx_Buffer[1]; // 方向
             ServerToCarData.xSetSpeed = ucTest_Rx_Buffer[2]; // 速度
+            ServerToCarData.xScreenLockStatus = ucTest_Rx_Buffer[3]; // 屏幕锁定状态
             // ServerToCarData.xMotorEnable = ucTest_Rx_Buffer[3]; // 电机使能运行
             // ServerToCarData.xStationStatus = ucTest_Rx_Buffer[4]; // 到站状态
             // DEBUGINFO("xAutoMode : %X, xDirection : %X, xSetSpeed : %X, xMotorEnable : %X, xStationStatus : %X",
             //   ServerToCarData.xAutoMode, ServerToCarData.xDirection, ServerToCarData.xSetSpeed, ServerToCarData.xMotorEnable, ServerToCarData.xStationStatus);
 
-            DEBUGINFO("xAutoMode : %X, xDirection : %X, xSetSpeed : %X",
-              ServerToCarData.xAutoMode, ServerToCarData.xDirection, ServerToCarData.xSetSpeed);
+            DEBUGINFO("xAutoMode : %X, xDirection : %X, xSetSpeed : %X, xScreenLockStatus : %X",
+              ServerToCarData.xAutoMode, ServerToCarData.xDirection, ServerToCarData.xSetSpeed, ServerToCarData.xScreenLockStatus);
 
             // vParseCommandToCar();
             vRemoteModeSet(ServerToCarData.xAutoMode);
             vRemoteMotionCmd(ServerToCarData.xDirection, ServerToCarData.xSetSpeed);
-
+            vSet_Screen_LockStatus(ServerToCarData.xScreenLockStatus);
 
             // 重启RX接收
             vTest_Start_DMA_Receive(ucTest_Rx_Buffer);
