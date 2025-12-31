@@ -18,7 +18,7 @@
 #define FLASH_VOLTAGE_RANGE FLASH_VOLTAGE_RANGE_3 // 3.0~3.6V
 
 //extern void* hFlashMutex;
-
+void flash_operation_init();
 // Flash操作函数声明
 uint8_t flash_unlock(void);
 uint8_t flash_lock(void);
