@@ -46,7 +46,7 @@ void vEeprom_Data_Init(void)
     DEBUGINFO("Fisrt Boot\r\n");
 		//write card password
 		bEeprom_Write_Byte(EEP_ADD_IS_ENCRYED,temp[0]); 
-		bEeprom_Write_Byte(EEP_ADD_CAR_STATION_STATUS,temp[0]); 	
+//		bEeprom_Write_Byte(EEP_ADD_CAR_STATION_STATUS,temp[0]);
 		bEeprom_Write_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,defaultUv); 	
 		bEeprom_Write_Byte(EEP_ADD_IDCARD_PASSWORD_NUM,temp[0]); 
 		bEeprom_Write_Byte(EEP_ADD_EN_VIRTUAL_BUTTON,temp[0]); 

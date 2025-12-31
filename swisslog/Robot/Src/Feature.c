@@ -4,6 +4,7 @@
 #include "JsonCommon.h"
 #include "main.h"
 #include "Task_MotionCtrl.h"
+#include "Task_BoxCtrl.h"
 
 List *feature_list = NULL;
 //链表初始化
@@ -135,12 +136,26 @@ void Feature_ToCmd(Feature_t* feature)
             char *res = strstr(feature->value, "unlock");  
             if (res != NULL) {
                 DEBUGINFO("unlock\n"); 
-
+                if(CarStatus.xScreenLockStatus == UnLock)
+                {
+                    list_remove_by_value(feature_list,feature,Feature_FindName,vPortFree);
+                }
+                else
+                {
+                    vSet_Screen_LockStatus(UnLock);
+                }
             }
             else
             {
                 DEBUGINFO("lock\n"); 
-
+                if(CarStatus.xScreenLockStatus == Locked)
+                {
+                    list_remove_by_value(feature_list,feature,Feature_FindName,vPortFree);
+                }
+                else
+                {
+                    vSet_Screen_LockStatus(Locked);
+                }
             }                                                   
         } 
     }
@@ -151,13 +166,27 @@ void Feature_ToCmd(Feature_t* feature)
             DEBUGINFO("runModel\n"); 
             char *res = strstr(feature->value, "auto");  
             if (res != NULL) {
-                DEBUGINFO("auto\n"); 
-                vRemoteModeSet(Auto);
+                DEBUGINFO("auto\n");
+                if(CarStatus.xAutoMode == Auto) 
+                {
+                    list_remove_by_value(feature_list,feature,Feature_FindName,vPortFree);
+                }
+                else
+                {
+                    vRemoteModeSet(Auto);
+                } 
             }
             else
             {
                 DEBUGINFO("manual\n"); 
-                vRemoteModeSet(Manual);
+                if(CarStatus.xAutoMode == Manual) 
+                {
+                    list_remove_by_value(feature_list,feature,Feature_FindName,vPortFree);
+                }
+                else
+                {
+                    vRemoteModeSet(Manual);
+                }                 
             }                                                   
         }
     }
