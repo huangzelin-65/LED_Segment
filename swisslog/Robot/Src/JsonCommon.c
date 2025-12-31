@@ -145,7 +145,7 @@ char* Json_Generate_Action(void *action)
     cJSON_AddStringToObject(root, "headerId", data->headerId);
     cJSON_AddStringToObject(root, "timestamp", data->timestamp);
     cJSON_AddStringToObject(root, "version", data->version);
- 
+    cJSON_AddNumberToObject(root, "curPos", data->curPos);
     cJSON *actionStates = cJSON_CreateObject();
     cJSON_AddItemToObject(root, "actionStates", actionStates);
 

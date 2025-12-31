@@ -93,6 +93,7 @@ void Action_Execute(void)
         {   
             //需要回复ack
             memcpy(action->cmd.status,"ack",4);
+            action->curPos = CarStatus.dwCurPos;
 
             Action_t* json_action = pvPortMalloc(sizeof(Action_t));
             memcpy(json_action,action,sizeof(Action_t));            
@@ -187,6 +188,7 @@ void Action_Edit(Action_t *action)
                 if(action->running != CarRunning)//之前为stop
                 {
                     memcpy(action->cmd.status,"running",8);
+                    action->curPos = CarStatus.dwCurPos;
                     //发送状态更新
                     Action_t* json_action = pvPortMalloc(sizeof(Action_t));
                     memcpy(json_action,action,sizeof(Action_t));                    
@@ -220,6 +222,7 @@ void Action_Edit(Action_t *action)
                         {
                             memcpy(action->cmd.status,"finished",9);
                         }
+                        action->curPos = CarStatus.dwCurPos;
                         //发送状态更新
                         Action_t* json_action = pvPortMalloc(sizeof(Action_t));
                         memcpy(json_action,action,sizeof(Action_t));                    
@@ -231,6 +234,7 @@ void Action_Edit(Action_t *action)
                     else//触发标签停止
                     {
                         memcpy(action->cmd.status,"finished",9);
+                        action->curPos = CarStatus.dwCurPos;
                         //发送状态更新
                         Action_t* json_action = pvPortMalloc(sizeof(Action_t));
                         memcpy(json_action,action,sizeof(Action_t));                    
@@ -261,6 +265,7 @@ void Action_Edit(Action_t *action)
                 if(CarStatus.FrontProxStatus != SensorTrigger && CarStatus.RearProxStatus != SensorTrigger)
                 {
                     memcpy(action->cmd.status,"ready",6);
+                    action->curPos = CarStatus.dwCurPos;
                     Action_t* json_action = pvPortMalloc(sizeof(Action_t));
                     memcpy(json_action,action,sizeof(Action_t));                    
                     Json_GenerateMsg(JSON_G_ACTION,json_action);                    
