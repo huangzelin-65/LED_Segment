@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 uint16_t CRC16( uint8_t *arr_buff, uint16_t len);
+uint32_t crc32_calc(uint32_t start_addr, uint32_t data_len);// CRC32计算函数声明
 uint8_t LRC(uint8_t * buff,uint16_t len);
 uint8_t Hex2char(uint8_t bHex);
 void HexToStr(uint8_t *pbDest, uint8_t *pbSrc, int nLen);

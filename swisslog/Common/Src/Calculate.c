@@ -29,6 +29,19 @@ uint16_t CRC16( uint8_t *arr_buff, uint16_t len)
 	return  (crc);
 }
 
+extern CRC_HandleTypeDef hcrc; // App侧独立CRC句柄
+// CRC32计算（按字节长度，自动对齐4字节）
+uint32_t crc32_calc(uint32_t start_addr, uint32_t data_len) {
+    if (data_len == 0) {
+        return 0;
+    }
+
+    // 计算4字节对齐后的长度
+    //uint32_t word_len = (data_len + 3) / 4;
+    uint32_t crc_val = HAL_CRC_Calculate(&hcrc, (uint32_t*)start_addr, data_len);
+    return crc_val;
+}
+
 /***********计算CRL效验***************************/
 
 uint8_t LRC(uint8_t * buff,uint16_t len)
