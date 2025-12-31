@@ -1332,6 +1332,7 @@ void Robot_ActionAck(void)
 //事件发生，上报状态
 void Robot_Event(void)
 {
+    #ifdef ROBOT
     DEBUGINFO("start");
     // if (robotSate.mutex == NULL)return;
     // if (xSemaphoreTake(robotSate.mutex, portMAX_DELAY) != pdPASS) return;
@@ -1343,6 +1344,7 @@ void Robot_Event(void)
     State_Event(0);
     Action_Update(0);
     Feature_Update(0);
+    #endif
 }
 //消息通知主线程
 void Robot_Notify(uint32_t value)
