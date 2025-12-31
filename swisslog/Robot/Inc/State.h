@@ -3,6 +3,13 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#define ERROR_LEVEL_LOW_  "LOW"
+#define ERROR_LEVEL_HIGH_  "HIGH"
+
+#define ERROR_TYPE_NONE_ "NONE"
+#define ERROR_TYPE_MOTOR_ "MOTOR"
+
+
 typedef struct {
     bool front;
     bool back;
@@ -29,6 +36,7 @@ typedef struct {
 typedef struct {
     const char * Type;
     const char * Level;
+    int Code;
 } Error_t;
 typedef struct {
     char headerId[64];

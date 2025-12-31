@@ -82,7 +82,7 @@ char* Json_Generate_State(void *state)
     obj = cJSON_CreateObject();
     cJSON_AddBoolToObject(obj, "front", data->hallState.front);
     cJSON_AddBoolToObject(obj, "back", data->hallState.back);    
-    cJSON_AddItemToObject(root, "HallState", obj);
+    cJSON_AddItemToObject(root, "hallState", obj);
 
     obj = cJSON_CreateObject();
     cJSON_AddNumberToObject(obj, "speedLevel", data->motorState.speedLevel);
@@ -96,11 +96,14 @@ char* Json_Generate_State(void *state)
     cJSON_AddNumberToObject(obj, "setTime", data->disinfect.setTime);
     cJSON_AddItemToObject(root, "disinfectState", obj);
 
-    obj = cJSON_CreateObject();
-    cJSON_AddStringToObject(obj, "errorType", data->errors.Type);
-    cJSON_AddStringToObject(obj, "errorLevel", data->errors.Level);    
-    cJSON_AddItemToObject(root, "errors", obj); 
-    
+    cJSON *errors = cJSON_CreateArray();
+    cJSON *errorItem = cJSON_CreateObject();
+    cJSON_AddStringToObject(errorItem, "errorType", data->errors.Type);
+    cJSON_AddStringToObject(errorItem, "errorLevel", data->errors.Level);
+    cJSON_AddNumberToObject(errorItem, "errorCode", data->errors.Code);
+    cJSON_AddItemToArray(errors, errorItem);
+    cJSON_AddItemToObject(root, "errors", errors);
+
     char* json_str = cJSON_PrintUnformatted(root);//需free
 
     cJSON_Delete(root);

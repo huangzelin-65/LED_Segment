@@ -138,6 +138,9 @@ void State_Update(State_t* new_state)
         new_state->motorState.direction = CarStatus.xRealDirection;
         new_state->motorState.speedLevel = CarStatus.xRealSpeed;
         new_state->operatingMode = (CarStatus.xAutoMode == Auto ? MODE_TYPE_AUTO : MODE_TYPE_MANUAL);
+        new_state->errors.Level = ERROR_LEVEL_LOW_;
+        new_state->errors.Type = ERROR_TYPE_NONE_;
+        new_state->errors.Code = 0;
         DEBUGINFO("front:%d back:%d",new_state->bumperState.front,new_state->bumperState.back);
     }
     else//多份状态则从不同地方获取对应id机器的状态
