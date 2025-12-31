@@ -123,6 +123,15 @@ int __io_putchar(int ch)
   HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
   return ch;
 }
+
+extern const uint32_t __VECTOR_TABLE_BASE;
+
+void SetVTOR_FromLD(void) {
+    uint32_t vtor = (uint32_t)&__VECTOR_TABLE_BASE;
+    // 对齐校验（可选）
+    if (vtor & 0xFF) return;
+    SCB->VTOR = vtor;
+}
 /* USER CODE END 0 */
 
 /**
@@ -133,7 +142,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+	SetVTOR_FromLD();
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/

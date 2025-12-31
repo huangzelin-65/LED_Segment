@@ -12,6 +12,6 @@ uint8_t compareArray(uint8_t* arr1,uint8_t* arr2,int len);
 uint8_t h10Toh16(uint8_t bHex);
 uint8_t BCDToh10(uint8_t bHex);
 uint8_t h10ToBCD(uint8_t bDec);
-uint32_t substring_to_uint(char* str, u16 start, u16 length);
+uint32_t substring_to_uint(char* str, uint16_t start, uint16_t length);
 bool waitforperiod(int *counter,int period);
 #endif /* COMMON_INC_CALCULATE_H_ */

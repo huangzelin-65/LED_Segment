@@ -41,11 +41,12 @@ _estack = ORIGIN(RAM) + LENGTH(RAM); /* end of "RAM" Ram type memory */
 _Min_Heap_Size = 0x200; /* required amount of heap */
 _Min_Stack_Size = 0x400; /* required amount of stack */
 
+PROVIDE(__VECTOR_TABLE_BASE = 0x08020000);
 /* Memories definition */
 MEMORY
 {
   RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 640K
-  FLASH    (rx)    : ORIGIN = 0x08000000,   LENGTH = 2048K
+  FLASH    (rx)    : ORIGIN = 0x08020000,   LENGTH = 896K
 }
 
 /* Sections */
