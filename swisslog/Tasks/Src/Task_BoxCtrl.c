@@ -14,14 +14,11 @@
 #define FENZI 12
 #define FENMU	6
 
-//小车在站状态
-// static CarStationStatus mCarStationStatus=InStation;
-
 extern uint8_t startFinishedFlag;
 extern CarStatus_t CarStatus;
 extern ServerToCarData_t ServerToCarData;
 extern osMessageQueueId_t xBox_Ctrl_QueueHandle;
-
+extern osMessageQueueId_t xMotion_QueueHandle;
 
 
 /**
@@ -81,6 +78,7 @@ void vBoxCtrlTask(void *argument)
 	DEBUGINFO("start");
 
 	eBoxCtrlType box_msg;
+	uint8_t ucMotion_msg;
 
 	//初始化数码管显示
 	NumDisp_Init();
@@ -110,12 +108,13 @@ void vBoxCtrlTask(void *argument)
 	{
 		if(osMessageQueueGet(xBox_Ctrl_QueueHandle, &box_msg, NULL, osWaitForever) == osOK)
 		{
-			DEBUGINFO("box_msg = %d\r\n",box_msg);
+			// DEBUGINFO("box_msg = %d",box_msg);
 			switch (box_msg)
 			{
-				//*********************************** 车厢电子锁操作 **************************************
+				//*********************************** 车厢电子锁操作 **************************************//
 				case BoxElockOps:
-					DEBUGINFO("UvClean_IsRunning=%d, xIsCarRunning=%d, xBoxLocked=%d, HMI_Is_Button_En=%d\r\n",
+					DEBUGINFO("case BoxElockOps");
+					DEBUGINFO("UvClean_IsRunning=%d, xIsCarRunning=%d, xBoxLocked=%d, HMI_Is_Button_En=%d",
 						UvClean_IsRunning(),CarStatus.xIsCarRunning,CarStatus.xBoxLocked,HMI_Is_Button_En());
 					if( !UvClean_IsRunning()&&
 						( CarStatus.xIsCarRunning == CarStop ) &&
@@ -128,15 +127,17 @@ void vBoxCtrlTask(void *argument)
 					break;
 
 
-				//*********************************** 车厢RFID登录超时 **************************************
+				//*********************************** 车厢RFID登录超时 **************************************//
 				case RfidLoginTimeout:
+					DEBUGINFO("case RfidLoginTimeout");
 					RFID_ResetLoginStatus();
 					HMI_CheckRFCard(0); 
 					break;
 
 
-				//*********************************** 更新电子锁状态 **************************************
+				//*********************************** 更新电子锁状态 **************************************//
 				case UpdateBoxLockStatus:
+					DEBUGINFO("case UpdateBoxLockStatus");
 					if( CarStatus.xBoxLocked == Locked )
 					{
 						// 锁上
@@ -146,18 +147,29 @@ void vBoxCtrlTask(void *argument)
 						// 解锁
 						DEBUGINFO("UnLock\n");
 						// 如果在消毒时，则停止消毒，跳转到消毒停止页面，记录已消毒的时间
-						if(UvClean_IsRunning()){
+						if(UvClean_IsRunning())
+						{
 							UvClean_Stop(); 
 							UvClean_Save_Record();
 							HMI_Change_Page(pgWarningUvCleanCanceled);
+						}
+						// 如果在运动中，则停止运动
+						if(CarStatus.xIsCarRunning != CarStop)
+						{
+							ucMotion_msg = CarStop;
+							if(osMessageQueuePut(xMotion_QueueHandle, &ucMotion_msg, 0, pdMS_TO_TICKS(100)) != osOK)
+							{
+								DEBUGINFO("send motion msg error");
+							}
 						}
 						HMI_Update_LockStatus_Req(0); // 发送电子锁的状态到LCD(HMI)
 					}
 					break;
 				
 
-				//*********************************** 更新UV消毒状态 **************************************
+				//*********************************** 更新UV消毒状态 **************************************//
 				case UpdateUVCleanStatus:
+					DEBUGINFO("case UpdateUVCleanStatus");
 					//消毒结束，保存本次消毒开始的rtc时间 + 消毒时长
 					if( !CarStatus.ucUVTimeRemain )
 					{
