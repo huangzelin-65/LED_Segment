@@ -2,6 +2,7 @@
 #define INC_STATE_H_
 #include <stdbool.h>
 #include <stdio.h>
+#include "include_defs.h"
 
 #define ERROR_LEVEL_LOW_  "LOW"
 #define ERROR_LEVEL_HIGH_  "HIGH"
@@ -39,9 +40,9 @@ typedef struct {
     int Code;
 } Error_t;
 typedef struct {
-    char headerId[64];
-    char timestamp[32];  
-    char version[16];   
+    char headerId[HEAD_ID_LENGTH];
+    char timestamp[TIMESTAMP_LENGTH];  
+    char version[VERSION_LENGTH];   
     const char *manufacturer;
     const char *serialNumber;
     const char *operatingMode;

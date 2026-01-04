@@ -3,8 +3,7 @@
 #include "clist.h"
 #include "JsonCommon.h"
 #include "main.h"
-#include "Task_MotionCtrl.h"
-#include "Task_BoxCtrl.h"
+
 
 List *feature_list = NULL;
 //链表初始化

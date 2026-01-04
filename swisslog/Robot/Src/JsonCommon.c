@@ -18,19 +18,19 @@
 #define TOPIC_CONN_ACK      "tk/v1/slhc/tkv-%d/connection/ack"
 
 /*解析时，字段存储使用以下数组*/
-char headerId[64]; 
-char timestamp[32];
-char version[16];
-char cmd[16];
-char cmdId[64];
-char model[16];
-char speedLevel[16];
-char sub_topic[64] = {0};
-char name[32];
-char value[32];
-char params[32];
-char type[32];
-char message[32];
+char headerId[HEAD_ID_LENGTH]; 
+char timestamp[TIMESTAMP_LENGTH];
+char version[VERSION_LENGTH];
+char cmd[CMD_LENGTH];
+char cmdId[CMD_ID_LENGTH];
+char model[MODEL_LENGTH];
+char speedLevel[SPEEDLEVEL_LENGTH];
+char sub_topic[SUBTOPIC_LENGTH] = {0};
+char name[NAME_LENGTH];
+char value[VALUE_LENGTH];
+char params[PARAMS_LENGTH];
+char type[TYPE_LENGTH];
+char message[MESSAGE_LENGTH];
 int Type;
 int code;
 Action_t temp_action;
