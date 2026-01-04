@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include "include_defs.h"
 
 void StrCommon_CreateHeadId(char* headerId);
 void StrCommon_CreateVersion(char* version);

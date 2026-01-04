@@ -2,6 +2,7 @@
 #define INC_STATE_H_
 #include <stdbool.h>
 #include <stdio.h>
+#include "include_defs.h"
 
 #define ERROR_LEVEL_LOW_  "LOW"
 #define ERROR_LEVEL_HIGH_  "HIGH"
