@@ -4,12 +4,13 @@
 #include <stdio.h>
 #include "include_defs.h"
 
-#define ERROR_LEVEL_LOW_  "LOW"
-#define ERROR_LEVEL_HIGH_  "HIGH"
+#define ERROR_LEVEL_LOW_    "LOW"
+#define ERROR_LEVEL_HIGH_   "HIGH"
 
-#define ERROR_TYPE_NONE_ "NONE"
-#define ERROR_TYPE_MOTOR_ "MOTOR"
-
+#define ERROR_TYPE_NONE_    "NONE"
+#define ERROR_TYPE_MOTOR_   "MOTOR"     //利用code值区分不同的电机故障
+#define ERROR_TYPE_SENSOR_  "SENSOR"    //利用code值区分不同的传感器故障
+#define ERROR_TYPE_SCREEN_  "SCREEN"
 
 typedef struct {
     bool front;
