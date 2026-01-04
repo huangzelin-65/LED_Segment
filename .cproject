@@ -101,6 +101,7 @@
 									<listOptionValue builtIn="false" value="../swisslog/Robot/Inc"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/swisslog}&quot;"/>
 									<listOptionValue builtIn="false" value="../swisslog/Ota/Inc"/>
+									<listOptionValue builtIn="false" value="../swisslog/Register/Inc"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1865227280" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -352,6 +353,7 @@
 									<listOptionValue builtIn="false" value="../swisslog/Robot/Inc"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/swisslog}&quot;"/>
 									<listOptionValue builtIn="false" value="../swisslog/Ota/Inc"/>
+									<listOptionValue builtIn="false" value="../swisslog/Register/Inc"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.821405208" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -490,6 +492,7 @@
 									<listOptionValue builtIn="false" value="../swisslog/Robot/Inc"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/swisslog}&quot;"/>
 									<listOptionValue builtIn="false" value="../swisslog/Ota/Inc"/>
+									<listOptionValue builtIn="false" value="../swisslog/Register/Inc"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1095945097" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -538,8 +541,14 @@
 	<storageModule moduleId="refreshScope"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.1292472020.1765997503;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.1292472020.1765997503.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1459667325;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1095945097">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.1292472020;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.1292472020.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.2080972466;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1865227280">
 			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.1292472020.1097731586;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.1292472020.1097731586.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.2045048064;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.821405208">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.release.1565653370;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.release.1565653370.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.557879938;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.555642077">
 			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>

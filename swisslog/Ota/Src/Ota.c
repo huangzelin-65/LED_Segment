@@ -21,13 +21,13 @@
 // #define OTA_SAVE_INTERVAL    128*1024 // 每下载128KB保存一次续传状态（适配大分区）
 
 // 全局变量
-static TaskHandle_t ota_task_handle = NULL;
-static QueueHandle_t ota_cmd_queue = NULL;
-static OTA_ProgressTypeDef ota_progress = {0};
+//static TaskHandle_t ota_task_handle = NULL;
+//static QueueHandle_t ota_cmd_queue = NULL;
+//static OTA_ProgressTypeDef ota_progress = {0};
 //static Partition_TypeDef ota_current_part = PARTITION_MAX;
 
 //保存升级的APP flash位置
-static Partition_TypeDef ota_target_part = PARTITION_MAX;
+//static Partition_TypeDef ota_target_part = PARTITION_MAX;
 
 //保存运行APP的相关参数，及更新的参数区位置
 //static Param_And_Area s_struTargetRunningParam= {0};
@@ -48,7 +48,7 @@ static Partition_TypeDef ota_target_part = PARTITION_MAX;
 } OTA_CmdTypeDef;*/
 
 // 函数声明
-static void ota_task(void* arg);
+void ota_task(void* arg);
 //static BaseType_t ota_cmd_send(OTA_CmdTypeDef cmd, TickType_t timeout);
 
 extern osMessageQueueId_t xMqttManagerQueueHandle;
@@ -56,7 +56,7 @@ STRU_Of_Get_UpgPkg_Info_TypeDef ReadyBack;
 STRU_Of_Upg_Result_TypeDef upgRlt;
 
 // OTA任务核心逻辑
-static void ota_task(void* arg) {
+void ota_task(void* arg) {
     //OTA_CmdTypeDef cmd;
 
     of_init_target_param();

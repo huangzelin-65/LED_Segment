@@ -66,12 +66,9 @@ bool bIncFieldRegisterErrTimes(void)
 	//compare head
 	if(plRegInfo.head != 0xAA55AA55) return false;
 
+	plRegInfo.counter++;
 	//
-	if(plRegInfo.counter < (MOST_FIELD_REG_ERR_TIMES-1))//
-	{
-		plRegInfo.counter++;//increase error times
-	}
-	else //over MOST_FIELD_REG_ERR_TIMES
+	if(MOST_FIELD_REG_ERR_TIMES <= plRegInfo.counter )//over MOST_FIELD_REG_ERR_TIMES
 	{
 		//clear data
 		memset(&plRegInfo, 0xFF, sizeof(Stru_ProductLine_Register_Typedef));
