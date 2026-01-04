@@ -8,6 +8,11 @@ To make it easy for you to get started with GitLab, here's a list of recommended
 
 Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
 
+## Build your system
+
+When you debug the program in daily development, you need to go to build configurations → Set active → select the Debug mode.
+When you want to get an OTA firmware, you need to go to build configurations → Set active → select the DebugA/DebugB mode. This will generate two bin files, which are used for programming into Flash's Bank A and Bank B respectively.
+
 ## Add your files
 
 - [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files

@@ -6,11 +6,15 @@
 #include "adaptor_can.h"
 #include "LogDebugInfo.h"
 #include "string.h"
+#include "common.h"
+#include "Task_MotionCtrl.h"
+#include "Task_BoxCtrl.h"
 
 /* ===================== 全局变量定义 ===================== */
 extern FDCAN_HandleTypeDef hfdcan1;
 extern osMessageQueueId_t xCAN1_Rx_QueueHandle;
 extern osMessageQueueId_t xCAN1_Tx_QueueHandle;
+extern ServerToCarData_t ServerToCarData;
 SemaphoreHandle_t g_car_mutex;
 CANCarCtx_t g_CAN_car_ctx = {0};
 
@@ -168,28 +172,37 @@ void Car_Process_MasterCmdFrame(uint8_t *pu8_rx_data) {
     // 仅处理当前关联主设备+自身临时ID
     if (u16_master_id != g_CAN_car_ctx.u16_cur_master_id || u8_temp_id != g_CAN_car_ctx.u8_temp_id) {
         xSemaphoreGive(g_car_mutex);
+        DEBUGINFO("ID not match!! Master ID: %d, Temp ID: %d", u16_master_id, u8_temp_id);
         return;
     }
 
+    // 仅处理最新的指令(根据g_CAN_car_ctx.u8_cmd_seq判断)
+    uint8_t seq_diff = (pu8_rx_data[3] - g_CAN_car_ctx.u8_cmd_seq) & 0xFF; // 无符号差值运算，若差值大于127，说明pu8_rx_data[3]是旧指令（回绕前的序号）
+    if (seq_diff > 127) { // 超过半周期，判定为旧指令，不处理
+        xSemaphoreGive(g_car_mutex);
+        DEBUGINFO("Seq not match!! cmd Seq: %d, the last cmd: %d", pu8_rx_data[3], g_CAN_car_ctx.u8_cmd_seq);
+        return;
+    }
+    g_CAN_car_ctx.u8_cmd_seq = pu8_rx_data[3]; //赋值最新指令序号
+    g_CAN_car_ctx.u8_cmd_seq++;  // 无符号char溢出后自动从255→0，无需手动判断
+
     uint8_t u8_ack_code = ACK_CODE_SUCCESS;
-    switch (pu8_rx_data[3]) {
-        case CMD_TYPE_START_STOP:
-            if (pu8_rx_data[5] == 1) {
-                g_CAN_car_ctx.u8_run_status = 1; // 启动
-            } else if (pu8_rx_data[5] == 0) {
-                g_CAN_car_ctx.u8_run_status = 0; // 停止
-            } else {
-                u8_ack_code = ACK_CODE_EXEC_FAIL;
-            }
-            break;
-        case CMD_TYPE_SPEED_ADJ:
-            if (pu8_rx_data[5] >= 1 && pu8_rx_data[5] <= 10) {
-                g_CAN_car_ctx.u8_speed_level = pu8_rx_data[5];
-            } else {
-                u8_ack_code = ACK_CODE_EXEC_FAIL;
-            }
+    // 处理指令类型
+    switch (pu8_rx_data[4]) {
+        case CMD_TYPE_MOTION_CTRL:
+            uint16_t u16_cmd_param = (pu8_rx_data[5] << 8) | pu8_rx_data[6];
+            ServerToCarData.xAutoMode = u16_cmd_param & 0x03; // 模式选择
+            ServerToCarData.xDirection = (u16_cmd_param >> 2) & 0x03; // 方向
+            ServerToCarData.xSetSpeed = (u16_cmd_param >> 4) & 0x03; // 速度
+            ServerToCarData.xScreenLockStatus = (u16_cmd_param >> 6) & 0x03; // 车厢屏幕是否锁上
+            DEBUGINFO("xAutoMode : %d, xDirection : %d, xSetSpeed : %d, xScreenLockStatus : %d",
+                ServerToCarData.xAutoMode, ServerToCarData.xDirection, ServerToCarData.xSetSpeed, ServerToCarData.xScreenLockStatus);
+            vRemoteModeSet(ServerToCarData.xAutoMode);
+            vRemoteMotionCmd(ServerToCarData.xDirection, ServerToCarData.xSetSpeed);
+            vSet_Screen_LockStatus(ServerToCarData.xScreenLockStatus);
             break;
         case CMD_TYPE_STATUS_REQUERY:
+            // Todo ...
             Car_Send_Status(STATUS_TYPE_RUN); // 立即上报运行状态
             break;
         default:

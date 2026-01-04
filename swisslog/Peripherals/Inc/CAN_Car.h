@@ -40,8 +40,7 @@
 #define CAN_ID_CAR_STATUS              0x007   // 小车状态帧（小→主）
 
 // 指令类型（Byte3）
-#define CMD_TYPE_START_STOP            0x01    // 小车启停
-#define CMD_TYPE_SPEED_ADJ             0x02    // 速度调节
+#define CMD_TYPE_MOTION_CTRL           0x01    // 小车运动控制
 #define CMD_TYPE_STATUS_REQUERY        0x03    // 状态重询
 #define CMD_TYPE_FAULT_RESET           0x04    // 故障复位
 
@@ -117,6 +116,7 @@ typedef struct {
     TrackStatus_t en_track_status;     // 轨道状态
     uint32_t u32_last_master_heart;    // 最后接收主心跳时间
     uint8_t u8_status_seq;             // 状态序列号自增
+    uint8_t u8_cmd_seq;                // 指令序列号判断
     // 小车硬件状态
     uint8_t u8_run_status;             // 0=停止，1=运行，2=故障
     uint8_t u8_speed_level;            // 速度等级（1~10）

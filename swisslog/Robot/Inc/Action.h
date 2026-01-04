@@ -2,15 +2,16 @@
 #define INC_ACTION_H_
 #include <stdbool.h>
 #include <stdio.h>
+#include "include_defs.h"
 
 typedef struct {
-    char model[16];  // 存储"auto"或"manual"，预留足够长度
-    char speedLevel[16];//速度数值
+    char model[MODEL_LENGTH];  // 存储"auto"或"manual"，预留足够长度
+    char speedLevel[SPEEDLEVEL_LENGTH];//速度数值
 }CmdParams;
 
 typedef struct {
-    char cmd[16];     // 存储"forward"/"back"/"stop"/"runModel"
-    char cmdId[64];   // 存储命令ID（如"1"）
+    char cmd[CMD_LENGTH];     // 存储"forward"/"back"/"stop"/"runModel"
+    char cmdId[CMD_ID_LENGTH];   // 存储命令ID（如"1"）
     CmdParams params;  // 命令参数
     char status[24];  //执行结果
 } Cmd_t;
@@ -22,9 +23,9 @@ typedef struct {
 } ActionParams;
 
 typedef struct {
-    char headerId[64];    // 最多4字符+":"+Long，预留长度
-    char timestamp[32];   // Unix毫秒时间戳（字符串形式）
-    char version[16];     // 版本号（如"1.0.0"）
+    char headerId[HEAD_ID_LENGTH];    // 最多4字符+":"+Long，预留长度
+    char timestamp[TIMESTAMP_LENGTH];   // Unix毫秒时间戳（字符串形式）
+    char version[VERSION_LENGTH];     // 版本号（如"1.0.0"）
     int id;//流水号
     int Type; 
     Cmd_t cmd;
