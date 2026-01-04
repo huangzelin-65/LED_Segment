@@ -5,13 +5,13 @@
 #include "include_defs.h"
 
 typedef struct {
-    char model[16];  // 存储"auto"或"manual"，预留足够长度
-    char speedLevel[16];//速度数值
+    char model[MODEL_LENGTH];  // 存储"auto"或"manual"，预留足够长度
+    char speedLevel[SPEEDLEVEL_LENGTH];//速度数值
 }CmdParams;
 
 typedef struct {
-    char cmd[16];     // 存储"forward"/"back"/"stop"/"runModel"
-    char cmdId[64];   // 存储命令ID（如"1"）
+    char cmd[CMD_LENGTH];     // 存储"forward"/"back"/"stop"/"runModel"
+    char cmdId[CMD_ID_LENGTH];   // 存储命令ID（如"1"）
     CmdParams params;  // 命令参数
     char status[24];  //执行结果
 } Cmd_t;
