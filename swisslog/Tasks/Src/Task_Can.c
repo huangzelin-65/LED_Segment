@@ -33,8 +33,12 @@ uint8_t txData2[8] = {0xFF,0x55,0x06,0x05,0x04,0x03,0x02,0x01};
 void vCANManagerTask(void *argument)
 {
     DEBUGINFO("start");
-    
+#ifdef USE_FDCAN1
     CAN_Init(&hfdcan1, 0, FILTER_MASK_ALL, CAN_RX_FIFO0); 
+#endif
+#ifdef USE_FDCAN2
+    CAN_Init(&hfdcan2, 0, FILTER_MASK_ALL, CAN_RX_FIFO1);
+#endif
 
 #ifdef CAN_TEST
     osThreadResume(FDCANTxTaskHandle);
@@ -69,7 +73,12 @@ void vCANCarTxTask(void *argument)
     {
         if(xQueueReceive(xCAN1_Tx_QueueHandle, &CAN_Send_Msg, portMAX_DELAY) == pdPASS)
         {
+#ifdef USE_FDCAN1
             CAN_AddMsgToTxFifo(&hfdcan1, CAN_Send_Msg.u32_frame_id, CAN_Send_Msg.u8_data);
+#endif
+#ifdef USE_FDCAN2
+            CAN_AddMsgToTxFifo(&hfdcan2, CAN_Send_Msg.u32_frame_id, CAN_Send_Msg.u8_data);
+#endif
         }
         // if(g_CAN_car_ctx.en_online_status == ONLINE_STATUS_ONLINE)
         // {
