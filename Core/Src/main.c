@@ -73,7 +73,10 @@ UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart6;
 UART_HandleTypeDef huart10;
 UART_HandleTypeDef huart11;
+DMA_NodeTypeDef Node_GPDMA1_Channel6;
+DMA_QListTypeDef List_GPDMA1_Channel6;
 DMA_HandleTypeDef handle_GPDMA1_Channel6;
+DMA_HandleTypeDef handle_GPDMA2_Channel3;
 DMA_HandleTypeDef handle_GPDMA1_Channel1;
 DMA_HandleTypeDef handle_GPDMA1_Channel0;
 DMA_HandleTypeDef handle_GPDMA2_Channel0;
@@ -502,6 +505,8 @@ static void MX_GPDMA2_Init(void)
     HAL_NVIC_EnableIRQ(GPDMA2_Channel1_IRQn);
     HAL_NVIC_SetPriority(GPDMA2_Channel2_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(GPDMA2_Channel2_IRQn);
+    HAL_NVIC_SetPriority(GPDMA2_Channel3_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(GPDMA2_Channel3_IRQn);
 
   /* USER CODE BEGIN GPDMA2_Init 1 */
 
@@ -794,6 +799,13 @@ static void MX_UART5_Init(void)
   }
   /* USER CODE BEGIN UART5_Init 2 */
 
+  #ifdef ZHONGNENG_RFID
+  huart5.Init.BaudRate = 115200;
+  if (HAL_UART_Init(&huart5) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  #endif
   /* USER CODE END UART5_Init 2 */
 
 }

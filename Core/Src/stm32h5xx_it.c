@@ -46,6 +46,9 @@
 /* USER CODE BEGIN PD */
 BaseType_t xHigherPriorityTaskWoken;
 eInterruptType msg;
+#ifdef ZHONGNENG_RFID
+SemaphoreHandle_t xUART_TxSemaphore_ZHONGNENG = NULL;
+#endif
 
 /* USER CODE END PD */
 
@@ -74,7 +77,10 @@ extern ETH_HandleTypeDef heth;
 extern FDCAN_HandleTypeDef hfdcan1;
 extern FDCAN_HandleTypeDef hfdcan2;
 extern I2C_HandleTypeDef hi2c1;
+extern DMA_NodeTypeDef Node_GPDMA1_Channel6;
+extern DMA_QListTypeDef List_GPDMA1_Channel6;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel6;
+extern DMA_HandleTypeDef handle_GPDMA2_Channel3;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel1;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel0;
 extern DMA_HandleTypeDef handle_GPDMA2_Channel0;
@@ -687,6 +693,20 @@ void GPDMA2_Channel2_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles GPDMA2 Channel 3 global interrupt.
+  */
+void GPDMA2_Channel3_IRQHandler(void)
+{
+  /* USER CODE BEGIN GPDMA2_Channel3_IRQn 0 */
+
+  /* USER CODE END GPDMA2_Channel3_IRQn 0 */
+  HAL_DMA_IRQHandler(&handle_GPDMA2_Channel3);
+  /* USER CODE BEGIN GPDMA2_Channel3_IRQn 1 */
+
+  /* USER CODE END GPDMA2_Channel3_IRQn 1 */
+}
+
+/**
   * @brief This function handles UART7 global interrupt.
   */
 void UART7_IRQHandler(void)
@@ -771,9 +791,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
   }
   else if (huart->Instance == UART5) {
     //Car Rfid串口接收处理
-    uint16_t dataLength = ulCarRfid_Get_DMA_Receive_Len();
-
-    if (dataLength > 0) 
+    if (Size > 0)
     {
       osSemaphoreRelease(xCarRfidRxSemHandle);  // 释放信号量,允许读取RFID数据
     }
@@ -830,6 +848,15 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
     vPortFree(tx_data);
     #endif
     osSemaphoreRelease(xPrintSemHandle);  // 释放信号量,允许下一次打印
+  }
+
+  else if(huart->Instance == UART5)
+  {
+ #ifdef ZHONGNENG_RFID
+    xHigherPriorityTaskWoken = pdFALSE;
+    xSemaphoreGiveFromISR(xUART_TxSemaphore_ZHONGNENG, &xHigherPriorityTaskWoken);
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+ #endif
   }
   else if (huart->Instance == USART6)
   {
