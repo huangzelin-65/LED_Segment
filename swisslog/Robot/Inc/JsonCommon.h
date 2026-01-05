@@ -24,6 +24,7 @@ typedef enum {
     JSON_PARSE_NONE = 0,
     JSON_PARSE_ACTION, 
     JSON_PARSE_HEARTBEAT_ACK,
+    JSON_PARSE_REGISTER_RESPONSE
 } JsonParseType_t;
 
 typedef struct {
@@ -43,4 +44,5 @@ void Json_ParseMsg(JsonParseType_t type,void *data);
 int Json_ParseTopic(const char* topic);
 int Json_ParseAction(char* data);
 int Json_ParseHeartBeat(char* data);
+int Json_ParseRegister(char* data);
 #endif

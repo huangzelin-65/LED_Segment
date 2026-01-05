@@ -131,6 +131,11 @@ void vJsonParseTask(void *argument)
                 {
                     Json_ParseHeartBeat(json_data->data);
                 }
+                break;
+                case JSON_PARSE_REGISTER_RESPONSE:
+                {
+                    Json_ParseRegister(json_data->data);
+                }
                 break;                                        
                 default:
                 break;

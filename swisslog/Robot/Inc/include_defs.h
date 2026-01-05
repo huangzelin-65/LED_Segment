@@ -16,7 +16,10 @@
 #define SUBTOPIC_LENGTH     64
 #define CAUSE_LENGTH        32
 #define IP_LENGTH           36
-#define DEVICE_CODE_LENGTH  36
+#define DEVICE_CODE_LENGTH  50
+#define USER_LENGTH         36
+#define PWD_LENGTH          36
+#define SN_LENGTH           50
 
 #include "Task_MotionCtrl.h"
 #include "Task_BoxCtrl.h"

@@ -14,8 +14,9 @@
 #include "Notify.h"
 #include "RegisterInfo.h"
 
-#define TOPIC_ACTION        "tk/v1/slhc/tkv-%d/instantactions"
-#define TOPIC_CONN_ACK      "tk/v1/slhc/tkv-%d/connection/ack"
+#define TOPIC_ACTION                 "tk/v1/slhc/tkv-%s/instantactions"
+#define TOPIC_CONN_ACK               "tk/v1/slhc/tkv-%s/connection/ack"
+#define TOPIC_REGISTER_RESPONSE      "bcss/v1/slhc/register/response"
 
 /*解析时，字段存储使用以下数组*/
 char headerId[HEAD_ID_LENGTH]; 
@@ -31,6 +32,10 @@ char value[VALUE_LENGTH];
 char params[PARAMS_LENGTH];
 char type[TYPE_LENGTH];
 char message[MESSAGE_LENGTH];
+char user[USER_LENGTH];
+char pwd[PWD_LENGTH];
+char deviceCode[DEVICE_CODE_LENGTH];
+char sn[SN_LENGTH];
 int Type;
 int code;
 Action_t temp_action;
@@ -316,7 +321,7 @@ int Json_ParseTopic(const char* topic)
     DEBUGINFO("topic:%s\n",topic);
     { 
         memset(sub_topic,0,sizeof(sub_topic));
-        snprintf(sub_topic, sizeof(sub_topic), TOPIC_ACTION, usEncoder_Read_Number()); 
+        snprintf(sub_topic, sizeof(sub_topic), TOPIC_ACTION, mqtt_info.id); 
         char *result = strstr(topic, sub_topic);
         if (result != NULL) {
             return JSON_PARSE_ACTION;
@@ -324,12 +329,20 @@ int Json_ParseTopic(const char* topic)
     }
     {
         memset(sub_topic,0,sizeof(sub_topic));
-        snprintf(sub_topic, sizeof(sub_topic), TOPIC_CONN_ACK, usEncoder_Read_Number());
+        snprintf(sub_topic, sizeof(sub_topic), TOPIC_CONN_ACK, mqtt_info.id);
         char *result = strstr(topic, sub_topic);
         if (result != NULL) {
             return JSON_PARSE_HEARTBEAT_ACK;
         }  
-    }        
+    }   
+    {
+        memset(sub_topic,0,sizeof(sub_topic));
+        snprintf(sub_topic, sizeof(sub_topic), TOPIC_REGISTER_RESPONSE);
+        char *result = strstr(topic, sub_topic);
+        if (result != NULL) {
+            return JSON_PARSE_REGISTER_RESPONSE;
+        }  
+    }         
     return JSON_PARSE_NONE;
 }
 
@@ -805,4 +818,80 @@ int Json_ParseHeartBeat(char* data)
     return 0;
 }
 
+int Json_ParseRegister(char* data)
+{
+    if (data == NULL) {
+        return -1;
+    }
+    // 1. 解析整个JSON
+    cJSON *root = cJSON_Parse(data);
+    if (root == NULL) {
+        DEBUGINFO("cJSON_Parse fail\n");
+        return -1;
+    }
+    // 2. 解析顶层字段: user
+    cJSON *user_json = cJSON_GetObjectItem(root, "user");
+    if (user_json == NULL || !cJSON_IsString(user_json)) {
+        DEBUGINFO("user Not find\n");
+        cJSON_Delete(root);
+        return -1;
+    }
 
+    strncpy(user, user_json->valuestring, sizeof(user)-1);
+    user[sizeof(user)-1] = '\0';  
+
+    // 3. 解析顶层字段: pwd
+    cJSON *pwd_json = cJSON_GetObjectItem(root, "pwd");
+    if (pwd_json == NULL || !cJSON_IsString(pwd_json)) {
+        DEBUGINFO("pwd Not find\n");
+        cJSON_Delete(root);
+        return -1;
+    }
+
+    strncpy(pwd, pwd_json->valuestring, sizeof(pwd)-1);
+    pwd[sizeof(pwd)-1] = '\0';
+
+    // 4. 解析顶层字段: deviceCode
+    cJSON *deviceCode_js = cJSON_GetObjectItem(root, "deviceCode");
+    if (deviceCode_js == NULL || !cJSON_IsString(deviceCode_js)) {
+        DEBUGINFO("deviceCode Not find\n");
+        cJSON_Delete(root);
+        return -1;
+    }
+
+    strncpy(deviceCode, deviceCode_js->valuestring, sizeof(deviceCode)-1);
+    deviceCode[sizeof(deviceCode)-1] = '\0';
+
+    // 5. 解析顶层字段: sn
+    cJSON *sn_js = cJSON_GetObjectItem(root, "sn");
+    if (sn_js == NULL || !cJSON_IsString(sn_js)) {
+        DEBUGINFO("sn Not find\n");
+        cJSON_Delete(root);
+        return -1;
+    }
+
+    strncpy(sn, sn_js->valuestring, sizeof(sn)-1);
+    sn[sizeof(sn)-1] = '\0';
+
+    // 6. 解析顶层字段: timestamp
+    cJSON *time_stamp = cJSON_GetObjectItem(root, "ts");
+    if (time_stamp == NULL || !cJSON_IsString(time_stamp)) {
+        DEBUGINFO("ts Not find\n");
+        cJSON_Delete(root);
+        return -1;
+    }
+
+    strncpy(timestamp, time_stamp->valuestring, sizeof(timestamp)-1);
+    timestamp[sizeof(timestamp)-1] = '\0';
+
+    // 释放cJSON资源
+    cJSON_Delete(root);    
+
+    DEBUGINFO("  user: %s\n", user);
+    DEBUGINFO("  pwd: %s\n",pwd);
+    DEBUGINFO("  deviceCode: %s\n", deviceCode);
+    DEBUGINFO("  sn: %s\n",sn);
+    DEBUGINFO("  timestamp: %s\n", timestamp);
+
+    return 0;
+}
