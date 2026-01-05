@@ -47,7 +47,7 @@ bool bReadProdRegisterInfo(const char *uuid, uint8_t len)
 	if(plRegInfo.head != 0xAA55AA55) return false;
 
 	//compare crc
-	uint32_t readcrc = (plRegInfo.info[3]-1)<<24 | (plRegInfo.info[3]-1)<<16 | (plRegInfo.info[1]-1)<<8 | (plRegInfo.info[0]-1);
+	uint32_t readcrc = (plRegInfo.info[3]-1)<<24 | (plRegInfo.info[2]-1)<<16 | (plRegInfo.info[1]-1)<<8 | (plRegInfo.info[0]-1);
 	if(readcrc != crc) return false;
 
 	return true;
