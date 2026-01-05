@@ -17,9 +17,9 @@
 #include "Register.h"
 #include "StringEdit.h"
 
-#define MQTT_TOPIC_NAME                 "tk/v1/slhc/tkv-%d/state" 
-#define MQTT_HEARTBEAT_TOPIC_NAME       "tk/v1/slhc/tkv-%d/connection" 
-#define MQTT_FACTSHEET_TOPIC_NAME       "tk/v1/slhc/tkv-%d/factsheet" 
+#define MQTT_TOPIC_NAME                 "tk/v1/slhc/tkv-%s/state" 
+#define MQTT_HEARTBEAT_TOPIC_NAME       "tk/v1/slhc/tkv-%s/connection" 
+#define MQTT_FACTSHEET_TOPIC_NAME       "tk/v1/slhc/tkv-%s/factsheet" 
 #define MQTT_PUBLISH_MSG                "HEARTBEAT"
 #define MQTT_CMD_TIMEOUT_MS             30000
 
@@ -78,9 +78,10 @@ void vMqttManagerTask(void *argument)
                     {
                         bool rc = bReadProdRegisterInfo(mqtt_info.uuid, MQTT_UUID_ID_LENGTH);
                         if(rc == true)//校验成功，产品需静默注册
-                        {
+                        {                            
                             strcpy(mqtt_info.name, MQTT_REGISTER_NAME);//使用默认名称
                             strcpy(mqtt_info.pwd, MQTT_REGISTER_PSW); //使用默认密码
+                            strcpy(mqtt_info.sn, mqtt_info.uuid);//为了满足多台机器同时静默升级且不冲突，此处用uuid作为client id 登录
                             mqtt_info.Register = 1;  //需要执行静默注册  
                             Mqtt_Notify(MQTT_NOTIFY_INIT);                       
                         }
@@ -93,7 +94,7 @@ void vMqttManagerTask(void *argument)
                 break;
                 case MQTT_MSG_INIT:
                 {
-                    int rc = MqttInit(robotSate.client_id);
+                    int rc = MqttInit();
                     if(rc == MQTT_CODE_SUCCESS)
                     {  
                         DEBUGINFO("MqttInit SUCCESS");
@@ -107,7 +108,7 @@ void vMqttManagerTask(void *argument)
                     DEBUGINFO("MQTT_MSG_HEARTBEAT start\n");
                     char* robot_json_str = (char*)msg->data;
                     char topic[64] = {0};
-                    snprintf(topic, sizeof(topic), MQTT_HEARTBEAT_TOPIC_NAME, robotSate.encode_number);                  
+                    snprintf(topic, sizeof(topic), MQTT_HEARTBEAT_TOPIC_NAME, mqtt_info.id);                  
                     Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 1, 0);
                     vPortFree(robot_json_str);
                     DEBUGINFO("MQTT_MSG_HEARTBEAT end\n");
@@ -121,7 +122,7 @@ void vMqttManagerTask(void *argument)
                     {
                         DEBUGINFO("robot_json_str:%s\n",robot_json_str);
                         char topic[64] = {0};
-                        snprintf(topic, sizeof(topic), MQTT_TOPIC_NAME, robotSate.encode_number);
+                        snprintf(topic, sizeof(topic), MQTT_TOPIC_NAME, mqtt_info.id);
                         Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 1, 0);
                         vPortFree(robot_json_str);
                     }
@@ -130,7 +131,7 @@ void vMqttManagerTask(void *argument)
                 break;
                 case MQTT_MSG_SUBSCRIBE:
                 {
-                    int rc = Mqtt_SubscribeTopicInit(robotSate.encode_number);
+                    int rc = Mqtt_SubscribeTopicInit();
                     if (rc != MQTT_CODE_SUCCESS) {
                         DEBUGINFO("Mqtt_SubscribeTopicInit fail");
                         //订阅话题失败，尝试再次订阅
@@ -138,8 +139,16 @@ void vMqttManagerTask(void *argument)
                     }  
                     else
                     {
-                        DEBUGINFO("Mqtt_SubscribeTopicInit success,start online");
-                        Mqtt_Notify(MQTT_NOTIFY_ONLINE);    
+                        if(mqtt_info.Register)//发布注册消息
+                        {
+                            DEBUGINFO("Mqtt_SubscribeTopicInit success,start register");
+                            Mqtt_Notify(MQTT_NOTIFY_REGISTER);                            
+                        }
+                        else//正常登录上线
+                        {
+                            DEBUGINFO("Mqtt_SubscribeTopicInit success,start online");
+                            Mqtt_Notify(MQTT_NOTIFY_ONLINE);  
+                        }
                     }                                       
                 }
                 break; 
@@ -149,7 +158,7 @@ void vMqttManagerTask(void *argument)
                     //此处需修改为online的具体内容
                     char* robot_json_str = (char*)msg->data;
                     char topic[64] = {0};
-                    snprintf(topic, sizeof(topic), MQTT_FACTSHEET_TOPIC_NAME, robotSate.encode_number);                     
+                    snprintf(topic, sizeof(topic), MQTT_FACTSHEET_TOPIC_NAME, mqtt_info.id);                     
                     Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
                     vPortFree(robot_json_str);
 
@@ -163,14 +172,28 @@ void vMqttManagerTask(void *argument)
                     //此处需修改为online的具体内容
                     char* robot_json_str = (char*)msg->data;
                     char topic[64] = {0};
-                    snprintf(topic, sizeof(topic), MQTT_FACTSHEET_TOPIC_NAME, robotSate.encode_number);                     
+                    snprintf(topic, sizeof(topic), MQTT_FACTSHEET_TOPIC_NAME, mqtt_info.id);                     
                     Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 0, 0);
                     vPortFree(robot_json_str);
 
                     MqttReadReady = 1;//发布话题后既可正常等待话题
                     DEBUGINFO("MQTT_MSG_OFFLINE end\n");
                 }
-                break;                                                
+                break;
+                case MQTT_MSG_REGISTER:
+                {
+                    DEBUGINFO("MQTT_MSG_REGISTER start\n");
+                    char* robot_json_str = (char*)msg->data;
+                    if(robot_json_str != NULL)
+                    {
+                        char topic[64] = {0};
+                        snprintf(topic, sizeof(topic), MQTT_REGISTER_PUB_TOPIC);
+                        Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 1, 0);
+                        vPortFree(robot_json_str);
+                    }                    
+                    DEBUGINFO("MQTT_MSG_REGISTER end\n");
+                }   
+                break;                                             
                 default:break;
             }
             vPortFree(manage_data);
@@ -252,7 +275,12 @@ void vMqttNotifyTask(void *argument)
           {
             DEBUGINFO("MQTT_NOTIFY_INIT\n");  
             Mqtt_SendMsg(MQTT_MSG_INIT,NULL);
-          }                                                                     
+          }  
+          if(ulNotificationValue & MQTT_NOTIFY_REGISTER)
+          {
+            DEBUGINFO("MQTT_NOTIFY_REGISTER\n");  
+            Mqtt_SendMsg(MQTT_MSG_REGISTER,NULL);
+          }                                                                             
       }        
     }
 }

@@ -574,7 +574,7 @@ void Robot_ParseJson(char* topic,char* data)
 {
     char sub_topic[64] = {0};
     memset(sub_topic,0,sizeof(sub_topic));
-    snprintf(sub_topic, sizeof(sub_topic), MQTT_SUB_ACTION, robotSate.encode_number); 
+    // snprintf(sub_topic, sizeof(sub_topic), MQTT_SUB_ACTION, robotSate.encode_number); 
     char *result = strstr(topic, sub_topic);
     if (result != NULL) {
         DEBUGINFO("MQTT_SUB_ACTION");
@@ -596,7 +596,7 @@ void Robot_ParseJson(char* topic,char* data)
     else
     {
         memset(sub_topic,0,sizeof(sub_topic));
-        snprintf(sub_topic, sizeof(sub_topic), MQTT_SUB_CONN_ACK, robotSate.encode_number);
+        // snprintf(sub_topic, sizeof(sub_topic), MQTT_SUB_CONN_ACK, robotSate.encode_number);
         char *result = strstr(topic, sub_topic);
         if (result != NULL) {
             DEBUGINFO("MQTT_SUB_CONN_ACK");

@@ -28,6 +28,7 @@
 #define MQTT_PUBLISH_MSG       "Test Publish"
 #define MQTT_USERNAME          "hcms_mqtt"
 #define MQTT_PASSWORD          "KM5zng23"
+
 #ifdef ENABLE_MQTT_TLS
     #define MQTT_USE_TLS       1
     #define MQTT_PORT          8883
@@ -56,7 +57,8 @@ int mqtt_ready2read = 0;//接收到mqtt数据，可以开始读取
 int mqtt_rest2read = 0;//剩余需要区域读取得mqtt数据长度
 int mqtt_socket_id = -1;//mqtt底层tcp连接时，被分配得socket ip
 volatile word16 mPacketIdLast;//mqtt唯一id
-MqttTopic subscribe_topics[MQTT_SUBSCRIBE_COUNT];//订阅的话题
+MqttTopic subscribe_topics[MQTT_SUBSCRIBE_COUNT + 1];//订阅的话题,+1是给注册用
+char mqtt_sub_topic[MQTT_SUBSCRIBE_COUNT + 1][64];
 MqttNet mNetwork;//网络结构体
 MqttClient mClient;//mqtt客户端
 int mSockFd = INVALID_SOCKET_FD;
@@ -531,7 +533,7 @@ static int Mqtt_TlsCb(MqttClient* client)
     return 0;
 }
 //mqtt参数初始化，连接服务器、订阅话题
-int MqttInit(const char *client_id)
+int MqttInit(void)
 {
     MqttObject mqttObj;
     int rc = 0;
@@ -561,16 +563,16 @@ int MqttInit(const char *client_id)
     //连接服务器第二步
     XMEMSET(&mqttObj, 0, sizeof(mqttObj));
     mqttObj.connect.keep_alive_sec = MQTT_KEEP_ALIVE_SEC;
-    mqttObj.connect.client_id = client_id;
-    mqttObj.connect.username = MQTT_USERNAME;
-    mqttObj.connect.password = MQTT_PASSWORD;
+    mqttObj.connect.client_id = mqtt_info.sn;
+    mqttObj.connect.username = mqtt_info.name;
+    mqttObj.connect.password = mqtt_info.pwd;
     rc = MqttClient_Connect(&mClient, &mqttObj.connect);
     if (rc != MQTT_CODE_SUCCESS) {
         DEBUGINFO("MqttClient_Connect fail");
         goto exit;
     }
     DEBUGINFO("MQTT Broker Connect Success: ClientID %s, Username %s, Password %s",
-        client_id,
+        mqtt_info.sn,
         (MQTT_USERNAME == NULL) ? "Null" : MQTT_USERNAME,
         (MQTT_PASSWORD == NULL) ? "Null" : MQTT_PASSWORD);
     mqtt_isConnected = 1;
@@ -869,25 +871,26 @@ int Mqtt_SubscribeMsg(MqttTopic *topics,int count)
 }
 
 //需要订阅的话题初始化
-int Mqtt_SubscribeTopicInit(uint16_t id)
+int Mqtt_SubscribeTopicInit(void)
 {
     DEBUGINFO("start");
-    char sub_topic[MQTT_SUBSCRIBE_COUNT][64];
+
+    //正常流程订阅话题
     for (int i = 0; i < MQTT_SUBSCRIBE_COUNT; i++)
     {
         switch (i)
         {
             case 0:
             {
-                snprintf(sub_topic[i], 64, MQTT_SUB_ACTION, id);                
-                subscribe_topics[i].topic_filter = sub_topic[i];
+                snprintf(mqtt_sub_topic[i], 64, MQTT_SUB_ACTION, mqtt_info.id);                
+                subscribe_topics[i].topic_filter = mqtt_sub_topic[i];
                 subscribe_topics[i].qos = MQTT_QOS;
             }
             break;
             case 1:
             {
-                snprintf(sub_topic[i], 64, MQTT_SUB_CONN_ACK, id);                
-                subscribe_topics[i].topic_filter = sub_topic[i];
+                snprintf(mqtt_sub_topic[i], 64, MQTT_SUB_CONN_ACK, mqtt_info.id);                
+                subscribe_topics[i].topic_filter = mqtt_sub_topic[i];
                 subscribe_topics[i].qos = MQTT_QOS;
             }
             break;
@@ -901,7 +904,14 @@ int Mqtt_SubscribeTopicInit(uint16_t id)
             break;
         }
     }
-    
+    //注册流程需订阅话题
+    if(mqtt_info.Register)
+    {
+        snprintf(mqtt_sub_topic[MQTT_SUBSCRIBE_COUNT], 64, MQTT_REGISTER_SUB_TOPIC);
+        subscribe_topics[MQTT_SUBSCRIBE_COUNT].topic_filter = mqtt_sub_topic[MQTT_SUBSCRIBE_COUNT];
+        subscribe_topics[MQTT_SUBSCRIBE_COUNT].qos = MQTT_QOS;
+    }
+
     int rc = Mqtt_SubscribeMsg(subscribe_topics,MQTT_SUBSCRIBE_COUNT);
     if (rc == MQTT_CODE_SUCCESS) {
         DEBUGINFO("Success");

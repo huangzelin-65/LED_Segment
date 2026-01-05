@@ -14,8 +14,12 @@
 #define MQTT_REGISTER_NAME      "hcms_def"    //静默注册时使用的账户
 #define MQTT_REGISTER_PSW       "Abc@123456"  //静默注册时使用的账户密码
 
-#define MQTT_SUB_ACTION        "tk/v1/slhc/tkv-%d/instantactions"
-#define MQTT_SUB_CONN_ACK      "tk/v1/slhc/tkv-%d/connection/ack"  
+#define MQTT_SUB_ACTION        "tk/v1/slhc/tkv-%s/instantactions"
+#define MQTT_SUB_CONN_ACK      "tk/v1/slhc/tkv-%s/connection/ack"  
+
+#define MQTT_REGISTER_PUB_TOPIC "bcss/v1/slhc/register"
+#define MQTT_REGISTER_SUB_TOPIC "bcss/v1/slhc/register/response"
+
 typedef enum
 {
     MQTT_OK = 0,
@@ -41,7 +45,8 @@ typedef enum
     MQTT_MSG_ROBOT_EVENT,
     MQTT_MSG_SUBSCRIBE,
     MQTT_MSG_ONLINE,
-    MQTT_MSG_OFFLINE,    
+    MQTT_MSG_OFFLINE, 
+    MQTT_MSG_REGISTER,   
 }MqttMsgType_t;
 
 typedef struct 
@@ -86,6 +91,7 @@ typedef enum {
     MQTT_NOTIFY_ONLINE = 0x02,
     MQTT_NOTIFY_OFFLINE = 0x04,
     MQTT_NOTIFY_INIT = 0x08,
+    MQTT_NOTIFY_REGISTER = 0x10,
 } MqttNotify_t;
 
 typedef struct {
@@ -96,7 +102,7 @@ typedef struct {
 typedef struct {
 	char name[MQTT_NAME_LENGTH];
 	char pwd[MQTT_PSW_LENGTH]; 
-    char sn[MQTT_SN_LENGTH]; 
+    char sn[MQTT_SN_LENGTH];//作为client id使用 
     char id[MQTT_ID_LENGTH];//从sn中获取
     char uuid[MQTT_UUID_ID_LENGTH];
     uint8_t Register;//代表需要注册  
@@ -111,12 +117,12 @@ extern int mqtt_isConnected;
 extern int MqttReadReady;
 extern MqttInfo_t mqtt_info;
 
-int MqttInit(const char *client_id);
+int MqttInit(void);
 void Mqtt_SendMsg(MqttMsgType_t msg,char *data);
 void Mqtt_ParseData(uint8_t* rbuf,int len);
 void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t qos, uint8_t retain);
 int Mqtt_SubscribeMsg(MqttTopic *topics,int count);
-int Mqtt_SubscribeTopicInit(uint16_t id);
+int Mqtt_SubscribeTopicInit(void);
 void Mqtt_SetMsgCb(MqttClient *client,MqttMsgCb msg_cb);
 void Mqtt_ListInit(void);
 int Mqtt_GetListSize(void);
