@@ -5,6 +5,11 @@
 
 #define MQTT_SUBSCRIBE_COUNT     2
 #define MQTT_SUBSCRIBE_LENGTH    64
+#define MQTT_NAME_LENGTH         30
+#define MQTT_PSW_LENGTH          30
+#define MQTT_SN_LENGTH           50
+#define MQTT_ID_LENGTH           20
+#define MQTT_UUID_ID_LENGTH      (2*3*32/8) //3个32bit的数值，16进制上传，24个字符
 
 #define MQTT_SUB_ACTION        "tk/v1/slhc/tkv-%d/instantactions"
 #define MQTT_SUB_CONN_ACK      "tk/v1/slhc/tkv-%d/connection/ack"  
@@ -28,6 +33,7 @@ typedef enum
 typedef enum
 {
     MQTT_MSG_START = 0,//启动mqtt服务
+    MQTT_MSG_INIT,
     MQTT_MSG_HEARTBEAT,
     MQTT_MSG_ROBOT_EVENT,
     MQTT_MSG_SUBSCRIBE,
@@ -76,6 +82,7 @@ typedef enum {
     MQTT_NOTIFY_SUBSCRIBE = 0x01,
     MQTT_NOTIFY_ONLINE = 0x02,
     MQTT_NOTIFY_OFFLINE = 0x04,
+    MQTT_NOTIFY_INIT = 0x08,
 } MqttNotify_t;
 
 typedef struct {
@@ -84,9 +91,11 @@ typedef struct {
 }MqttRcMsg_t;
 
 typedef struct {
-	char name[30];
-	char pwd[30];   
-    uint16_t id;
+	char name[MQTT_NAME_LENGTH];
+	char pwd[MQTT_PSW_LENGTH]; 
+    char sn[MQTT_SN_LENGTH]; 
+    char id[MQTT_ID_LENGTH];//从sn中获取
+    char uuid[MQTT_UUID_ID_LENGTH];
     uint8_t Register;//代表需要注册  
     char sub_topic[MQTT_SUBSCRIBE_COUNT][MQTT_SUBSCRIBE_LENGTH];//订阅话题
     uint8_t sub_topic_cnt;//订阅的话题数量   
@@ -97,6 +106,7 @@ extern MqttNet mNetwork;//网络结构体
 extern MqttClient mClient;//mqtt客户端
 extern int mqtt_isConnected;
 extern int MqttReadReady;
+extern MqttInfo_t mqtt_info;
 
 int MqttInit(const char *client_id);
 void Mqtt_SendMsg(MqttMsgType_t msg,char *data);
