@@ -105,7 +105,7 @@ bool bReadFieldRegisterInfo(Stru_Field_Register_Typedef *info)
 {
 	//read out field register info
 	bEeprom_Check_Conn();
-	if(!bEeprom_Read_Buf(EEP_ADD_FIELD_REGISTER_USER_NAME_LEN, (uint8_t*)info, sizeof(EEP_ADD_FIELD_REGISTER_USER_NAME_LEN)))
+	if(!bEeprom_Read_Buf(EEP_ADD_FIELD_REGISTER_USER_NAME_LEN, (uint8_t*)info, sizeof(Stru_Field_Register_Typedef)))
 	{
 		return false;
 	}
