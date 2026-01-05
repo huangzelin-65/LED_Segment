@@ -19,6 +19,7 @@
 #include "Feature.h"
 #include "Config.h"
 #include "Notify.h"
+#include "RegisterInfo.h"
 #include "StringCommon.h"
 
 void vJsonGenerateTask(void *argument)
@@ -91,7 +92,16 @@ void vJsonGenerateTask(void *argument)
                     Mqtt_SendMsg(MQTT_MSG_ROBOT_EVENT,json_str);//mqtt发送完则释放内存
                     DEBUGINFO("JSON_G_NOTIFY end\n"); 
                 }
-                break;                                                                                                                  
+                break; 
+                case JSON_G_REGISTER:
+                {
+                    RegisterInfo_t* register_info = (RegisterInfo_t*)(json_data->data);
+                    DEBUGINFO("JSON_G_REGISTER start\n");  
+                    char* json_str = Json_Generate_Register(register_info);
+                    Mqtt_SendMsg(MQTT_MSG_REGISTER,json_str);//mqtt发送完则释放内存
+                    DEBUGINFO("JSON_G_REGISTER end\n"); 
+                }
+                break;                                                                                                                                 
                 default:
                 break;
             }

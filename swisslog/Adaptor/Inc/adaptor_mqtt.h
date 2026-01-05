@@ -91,7 +91,6 @@ typedef enum {
     MQTT_NOTIFY_ONLINE = 0x02,
     MQTT_NOTIFY_OFFLINE = 0x04,
     MQTT_NOTIFY_INIT = 0x08,
-    MQTT_NOTIFY_REGISTER = 0x10,
 } MqttNotify_t;
 
 typedef struct {
@@ -104,10 +103,9 @@ typedef struct {
 	char pwd[MQTT_PSW_LENGTH]; 
     char sn[MQTT_SN_LENGTH];//作为client id使用 
     char id[MQTT_ID_LENGTH];//从sn中获取
-    char uuid[MQTT_UUID_ID_LENGTH];
-    uint8_t Register;//代表需要注册  
+    char uuid[MQTT_UUID_ID_LENGTH];//16进制表示的uid 
     char sub_topic[MQTT_SUBSCRIBE_COUNT][MQTT_SUBSCRIBE_LENGTH];//订阅话题
-    uint8_t sub_topic_cnt;//订阅的话题数量   
+    uint8_t Register;//代表需要注册     
 }MqttInfo_t;
 
 

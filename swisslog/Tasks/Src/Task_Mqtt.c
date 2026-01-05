@@ -7,6 +7,7 @@
 #include "Task_Mqtt.h"
 #include "LogDebugInfo.h"
 #include "adaptor_mqtt.h"
+#include "adaptor_wifi.h"
 #include "Common.h"
 #include <stdbool.h>
 #include "queue.h"
@@ -16,6 +17,7 @@
 #include <limits.h>
 #include "Register.h"
 #include "StringEdit.h"
+#include "RegisterInfo.h"
 
 #define MQTT_TOPIC_NAME                 "tk/v1/slhc/tkv-%s/state" 
 #define MQTT_HEARTBEAT_TOPIC_NAME       "tk/v1/slhc/tkv-%s/connection" 
@@ -46,7 +48,6 @@ void vMqttManagerTask(void *argument)
                 {
                     memset(&mqtt_info,0,sizeof(MqttInfo_t));
                     memset(&g_register_info,0,sizeof(Stru_Field_Register_Typedef));
-                    
                     //初始化uuid
                     uint32_t UID[3];
                     HAL_ICACHE_Disable();
@@ -141,8 +142,8 @@ void vMqttManagerTask(void *argument)
                     {
                         if(mqtt_info.Register)//发布注册消息
                         {
-                            DEBUGINFO("Mqtt_SubscribeTopicInit success,start register");
-                            Mqtt_Notify(MQTT_NOTIFY_REGISTER);                            
+                            DEBUGINFO("Mqtt_SubscribeTopicInit success,start register");  
+                            Register_Event();        
                         }
                         else//正常登录上线
                         {
@@ -275,12 +276,7 @@ void vMqttNotifyTask(void *argument)
           {
             DEBUGINFO("MQTT_NOTIFY_INIT\n");  
             Mqtt_SendMsg(MQTT_MSG_INIT,NULL);
-          }  
-          if(ulNotificationValue & MQTT_NOTIFY_REGISTER)
-          {
-            DEBUGINFO("MQTT_NOTIFY_REGISTER\n");  
-            Mqtt_SendMsg(MQTT_MSG_REGISTER,NULL);
-          }                                                                             
+          }                                                                               
       }        
     }
 }

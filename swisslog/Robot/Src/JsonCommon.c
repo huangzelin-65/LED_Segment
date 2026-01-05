@@ -8,11 +8,11 @@
 #include "HeartBeat.h"
 #include "Encoder.h"
 #include <string.h>
-#include "adaptor_ntp.h"
 #include <stdlib.h>
 #include "Feature.h"
 #include "Config.h"
 #include "Notify.h"
+#include "RegisterInfo.h"
 
 #define TOPIC_ACTION        "tk/v1/slhc/tkv-%d/instantactions"
 #define TOPIC_CONN_ACK      "tk/v1/slhc/tkv-%d/connection/ack"
@@ -269,6 +269,30 @@ char* Json_Generate_Notify(void *notify)
     cJSON_Delete(root);
 
     return json_str;
+}
+
+char* Json_Generate_Register(void *register_info)
+{
+    RegisterInfo_t *data = (RegisterInfo_t *)register_info;
+    cJSON* root = cJSON_CreateObject();
+    if(root == NULL)
+    {
+        DEBUGINFO("cJSON_CreateObject fail\n");
+        return NULL;
+    }
+    //创建单字段json对象
+    cJSON_AddStringToObject(root, "name",data->name);//"TK2.1_CCUB100_VCB_MB"
+    cJSON_AddNumberToObject(root, "bizSystem", data->bizSystem);
+    cJSON_AddStringToObject(root, "ip", data->ip);
+    cJSON_AddNumberToObject(root, "type", data->type);
+    cJSON_AddStringToObject(root, "deviceCode", data->deviceCode);
+    cJSON_AddNumberToObject(root, "deviceType", data->deviceType);
+
+    char* json_str = cJSON_PrintUnformatted(root);//需free
+
+    cJSON_Delete(root);
+
+    return json_str;    
 }
 
 void Json_ParseMsg(JsonParseType_t type,void *data)

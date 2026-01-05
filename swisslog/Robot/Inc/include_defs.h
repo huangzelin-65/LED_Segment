@@ -15,9 +15,14 @@
 #define SPEEDLEVEL_LENGTH   16
 #define SUBTOPIC_LENGTH     64
 #define CAUSE_LENGTH        32
+#define IP_LENGTH           36
+#define DEVICE_CODE_LENGTH  36
 
 #include "Task_MotionCtrl.h"
 #include "Task_BoxCtrl.h"
+#include "adaptor_wifi.h"
+#include "adaptor_mqtt.h"
+#include "adaptor_ntp.h"
 
 #endif
 
