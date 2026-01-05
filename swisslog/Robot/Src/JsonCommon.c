@@ -43,6 +43,8 @@ Feature_t temp_feature;
 Config_t temp_config;
 Notify_t temp_notify;
 
+Stru_Field_Register_Typedef s_register;
+
 void Json_GenerateMsg(JsonGenerateType_t type,void *data)
 {
     if(JsonGenerateQueueHandle != NULL)
@@ -892,6 +894,23 @@ int Json_ParseRegister(char* data)
     DEBUGINFO("  deviceCode: %s\n", deviceCode);
     DEBUGINFO("  sn: %s\n",sn);
     DEBUGINFO("  timestamp: %s\n", timestamp);
+
+    mqtt_info.Register = 0;//无需再发布注册消息
+
+    memset(&s_register,0,sizeof(Stru_Field_Register_Typedef));
+
+    memcpy(s_register.name,user,USER_LENGTH); 
+
+    memcpy(s_register.pwd,pwd,PWD_LENGTH); 
+
+    memcpy(s_register.sn,sn,SN_LENGTH);
+
+    bool rc = bWriteFieldRegisterInfo(&s_register);
+
+    if(rc)
+    {
+        DEBUGINFO("bWriteFieldRegisterInfo success\n");    
+    }
 
     return 0;
 }

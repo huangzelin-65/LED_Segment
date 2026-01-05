@@ -17,6 +17,7 @@
 #include "app_freertos.h"
 #include "Calculate.h"
 #include "HeartBeat.h"
+#include "RegisterInfo.h"
 
 extern CarStatus_t CarStatus;
 extern osMessageQueueId_t xRobotQueueHandle;//该消息队列处理事件上报
@@ -129,7 +130,8 @@ void vRobotReceiveTask(void *argument)
 
 void vRobotHeartBeatTask(void *argument)
 {  
-    int prinrf_info_cnt = 0;    
+    int prinrf_info_cnt = 0;
+    int register_info_cnt = 0;     
     DEBUGINFO("vRobotHeartBeatTask\n"); 
     while (1)
     {
@@ -149,6 +151,20 @@ void vRobotHeartBeatTask(void *argument)
             DEBUGINFO("mqtt connect state: %d", Mqtt_IsConnected());
             // printf("FreeHeapSize %u bytes\r\n", xPortGetFreeHeapSize());
         }
+        if(waitforperiod(&register_info_cnt,3))
+        {
+            if(mqtt_info.Register)
+            {
+                if(mqtt_info.Register_cnt++ > 5)
+                {
+                    DEBUGINFO("register fail\n");
+                }
+                else
+                {
+                    Register_Event();
+                }
+            }
+        }        
         osDelay(1000);
     }    
 }
