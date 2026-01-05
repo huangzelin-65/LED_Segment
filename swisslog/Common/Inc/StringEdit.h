@@ -8,7 +8,7 @@
 
 
 int uid_to_uuid(const uint32_t *pUID, char *pUuid,uint32_t uuid_len);
-int extract_last_numbers(const char *src, char *dest, int dest_len);
+int extract_last_numbers(char *src, char *dest, int dest_len);
 
 
 

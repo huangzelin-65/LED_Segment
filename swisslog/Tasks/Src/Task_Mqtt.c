@@ -15,6 +15,7 @@
 #include "semphr.h"
 #include <limits.h>
 #include "Register.h"
+#include "StringEdit.h"
 
 #define MQTT_TOPIC_NAME                 "tk/v1/slhc/tkv-%d/state" 
 #define MQTT_HEARTBEAT_TOPIC_NAME       "tk/v1/slhc/tkv-%d/connection" 
@@ -47,7 +48,14 @@ void vMqttManagerTask(void *argument)
                     memset(&g_register_info,0,sizeof(Stru_Field_Register_Typedef));
                     
                     //初始化uuid
-                    
+                    uint32_t UID[3];
+                    HAL_ICACHE_Disable();
+                    UID[0] = HAL_GetUIDw0();
+                    UID[1] = HAL_GetUIDw1();
+                    UID[2] = HAL_GetUIDw2(); 
+                    HAL_ICACHE_Enable();                    
+                    uid_to_uuid(UID,mqtt_info.uuid,MQTT_UUID_ID_LENGTH);
+                    DEBUGINFO("uuid:%s\n",mqtt_info.uuid);
 
 
                     bool rc = bReadFieldRegisterInfo(&g_register_info);
@@ -58,16 +66,23 @@ void vMqttManagerTask(void *argument)
                         memcpy(mqtt_info.pwd,g_register_info.pwd,MQTT_PSW_LENGTH);
                         memcpy(mqtt_info.sn,g_register_info.sn,MQTT_SN_LENGTH);
                         mqtt_info.Register = 0;//不需要静默注册
+
+                        DEBUGINFO("name:%s pwd:%s sn:%s\n", g_register_info.name,g_register_info.pwd,g_register_info.sn);
                         //从sn中提取ID信息
-
-
+                        if (extract_last_numbers((char *)g_register_info.sn, mqtt_info.id, sizeof(mqtt_info.id))) {                            
+                            DEBUGINFO("id:%s\n", mqtt_info.id);
+                            Mqtt_Notify(MQTT_NOTIFY_INIT);
+                        }                        
                     }
                     else
                     {
                         bool rc = bReadProdRegisterInfo(mqtt_info.uuid, MQTT_UUID_ID_LENGTH);
                         if(rc == true)//校验成功，产品需静默注册
                         {
-                            
+                            strcpy(mqtt_info.name, MQTT_REGISTER_NAME);//使用默认名称
+                            strcpy(mqtt_info.pwd, MQTT_REGISTER_PSW); //使用默认密码
+                            mqtt_info.Register = 1;  //需要执行静默注册  
+                            Mqtt_Notify(MQTT_NOTIFY_INIT);                       
                         }
                         else
                         {

@@ -26,6 +26,8 @@ int uid_to_uuid(const uint32_t *pUID, char *pUuid,uint32_t uuid_len)
     snprintf(&pUuid[8], 9, "%08lX", pUID[1]);  // 第2个UID：8-15位（8个字符）
     snprintf(&pUuid[16], 9, "%08lX", pUID[2]); // 第3个UID：16-23位（8个字符）
 
+    pUuid[uuid_len] = '\0';
+
     return 0; // 转换成功
 }
 
@@ -36,7 +38,7 @@ int uid_to_uuid(const uint32_t *pUID, char *pUuid,uint32_t uuid_len)
  * @param dest_len 结果缓冲区的长度
  * @return 成功返回1，失败返回0（无数字/无下划线等）
  */
-int extract_last_numbers(const char *src, char *dest, int dest_len) {
+int extract_last_numbers(char *src, char *dest, int dest_len) {
     if (src == NULL || dest == NULL || dest_len <= 0) {
         return 0;  // 入参非法
     }
