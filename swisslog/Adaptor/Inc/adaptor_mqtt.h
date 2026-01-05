@@ -3,6 +3,9 @@
 #include <stdbool.h>
 #include "wolfmqtt/mqtt_client.h"
 
+#define MQTT_SUBSCRIBE_COUNT     2
+#define MQTT_SUBSCRIBE_LENGTH    64
+
 #define MQTT_SUB_ACTION        "tk/v1/slhc/tkv-%d/instantactions"
 #define MQTT_SUB_CONN_ACK      "tk/v1/slhc/tkv-%d/connection/ack"  
 typedef enum
@@ -79,6 +82,16 @@ typedef struct {
     char *topic_name;
     char *data;
 }MqttRcMsg_t;
+
+typedef struct {
+	char name[30];
+	char pwd[30];   
+    uint16_t id;
+    uint8_t Register;//代表需要注册  
+    char sub_topic[MQTT_SUBSCRIBE_COUNT][MQTT_SUBSCRIBE_LENGTH];//订阅话题
+    uint8_t sub_topic_cnt;//订阅的话题数量   
+}MqttInfo_t;
+
 
 extern MqttNet mNetwork;//网络结构体
 extern MqttClient mClient;//mqtt客户端
