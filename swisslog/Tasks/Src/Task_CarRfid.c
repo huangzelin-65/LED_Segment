@@ -18,19 +18,20 @@
 #include "adaptor_rfid.h"
 #include "adaptor_wifi.h"
 #include "DwinHMI.h"
+#include"Task_CarRfid.h"
 
-
-#define CARD_NUM_LEN 9 // 9位卡号
-#define CHAR_OFFSET 8 //卡号开始位置：跳过"$E000000"（8字节）
-#define POS_LEN 5 // 5位位置编号
-#define SPEED_OFFSET 5 // 速度偏移量
-#define POS_TYPE_OFFSET 7 // 位置类型偏移量
+#ifdef ZHONGNENG_RFID
+#include "ZhongnengRfidReader.h"
+#include "semphr.h"
+#endif
 
 char pcCardNum[10] = {0};
 u8 ucRfidDataLen = 0;
 u8 ucMotion_msg;
-uint8_t ucCarRfid_Rx_Buffer[2][CAR_RFID_RX_BUF_SIZE];
-uint8_t ucCarRfid_current_buf_idx = 0;  // 当前使用的缓冲区索引
+uint8_t ucCarRfid_Rx_Buffer[CAR_RFID_RX_BUF_SIZE];
+uint32_t ucReciveLen = 0;         //DMA接收数据长度
+uint32_t package_start_idx = 0 ;  //DMA接收数据包起始位置
+
 
 extern osMessageQueueId_t xMotion_QueueHandle;
 extern CarToServerData_t CarToServerData;
@@ -39,6 +40,66 @@ extern osMessageQueueId_t xRfid_Rx_QueueHandle;
 extern osSemaphoreId_t xCarRfidRxSemHandle;
 
 //获取9位卡号
+
+#ifdef ZHONGNENG_RFID
+char* pcGetRfidCardNum_ZHONGNENG(uint8_t *data, u32 RfidDataLen)
+{
+    static char pcTempCardNum[10] = {0};
+    memset(pcTempCardNum, 0, sizeof(pcTempCardNum));
+    // 长度校验，二进制数据包至少需要17字节
+    if (!data || RfidDataLen < Rfid_Rx_Package_LEN)
+    {
+        DEBUGINFO("RFID invalid parameters\r\n");
+        return NULL;
+    }
+
+   //  验证起始/结束符
+    if (data[0] != 0x1D || data[RfidDataLen - 1] != 0xB2)
+    {
+        DEBUGINFO("RFID data format error\r\n");
+        return NULL;
+    }
+
+    //判断密钥是否正确
+    if(data[5] == 0x03)
+    {
+    	DEBUGINFO("Invalid password\r\n");
+    	return NULL;
+    }
+
+    //判断标签是否丢失
+    if(data[5] == 0x04)
+    {
+    	DEBUGINFO("Tag loss\r\n");
+    	return NULL;
+    }
+    // 异或校验
+    uint8_t i = 0;
+    uint8_t XOR_check_bit = 0;
+    for(i = 1; i <= Rfid_Rx_Package_LEN - 3; i++)
+    {
+        XOR_check_bit ^= data[i];
+    }
+    if(XOR_check_bit != data[Rfid_Rx_Package_LEN - 2])
+    {
+        DEBUGINFO("RFID data mismatch\r\n");
+        return NULL;
+    }
+
+    // 提取9位卡号
+    if (CHAR_OFFSET + CARD_NUM_LEN > RfidDataLen - 2)
+    {
+        DEBUGINFO("Invalid RFID format, insufficient length\r\n");
+        return NULL;
+    }
+    else
+    {
+        bin_id_to_num_str(&data[CHAR_OFFSET], CARD_NUM_LEN, pcTempCardNum);
+        pcTempCardNum[CARD_NUM_LEN] = '\0';
+        return pcTempCardNum;
+    }
+}
+#else
 char* pcGetRfidCardNum(char *data, u32 RfidDataLen)
 {
     static char pcTempCardNum[10] = {0}; // 存储9位卡号加终止符
@@ -94,6 +155,7 @@ char* pcGetRfidCardNum(char *data, u32 RfidDataLen)
         return NULL;
     }
 }
+#endif
 
 // 获取小车当前位置
 void vGetCarPosition(char *data)
@@ -189,33 +251,32 @@ void vGetTagSpeed(char *data)
 //任务入口函数
 void vCarRfidTask(void *argument)
 {
-  uint32_t ucReciveLen = 0;
   char pcPreviousCardNum[10] = {0};
-
-  
+  static uint8_t temp_continuous_buf[CAR_RFID_RX_BUF_SIZE] = {0};
+#ifdef ZHONGNENG_RFID
+  CarRfid_Init_With_Retry();		//调用读卡器的初始化函数，失败时重新初始化
+#else
   //启动DMA接收
-  vCarRfid_Start_DMA_Receive(ucCarRfid_Rx_Buffer[ucCarRfid_current_buf_idx]);
-
-  while(1) {
-    // 等待DMA接收完成信号
+  vCarRfid_Start_DMA_Receive(ucCarRfid_Rx_Buffer);
+#endif
+  while(1)
+  {
     if (osSemaphoreAcquire(xCarRfidRxSemHandle, osWaitForever) == osOK)
     {
-      ucReciveLen = ulCarRfid_Get_DMA_Receive_Len();
-      DEBUGINFO("ucCarRfid_current_buf_idx:%d\r\n",ucCarRfid_current_buf_idx);
-      DEBUGINFO("rfid received len:%d,data:%s\r\n",ucReciveLen,ucCarRfid_Rx_Buffer[ucCarRfid_current_buf_idx]);
-      //DEBUGINFO("rfid received len:%d\r\n",ucReciveLen);
-      //vPrint_Array(ucCarRfid_Rx_Buffer[ucCarRfid_current_buf_idx], ucReciveLen);
-      
-      //uint8_t* temp_buffer = ucCarRfid_Rx_Buffer[ucCarRfid_current_buf_idx];
+      ucReciveLen = ulCarRfid_Get_DMA_Receive_Len(&package_start_idx);
+      ucCarRfid_Rx_Buffer_Wrap_process(ucCarRfid_Rx_Buffer,package_start_idx,
+    		  	  	  	  	  	  	  	  ucReciveLen,temp_continuous_buf);
+#ifdef ZHONGNENG_RFID
+      DEBUGINFO("rfid received len:%d\r\n",ucReciveLen);
+      //vPrint_Array(temp_continuous_buf,ucReciveLen);
+      char* pResult = pcGetRfidCardNum_ZHONGNENG(temp_continuous_buf, ucReciveLen);
+#else
+      DEBUGINFO("rfid received len:%d,data:%s\r\n",
+    		  	  ucReciveLen,(u8* )&ucCarRfid_Rx_Buffer[package_start_idx]);
 
-      // 解析RFID卡号
-      char* pResult = pcGetRfidCardNum((char*)ucCarRfid_Rx_Buffer[ucCarRfid_current_buf_idx], ucReciveLen);
-
-      // 切换缓冲区并重启接收
-      ucCarRfid_current_buf_idx ^= 1;
-      vCarRfid_Start_DMA_Receive(ucCarRfid_Rx_Buffer[ucCarRfid_current_buf_idx]);
-
-      //判断卡号非空
+              // 解析RFID卡号
+     char* pResult = pcGetRfidCardNum((char*)temp_continuous_buf, ucReciveLen);
+#endif
       if (pResult != NULL)
       {
         strcpy(pcCardNum, pResult);

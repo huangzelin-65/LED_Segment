@@ -14,6 +14,8 @@
 #include "Encoder.h"
 #include "semphr.h"
 #include <limits.h>
+#include "Register.h"
+#include "StringEdit.h"
 
 #define MQTT_TOPIC_NAME                 "tk/v1/slhc/tkv-%d/state" 
 #define MQTT_HEARTBEAT_TOPIC_NAME       "tk/v1/slhc/tkv-%d/connection" 
@@ -23,6 +25,8 @@
 
 extern CarStatus_t CarStatus;
 extern osMessageQueueId_t xMqttManagerQueueHandle;
+
+Stru_Field_Register_Typedef g_register_info;
 
 //mqtt主任务，处理初始化，发送消息等
 void vMqttManagerTask(void *argument)
@@ -38,7 +42,56 @@ void vMqttManagerTask(void *argument)
             DEBUGINFO("msg type:%d\n",msg->type);
             switch(msg->type)
             {
-                case MQTT_MSG_START:
+                case MQTT_MSG_START://获取登录信息
+                {
+                    memset(&mqtt_info,0,sizeof(MqttInfo_t));
+                    memset(&g_register_info,0,sizeof(Stru_Field_Register_Typedef));
+                    
+                    //初始化uuid
+                    uint32_t UID[3];
+                    HAL_ICACHE_Disable();
+                    UID[0] = HAL_GetUIDw0();
+                    UID[1] = HAL_GetUIDw1();
+                    UID[2] = HAL_GetUIDw2(); 
+                    HAL_ICACHE_Enable();                    
+                    uid_to_uuid(UID,mqtt_info.uuid,MQTT_UUID_ID_LENGTH);
+                    DEBUGINFO("uuid:%s\n",mqtt_info.uuid);
+
+
+                    bool rc = bReadFieldRegisterInfo(&g_register_info);
+                    if(rc == true)//正常登录
+                    {
+                        //这里已经获取正常账号和密码
+                        memcpy(mqtt_info.name,g_register_info.name,MQTT_NAME_LENGTH);
+                        memcpy(mqtt_info.pwd,g_register_info.pwd,MQTT_PSW_LENGTH);
+                        memcpy(mqtt_info.sn,g_register_info.sn,MQTT_SN_LENGTH);
+                        mqtt_info.Register = 0;//不需要静默注册
+
+                        DEBUGINFO("name:%s pwd:%s sn:%s\n", g_register_info.name,g_register_info.pwd,g_register_info.sn);
+                        //从sn中提取ID信息
+                        if (extract_last_numbers((char *)g_register_info.sn, mqtt_info.id, sizeof(mqtt_info.id))) {                            
+                            DEBUGINFO("id:%s\n", mqtt_info.id);
+                            Mqtt_Notify(MQTT_NOTIFY_INIT);
+                        }                        
+                    }
+                    else
+                    {
+                        bool rc = bReadProdRegisterInfo(mqtt_info.uuid, MQTT_UUID_ID_LENGTH);
+                        if(rc == true)//校验成功，产品需静默注册
+                        {
+                            strcpy(mqtt_info.name, MQTT_REGISTER_NAME);//使用默认名称
+                            strcpy(mqtt_info.pwd, MQTT_REGISTER_PSW); //使用默认密码
+                            mqtt_info.Register = 1;  //需要执行静默注册  
+                            Mqtt_Notify(MQTT_NOTIFY_INIT);                       
+                        }
+                        else
+                        {
+                            //产品无法正常使用
+                        }
+                    }
+                }
+                break;
+                case MQTT_MSG_INIT:
                 {
                     int rc = MqttInit(robotSate.client_id);
                     if(rc == MQTT_CODE_SUCCESS)
@@ -194,7 +247,12 @@ void vMqttNotifyTask(void *argument)
             Robot_UpdateTimeStamp(robotOnOffLine.timestamp);
             Robot_UpdateOnOffLineJson(Robot_OnOffLineJson,&robotOnOffLine); 
             Mqtt_SendMsg(MQTT_MSG_OFFLINE,Robot_GetOnOffLineJsonStr());            
-          }                                                           
+          } 
+          if(ulNotificationValue & MQTT_NOTIFY_INIT)
+          {
+            DEBUGINFO("MQTT_NOTIFY_INIT\n");  
+            Mqtt_SendMsg(MQTT_MSG_INIT,NULL);
+          }                                                                     
       }        
     }
 }

@@ -40,7 +40,7 @@
 #define PRINT_BUFFER_SIZE      1024
 #define MQTT_TX_BUF_SIZE       1024
 #define MQTT_RX_BUF_SIZE       1024
-#define MQTT_SUBSCRIBE_COUNT     2
+
 // #define MQTT_STATIC_ARRAY
 extern CarStatus_t CarStatus;
 extern UART_HandleTypeDef huart6;
@@ -74,6 +74,7 @@ MqttSocket_t mqtt_socket = {
     .type = 0
 };
 List *mqtt_list = NULL;
+MqttInfo_t mqtt_info;//mqtt消息
 //发送消息给线程，处理相关消息类型，指定处理内容
 void Mqtt_SendMsg(MqttMsgType_t msg,char *data)
 {
@@ -903,7 +904,7 @@ int Mqtt_SubscribeTopicInit(uint16_t id)
     
     int rc = Mqtt_SubscribeMsg(subscribe_topics,MQTT_SUBSCRIBE_COUNT);
     if (rc == MQTT_CODE_SUCCESS) {
-        DEBUGINFO("Mqtt_SubscribeTopicInit Success");
+        DEBUGINFO("Success");
     }    
     return rc;
 }

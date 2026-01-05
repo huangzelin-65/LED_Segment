@@ -17,4 +17,6 @@
 // #define MQTT_USE_ETH      //开启此宏，mqtt通过有线网口实现
 #define ROBOT            //开启此宏，响应与服务器交互事件
 
+//读取众能RFID的宏
+//#define ZHONGNENG_RFID 	//开启此宏，开启读取RFID模块
 #endif /* PROJECT_CONFIG_H_ */

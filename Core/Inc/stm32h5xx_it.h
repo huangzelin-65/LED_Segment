@@ -85,6 +85,7 @@ void USART11_IRQHandler(void);
 void GPDMA2_Channel0_IRQHandler(void);
 void GPDMA2_Channel1_IRQHandler(void);
 void GPDMA2_Channel2_IRQHandler(void);
+void GPDMA2_Channel3_IRQHandler(void);
 void UART7_IRQHandler(void);
 void UART8_IRQHandler(void);
 void ETH_IRQHandler(void);
