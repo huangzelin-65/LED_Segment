@@ -666,17 +666,18 @@ void HMI_Update_VirtualBtSetting_Req(uint8_t status){
 	HMI_Send_Msg_To_SendTask(sendSt);
 }
 
-void HMI_Update_InStationSetting_Req(uint8_t status){
-	DEBUGINFO("cmd:DwinWriteValue data[1]=addInStationEnableDisplay status:%d\r\n",status);
-	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(4);
-	sendSt->cmd = DwinWriteValue;
-	sendSt->length = 5;
-	sendSt->data[0]=0;
-	sendSt->data[1]=addInStationEnableDisplay;
-	sendSt->data[2] = 0;
-	sendSt->data[3] = status>0?1:0;;
-	HMI_Send_Msg_To_SendTask(sendSt);
-}
+// //使能进站信号按钮
+// void HMI_Update_InStationSetting_Req(uint8_t status){
+// 	DEBUGINFO("cmd:DwinWriteValue data[1]=addInStationEnableDisplay status:%d\r\n",status);
+// 	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(4);
+// 	sendSt->cmd = DwinWriteValue;
+// 	sendSt->length = 5;
+// 	sendSt->data[0]=0;
+// 	sendSt->data[1]=addInStationEnableDisplay;
+// 	sendSt->data[2] = 0;
+// 	sendSt->data[3] = status>0?1:0;;
+// 	HMI_Send_Msg_To_SendTask(sendSt);
+// }
 
 
 //yy为16进制，一般是hmi申请调整自己的时间

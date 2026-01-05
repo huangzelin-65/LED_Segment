@@ -22,7 +22,7 @@ extern osMessageQueueId_t xMotion_QueueHandle;
 
 
 /**
-保存屏幕锁定状态
+设置屏幕锁定状态
 */
 void vSet_Screen_LockStatus(eLockStatusType value)
 {

@@ -28,29 +28,29 @@ typedef enum {
 
 //button define 
 typedef enum {
-	btToEncryptPage = 0x0001,
-	btToUVPage = 0x0002,
+	btToEncryptPage = 0x0001, // 加密
+	btToUVPage = 0x0002, // 消毒
 	btToSettingPage = 0x0003,
 	btToLastPage = 0x0004,		
-	btEncryptReq = 0x0005,
-	btDecryptReq = 0x0006,
-	btStartUv = 0x0007,
+	btEncryptReq = 0x0005, // 加密页面数字键盘确认键
+	btDecryptReq = 0x0006, // 解密页面数字键盘确认键
+	btStartUv = 0x0007, // 消毒页面确定键
 	btStopUv = 0x0008,
-	btConfirmUv = 0x0009,
-	btChangeSetting = 0x000A,
-	btBackToHome = 0x000b,	
-	btBackToRfPg = 0x000c,	
+	btConfirmUv = 0x0009, // 消毒完成确定键
+	btChangeSetting = 0x000A, // 设置页面确认键
+	btBackToHome = 0x000b,	// 返回主页面键（设置页面、消毒页面、加密页面都有使用）
+	btBackToRfPg = 0x000c,	// 解密页面返回键
 	btWrongPswdConfirm = 0x000d,	
 	btDoorIsOpenPdConfirm = 0x000e,	
 	btDoorIsOpenUvConfirm = 0x000f,
 //	btUvCancelConfirm = 0x0010,
 //	btUvCancelBack = 0x0011,
-	btVirtualRfCard	= 0x0012,
-	btVirtualUnlock	= 0x0013,
-	btVirtualBtChangeSetting	= 0x0014,
-	btInStationChangeSetting	= 0x0015,
+	btVirtualRfCard	= 0x0012, // rfid虚拟按键，应该是点击后直接进入输入密码
+	btVirtualUnlock	= 0x0013, // 解锁虚拟按键
+	btVirtualBtChangeSetting	= 0x0014, // 虚拟按键使能开关
+	btInStationChangeSetting	= 0x0015, // 进站检测开关（TK2.1取消掉）
 	btTPCorrectReq	= 0x0016,
-	btToSettingPageWithPasswd	= 0x0017,
+	btToSettingPageWithPasswd	= 0x0017, // 设置
 	btSysPasswdConfirm	= 0x0018,
 }eDwinButtonDef;
 	
@@ -58,37 +58,37 @@ typedef enum {
 //HMI屏幕上的变量地址
 typedef enum {
 	addButton = 0x0001,
-	addCarNum = 0x0002,
+	addCarNum = 0x0002, // 车辆号
 	addPasswdEy = 0x0003,
 	addPasswdDy = 0x0005,		
-	addUvWorkTime = 0x0007,
-	addSetUvDefaultWorkTime = 0x0008,
-	addSetDataYY = 0x0009,
-	addSetDataMM = 0x0000A,
-	addSetDataDD = 0x0000B,
-	addSetDataHH = 0x000C,
-	addSetDataMIN = 0x000D,
-	addSetDataSS = 0x000E,
+	addUvWorkTime = 0x0007, // 显示消毒分钟数
+	addSetUvDefaultWorkTime = 0x0008, // 显示默认消毒分钟数
+	addSetDataYY = 0x0009, // 显示年
+	addSetDataMM = 0x0000A, // 显示月
+	addSetDataDD = 0x0000B, // 显示日
+	addSetDataHH = 0x000C, // 显示时
+	addSetDataMIN = 0x000D, // 显示分
+	addSetDataSS = 0x000E, // 显示秒
 	addLastUvTime = 0x000F,//7*2words
 	addPasswdSys = 0x0010,
-	addLastUvDuration = 0x0015,
-	addLockStatus = 0x0020,
+	addLastUvDuration = 0x0015, // 上次消毒持续分钟数
+	addLockStatus = 0x0020, // 上锁状态图标 (0:解锁图标 1:上锁图标)
 	addCorrectStatus = 0x0022,
-	addVirtualBtEnableDisplay = 0x0024,
-	addInStationEnableDisplay = 0x0026,
-	addSrcStationNum = 0x0029,
-	addDestStationNum = 0x002B,
-	addWifiSignalBars = 0x002C,
-	addDirtyStatus = 0x002D,
-	addSetCarNum = 0x002E,
-	addCurLocationId = 0x0900,
-	addTextRunTime = 0x0910,
-	addTextEyWord = 0x1000,
-	addTextDyWord = 0x1100,
-	addTextLastUvRecoed = 0x1200,
+	addVirtualBtEnableDisplay = 0x0024, // 解锁虚拟按键图标（0:不显示虚拟按键 1:显示虚拟按键）
+	addInStationEnableDisplay = 0x0026, // 进站检测开关图标（TK2.1取消掉）
+	addSrcStationNum = 0x0029, // 起始站点号（s16）
+	addDestStationNum = 0x002B, // 目标站点号 （s16）
+	addWifiSignalBars = 0x002C, // wifi信号图标 [0~4 0：0格信号 4：4格(满格)信号]
+	addDirtyStatus = 0x002D, // 污/洁
+	addSetCarNum = 0x002E, // 显示小车号
+	addCurLocationId = 0x0900, // 当前位置标签号（u32）
+	addTextRunTime = 0x0910, // 运行时间
+	addTextEyWord = 0x1000, // 加密页面密码显示区域
+	addTextDyWord = 0x1100, // 解密页面密码显示区域
+	addTextLastUvRecoed = 0x1200, // 上次消毒时间
 	addTextStm32Version = 0x1300,
-	addTextHmiVersion = 0x1350,
-	addTextSysWord = 0x1400,
+	addTextHmiVersion = 0x1350, // 显示HmiVersion
+	addTextSysWord = 0x1400, // 输入系统密码页面，1.0无用，2.0点设置时跳转到此页面，密码固定为123456
 }eDwinValueAdd;
 
 //special register define 
@@ -153,21 +153,21 @@ void HMI_Display_Text_HmiVersion();
 void HMI_Display_Text_EncrtPasswd();
 void HMI_Display_Text_DecryPasswd();
 void HMI_Display_Text_SysPasswd();
-void HMI_Display_Text_RunTime();
+void HMI_Display_Text_RunTime(); // 设置屏幕运行时间
 
 void HMI_Update_DefaultUVTime_Req(uint8_t time);
 void _HMI_Update_CarNum_Req(uint8_t add, uint8_t carNum[2]);
-void HMI_Update_CarNum_Req(uint8_t carNum[2]);
-void HMI_Update_LockStatus_Req(uint8_t status);
+void HMI_Update_CarNum_Req(uint8_t carNum[2]); // 设置屏幕上的车辆号
+void HMI_Update_LockStatus_Req(uint8_t status); // 设置车厢锁状态，0~1
 void HMI_Update_CorrectStatus_Req(uint8_t status);
-void HMI_Update_VirtualBtSetting_Req(uint8_t status);
-void HMI_Update_InStationSetting_Req(uint8_t status);
+void HMI_Update_VirtualBtSetting_Req(uint8_t status); // 设置虚拟解锁按钮，0~1
+// void HMI_Update_InStationSetting_Req(uint8_t status); // 使能进站信号按钮，0~1
 void HMI_Update_Default_Setting_Page_RtcTime_Req(uint8_t date[6]);
-void HMI_Update_SrcStation_Req(uint16_t StationNum);
-void HMI_Update_DestStation_Req(uint16_t StationNum);
-void HMI_Update_WifiSignalBars_Req(uint8_t WifiSignalBars);
-void HMI_Update_DirtyStatus_Req(uint8_t isDirty);
-void HMI_Update_CurLocationId_Req(uint32_t CurLocationId);
+void HMI_Update_SrcStation_Req(uint16_t StationNum); // 设置起始站点，000~999
+void HMI_Update_DestStation_Req(uint16_t StationNum); // 设置目标站点，000~999
+void HMI_Update_WifiSignalBars_Req(uint8_t WifiSignalBars); //设置Wifi信号强度
+void HMI_Update_DirtyStatus_Req(uint8_t isDirty); // 设置污车、洁车，0~1
+void HMI_Update_CurLocationId_Req(uint32_t CurLocationId); // 设置当前位置，00000~99999
 
 void HMI_Check_Uv_Clean(uint8_t time);
 void HMI_CheckRFCard(uint8_t en);

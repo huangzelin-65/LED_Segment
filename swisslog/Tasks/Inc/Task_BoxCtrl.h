@@ -3,6 +3,6 @@
 
 #include "main.h"
 
-void vSet_Screen_LockStatus(eLockStatusType value);
+void vSet_Screen_LockStatus(eLockStatusType value); // 设置屏幕锁定状态
 
 #endif /* TASKS_INC_TASK_BOXCTRL_H_ */

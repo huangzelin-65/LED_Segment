@@ -109,7 +109,7 @@ void vHmiRecvTask(void *argument)
 		if(osMessageQueueGet(xHmi_Recv_QueueHandle, &recMsg, NULL, osWaitForever) != osOK)
 		{
 			//正常情况下不会走到这里
-      DEBUGINFO("xQueueReceive failed");
+      		DEBUGINFO("xQueueReceive failed");
 			continue;
 		}
 		DEBUGINFO("Receive from HMI\r\n");
