@@ -97,8 +97,7 @@ void vJsonGenerateTask(void *argument)
                 {
                     RegisterInfo_t* register_info = (RegisterInfo_t*)(json_data->data);
                     DEBUGINFO("JSON_G_REGISTER start\n");  
-                    char* json_str = Json_Generate_Register(register_info);
-                    DEBUGINFO("json_str :%s\n",json_str); 
+                    char* json_str = Json_Generate_Register(register_info); 
                     Mqtt_SendMsg(MQTT_MSG_REGISTER,json_str);//mqtt发送完则释放内存
                     DEBUGINFO("JSON_G_REGISTER end\n"); 
                 }

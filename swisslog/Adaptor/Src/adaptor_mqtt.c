@@ -874,7 +874,7 @@ int Mqtt_SubscribeMsg(MqttTopic *topics,int count)
 int Mqtt_SubscribeTopicInit(void)
 {
     DEBUGINFO("start");
-
+    int subscribe_cnt = MQTT_SUBSCRIBE_COUNT;
     //正常流程订阅话题
     for (int i = 0; i < MQTT_SUBSCRIBE_COUNT; i++)
     {
@@ -912,9 +912,11 @@ int Mqtt_SubscribeTopicInit(void)
         subscribe_topics[MQTT_SUBSCRIBE_COUNT].topic_filter = mqtt_sub_topic[MQTT_SUBSCRIBE_COUNT];
         subscribe_topics[MQTT_SUBSCRIBE_COUNT].qos = MQTT_QOS;
         DEBUGINFO("sub topic:%s",subscribe_topics[MQTT_SUBSCRIBE_COUNT].topic_filter);
+
+        subscribe_cnt = MQTT_SUBSCRIBE_COUNT + 1;
     }
 
-    int rc = Mqtt_SubscribeMsg(subscribe_topics,MQTT_SUBSCRIBE_COUNT);
+    int rc = Mqtt_SubscribeMsg(subscribe_topics,subscribe_cnt);
     if (rc == MQTT_CODE_SUCCESS) {
         DEBUGINFO("Success");
     }    

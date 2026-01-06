@@ -14,7 +14,7 @@
 #define MQTT_TEST_NAME      "hcms_mqtt"    //测试时使用的账户
 #define MQTT_TEST_PSW       "KM5zng23"  //测试时使用的账户密码
 
-#define MQTT_REGISTER_NAME      "hcms_def"    //静默注册时使用的账户
+#define MQTT_REGISTER_NAME      "hcms_mqtt2"    //静默注册时使用的账户
 #define MQTT_REGISTER_PSW       "Abc@123456"  //静默注册时使用的账户密码
 
 #define MQTT_SUB_ACTION        "tk/v1/slhc/tkv-%s/instantactions"

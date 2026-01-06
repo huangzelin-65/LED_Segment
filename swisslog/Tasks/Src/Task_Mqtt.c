@@ -76,6 +76,7 @@ void vMqttManagerTask(void *argument)
                     }
                     else
                     {
+                        //以下是测试用，模拟工程注册，后需要删除
                         {
                             bool rc = bInitProdRegisterInfo(mqtt_info.uuid, MQTT_UUID_ID_LENGTH);
                             if(rc == true)
@@ -84,7 +85,7 @@ void vMqttManagerTask(void *argument)
                             }
                         }
                         
-
+                        //校验产品
                         bool rc = bReadProdRegisterInfo(mqtt_info.uuid, MQTT_UUID_ID_LENGTH);
                         if(rc == true)//校验成功，产品需静默注册
                         {                            
@@ -158,7 +159,8 @@ void vMqttManagerTask(void *argument)
                         if(mqtt_info.Register)//发布注册消息
                         {
                             DEBUGINFO("Mqtt_SubscribeTopicInit success,start register");  
-                            // Register_Event();        
+                            // Register_Event(); 
+                            MqttReadReady = 1;//开始接收消息       
                         }
                         else//正常登录上线
                         {
