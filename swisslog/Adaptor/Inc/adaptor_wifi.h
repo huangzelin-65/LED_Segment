@@ -12,7 +12,7 @@
 #define WIFI_DHCP  1
 #define WIFI_SSID "SwisslogHC"
 #define WIFI_PSW  "SwisslogHC" 
-#define WIFI_CHECK_IP      "192.168.10"//验证WIFI是否已经连接到理由，注意：此处需要根据实际情况更改
+#define WIFI_CHECK_IP      "LIP"//验证WIFI是否已经连接到理由
 
 #define WIFI_ARRAY_LEN 30  //保存解析信息的长度
 // #define WIFI_USE_MALLOC   //开启之后，中断里malloc消息长度，线程中解析（虽然malloc内存很小，但存在风险）

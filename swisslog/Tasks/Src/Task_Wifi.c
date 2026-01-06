@@ -7,7 +7,7 @@
 #include "Task_Wifi.h"
 #include "LogDebugInfo.h"
 #include "adaptor_wifi.h"
-// #include "Common.h"
+#include "StringEdit.h"
 #include <stdbool.h>
 #include "queue.h"
 #include "adaptor_mqtt.h"
@@ -53,7 +53,7 @@ void vWifiManagerTask(void *argument)
       }
       if(waitforperiod(&wifi_get_ip_cnt,50))//5秒获取一次获取ip地址,如果没有获取
       {
-        if(wifi_status.ip[0] == 0)
+        if(is_invalid_ip(wifi_status.ip))//ip无效
         {
           Wifi_SendATCmd("AT+LIP",2000);
         }

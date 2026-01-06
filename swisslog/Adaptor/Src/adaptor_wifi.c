@@ -7,6 +7,7 @@
 #include "adaptor_wifi.h"
 #include "LogDebugInfo.h"
 #include "queue.h"
+#include "StringEdit.h"
 
 extern osMessageQueueId_t xWifi_Parse_QueueHandle;
 extern UART_HandleTypeDef huart6;
@@ -223,24 +224,24 @@ void Wifi_ParseData(uint8_t* rbuf,int len)
     {
         char target_mqtt_str[] = WIFI_CHECK_IP;
         char *result = strstr((char *)rbuf, target_mqtt_str);
-        if (result != NULL) {  
-            wifi_result = WIFI_OK; 
-            wifi_status.connect_state = WIFI_OK; 
-            wifi_state = WIFI_END;    
-            char *equal_pos = strchr((char *)rbuf, '=');
-            if (equal_pos != NULL) {
-                char *ip_str = equal_pos + 1;
-                // 复制IP到字符串数组（strcpy会自动添加终止符）
-                // 先检查IP长度，避免数组溢出（可选，增强安全性）
-                if (strlen(ip_str) >= sizeof(wifi_status.ip)) {
-                    DEBUGINFO("IP too long\n");
-                }
-                else
+        if (result != NULL) {          
+            // 提取IP
+            char* result = extract_ip((char *)rbuf, wifi_status.ip, sizeof(wifi_status.ip));
+            // 输出结果
+            if (result != NULL) {
+                DEBUGINFO("ip:%s\n", wifi_status.ip); 
+                if(is_invalid_ip(wifi_status.ip))//ip无效
                 {
-                    strcpy(wifi_status.ip, ip_str); 
-                    DEBUGINFO("WIFI IP:%s\n",wifi_status.ip);         
-                }          
-            }                
+                    DEBUGINFO("ip invalid\n");
+                }
+                else//有效ip
+                {
+                    DEBUGINFO("ip valid\n");
+                    wifi_result = WIFI_OK; 
+                    wifi_status.connect_state = WIFI_OK; 
+                    wifi_state = WIFI_END;
+                }                
+            }                   
         }        
     }  
     {
@@ -304,14 +305,22 @@ void Wifi_ConnectAck(uint8_t* rbuf,int len)
             char target_mqtt_str[] = WIFI_CHECK_IP;
             char *result = strstr((char *)rbuf, target_mqtt_str);
             if (result != NULL) {
-                DEBUGINFO("WIFI_CHECK_CONNET ok\n");   
-                wifi_result = WIFI_OK; 
-                wifi_status.connect_state = WIFI_OK; 
-                wifi_state = WIFI_END;     
+                DEBUGINFO("WIFI_CHECK_CONNET\n");  
+                if(is_invalid_ip(wifi_status.ip))//ip无效
+                {
+                    DEBUGINFO("WIFI_SET_CONNECT\n");
+                    wifi_result = WIFI_OK;                     
+                }
+                else//有效ip
+                {
+                    wifi_result = WIFI_OK; 
+                    wifi_status.connect_state = WIFI_OK; 
+                    wifi_state = WIFI_END;
+                } 
             } 
             else
             {
-                DEBUGINFO("WIFI_CHECK_CONNET to WIFI_SET_CONNECT\n");
+                DEBUGINFO("WIFI_SET_CONNECT\n");
                 wifi_result = WIFI_OK;  
             }           
         }

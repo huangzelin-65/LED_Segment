@@ -65,9 +65,63 @@ int extract_last_numbers(char *src, char *dest, int dest_len) {
     return 1;
 }
 
+/**
+ * @brief 从指定字符串中提取IP地址
+ * @param input_str 输入字符串（格式如 +LIP=192.168.10.126）
+ * @param ip_buffer 存储提取出的IP的缓冲区
+ * @param buffer_size 缓冲区大小（建议至少16，IPv4最长15字符+结束符）
+ * @return 成功返回IP缓冲区地址，失败返回NULL
+ */
+char* extract_ip(const char* input_str, char* ip_buffer, int buffer_size) 
+{
+    // 1. 入参合法性检查
+    if (input_str == NULL || ip_buffer == NULL || buffer_size <= 0) {
+        return NULL;
+    }
 
+    // 2. 找到等号的位置（IP的起始标记）
+    const char* equal_sign = strchr(input_str, '=');
+    if (equal_sign == NULL) {
+        return NULL; // 未找到等号，无IP
+    }
 
+    // 3. 从等号下一个字符开始提取IP
+    const char* ip_start = equal_sign + 1;
+    char* ip_ptr = ip_buffer;
+    int char_count = 0;
 
+    // 4. 只提取数字和点，直到缓冲区满或遇到非IP字符
+    // 关键修正：将char转换为unsigned char后再传入isdigit，消除警告
+    while (*ip_start != '\0' && char_count < buffer_size - 1) {
+        if (isdigit((unsigned char)*ip_start) || *ip_start == '.') {
+            *ip_ptr++ = *ip_start++;
+            char_count++;
+        } else {
+            break; // 遇到非IP字符（如换行、OK等），停止提取
+        }
+    }
+
+    // 5. 补充字符串结束符（必须）
+    *ip_ptr = '\0';
+
+    // 6. 提取到有效IP才返回，否则返回NULL
+    return (char_count > 0) ? ip_buffer : NULL;
+}
+
+/**
+ * @brief 判断IP是否为无效地址（0.0.0.0）
+ * @param ip_str 提取到的IP字符串（需确保非NULL）
+ * @return 是0.0.0.0返回1，否则返回0
+ */
+int is_invalid_ip(const char* ip_str)
+{
+    // 入参检查：NULL视为无效IP
+    if (ip_str == NULL) {
+        return 1;
+    }
+    // 字符串比较，判断是否等于0.0.0.0
+    return (strcmp(ip_str, "0.0.0.0") == 0) ? 1 : 0;
+}
 
 
 
