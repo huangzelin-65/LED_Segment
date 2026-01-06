@@ -71,6 +71,10 @@ void vMqttManagerTask(void *argument)
                         //从sn中提取ID信息
                         if (extract_last_numbers((char *)g_register_info.sn, mqtt_info.id, sizeof(mqtt_info.id))) {                            
                             DEBUGINFO("id:%s\n", mqtt_info.id);
+
+                            //测试用
+                            snprintf(mqtt_info.id, 7, "%d", usEncoder_Read_Number());  //"%06d"
+
                             Mqtt_Notify(MQTT_NOTIFY_INIT);
                         }                        
                     }
@@ -96,9 +100,9 @@ void vMqttManagerTask(void *argument)
 
 
                             //测试用
-                            strcpy(mqtt_info.name, MQTT_TEST_NAME);
-                            strcpy(mqtt_info.pwd, MQTT_TEST_PSW);
-                            snprintf(mqtt_info.id, 7, "%d", usEncoder_Read_Number());  
+                            // strcpy(mqtt_info.name, MQTT_TEST_NAME);
+                            // strcpy(mqtt_info.pwd, MQTT_TEST_PSW);
+                            // snprintf(mqtt_info.id, 7, "%d", usEncoder_Read_Number());  
 
                             Mqtt_Notify(MQTT_NOTIFY_INIT);                       
                         }

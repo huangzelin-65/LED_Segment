@@ -876,15 +876,15 @@ int Json_ParseRegister(char* data)
     sn[sizeof(sn)-1] = '\0';
 
     // 6. 解析顶层字段: timestamp
-    cJSON *time_stamp = cJSON_GetObjectItem(root, "ts");
-    if (time_stamp == NULL || !cJSON_IsString(time_stamp)) {
-        DEBUGINFO("ts Not find\n");
-        cJSON_Delete(root);
-        return -1;
-    }
+    // cJSON *time_stamp = cJSON_GetObjectItem(root, "ts");
+    // if (time_stamp == NULL || !cJSON_IsString(time_stamp)) {
+    //     DEBUGINFO("ts Not find\n");
+    //     cJSON_Delete(root);
+    //     return -1;
+    // }
 
-    strncpy(timestamp, time_stamp->valuestring, sizeof(timestamp)-1);
-    timestamp[sizeof(timestamp)-1] = '\0';
+    // strncpy(timestamp, time_stamp->valuestring, sizeof(timestamp)-1);
+    // timestamp[sizeof(timestamp)-1] = '\0';
 
     // 释放cJSON资源
     cJSON_Delete(root);    
@@ -893,7 +893,7 @@ int Json_ParseRegister(char* data)
     DEBUGINFO("  pwd: %s\n",pwd);
     DEBUGINFO("  deviceCode: %s\n", deviceCode);
     DEBUGINFO("  sn: %s\n",sn);
-    DEBUGINFO("  timestamp: %s\n", timestamp);
+    // DEBUGINFO("  timestamp: %s\n", timestamp);
 
     mqtt_info.Register = 0;//无需再发布注册消息
 
