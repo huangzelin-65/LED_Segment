@@ -58,7 +58,6 @@ void vMqttManagerTask(void *argument)
                     uid_to_uuid(UID,mqtt_info.uuid,MQTT_UUID_ID_LENGTH);
                     DEBUGINFO("uuid:%s\n",mqtt_info.uuid);
 
-
                     bool rc = bReadFieldRegisterInfo(&g_register_info);
                     if(rc == true)//正常登录
                     {
@@ -77,6 +76,15 @@ void vMqttManagerTask(void *argument)
                     }
                     else
                     {
+                        {
+                            bool rc = bInitProdRegisterInfo(mqtt_info.uuid, MQTT_UUID_ID_LENGTH);
+                            if(rc == true)
+                            {
+                               DEBUGINFO("bInitProdRegisterInfo success\n"); 
+                            }
+                        }
+                        
+
                         bool rc = bReadProdRegisterInfo(mqtt_info.uuid, MQTT_UUID_ID_LENGTH);
                         if(rc == true)//校验成功，产品需静默注册
                         {                            
@@ -84,6 +92,13 @@ void vMqttManagerTask(void *argument)
                             strcpy(mqtt_info.pwd, MQTT_REGISTER_PSW); //使用默认密码
                             strcpy(mqtt_info.sn, mqtt_info.uuid);//为了满足多台机器同时静默升级且不冲突，此处用uuid作为client id 登录
                             mqtt_info.Register = 1;  //需要执行静默注册  
+
+
+                            //测试用
+                            strcpy(mqtt_info.name, MQTT_TEST_NAME);
+                            strcpy(mqtt_info.pwd, MQTT_TEST_PSW);
+                            snprintf(mqtt_info.id, 7, "%d", usEncoder_Read_Number());  
+
                             Mqtt_Notify(MQTT_NOTIFY_INIT);                       
                         }
                         else
@@ -143,7 +158,7 @@ void vMqttManagerTask(void *argument)
                         if(mqtt_info.Register)//发布注册消息
                         {
                             DEBUGINFO("Mqtt_SubscribeTopicInit success,start register");  
-                            Register_Event();        
+                            // Register_Event();        
                         }
                         else//正常登录上线
                         {

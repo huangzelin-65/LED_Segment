@@ -11,7 +11,9 @@ void Register_Event(void)
 {
     RegisterInfo_t* json_register_info = pvPortMalloc(sizeof(RegisterInfo_t));
 
-    memcpy(register_info.ip,wifi_status.ip,36);  //填入ip信息
+    memset(&register_info,0,sizeof(RegisterInfo_t));
+
+    // memcpy(register_info.ip,wifi_status.ip,36);  //填入ip信息
 
     strcpy(register_info.deviceCode,mqtt_info.uuid); //填入uuid
 

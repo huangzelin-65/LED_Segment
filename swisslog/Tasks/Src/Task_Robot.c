@@ -141,29 +141,29 @@ void vRobotHeartBeatTask(void *argument)
             {
                 DEBUGINFO("heartbeat\n");
                 // Robot_Notify(ROBOT_HEARTBEAT);
-                Heart_Event();
+                if(!mqtt_info.Register)Heart_Event();
             }
+            if(waitforperiod(&register_info_cnt,5))
+            {
+                if(mqtt_info.Register)
+                {
+                    if(mqtt_info.Register_cnt++ > 5)
+                    {
+                        DEBUGINFO("register fail\n");
+                        mqtt_info.Register = 0;
+                    }
+                    else
+                    {
+                        Register_Event();
+                    }
+                }
+            }            
         }
         if(waitforperiod(&prinrf_info_cnt,3))
         {
             DEBUGINFO("FreeHeapSize %u bytes", xPortGetFreeHeapSize());
             DEBUGINFO("encode_number: %d", robotSate.encode_number);
             DEBUGINFO("mqtt connect state: %d", Mqtt_IsConnected());
-            // printf("FreeHeapSize %u bytes\r\n", xPortGetFreeHeapSize());
-        }
-        if(waitforperiod(&register_info_cnt,3))
-        {
-            if(mqtt_info.Register)
-            {
-                if(mqtt_info.Register_cnt++ > 5)
-                {
-                    DEBUGINFO("register fail\n");
-                }
-                else
-                {
-                    Register_Event();
-                }
-            }
         }        
         osDelay(1000);
     }    

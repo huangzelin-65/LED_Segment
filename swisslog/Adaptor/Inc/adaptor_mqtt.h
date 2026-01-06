@@ -11,6 +11,9 @@
 #define MQTT_ID_LENGTH           7
 #define MQTT_UUID_ID_LENGTH      ((2*3*32/8)+1) //3个32bit的数值，16进制上传，24个字符,最后一位添加结束符
 
+#define MQTT_TEST_NAME      "hcms_mqtt"    //测试时使用的账户
+#define MQTT_TEST_PSW       "KM5zng23"  //测试时使用的账户密码
+
 #define MQTT_REGISTER_NAME      "hcms_def"    //静默注册时使用的账户
 #define MQTT_REGISTER_PSW       "Abc@123456"  //静默注册时使用的账户密码
 

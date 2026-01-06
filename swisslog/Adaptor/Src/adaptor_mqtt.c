@@ -573,8 +573,8 @@ int MqttInit(void)
     }
     DEBUGINFO("MQTT Broker Connect Success: ClientID %s, Username %s, Password %s",
         mqtt_info.sn,
-        (MQTT_USERNAME == NULL) ? "Null" : MQTT_USERNAME,
-        (MQTT_PASSWORD == NULL) ? "Null" : MQTT_PASSWORD);
+        (mqtt_info.name == NULL) ? "Null" : mqtt_info.name,
+        (mqtt_info.pwd == NULL) ? "Null" : mqtt_info.pwd);
     mqtt_isConnected = 1;
     return rc;
 exit:
@@ -903,6 +903,7 @@ int Mqtt_SubscribeTopicInit(void)
             default:
             break;
         }
+        DEBUGINFO("sub topic:%s",subscribe_topics[i].topic_filter);
     }
     //注册流程需订阅话题
     if(mqtt_info.Register)
@@ -910,6 +911,7 @@ int Mqtt_SubscribeTopicInit(void)
         snprintf(mqtt_sub_topic[MQTT_SUBSCRIBE_COUNT], 64, MQTT_REGISTER_SUB_TOPIC);
         subscribe_topics[MQTT_SUBSCRIBE_COUNT].topic_filter = mqtt_sub_topic[MQTT_SUBSCRIBE_COUNT];
         subscribe_topics[MQTT_SUBSCRIBE_COUNT].qos = MQTT_QOS;
+        DEBUGINFO("sub topic:%s",subscribe_topics[MQTT_SUBSCRIBE_COUNT].topic_filter);
     }
 
     int rc = Mqtt_SubscribeMsg(subscribe_topics,MQTT_SUBSCRIBE_COUNT);
