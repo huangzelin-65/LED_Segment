@@ -53,7 +53,7 @@ bool bReadProdRegisterInfo(const char *uuid, uint8_t len);//正式软件初始�
 
 ///////////////////////// 现场注册信息操作 /////////////////////////
 //读取与写入，内部会计算CRC
-bool bWriteFieldRegisterInfo(const Stru_Field_Register_Typedef *info);//注册成功调用
+bool bWriteFieldRegisterInfo(const Stru_Field_Register_Typedef *info, bool isErase);//注册成功调用
 bool bReadFieldRegisterInfo(Stru_Field_Register_Typedef *info);//正式软件初始化调用
 
 //写入现场注册错误次数

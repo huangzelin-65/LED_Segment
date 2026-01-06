@@ -591,6 +591,7 @@ int MqttDeInit(void)
     if(rc == MQTT_CODE_SUCCESS)
     {
         DEBUGINFO("disconnect success");
+        mqtt_isConnected = 0;
     }
     return rc;
 }

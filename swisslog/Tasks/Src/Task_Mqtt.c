@@ -28,14 +28,19 @@
 extern CarStatus_t CarStatus;
 extern osMessageQueueId_t xMqttManagerQueueHandle;
 
-Stru_Field_Register_Typedef g_register_info;
-
+Stru_Field_Register_Typedef g_register_info; 
 //mqtt主任务，处理初始化，发送消息等
 void vMqttManagerTask(void *argument)
 {
     DEBUGINFO("vMqttManagerTask\r\n");
     Mqtt_ListInit();
     char *manage_data = NULL;
+
+    //测试用
+    // memset(&g_register_info,0xFF,sizeof(Stru_Field_Register_Typedef));
+    // bWriteFieldRegisterInfo(&g_register_info, true);
+    // memset(&g_register_info,0x0,sizeof(Stru_Field_Register_Typedef));
+    // bReadFieldRegisterInfo(&g_register_info);
     while (1)
     {
         if(xQueueReceive(xMqttManagerQueueHandle, &manage_data, portMAX_DELAY) == pdTRUE)
@@ -222,6 +227,8 @@ void vMqttManagerTask(void *argument)
                     if(rc == MQTT_CODE_SUCCESS)
                     {  
                         DEBUGINFO("MqttDeInit SUCCESS");
+                        MqttReadReady = 0;
+                        
                         //服务器断开连接后需要重新连接
                         Mqtt_Notify(MQTT_NOTIFY_RESTART);
                     }                    
