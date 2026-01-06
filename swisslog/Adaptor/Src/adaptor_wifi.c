@@ -203,8 +203,8 @@ void Wifi_ConnectProcess(void)
         wifi_result = WIFI_ERROR;
     }     
 }
-//wifi模块连接路由过程中，ack的校验
-void Wifi_ConnectAck(uint8_t* rbuf,int len)
+//wifi数据解析
+void Wifi_ParseData(uint8_t* rbuf,int len)
 {
     //解析wifi的数据
     {
@@ -218,7 +218,7 @@ void Wifi_ConnectAck(uint8_t* rbuf,int len)
             DEBUGINFO("ret:%d rssi:%d\n",ret,rssi);  
             wifi_status.rssi = rssi;              
         }            
-    }  
+    }
     //保存wifi IP
     {
         char target_mqtt_str[] = WIFI_CHECK_IP;
@@ -254,7 +254,13 @@ void Wifi_ConnectAck(uint8_t* rbuf,int len)
                 Wifi_ConnectStart(); 
             }     
         }           
-    }        
+    }     
+}
+//wifi模块连接路由过程中，ack的校验
+void Wifi_ConnectAck(uint8_t* rbuf,int len)
+{
+    //解析tcp的数据
+    Wifi_ParseData(rbuf,len);          
     if(wifi_state <= WIFI_AT) 
     {
         return;
