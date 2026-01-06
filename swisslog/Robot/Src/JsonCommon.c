@@ -909,7 +909,9 @@ int Json_ParseRegister(char* data)
 
     if(rc)
     {
-        DEBUGINFO("bWriteFieldRegisterInfo success\n");    
+        DEBUGINFO("bWriteFieldRegisterInfo success\n"); 
+        //通知mqtt重新断开并重新连接
+        Mqtt_SendMsg(MQTT_MSG_DISCONNECT,NULL);   
     }
 
     return 0;

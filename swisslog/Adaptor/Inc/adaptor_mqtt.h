@@ -49,7 +49,8 @@ typedef enum
     MQTT_MSG_SUBSCRIBE,
     MQTT_MSG_ONLINE,
     MQTT_MSG_OFFLINE, 
-    MQTT_MSG_REGISTER,   
+    MQTT_MSG_REGISTER,
+    MQTT_MSG_DISCONNECT,   
 }MqttMsgType_t;
 
 typedef struct 
@@ -94,6 +95,7 @@ typedef enum {
     MQTT_NOTIFY_ONLINE = 0x02,
     MQTT_NOTIFY_OFFLINE = 0x04,
     MQTT_NOTIFY_INIT = 0x08,
+    MQTT_NOTIFY_RESTART = 0x10,
 } MqttNotify_t;
 
 typedef struct {
@@ -120,6 +122,7 @@ extern int MqttReadReady;
 extern MqttInfo_t mqtt_info;
 
 int MqttInit(void);
+int MqttDeInit(void);
 void Mqtt_SendMsg(MqttMsgType_t msg,char *data);
 void Mqtt_ParseData(uint8_t* rbuf,int len);
 void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t qos, uint8_t retain);

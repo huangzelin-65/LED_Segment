@@ -13,7 +13,11 @@ void Register_Event(void)
 
     memset(&register_info,0,sizeof(RegisterInfo_t));
 
-    // memcpy(register_info.ip,wifi_status.ip,36);  //填入ip信息
+    #ifdef MQTT_USE_WIFI
+    memcpy(register_info.ip,wifi_status.ip,36);  //填入ip信息
+    #else
+    //这里应该填入有线网口分配的ip
+    #endif
 
     strcpy(register_info.deviceCode,mqtt_info.uuid); //填入uuid
 

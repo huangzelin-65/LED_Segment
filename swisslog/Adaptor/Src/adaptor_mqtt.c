@@ -583,6 +583,17 @@ exit:
     }
     return rc;
 }
+//mqtt参数初始化，连接服务器、订阅话题
+int MqttDeInit(void)
+{
+    int rc = MqttClient_Disconnect(&mClient);
+    DEBUGINFO("rc:%d",rc);
+    if(rc == MQTT_CODE_SUCCESS)
+    {
+        DEBUGINFO("disconnect success");
+    }
+    return rc;
+}
 /**
  * @brief 在一个可能包含'\0'的字节数组中查找所有"+WFDATA="的起始位置。
  * 

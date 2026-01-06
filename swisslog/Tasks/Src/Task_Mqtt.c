@@ -73,7 +73,7 @@ void vMqttManagerTask(void *argument)
                             DEBUGINFO("id:%s\n", mqtt_info.id);
 
                             //测试用
-                            snprintf(mqtt_info.id, 7, "%d", usEncoder_Read_Number());  //"%06d"
+                            // snprintf(mqtt_info.id, 7, "%d", usEncoder_Read_Number());  //"%06d"
 
                             Mqtt_Notify(MQTT_NOTIFY_INIT);
                         }                        
@@ -162,8 +162,7 @@ void vMqttManagerTask(void *argument)
                     {
                         if(mqtt_info.Register)//发布注册消息
                         {
-                            DEBUGINFO("Mqtt_SubscribeTopicInit success,start register");  
-                            // Register_Event(); 
+                            DEBUGINFO("Mqtt_SubscribeTopicInit success,start register");   
                             MqttReadReady = 1;//开始接收消息       
                         }
                         else//正常登录上线
@@ -215,7 +214,20 @@ void vMqttManagerTask(void *argument)
                     }                    
                     DEBUGINFO("MQTT_MSG_REGISTER end\n");
                 }   
-                break;                                             
+                break;  
+                case MQTT_MSG_DISCONNECT:
+                {
+                    DEBUGINFO("MQTT_MSG_DISCONNECT start\n");
+                    int rc = MqttDeInit();
+                    if(rc == MQTT_CODE_SUCCESS)
+                    {  
+                        DEBUGINFO("MqttDeInit SUCCESS");
+                        //服务器断开连接后需要重新连接
+                        Mqtt_Notify(MQTT_NOTIFY_RESTART);
+                    }                    
+                    DEBUGINFO("MQTT_MSG_DISCONNECT end\n");
+                }
+                break;                                           
                 default:break;
             }
             vPortFree(manage_data);
@@ -297,7 +309,12 @@ void vMqttNotifyTask(void *argument)
           {
             DEBUGINFO("MQTT_NOTIFY_INIT\n");  
             Mqtt_SendMsg(MQTT_MSG_INIT,NULL);
-          }                                                                               
+          }   
+          if(ulNotificationValue & MQTT_NOTIFY_RESTART)
+          {
+            DEBUGINFO("MQTT_NOTIFY_RESTART\n");  
+            Mqtt_SendMsg(MQTT_MSG_START,NULL);
+          }                                                                                      
       }        
     }
 }

@@ -38,6 +38,7 @@ void vWifiManagerTask(void *argument)
     {
       if(Wifi_IsConnected())
       {
+        Wifi_SendATCmd("AT+LIP",2000);
         #ifdef MQTT_ENABLE
         Mqtt_SendMsg(MQTT_MSG_START,NULL);
         #endif
