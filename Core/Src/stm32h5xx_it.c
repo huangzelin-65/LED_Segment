@@ -80,6 +80,9 @@ extern I2C_HandleTypeDef hi2c1;
 extern DMA_NodeTypeDef Node_GPDMA1_Channel6;
 extern DMA_QListTypeDef List_GPDMA1_Channel6;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel6;
+extern DMA_NodeTypeDef Node_GPDMA2_Channel3;
+extern DMA_QListTypeDef List_GPDMA2_Channel3;
+extern DMA_HandleTypeDef handle_GPDMA2_Channel3;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel1;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel0;
 extern DMA_HandleTypeDef handle_GPDMA2_Channel0;
@@ -699,6 +702,7 @@ void GPDMA2_Channel3_IRQHandler(void)
   /* USER CODE BEGIN GPDMA2_Channel3_IRQn 0 */
 
   /* USER CODE END GPDMA2_Channel3_IRQn 0 */
+  HAL_DMA_IRQHandler(&handle_GPDMA2_Channel3);
   /* USER CODE BEGIN GPDMA2_Channel3_IRQn 1 */
 
   /* USER CODE END GPDMA2_Channel3_IRQn 1 */

@@ -76,6 +76,9 @@ UART_HandleTypeDef huart11;
 DMA_NodeTypeDef Node_GPDMA1_Channel6;
 DMA_QListTypeDef List_GPDMA1_Channel6;
 DMA_HandleTypeDef handle_GPDMA1_Channel6;
+DMA_NodeTypeDef Node_GPDMA2_Channel3;
+DMA_QListTypeDef List_GPDMA2_Channel3;
+DMA_HandleTypeDef handle_GPDMA2_Channel3;
 DMA_HandleTypeDef handle_GPDMA1_Channel1;
 DMA_HandleTypeDef handle_GPDMA1_Channel0;
 DMA_HandleTypeDef handle_GPDMA2_Channel0;
@@ -921,7 +924,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 9600;
+  huart1.Init.BaudRate = 115200;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
