@@ -37,8 +37,7 @@ void vMqttManagerTask(void *argument)
     char *manage_data = NULL;
 
     //测试用
-    // memset(&g_register_info,0xFF,sizeof(Stru_Field_Register_Typedef));
-    // bWriteFieldRegisterInfo(&g_register_info, true);
+    // bEraseRegisterArea();
     // memset(&g_register_info,0x0,sizeof(Stru_Field_Register_Typedef));
     // bReadFieldRegisterInfo(&g_register_info);
     while (1)

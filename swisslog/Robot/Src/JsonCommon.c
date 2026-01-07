@@ -905,7 +905,7 @@ int Json_ParseRegister(char* data)
 
     memcpy(s_register.sn,sn,SN_LENGTH);
 
-    bool rc = bWriteFieldRegisterInfo(&s_register,false);
+    bool rc = bWriteFieldRegisterInfo(&s_register);
 
     if(rc)
     {

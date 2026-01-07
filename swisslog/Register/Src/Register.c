@@ -84,17 +84,14 @@ bool bIncFieldRegisterErrTimes(void)
 
 ///////////////////////// 现场注册信息操作 /////////////////////////
 //读取与写入，内部会计算CRC
-bool bWriteFieldRegisterInfo(const Stru_Field_Register_Typedef *info, bool isErase)
+bool bWriteFieldRegisterInfo(const Stru_Field_Register_Typedef *info)
 {
 	Stru_Field_Register_Typedef temp;
 	//copy input param to temp
 	memcpy(&temp, info, sizeof(Stru_Field_Register_Typedef));
 
 	//calculate crc32
-	if(!isErase)
-	{
-		temp.crc = crc32_calc((uint32_t)info, sizeof(Stru_Field_Register_Typedef)-4);
-	}
+	temp.crc = crc32_calc((uint32_t)info, sizeof(Stru_Field_Register_Typedef)-4);
 
 	//write
 	bEeprom_Check_Conn();
@@ -120,4 +117,17 @@ bool bReadFieldRegisterInfo(Stru_Field_Register_Typedef *info)
 		return true;
 	}
 	return false;
+}
+
+bool bEraseRegisterArea(void)
+{
+	Stru_Field_Register_Typedef temp;
+	memset(&temp, 0xFF, sizeof(Stru_Field_Register_Typedef));
+
+	//clear eeprom area
+	bEeprom_Check_Conn();
+	if(bEeprom_Write_Buf(EEP_ADD_FIELD_REGISTER_USER_NAME_LEN, (uint8_t*)&temp, sizeof(Stru_Field_Register_Typedef)))
+		return true;
+	else
+		return false;
 }

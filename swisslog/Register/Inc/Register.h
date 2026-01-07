@@ -19,7 +19,7 @@
 #define EEP_ADD_PDTLINE_REGISTER_HEAD	      	0x1F00
 #define EEP_ADD_FIELD_REGISTER_USER_NAME_LEN	0x1F00
 
-#define MOST_FIELD_REG_ERR_TIMES	4
+#define MOST_FIELD_REG_ERR_TIMES	29
 
 typedef struct
 {
@@ -53,10 +53,13 @@ bool bReadProdRegisterInfo(const char *uuid, uint8_t len);//正式软件初始�
 
 ///////////////////////// 现场注册信息操作 /////////////////////////
 //读取与写入，内部会计算CRC
-bool bWriteFieldRegisterInfo(const Stru_Field_Register_Typedef *info, bool isErase);//注册成功调用
+bool bWriteFieldRegisterInfo(const Stru_Field_Register_Typedef *info);//注册成功调用
 bool bReadFieldRegisterInfo(Stru_Field_Register_Typedef *info);//正式软件初始化调用
 
 //写入现场注册错误次数
 bool bIncFieldRegisterErrTimes(void);//现场注册错误时调用
+
+//擦除register区域所有信息
+bool bEraseRegisterArea(void);//调试使用
 
 #endif /* INC_FLASH_H_ */
