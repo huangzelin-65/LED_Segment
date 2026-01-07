@@ -66,6 +66,7 @@ void Notify_Event(Notify_t *notify)
                 {
                     DEBUGINFO("notify has exist,all params same");
                     vPortFree(new_notify);
+                    osMutexRelease(notifyMutexHandle);
                     return;
                 }           
             }

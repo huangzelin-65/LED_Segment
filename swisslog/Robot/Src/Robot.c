@@ -1347,7 +1347,8 @@ void Robot_Event(void)
     Action_Update(0);
     Feature_Update(0);
     Config_Update(0);
-    Notify_Update(0);
+    Notify_Update(0);   
+    DEBUGINFO("end");
     #endif
 }
 //消息通知主线程

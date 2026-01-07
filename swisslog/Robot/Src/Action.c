@@ -75,6 +75,7 @@ void Action_Event(Action_t *action)
                 {
                     DEBUGINFO("cmd id has exist");
                     vPortFree(new_action);
+                    osMutexRelease(actionMutexHandle);
                     return;
                 }
             }

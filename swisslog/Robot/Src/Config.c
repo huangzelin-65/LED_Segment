@@ -77,6 +77,7 @@ void Config_Event(Config_t *config)
                 {
                     DEBUGINFO("config has exist,all params same");
                     vPortFree(new_config);
+                    osMutexRelease(configMutexHandle);
                     return;
                 }
                 //相同的功能，则覆盖

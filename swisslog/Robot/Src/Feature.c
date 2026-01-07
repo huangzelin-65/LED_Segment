@@ -78,6 +78,7 @@ void Feature_Event(Feature_t *feature)
                 {
                     DEBUGINFO("feature has exist,all params same");
                     vPortFree(new_feature);
+                    osMutexRelease(featureMutexHandle);
                     return;
                 }
                 //相同的功能，则覆盖
