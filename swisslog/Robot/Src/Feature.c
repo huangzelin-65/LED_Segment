@@ -53,52 +53,58 @@ void Feature_Event(Feature_t *feature)
         Feature_Init();
     }  
     if(feature_list == NULL) return;    
-    //创建状态数据
-    Feature_t* new_feature = pvPortMalloc(sizeof(Feature_t));
+    if(featureMutexHandle == NULL)return;
 
-    if(new_feature == NULL)return;
-
-    memset(new_feature,0,sizeof(Feature_t));
-
-    memcpy(new_feature,feature,sizeof(Feature_t));
-
-    int exist = 0;
-    for(int i = 0; i < feature_list->size;i++)
+    if (osMutexAcquire(featureMutexHandle, portMAX_DELAY) == osOK)
     {
-        Feature_t* feature = list_find_at(feature_list, i);
-        if(feature->id == new_feature->id)
-        {   
-            if(strcmp(feature->name,new_feature->name) == 0
-            && strcmp(feature->value,new_feature->value) == 0
-            && strcmp(feature->params,new_feature->params) == 0)
-            {
-                DEBUGINFO("feature has exist,all params same");
-                vPortFree(new_feature);
-                return;
+        //创建状态数据
+        Feature_t* new_feature = pvPortMalloc(sizeof(Feature_t));
+
+        if(new_feature == NULL)return;
+
+        memset(new_feature,0,sizeof(Feature_t));
+
+        memcpy(new_feature,feature,sizeof(Feature_t));
+
+        int exist = 0;
+        for(int i = 0; i < feature_list->size;i++)
+        {
+            Feature_t* feature = list_find_at(feature_list, i);
+            if(feature->id == new_feature->id)
+            {   
+                if(strcmp(feature->name,new_feature->name) == 0
+                && strcmp(feature->value,new_feature->value) == 0
+                && strcmp(feature->params,new_feature->params) == 0)
+                {
+                    DEBUGINFO("feature has exist,all params same");
+                    vPortFree(new_feature);
+                    return;
+                }
+                //相同的功能，则覆盖
+                if(strcmp(feature->name,new_feature->name) == 0
+                &&(strcmp(feature->value,new_feature->value) != 0 || strcmp(feature->params,new_feature->params) != 0))
+                {
+                    DEBUGINFO("feature has exist,but something change");
+                    memcpy(feature,new_feature,sizeof(Feature_t));
+                    exist = 1;
+                }            
             }
-            //相同的功能，则覆盖
-            if(strcmp(feature->name,new_feature->name) == 0
-            &&(strcmp(feature->value,new_feature->value) != 0 || strcmp(feature->params,new_feature->params) != 0))
-            {
-                DEBUGINFO("feature has exist,but something change");
-                memcpy(feature,new_feature,sizeof(Feature_t));
-                exist = 1;
-            }            
+        }    
+
+        if(exist)//存在，只是参数不同,释放内存
+        {
+            vPortFree(new_feature);
         }
-    }    
+        else
+        {
+            list_insert_tail(feature_list,new_feature);
+        }
+        
+        Feature_Execute();
 
-    if(exist)//存在，只是参数不同,释放内存
-    {
-        vPortFree(new_feature);
+        DEBUGINFO("list_size:%d",list_size(feature_list));
+        osMutexRelease(featureMutexHandle);
     }
-    else
-    {
-        list_insert_tail(feature_list,new_feature);
-    }
-    
-    Feature_Execute();
-
-    DEBUGINFO("list_size:%d",list_size(feature_list));
 }
 
 //增加最新链表执行动作
@@ -246,21 +252,27 @@ void Feature_Update(int id)
     {
         Feature_ListInit();
     }  
-    if(feature_list == NULL) return;   
-    DEBUGINFO("size:%d",feature_list->size);
-    for(int i = 0; i < feature_list->size;i++)
+    if(feature_list == NULL) return;  
+    if(featureMutexHandle == NULL)return;
+
+    if (osMutexAcquire(featureMutexHandle, portMAX_DELAY) == osOK)
     {
-        Feature_t* feature = list_find_at(feature_list, i);
-        if(feature->id == id)//更新所有对应id(流水号)的动作状态
-        {   
-            //执行过后才可以更新状态，防止其他事件出现，提前更新状态
-            DEBUGINFO("execute:%d",feature->execute);
-            if(feature->execute == 1)
-            {
-                //获取id对应的实际状态
-                Feature_Edit(feature);
+        DEBUGINFO("size:%d",feature_list->size);
+        for(int i = 0; i < feature_list->size;i++)
+        {
+            Feature_t* feature = list_find_at(feature_list, i);
+            if(feature->id == id)//更新所有对应id(流水号)的动作状态
+            {   
+                //执行过后才可以更新状态，防止其他事件出现，提前更新状态
+                DEBUGINFO("execute:%d",feature->execute);
+                if(feature->execute == 1)
+                {
+                    //获取id对应的实际状态
+                    Feature_Edit(feature);
+                }
             }
-        }
+        } 
+        osMutexRelease(featureMutexHandle);
     }    
 }
 

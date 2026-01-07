@@ -157,60 +157,73 @@ void State_Event(int id)
     {
         State_ListInit();
     }    
-    //创建状态数据
-    State_t* new_state = pvPortMalloc(sizeof(State_t));
-
-    if(new_state == NULL)return;
-
-    memset(new_state,0,sizeof(State_t));
-
-    new_state->id = id;
-    //给每个成员赋值
-    State_Update(new_state);
-    //对比数组有无发生变化
-    int change_state = State_IsChange(new_state);
-    DEBUGINFO("change_state:%d",change_state);
-    switch(change_state)
+    if(state_list == NULL) return;  
+    if(stateMutexHandle == NULL)return;  
+    
+    if (osMutexAcquire(stateMutexHandle, portMAX_DELAY) == osOK)
     {
-        case 0://数据没有变化
-        {
-            vPortFree(new_state);//赋值完释放内存
-        }          
-        break;
-        case 1: //数据有变化，链表中的数据重新赋值
-        {
-            State_t* state = (State_t*)list_find_by_value(state_list,new_state,State_FindId);
-            memcpy(state,new_state,sizeof(State_t));
-            vPortFree(new_state);//赋值完释放内存
+        //创建状态数据
+        State_t* new_state = pvPortMalloc(sizeof(State_t));
 
-            //需发送到队列中，创建json数据
-            State_t* json_state = pvPortMalloc(sizeof(State_t));
-            memcpy(json_state,state,sizeof(State_t));
-            Json_GenerateMsg(JSON_G_STATE,json_state);
-        }        
-        break;
-        case 2: //数据不存在，需要添加到链表中
+        if(new_state == NULL)return;
+
+        memset(new_state,0,sizeof(State_t));
+
+        new_state->id = id;
+        //给每个成员赋值
+        State_Update(new_state);
+        //对比数组有无发生变化
+        int change_state = State_IsChange(new_state);
+        DEBUGINFO("change_state:%d",change_state);
+        switch(change_state)
         {
-            list_insert_tail(state_list,new_state);
-            
-            //需发送到队列中，创建json数据
-            State_t* json_state = pvPortMalloc(sizeof(State_t));
-            memcpy(json_state,new_state,sizeof(State_t));            
-            Json_GenerateMsg(JSON_G_STATE,json_state);
+            case 0://数据没有变化
+            {
+                vPortFree(new_state);//赋值完释放内存
+            }          
+            break;
+            case 1: //数据有变化，链表中的数据重新赋值
+            {
+                State_t* state = (State_t*)list_find_by_value(state_list,new_state,State_FindId);
+                memcpy(state,new_state,sizeof(State_t));
+                vPortFree(new_state);//赋值完释放内存
+
+                //需发送到队列中，创建json数据
+                State_t* json_state = pvPortMalloc(sizeof(State_t));
+                memcpy(json_state,state,sizeof(State_t));
+                Json_GenerateMsg(JSON_G_STATE,json_state);
+            }        
+            break;
+            case 2: //数据不存在，需要添加到链表中
+            {
+                list_insert_tail(state_list,new_state);
+                
+                //需发送到队列中，创建json数据
+                State_t* json_state = pvPortMalloc(sizeof(State_t));
+                memcpy(json_state,new_state,sizeof(State_t));            
+                Json_GenerateMsg(JSON_G_STATE,json_state);
+            }
+            break;        
+            default:break;
         }
-        break;        
-        default:break;
+        DEBUGINFO("list_size:%d",list_size(state_list));
+        osMutexRelease(stateMutexHandle);
     }
-    DEBUGINFO("list_size:%d",list_size(state_list));
 }
 //删除某个id状态
 void State_DeleteId(int id)
 {
     DEBUGINFO("id:%d",id);
-    State_t t_state;
-    t_state.id = id;
-    list_remove_by_value(state_list,&t_state,State_FindId,vPortFree);
-    DEBUGINFO("list_size:%d",list_size(state_list));
+    if(stateMutexHandle == NULL)return;  
+    
+    if (osMutexAcquire(stateMutexHandle, portMAX_DELAY) == osOK)
+    {
+        State_t t_state;
+        t_state.id = id;
+        list_remove_by_value(state_list,&t_state,State_FindId,vPortFree);
+        DEBUGINFO("list_size:%d",list_size(state_list));
+        osMutexRelease(stateMutexHandle);
+    }
 }
 
 

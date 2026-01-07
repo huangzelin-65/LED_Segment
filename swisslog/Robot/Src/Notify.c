@@ -42,37 +42,43 @@ void Notify_Event(Notify_t *notify)
     {
         Notify_Init();
     }  
-    if(notify_list == NULL) return;    
-    //创建状态数据
-    Notify_t* new_notify = pvPortMalloc(sizeof(Notify_t));
-
-    if(new_notify == NULL)return;
-
-    memset(new_notify,0,sizeof(Notify_t));
-
-    memcpy(new_notify,notify,sizeof(Notify_t));
-
-    for(int i = 0; i < notify_list->size;i++)
+    if(notify_list == NULL) return; 
+    if(notifyMutexHandle == NULL)return;   
+    if (osMutexAcquire(notifyMutexHandle, portMAX_DELAY) == osOK)
     {
-        Notify_t* notify = list_find_at(notify_list, i);
-        if(notify->id == new_notify->id)
-        {   
-            if(strcmp(notify->type,new_notify->type) == 0
-            && notify->code == new_notify->code
-            && strcmp(notify->message,new_notify->message) == 0)
-            {
-                DEBUGINFO("notify has exist,all params same");
-                vPortFree(new_notify);
-                return;
-            }           
-        }
-    }    
+        //创建状态数据
+        Notify_t* new_notify = pvPortMalloc(sizeof(Notify_t));
 
-    list_insert_tail(notify_list,new_notify);
-    
-    Notify_Execute();
+        if(new_notify == NULL)return;
 
-    DEBUGINFO("list_size:%d",list_size(notify_list));
+        memset(new_notify,0,sizeof(Notify_t));
+
+        memcpy(new_notify,notify,sizeof(Notify_t));
+
+        for(int i = 0; i < notify_list->size;i++)
+        {
+            Notify_t* notify = list_find_at(notify_list, i);
+            if(notify->id == new_notify->id)
+            {   
+                if(strcmp(notify->type,new_notify->type) == 0
+                && notify->code == new_notify->code
+                && strcmp(notify->message,new_notify->message) == 0)
+                {
+                    DEBUGINFO("notify has exist,all params same");
+                    vPortFree(new_notify);
+                    return;
+                }           
+            }
+        }    
+
+        list_insert_tail(notify_list,new_notify);
+        
+        Notify_Execute();
+
+        DEBUGINFO("list_size:%d",list_size(notify_list));
+
+        osMutexRelease(notifyMutexHandle);
+    }
 }
 
 //增加最新链表执行动作
@@ -121,19 +127,24 @@ void Notify_Update(int id)
     {
         Notify_ListInit();
     }  
-    if(notify_list == NULL) return;   
-    for(int i = 0; i < notify_list->size;i++)
+    if(notify_list == NULL) return; 
+    if(notifyMutexHandle == NULL)return;   
+    if (osMutexAcquire(notifyMutexHandle, portMAX_DELAY) == osOK)
     {
-        Notify_t* notify = list_find_at(notify_list, i);
-        if(notify->id == id)//更新所有对应id(流水号)的动作状态
-        {   
-            //执行过后才可以更新状态，防止其他事件出现，提前更新状态
-            if(notify->execute == 1)
-            {
-                //获取id对应的实际状态
-                Notify_Edit(notify);
+        for(int i = 0; i < notify_list->size;i++)
+        {
+            Notify_t* notify = list_find_at(notify_list, i);
+            if(notify->id == id)//更新所有对应id(流水号)的动作状态
+            {   
+                //执行过后才可以更新状态，防止其他事件出现，提前更新状态
+                if(notify->execute == 1)
+                {
+                    //获取id对应的实际状态
+                    Notify_Edit(notify);
+                }
             }
-        }
-    }    
+        } 
+        osMutexRelease(notifyMutexHandle);
+    }      
 }
 

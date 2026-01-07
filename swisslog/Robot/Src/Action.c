@@ -52,35 +52,42 @@ void Action_Event(Action_t *action)
     {
         Action_ListInit();
     }  
-    if(action_list == NULL) return;    
-    //创建状态数据
-    Action_t* new_action = pvPortMalloc(sizeof(Action_t));
+    if(action_list == NULL) return;
+    if(actionMutexHandle == NULL)return;  
 
-    if(new_action == NULL)return;
-
-    memset(new_action,0,sizeof(Action_t));
-
-    memcpy(new_action,action,sizeof(Action_t));
-
-    for(int i = 0; i < action_list->size;i++)
+    if (osMutexAcquire(actionMutexHandle, portMAX_DELAY) == osOK)
     {
-        Action_t* action = list_find_at(action_list, i);
-        if(action->id == new_action->id)
-        {   
-            if(strcmp(action->cmd.cmdId,new_action->cmd.cmdId) == 0)
-            {
-                DEBUGINFO("cmd id has exist");
-                vPortFree(new_action);
-                return;
+        //创建状态数据
+        Action_t* new_action = pvPortMalloc(sizeof(Action_t));
+
+        if(new_action == NULL)return;
+
+        memset(new_action,0,sizeof(Action_t));
+
+        memcpy(new_action,action,sizeof(Action_t));
+
+        for(int i = 0; i < action_list->size;i++)
+        {
+            Action_t* action = list_find_at(action_list, i);
+            if(action->id == new_action->id)
+            {   
+                if(strcmp(action->cmd.cmdId,new_action->cmd.cmdId) == 0)
+                {
+                    DEBUGINFO("cmd id has exist");
+                    vPortFree(new_action);
+                    return;
+                }
             }
-        }
-    }    
+        }    
 
-    list_insert_tail(action_list,new_action);
+        list_insert_tail(action_list,new_action);
 
-    Action_Execute();
+        Action_Execute();
 
-    DEBUGINFO("list_size:%d",list_size(action_list));
+        DEBUGINFO("list_size:%d",list_size(action_list));
+
+        osMutexRelease(actionMutexHandle); 
+    }  
 }
 
 //增加最新链表执行动作
@@ -290,16 +297,22 @@ void Action_Update(int id)
     {
         Action_ListInit();
     }  
-    if(action_list == NULL) return;   
-    for(int i = 0; i < action_list->size;i++)
+    if(action_list == NULL) return;  
+    if(actionMutexHandle == NULL)return; 
+
+    if (osMutexAcquire(actionMutexHandle, portMAX_DELAY) == osOK)
     {
-        Action_t* action = list_find_at(action_list, i);
-        if(action->id == id)//更新所有对应id(流水号)的动作状态
-        {   
-            //获取id对应的实际状态
-            Action_Edit(action);
+        for(int i = 0; i < action_list->size;i++)
+        {
+            Action_t* action = list_find_at(action_list, i);
+            if(action->id == id)//更新所有对应id(流水号)的动作状态
+            {   
+                //获取id对应的实际状态
+                Action_Edit(action);
+            }
         }
-    }    
+        osMutexRelease(actionMutexHandle); 
+    }
 }
 
 

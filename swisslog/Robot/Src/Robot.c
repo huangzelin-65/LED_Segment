@@ -16,6 +16,8 @@
 #include "Action.h"
 #include "State.h"
 #include "Feature.h"
+#include "Config.h"
+#include "Notify.h"
 // #define USE_UID
 
 // extern CarStationStatus Car_Get_Station_Status(void);
@@ -1344,6 +1346,8 @@ void Robot_Event(void)
     State_Event(0);
     Action_Update(0);
     Feature_Update(0);
+    Config_Update(0);
+    Notify_Update(0);
     #endif
 }
 //消息通知主线程
