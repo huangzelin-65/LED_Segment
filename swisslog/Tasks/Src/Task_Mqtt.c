@@ -263,7 +263,7 @@ void vMqttReceiveTask(void *argument)
                     DEBUGINFO("MQTT Keep-Alive Ping");
                 } 
             }
-            else if (rc != MQTT_CODE_SUCCESS) {
+            else if (rc != MQTT_CODE_SUCCESS && rc != MQTT_CODE_CONTINUE) {
                 DEBUGINFO("MqttClient_WaitMessage_ex:%d",rc);
             }
         }
