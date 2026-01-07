@@ -18,6 +18,7 @@
 #include "Calculate.h"
 #include "HeartBeat.h"
 #include "RegisterInfo.h"
+#include "Register.h"
 
 extern CarStatus_t CarStatus;
 extern osMessageQueueId_t xRobotQueueHandle;//该消息队列处理事件上报
@@ -151,6 +152,7 @@ void vRobotHeartBeatTask(void *argument)
                     {
                         DEBUGINFO("register fail\n");
                         mqtt_info.Register = 0;
+                        bIncFieldRegisterErrTimes();//记录注册失败次数
                     }
                     else
                     {

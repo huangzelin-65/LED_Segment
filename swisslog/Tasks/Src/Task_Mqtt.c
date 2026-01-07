@@ -50,6 +50,7 @@ void vMqttManagerTask(void *argument)
             {
                 case MQTT_MSG_START://获取登录信息
                 {
+                    DEBUGINFO("MQTT_MSG_START");
                     memset(&mqtt_info,0,sizeof(MqttInfo_t));
                     memset(&g_register_info,0,sizeof(Stru_Field_Register_Typedef));
                     //初始化uuid
@@ -77,7 +78,7 @@ void vMqttManagerTask(void *argument)
                             DEBUGINFO("id:%s\n", mqtt_info.id);
 
                             //测试用
-                            // snprintf(mqtt_info.id, 7, "%d", usEncoder_Read_Number());  //"%06d"
+                            snprintf(mqtt_info.id, 7, "%d", usEncoder_Read_Number());  //"%06d"
 
                             Mqtt_Notify(MQTT_NOTIFY_INIT);
                         }                        
