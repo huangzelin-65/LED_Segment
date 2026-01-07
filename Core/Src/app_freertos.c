@@ -374,6 +374,31 @@ osMutexId_t mqttMutexHandle;
 const osMutexAttr_t mqttMutex_attributes = {
   .name = "mqttMutex"
 };
+/* Definitions for actionMutex */
+osMutexId_t actionMutexHandle;
+const osMutexAttr_t actionMutex_attributes = {
+  .name = "actionMutex"
+};
+/* Definitions for stateMutex */
+osMutexId_t stateMutexHandle;
+const osMutexAttr_t stateMutex_attributes = {
+  .name = "stateMutex"
+};
+/* Definitions for configMutex */
+osMutexId_t configMutexHandle;
+const osMutexAttr_t configMutex_attributes = {
+  .name = "configMutex"
+};
+/* Definitions for featureMutex */
+osMutexId_t featureMutexHandle;
+const osMutexAttr_t featureMutex_attributes = {
+  .name = "featureMutex"
+};
+/* Definitions for notifyMutex */
+osMutexId_t notifyMutexHandle;
+const osMutexAttr_t notifyMutex_attributes = {
+  .name = "notifyMutex"
+};
 /* Definitions for xResetButtonTimer */
 osTimerId_t xResetButtonTimerHandle;
 const osTimerAttr_t xResetButtonTimer_attributes = {
@@ -544,6 +569,21 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of mqttMutex */
   mqttMutexHandle = osMutexNew(&mqttMutex_attributes);
+
+  /* creation of actionMutex */
+  actionMutexHandle = osMutexNew(&actionMutex_attributes);
+
+  /* creation of stateMutex */
+  stateMutexHandle = osMutexNew(&stateMutex_attributes);
+
+  /* creation of configMutex */
+  configMutexHandle = osMutexNew(&configMutex_attributes);
+
+  /* creation of featureMutex */
+  featureMutexHandle = osMutexNew(&featureMutex_attributes);
+
+  /* creation of notifyMutex */
+  notifyMutexHandle = osMutexNew(&notifyMutex_attributes);
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
