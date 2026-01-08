@@ -58,7 +58,7 @@ uint8_t RunTimeSecondsASCII[3] = {0}; // 2字节ASCII + 终止符
 uint8_t lastUvSetTime = 0;
 uint8_t defaultUvSetTime = 0;
 uint8_t currentVirtualButtonEn = 0; // 使能虚拟按钮(勾选或取消勾选)
-uint8_t hmiEnButton = 1;
+uint8_t hmiEnButton = 1; // HMI是否允许按键操作 (1：允许，0：不允许)
 // uint8_t currentInStationEn = 0; // 使能进站信号按钮(用于提醒PLC小车已进站，TK2.1可去掉)
 
 
@@ -134,7 +134,7 @@ uint8_t HMI_Is_Button_En(void)
 }
 
 /*****************************local function***************************************/
-// HMI屏幕上解锁按键被按下
+// 触发屏幕上的解锁按键
 void HMI_Unlock_Button_Press()
 {
 	eBoxCtrlType box_msg;
@@ -155,7 +155,7 @@ void HMI_KeyBoard_Ctrl(eDwinKeyCtrlValue key){
 	HMI_Send_Msg_To_SendTask(sendSt);
 }
 
-//touch panel correct trigger
+// 触发触摸屏校准（向0xEA寄存器写入0x5A）
 void HMI_TPCal_Triger(void){
 	DEBUGINFO("cmd:DwinWriteReg data[0]:addRegCorrect data[1]:0x5a\r\n");
 	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(2);
@@ -233,7 +233,7 @@ void HMI_Get_Page_Req(){
 }
 
 void HMI_Get_Rtc(){
-	DEBUGINFO("cmd:DwinReadReg data[0]:addRegRTC data[1]:7\r\n");
+	DEBUGINFO("cmd:DwinReadReg data[0]:addRegRTC data[1]:7");
 // 5A A5 03 81 20 07 CRC  
 //7BYTES,yy,mm,dd,ww,hh,mm,ss
 	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(2);
@@ -730,7 +730,7 @@ uint8_t HMI_Check_Correct_Status(uint8_t currentTime[6]){
 }
 
 
-//open for uv clean task
+// 推送本次已消毒时间到HMI
 void HMI_Check_Uv_Clean(uint8_t time){
 	DEBUGINFO("HMI_Check_Uv_Clean time:%d\r\n",time);
 	//uint8_t temp[7];

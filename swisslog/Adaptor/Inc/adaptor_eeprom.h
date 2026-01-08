@@ -5,19 +5,19 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define EEP_ADD_SCREEN_LOCK_STATUS    		10  // 1bytes
+#define EEP_ADD_SCREEN_LOCK_STATUS    		10  // 1bytes 屏幕锁定状态
 // #define EEP_ADD_CAR_STATION_STATUS    		10  // 1bytes
-#define EEP_ADD_CAR_NUMBER		    		12  // 2bytes
-#define EEP_ADD_EEPROM_NEED_INIT		    16  // 2bytes
-#define EEP_ADD_IDCARD_PASSWORD_NUM		  	20 //1 bytes
-#define EEP_ADD_IDCARD_PASSWORD	      	  	21 //60 bytes
-#define EEP_ADD_UVCLEAN_TIME_MINUTES	    100 //1bytes
-#define EEP_ADD_LAST_UVCLEAN_DATE	      	101 //rtc time+clean time bytes
-#define EEP_ADD_SEND_PASSWORD		      	120 //6 bytes
-#define EEP_ADD_IS_ENCRYED			      	130 //1 bytes
-#define EEP_ADD_EN_VIRTUAL_BUTTON			131 //1 bytes
-#define EEP_ADD_EN_IN_STATION_SENSOR		132 //1 bytes
-#define EEP_ADD_LAST_CORRECT_DATE	      	150 //CCORRECT time 6 bytes
+#define EEP_ADD_CAR_NUMBER		    		12  // 2bytes 小车序号
+#define EEP_ADD_EEPROM_NEED_INIT		    16  // 2bytes EEPROM是否需要初始化标志（初始化后写入{0x51,0x4d}）
+#define EEP_ADD_IDCARD_PASSWORD_NUM		  	20 //1 bytes 车厢卡密码位数
+#define EEP_ADD_IDCARD_PASSWORD	      	  	21 //60 bytes 车厢卡密码（暂时没使用）
+#define EEP_ADD_UVCLEAN_TIME_MINUTES	    100 //1bytes 消毒时长设置 
+#define EEP_ADD_LAST_UVCLEAN_DATE	      	101 //rtc time+clean time bytes 上次消毒rtc时间 + 消毒时长
+#define EEP_ADD_SEND_PASSWORD		      	120 //6 bytes 屏幕上设置的6位数密码
+#define EEP_ADD_IS_ENCRYED			      	130 //1 bytes 车厢加密状态（1加密/0未加密）(为0时设置小车为在站状态)
+#define EEP_ADD_EN_VIRTUAL_BUTTON			131 //1 bytes 首页是否显示虚拟解锁按钮
+#define EEP_ADD_EN_IN_STATION_SENSOR		132 //1 bytes 虚拟进站信号（弃用）
+#define EEP_ADD_LAST_CORRECT_DATE	      	150 //CCORRECT time 6 bytes 上一次TP校准时间
 
 // 前向声明
 typedef struct M24C64_I2cOps M24C64_I2cOps;

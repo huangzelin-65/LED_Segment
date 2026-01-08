@@ -8,22 +8,22 @@
 //page define 2bytes
 typedef enum {
 	pgWelcome = 00,
-	pgHome = 01,
-	pgEncrypt = 03,
-	pgRfCard = 05,		
-	pgDecrypt = 06,
-	pgUvStart = 8,
-	pgUvWorking = 10,
-	pgUvFinished = 12,
-	pgSetting = 14,
+	pgHome = 01, // home页面
+	pgEncrypt = 03, // 加密页面（输入密码页面）
+	pgRfCard = 05, // “请扫描RFID卡或点击左侧按钮（已设置密码）”页面
+	pgDecrypt = 06, // 解密页面（输入密码页面）
+	pgUvStart = 8, // 消毒开始页面
+	pgUvWorking = 10, // 消毒中页面
+	pgUvFinished = 12, // 消毒完成页面
+	pgSetting = 14, // 设置页面
 	pgKeyBoard = 16,
-	pgErrorPasswd = 18,
+	pgErrorPasswd = 18, // 密码错误页面
 	pgWarningDoorIsOpenPd = 20,
-	pgWarningUvCleanCanceled = 22,
-	pgWarningDoorIsOpenStartUv = 24,
-	pgRfCardWithOutPasswd = 26,
+	pgWarningUvCleanCanceled = 22, // “消毒已取消”页面
+	pgWarningDoorIsOpenStartUv = 24, // "请关门后再消毒"页面
+	pgRfCardWithOutPasswd = 26, // “请扫描RFID卡或点击左侧按钮”页面
 	pgConfirmUvCancel = 27,
-	pgSysPassWd = 30,
+	pgSysPassWd = 30, // 系统密码页面
 }eDwinPage;
 
 //button define 
@@ -35,23 +35,23 @@ typedef enum {
 	btEncryptReq = 0x0005, // 加密页面数字键盘确认键
 	btDecryptReq = 0x0006, // 解密页面数字键盘确认键
 	btStartUv = 0x0007, // 消毒页面确定键
-	btStopUv = 0x0008,
-	btConfirmUv = 0x0009, // 消毒完成确定键
+	btStopUv = 0x0008, // 确定取消消毒键
+	btConfirmUv = 0x0009, // 消毒已完成确定键
 	btChangeSetting = 0x000A, // 设置页面确认键
 	btBackToHome = 0x000b,	// 返回主页面键（设置页面、消毒页面、加密页面都有使用）
 	btBackToRfPg = 0x000c,	// 解密页面返回键
-	btWrongPswdConfirm = 0x000d,	
-	btDoorIsOpenPdConfirm = 0x000e,	
-	btDoorIsOpenUvConfirm = 0x000f,
+	btWrongPswdConfirm = 0x000d,	// “密码错误，请重新输入”页面确定键
+	btDoorIsOpenPdConfirm = 0x000e,	// “密码设置前请先关门”页面确定键
+	btDoorIsOpenUvConfirm = 0x000f, // “请关门后再消毒”页面确定键
 //	btUvCancelConfirm = 0x0010,
 //	btUvCancelBack = 0x0011,
-	btVirtualRfCard	= 0x0012, // rfid虚拟按键，应该是点击后直接进入输入密码
-	btVirtualUnlock	= 0x0013, // 解锁虚拟按键
+	btVirtualRfCard	= 0x0012, // “请扫描RFID卡或点击左侧按钮（已设置密码）”页面解锁键
+	btVirtualUnlock	= 0x0013, // 虚拟解锁按键
 	btVirtualBtChangeSetting	= 0x0014, // 虚拟按键使能开关
 	btInStationChangeSetting	= 0x0015, // 进站检测开关（TK2.1取消掉）
-	btTPCorrectReq	= 0x0016,
-	btToSettingPageWithPasswd	= 0x0017, // 设置
-	btSysPasswdConfirm	= 0x0018,
+	btTPCorrectReq	= 0x0016, // 请求校准TP按键
+	btToSettingPageWithPasswd	= 0x0017, // 带系统密码的设置键
+	btSysPasswdConfirm	= 0x0018, // 系统密码确认键
 }eDwinButtonDef;
 	
 
@@ -59,18 +59,18 @@ typedef enum {
 typedef enum {
 	addButton = 0x0001,
 	addCarNum = 0x0002, // 车辆号
-	addPasswdEy = 0x0003,
-	addPasswdDy = 0x0005,		
-	addUvWorkTime = 0x0007, // 显示消毒分钟数
-	addSetUvDefaultWorkTime = 0x0008, // 显示默认消毒分钟数
-	addSetDataYY = 0x0009, // 显示年
-	addSetDataMM = 0x0000A, // 显示月
-	addSetDataDD = 0x0000B, // 显示日
-	addSetDataHH = 0x000C, // 显示时
-	addSetDataMIN = 0x000D, // 显示分
-	addSetDataSS = 0x000E, // 显示秒
+	addPasswdEy = 0x0003, // 显示加密页面密码显示区域
+	addPasswdDy = 0x0005, // 显示解密页面密码显示区域
+	addUvWorkTime = 0x0007, // 本次已消毒分钟数
+	addSetUvDefaultWorkTime = 0x0008, // 默认消毒分钟数
+	addSetDataYY = 0x0009, // 年
+	addSetDataMM = 0x0000A, // 月
+	addSetDataDD = 0x0000B, // 日
+	addSetDataHH = 0x000C, // 时
+	addSetDataMIN = 0x000D, // 分
+	addSetDataSS = 0x000E, // 秒
 	addLastUvTime = 0x000F,//7*2words
-	addPasswdSys = 0x0010,
+	addPasswdSys = 0x0010, // 显示系统密码页面密码显示区域
 	addLastUvDuration = 0x0015, // 上次消毒持续分钟数
 	addLockStatus = 0x0020, // 上锁状态图标 (0:解锁图标 1:上锁图标)
 	addCorrectStatus = 0x0022,
@@ -86,7 +86,7 @@ typedef enum {
 	addTextEyWord = 0x1000, // 加密页面密码显示区域
 	addTextDyWord = 0x1100, // 解密页面密码显示区域
 	addTextLastUvRecoed = 0x1200, // 上次消毒时间
-	addTextStm32Version = 0x1300,
+	addTextStm32Version = 0x1300, // 显示Stm32Version(没使用)
 	addTextHmiVersion = 0x1350, // 显示HmiVersion
 	addTextSysWord = 0x1400, // 输入系统密码页面，1.0无用，2.0点设置时跳转到此页面，密码固定为123456
 }eDwinValueAdd;

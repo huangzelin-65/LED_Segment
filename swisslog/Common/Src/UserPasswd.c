@@ -22,24 +22,33 @@ static uint8_t localSysCount = 0;
 static uint8_t isEncryed =0;		//记录当前是否有加密
 
 /************************************************************/
-uint8_t UserPswd_Add_Encry_Passwd(uint8_t byte){
-	if(byte == DEFAULT_BACKSPACE){
-		if(localEncryCount<=0)
-			return 0;
-		localEncryCount--;
-		localEncryPasswd[localEncryCount] = DEFAULT_PASSWD_CHAR;
+// 向密码缓冲区添加或删除字符
+uint8_t UserPswd_Add_Encry_Passwd(uint8_t byte)
+{
+	// 处理退格键
+	if (byte == DEFAULT_BACKSPACE)
+	{
+		// 如果密码长度为0，不做处理
+		if (localEncryCount <= 0)
+			return 0;											 // 返回失败
+		localEncryCount--;										 // 密码长度减1
+		localEncryPasswd[localEncryCount] = DEFAULT_PASSWD_CHAR; // 用默认字符替换被删除的字符
 	}
-	else{
-		if(localEncryCount>=MAX_PASSWD_LEN)
-			return 0;
-		localEncryPasswd[localEncryCount] = byte;
-		localEncryCount++;
+	// 处理普通字符输入
+	else
+	{
+		// 如果密码已达最大长度，不做处理
+		if (localEncryCount >= MAX_PASSWD_LEN)
+			return 0;							  // 返回失败
+		localEncryPasswd[localEncryCount] = byte; // 存储输入的字符
+		localEncryCount++;						  // 密码长度加1
 	}
 
-	return 1;	
+	return 1; // 返回成功
 }
 
-uint8_t UserPswd_Get_Encry_Status(){
+uint8_t UserPswd_Get_Encry_Status()
+{
 	return isEncryed;
 }
 
@@ -84,28 +93,41 @@ uint8_t UserPswd_Read_EncryFromFlash(){
 	return 1;	
 }
 
-
 /************************************************************/
-uint8_t UserPswd_Add_Decry_Passwd(uint8_t byte){
-	if(byte == DEFAULT_BACKSPACE){
-		if(localDecryCount<=0)
+// 函数功能：向解密密码缓冲区添加/删除字符
+// 参数：byte - 要处理的字符
+// 返回值：1-操作成功，0-操作失败
+uint8_t UserPswd_Add_Decry_Passwd(uint8_t byte)
+{
+	// 处理退格键
+	if (byte == DEFAULT_BACKSPACE)
+	{
+		// 如果缓冲区已空，拒绝操作
+		if (localDecryCount <= 0)
 			return 0;
+		// 回退计数器并用默认字符填充当前位置
 		localDecryCount--;
 		localDecryPasswd[localDecryCount] = DEFAULT_PASSWD_CHAR;
 	}
-	else{
-		if(localDecryCount>=MAX_PASSWD_LEN)
+	// 处理普通字符
+	else
+	{
+		// 如果缓冲区已满，拒绝操作
+		if (localDecryCount >= MAX_PASSWD_LEN)
 			return 0;
+		// 存储字符并前进计数器
 		localDecryPasswd[localDecryCount] = byte;
 		localDecryCount++;
 	}
-	
-	return 1;	
+
+	return 1; // 操作成功
 }
 
-uint8_t UserPswd_Get_Decry_Len(){
-	return localDecryCount;	
+uint8_t UserPswd_Get_Decry_Len()
+{
+	return localDecryCount;
 }
+// 清空临时解密密码
 void UserPswd_Clear_Decry(){
 	memset(localDecryPasswd,DEFAULT_PASSWD_CHAR,MAX_PASSWD_LEN);
 	localDecryCount = 0;
