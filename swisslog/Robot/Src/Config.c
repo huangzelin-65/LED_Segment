@@ -72,8 +72,7 @@ void Config_Event(Config_t *config)
             if(config->id == new_config->id)
             {   
                 if(strcmp(config->name,new_config->name) == 0
-                && strcmp(config->value,new_config->value) == 0
-                && strcmp(config->params,new_config->params) == 0)
+                && strcmp(config->value,new_config->value) == 0)
                 {
                     DEBUGINFO("config has exist,all params same");
                     vPortFree(new_config);
@@ -82,7 +81,7 @@ void Config_Event(Config_t *config)
                 }
                 //相同的功能，则覆盖
                 if(strcmp(config->name,new_config->name) == 0
-                &&(strcmp(config->value,new_config->value) != 0 || strcmp(config->params,new_config->params) != 0))
+                &&strcmp(config->value,new_config->value) != 0)
                 {
                     DEBUGINFO("config has exist,but something change");
                     memcpy(config,new_config,sizeof(Config_t));

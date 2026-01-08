@@ -21,6 +21,10 @@
 #define PWD_LENGTH          30
 #define SN_LENGTH           50
 
+// 定义静态二维数组的尺寸（适配需求：最多8个参数，每个参数最长32字符+1个'\0'）
+#define PARAM_MAX_COUNT 8   // params最多8个元素
+#define PARAM_BUF_LEN   (PARAMS_LENGTH + 1)  // 包含'\0'的总长度
+
 #include "Task_MotionCtrl.h"
 #include "Task_BoxCtrl.h"
 #include "adaptor_wifi.h"

@@ -553,6 +553,8 @@ int Json_ParseAction(char* data)
                     }
 
                     int params_count = cJSON_GetArraySize(params_array);
+                    if(params_count > PARAM_MAX_COUNT)params_count = PARAM_MAX_COUNT;
+                    temp_feature.params_cnt =  params_count;
                     for (int i = 0; i < params_count; i++)
                     {
                         cJSON *params_js = cJSON_GetArrayItem(params_array, i);
@@ -563,7 +565,9 @@ int Json_ParseAction(char* data)
                         }   
                         strncpy(params, params_js->valuestring, sizeof(params)-1);
                         params[sizeof(params)-1] = '\0';                        
-                        DEBUGINFO("  params: %s\n", params);
+                        DEBUGINFO("  params(%d): %s\n", i ,params);
+                        strncpy(temp_feature.params[i], params_js->valuestring, sizeof(params)-1);
+                        temp_feature.params[i][sizeof(params)-1] = '\0';
                     }
 
                     //feature中参数数组暂时没有params
@@ -644,6 +648,8 @@ int Json_ParseAction(char* data)
                     }
 
                     int params_count = cJSON_GetArraySize(params_array);
+                    if(params_count > PARAM_MAX_COUNT)params_count = PARAM_MAX_COUNT;
+                    temp_config.params_cnt =  params_count;
                     for (int i = 0; i < params_count; i++)
                     {
                         cJSON *params_js = cJSON_GetArrayItem(params_array, i);
@@ -654,7 +660,9 @@ int Json_ParseAction(char* data)
                         }   
                         strncpy(params, params_js->valuestring, sizeof(params)-1);
                         params[sizeof(params)-1] = '\0';                        
-                        DEBUGINFO("  params: %s\n", params);
+                        DEBUGINFO("  params(%d): %s\n", i,params);
+                        strncpy(temp_config.params[i], params_js->valuestring, sizeof(params)-1);
+                        temp_config.params[i][sizeof(params)-1] = '\0';                        
                     }
 
                     //config

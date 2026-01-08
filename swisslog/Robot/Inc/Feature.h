@@ -9,13 +9,14 @@ typedef struct {
     char version[VERSION_LENGTH];     // 版本号（如"1.0.0"）
     char name[NAME_LENGTH];//功能名称
     char value[VALUE_LENGTH];//功能参数
-    char params[PARAMS_LENGTH];//功能单位
+    char params[PARAM_MAX_COUNT][PARAM_BUF_LEN];//功能单位
     char cause[CAUSE_LENGTH];//执行出错时的原因
     int mode;//小车模式
     int screen_lock;//车厢屏幕状态
     int id;//流水号
     int execute;//代表是否执行。0：待执行 1：已经执行   
-    int code;//执行结果 
+    int code;//执行结果
+    int params_cnt;//参数的数量 
 } Feature_t;
 
 void Feature_Event(Feature_t *feature);
