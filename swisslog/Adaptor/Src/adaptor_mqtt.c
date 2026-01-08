@@ -343,7 +343,7 @@ int Mqtt_NetWrite(void *context, const byte* buf, int buf_len,int timeout_ms)
         // 前缀生成失败（缓冲区不足），处理错误
         return MQTT_CODE_ERROR_OUT_OF_BUFFER;
     }
-    int remaining_space = 1024 - prefix_len;
+    int remaining_space = 1024 - prefix_len - 2;//减去2目的：最后补上\r\n
     if (remaining_space < buf_len) {
         // buf 太长，缓冲区不足，处理错误（例如截断或报错）
         buf_len = remaining_space; 
@@ -352,12 +352,15 @@ int Mqtt_NetWrite(void *context, const byte* buf, int buf_len,int timeout_ms)
     mqtt_waitstate = MQTT_WAIT_STATE_WRITE;    
     // 步骤2：用 memcpy 复制 buf 的全部内容（包括中间的 '\0'）
     memcpy(Mqtt_SendBuffer + prefix_len, buf, buf_len);   
+
+    Mqtt_SendBuffer[prefix_len + buf_len] = '\r';
+    Mqtt_SendBuffer[prefix_len + buf_len + 1] = '\n';
  
     if (wifiUsartMutexHandle == NULL) return MQTT_CODE_ERROR_TIMEOUT;
 
     if (osMutexAcquire(wifiUsartMutexHandle, portMAX_DELAY) != osOK) return MQTT_CODE_ERROR_TIMEOUT;
 
-    HAL_UART_Transmit(&huart6, (uint8_t*)Mqtt_SendBuffer, (prefix_len + buf_len), 3000);
+    HAL_UART_Transmit(&huart6, (uint8_t*)Mqtt_SendBuffer, (prefix_len + buf_len + 2), 3000);
 
     osMutexRelease(wifiUsartMutexHandle);
 
