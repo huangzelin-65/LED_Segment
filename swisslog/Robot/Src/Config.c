@@ -72,8 +72,7 @@ void Config_Event(Config_t *config)
             if(config->id == new_config->id)
             {   
                 if(strcmp(config->name,new_config->name) == 0
-                && strcmp(config->value,new_config->value) == 0
-                && strcmp(config->params,new_config->params) == 0)
+                && strcmp(config->value,new_config->value) == 0)
                 {
                     DEBUGINFO("config has exist,all params same");
                     vPortFree(new_config);
@@ -82,7 +81,7 @@ void Config_Event(Config_t *config)
                 }
                 //相同的功能，则覆盖
                 if(strcmp(config->name,new_config->name) == 0
-                &&(strcmp(config->value,new_config->value) != 0 || strcmp(config->params,new_config->params) != 0))
+                &&strcmp(config->value,new_config->value) != 0)
                 {
                     DEBUGINFO("config has exist,but something change");
                     memcpy(config,new_config,sizeof(Config_t));
@@ -158,7 +157,23 @@ void Config_ToCmd(Config_t* config)
             DEBUGINFO("time:%s min\n",config->value);                                                    
         }
     }
+    //设置洁车污车
+    {
+        char *res = strstr(config->name, "kind");
+        if (res != NULL) {
+            DEBUGINFO("kind\n"); 
+            DEBUGINFO("value:%s\n",config->value);  
+            res = strstr(config->name, "clean");
+            if (res != NULL) {
+                HMI_Update_DirtyStatus_Req(0);
+            }
+            else
+            {
+                HMI_Update_DirtyStatus_Req(1);
+            }                                                  
+        }
 
+    }
 }
 //根据实际机器状态编辑config状态
 void Config_Edit(Config_t *config)
