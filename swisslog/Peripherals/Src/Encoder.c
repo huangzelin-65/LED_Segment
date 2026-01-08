@@ -41,14 +41,14 @@ uint16_t usEncoder_Read_Number()
     if(ucTen_2 == GPIO_PIN_RESET) ucTen += 2;
     if(ucTen_4 == GPIO_PIN_RESET) ucTen += 4;
     if(ucTen_8 == GPIO_PIN_RESET) ucTen += 8;
-    if(ucTen >= 9) ucTen = 0;
+    if(ucTen > 9) ucTen = 0;
 
     // 计算个位
     if(ucUnit_1 == GPIO_PIN_RESET) ucUnit += 1;
     if(ucUnit_2 == GPIO_PIN_RESET) ucUnit += 2;
     if(ucUnit_4 == GPIO_PIN_RESET) ucUnit += 4;
     if(ucUnit_8 == GPIO_PIN_RESET) ucUnit += 8;
-    if(ucUnit >= 9) ucUnit = 0;
+    if(ucUnit > 9) ucUnit = 0;
 
     // 计算总数值
     ucTotal = ucHundred * 100 + ucTen * 10 + ucUnit;
