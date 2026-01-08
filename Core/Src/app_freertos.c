@@ -242,14 +242,14 @@ const osThreadAttr_t BoxLEDTask_attributes = {
 osThreadId_t MqttManagerTaskHandle;
 const osThreadAttr_t MqttManagerTask_attributes = {
   .name = "MqttManagerTask",
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityNormal1,
   .stack_size = 512 * 4
 };
 /* Definitions for MqttReceiveTask */
 osThreadId_t MqttReceiveTaskHandle;
 const osThreadAttr_t MqttReceiveTask_attributes = {
   .name = "MqttReceiveTask",
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityBelowNormal,
   .stack_size = 512 * 4
 };
 /* Definitions for RobotManagerTask */
