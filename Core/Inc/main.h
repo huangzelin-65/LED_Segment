@@ -166,6 +166,7 @@ typedef enum
     ByInstation,        // 进站停止
     ByReset,            // 复位导致停止
     ByMotorError,       // 电机异常停止
+    ByInit,             // 初始化时停止
 }eMotorStopReasonType;
 
 //----------LED灯颜色枚举----------

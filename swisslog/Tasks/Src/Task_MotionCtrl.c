@@ -35,16 +35,20 @@ extern CarStatus_t CarStatus;
 // 小车运行状态初始化
 void vCarRunStatusInit()
 {
-    //初始化为正向正常速度运行
+    // 初始化为正向正常速度，禁用电机
     CarStatus.xSetSpeed = NormalSpeed;
     CarStatus.xRealDirection = Forward;
-    CarStatus.xMotorEnable = MotorDisable;
 }
 
 // 电机参数初始化
 void vMotorInit()
 {
-    vMotorEnable(); // 电机使能
+    CarStatus.xIsCarRunning = CarStop; //小车状态记录为停止
+    CarStatus.xMotorEnable = MotorDisable;
+    CarStatus.xMotorStopReason = ByInit; // 电机停止原因
+    DEBUGINFO("MotorStopReason: ByInit\r\n");
+    vMotorDisable(); // 禁用电机
+
     osDelay(pdMS_TO_TICKS(500));
     vMotorSetting(MOTOR_SETTING_ACCEL, MOTOR_SETTING_ACCEL_8000); // 设置电机加速度
     osDelay(pdMS_TO_TICKS(500));
@@ -122,12 +126,11 @@ void vRemoteMotionCmd(eDirectionType xDirection, eSpeedType xSpeed)
 
 void vMotionCtrlTask(void *argument)
 {
-  
-  // 小车运行状态初始化
-  vCarRunStatusInit();
+  vCarRunStatusInit(); // 小车运行状态初始化
 
-  // 电机参数初始化
-  vMotorInit();
+  vMotorInit(); // 电机参数初始化
+
+  Robot_Event(); // 上报小车状态
 
   while (1)
     {
