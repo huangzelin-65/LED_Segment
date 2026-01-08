@@ -167,10 +167,10 @@ void vHmiRecvTask(void *argument)
 					}
 					break;
 				case addRegVersion:
-					DEBUGINFO("addRegVersion\r\n");
+					DEBUGINFO("addRegVersion");
 					hmiVersion = recMsg->data[2];
 					startFinishedFlag = 1;
-					DEBUGINFO("startFinishedFlag = 1\r\n");
+					DEBUGINFO("startFinishedFlag = 1");
 					break;
 
 				default:
@@ -289,7 +289,7 @@ void vHmiWaitTask(void *argument)
 	NumDisp_SetNumber((uint16_t)(carNum[0]<<8)+carNum[1]);
 
 	//GET CURRENT POSTION
-	bEeprom_Check_Conn();
+	// bEeprom_Check_Conn();
 	// CarStationStatus stationSt=Car_Get_Station_Status();
 	
 	UserPswd_Init();
@@ -339,7 +339,7 @@ void vHmiWaitTask(void *argument)
 
 	vBoxELockStatusCheck();
 	
-	HMI_Display_Text_Stm32Version();
+	// HMI_Display_Text_Stm32Version();
 	HMI_Display_Text_HmiVersion();
 	HMI_Get_Rtc();
 	actFlag = rtcForCheckCorrect;

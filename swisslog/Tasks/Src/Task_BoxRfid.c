@@ -79,7 +79,7 @@ uint8_t RFID_GetLoginStatus(void)
 
 
 /*
-获取登录状态
+启用RFID扫描
 */
 void RFID_Scan_Enable(uint8_t en)
 {

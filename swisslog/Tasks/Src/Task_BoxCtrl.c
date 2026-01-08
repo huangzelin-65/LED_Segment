@@ -170,12 +170,12 @@ void vBoxCtrlTask(void *argument)
 				//*********************************** 更新UV消毒状态 **************************************//
 				case UpdateUVCleanStatus:
 					DEBUGINFO("case UpdateUVCleanStatus");
-					//消毒结束，保存本次消毒开始的rtc时间 + 消毒时长
+					// 消毒结束，保存本次消毒开始的rtc时间 + 消毒时长
 					if( !CarStatus.ucUVTimeRemain )
 					{
 						UvClean_Save_Record();
 					}
-					//推送UV清洁时间到HMI
+					// 推送UV清洁时间到HMI
 					HMI_Check_Uv_Clean(CarStatus.ucUVTimeRemain);
 					DEBUGINFO("UVTimeRemain:%d\n",CarStatus.ucUVTimeRemain);
 					break;
