@@ -1,0 +1,2 @@
+../swisslog/Task/Src/Task_rs485.c:21:6:RS485_Interrupt_Receive_Init	8	static
+../swisslog/Task/Src/Task_rs485.c:33:6:rs485_communicate	24	static,ignoring_inline_asm

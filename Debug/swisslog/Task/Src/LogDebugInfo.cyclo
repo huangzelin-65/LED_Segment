@@ -1,0 +1,3 @@
+../swisslog/Task/Src/LogDebugInfo.c:27:6:safe_printf_long	4
+../swisslog/Task/Src/LogDebugInfo.c:65:6:safe_printf_single	4
+../swisslog/Task/Src/LogDebugInfo.c:100:6:vPrint_Array	5
