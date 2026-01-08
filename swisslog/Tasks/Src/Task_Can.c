@@ -138,21 +138,18 @@ void vFDCANTxTask(void *argument)
     int swit = 1;
 
     DEBUGINFO("start");
-    // CAN_Init(&hfdcan1, 0x111, CAN_RX_FIFO0); // A
-    // CAN_Init(&hfdcan1, 0, FILTER_MASK_ALL, CAN_RX_FIFO0, CarStatus.usCarID);  // B
-    // CAN_Init(&hfdcan2, 0x111, CAN_RX_FIFO1);  // A
-    // CAN_Init(&hfdcan2, 0x555, CAN_RX_FIFO1); // B
 
     osDelay(pdMS_TO_TICKS(20));
     
+    // 测试CAN接口时短接CAN1和CAN2，互相收发
     while (1)
     {
-        // if(swit)
-            // CAN_AddMsgToTxFifo(&hfdcan1, 0x555, txData1); // A
+        if(swit)
+            CAN_AddMsgToTxFifo(&hfdcan1, 0x555, txData1); // A
             // CAN_AddMsgToTxFifo(&hfdcan1, 0x111, txData1); // B
-        // else
+        else
             // CAN_AddMsgToTxFifo(&hfdcan2, 0x555, txData2); // A
-            // CAN_AddMsgToTxFifo(&hfdcan2, 0x111, txData2); // B
+            CAN_AddMsgToTxFifo(&hfdcan2, 0x111, txData2); // B
         
         swit = !swit;
 

@@ -126,132 +126,132 @@ void vRemoteMotionCmd(eDirectionType xDirection, eSpeedType xSpeed)
 
 void vMotionCtrlTask(void *argument)
 {
-  vCarRunStatusInit(); // 小车运行状态初始化
+    vCarRunStatusInit(); // 小车运行状态初始化
 
-  vMotorInit(); // 电机参数初始化
+    vMotorInit(); // 电机参数初始化
 
-  Robot_Event(); // 上报小车状态
+    Robot_Event(); // 上报小车状态
 
-  while (1)
+    while (1)
     {
-      if ( osMessageQueueGet(xMotion_QueueHandle, &MotionRecv_msg, NULL, osWaitForever) == osOK ) 
-      {
-        DEBUGINFO("osMessageQueueGet:%d",MotionRecv_msg);
-        switch( MotionRecv_msg )
+        if ( osMessageQueueGet(xMotion_QueueHandle, &MotionRecv_msg, NULL, osWaitForever) == osOK ) 
         {
-          case CarStop:
-            if(CarStatus.xIsCarRunning != CarStop)
+            DEBUGINFO("osMessageQueueGet:%d",MotionRecv_msg);
+            switch( MotionRecv_msg )
             {
-              CarStatus.xIsCarRunning = CarStop; //小车状态记录为停止
-            }
-            CarStatus.xMotorEnable = MotorDisable; //电机使能状态清除
-
-            // 若是由于rfid停止标签导致的停止，则不禁用电机
-            if(CarStatus.xMotorStopReason == ByStopTag){
-              vMotorOps(NoDirection, ZeroSpeed);  // 设置0速度
-            } else {
-              vMotorDisable();  // 禁用电机
-            }
-            
-            GPIO_WRITE(LED4, GPIO_PIN_RESET); // 关闭LED4
-            DEBUGINFO("disable LED4 ");
-            break;
-          
-          case CarRunning:
-            DEBUGINFO("CarStatus.xAutoMode:%d, CarStatus.xMotorEnable:%d",CarStatus.xAutoMode, CarStatus.xMotorEnable);
-            // 拨动开关自动挡
-            if( CarStatus.ToggleSwtichPosition == ToggleFront )
-            {
-              // 远程自动模式
-              if(CarStatus.xAutoMode == Auto)
-              {
-                DEBUGINFO("remote Auto mode");
-
-                //车厢锁上才能发车
-                if( CarStatus.xBoxLocked == Locked )
-                {
-                   // 未允许电机运行（通过wifi或串口指令下发允许）
-                  if( CarStatus.xMotorEnable == MotorDisable )
-                  {
-                    DEBUGINFO("ReadyToRun");
-                    CarStatus.xIsCarRunning = CarReadyToRun;
-                    break;
-                  }
-                  // 已允许电机运行
-                  else if( CarStatus.xMotorEnable == MotorEnable )
-                  {
-                    // 电机按预设运行方向 和 预设速度运行
-                    CarStatus.xIsCarRunning = CarRunning;
-                    CarStatus.xRealDirection = CarStatus.xSetDirection;
-
-                    // 若是由于rfid停止标签导致的停止，则不用再使能电机
-                    if(CarStatus.xMotorStopReason == ByStopTag)
+                case CarStop:
+                    if(CarStatus.xIsCarRunning != CarStop)
                     {
-                      vMotorOps(CarStatus.xRealDirection, CarStatus.xSetSpeed);  
-                    } else {
-                      vMotorEnable();  // 电机使能
-                      osDelay(pdMS_TO_TICKS(100));
-                      vMotorOps(CarStatus.xRealDirection, CarStatus.xSetSpeed); 
+                        CarStatus.xIsCarRunning = CarStop; //小车状态记录为停止
                     }
-                    
-                    GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
-                    DEBUGINFO("LED4 ON");
-                  }
-                } else {
-                  CarStatus.xMotorEnable = MotorDisable;  // 停止电机
-                  CarStatus.xMotorStopReason = ByBoxUnlock; // 电机停止原因
-                  DEBUGINFO("MotorStopReason: ByBoxUnlock");
-                }
-              }
+                    CarStatus.xMotorEnable = MotorDisable; //电机使能状态清除
 
-              // 远程手动模式
-              else if( CarStatus.xAutoMode == Manual )
-              {
-                DEBUGINFO("remote Manual mode");
-                // 电机按实际运行方向 和 普通速度运行（手动档下）
-                CarStatus.xIsCarRunning = CarRunning;
-                vMotorEnable();  // 电机使能
-                osDelay(pdMS_TO_TICKS(100));
-                vMotorOps(CarStatus.xRealDirection, CarStatus.xSetSpeed);  
-                GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
-                DEBUGINFO("LED4 ON");
-              }
+                    // 若是由于rfid停止标签导致的停止，则不禁用电机
+                    if(CarStatus.xMotorStopReason == ByStopTag){
+                        vMotorOps(NoDirection, ZeroSpeed);  // 设置0速度
+                    } else {
+                        vMotorDisable();  // 禁用电机
+                    }
+                  
+                    GPIO_WRITE(LED4, GPIO_PIN_RESET); // 关闭LED4
+                    DEBUGINFO("disable LED4 ");
+                    break;
+              
+                case CarRunning:
+                    DEBUGINFO("CarStatus.xAutoMode:%d, CarStatus.xMotorEnable:%d",CarStatus.xAutoMode, CarStatus.xMotorEnable);
+                    // 拨动开关自动挡
+                    if( CarStatus.ToggleSwtichPosition == ToggleFront )
+                    {
+                      // 远程自动模式
+                      if(CarStatus.xAutoMode == Auto)
+                      {
+                        DEBUGINFO("remote Auto mode");
+
+                        //车厢锁上才能发车
+                        if( CarStatus.xBoxLocked == Locked )
+                        {
+                          // 未允许电机运行（通过wifi或串口指令下发允许）
+                          if( CarStatus.xMotorEnable == MotorDisable )
+                          {
+                            DEBUGINFO("ReadyToRun");
+                            CarStatus.xIsCarRunning = CarReadyToRun;
+                            break;
+                          }
+                          // 已允许电机运行
+                          else if( CarStatus.xMotorEnable == MotorEnable )
+                          {
+                            // 电机按预设运行方向 和 预设速度运行
+                            CarStatus.xIsCarRunning = CarRunning;
+                            CarStatus.xRealDirection = CarStatus.xSetDirection;
+
+                            // 若是由于rfid停止标签导致的停止，则不用再使能电机
+                            if(CarStatus.xMotorStopReason == ByStopTag)
+                            {
+                              vMotorOps(CarStatus.xRealDirection, CarStatus.xSetSpeed);  
+                            } else {
+                              vMotorEnable();  // 电机使能
+                              osDelay(pdMS_TO_TICKS(100));
+                              vMotorOps(CarStatus.xRealDirection, CarStatus.xSetSpeed); 
+                            }
+                            
+                            GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
+                            DEBUGINFO("LED4 ON");
+                          }
+                        } else {
+                          CarStatus.xMotorEnable = MotorDisable;  // 停止电机
+                          CarStatus.xMotorStopReason = ByBoxUnlock; // 电机停止原因
+                          DEBUGINFO("MotorStopReason: ByBoxUnlock");
+                        }
+                      }
+
+                      // 远程手动模式
+                      else if( CarStatus.xAutoMode == Manual )
+                      {
+                        DEBUGINFO("remote Manual mode");
+                        // 电机按实际运行方向 和 普通速度运行（手动档下）
+                        CarStatus.xIsCarRunning = CarRunning;
+                        vMotorEnable();  // 电机使能
+                        osDelay(pdMS_TO_TICKS(100));
+                        vMotorOps(CarStatus.xRealDirection, CarStatus.xSetSpeed);  
+                        GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
+                        DEBUGINFO("LED4 ON");
+                      }
 
 
+                    }
+                    // 拨动开关维修模式挡
+                    else if( CarStatus.ToggleSwtichPosition == ToggleBack )
+                    {
+                        DEBUGINFO("local Manual mode");
+
+                        // reset按钮没有按下才允许电机运行
+                        if( GPIO_READ(RESET) == GPIO_PIN_SET )
+                        {
+                            // 维修控杆触发才允许电机运行
+                            if( CarStatus.ServiceJoystickPosition == ServiceFront || CarStatus.ServiceJoystickPosition == ServiceBack )
+                            {
+                                // 电机按最低速度运行（维修模式档下）
+                                CarStatus.xIsCarRunning = CarRunning;
+                                vMotorEnable();  // 电机使能
+                                osDelay(pdMS_TO_TICKS(100));
+                                vMotorOps(CarStatus.xRealDirection, LowSpeed); 
+                                GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
+                                DEBUGINFO("LED4 ON");
+                            }
+                        }
+                    }
+                    // 拨动开关停止挡
+                    else if(CarStatus.ToggleSwtichPosition == ToggleStop)
+                    {
+                        CarStatus.xIsCarRunning = CarStop; //小车状态记录为停止
+                        CarStatus.xMotorEnable = MotorDisable; //电机使能状态清除（以防在停止挡接收到运动信号后，拨到自动挡时触发电机运行）
+                        CarStatus.xMotorStopReason = ByToggleStop;
+                        DEBUGINFO("MotorStopReason: ByToggleStop");
+                    }
+                    break;
             }
-            // 拨动开关手动挡
-            else if( CarStatus.ToggleSwtichPosition == ToggleBack )
-            {
-              DEBUGINFO("local Manual mode");
-
-              // reset按钮没有按下才允许电机运行
-              if( GPIO_READ(RESET) == GPIO_PIN_SET )
-              {
-                // 维修控杆触发才允许电机运行
-                if( CarStatus.ServiceJoystickPosition == ServiceFront || CarStatus.ServiceJoystickPosition == ServiceBack )
-                {
-                  // 电机按最低速度运行（手动档下）
-                  CarStatus.xIsCarRunning = CarRunning;
-                  vMotorEnable();  // 电机使能
-                  osDelay(pdMS_TO_TICKS(100));
-                  vMotorOps(CarStatus.xRealDirection, LowSpeed); 
-                  GPIO_WRITE(LED4, GPIO_PIN_SET); // 打开LED4
-                  DEBUGINFO("LED4 ON");
-                }
-              }
-            }
-            // 拨动开关停止挡
-            else if(CarStatus.ToggleSwtichPosition == ToggleStop)
-            {
-              CarStatus.xIsCarRunning = CarStop; //小车状态记录为停止
-              CarStatus.xMotorEnable = MotorDisable; //电机使能状态清除
-              CarStatus.xMotorStopReason = ByToggleStop;
-              DEBUGINFO("MotorStopReason: ByToggleStop");
-            }
-            break;
+            Robot_Event(); // 上报小车状态
         }
-        Robot_Event(); // 上报小车状态
-      }
     }
 }
 
@@ -259,24 +259,24 @@ void vMotionCtrlTask(void *argument)
 /* 电机反馈任务入口函数 */
 void vMotorFeedbackTask(void *argument)
 {
-  uint32_t ucReciveLen = 0;
+    uint32_t ucReciveLen = 0;
 
-  //启动DMA接收
-  vMotor_Start_DMA_Receive(ucMotor_Task_Rx_Buffer);
+    //启动DMA接收
+    vMotor_Start_DMA_Receive(ucMotor_Task_Rx_Buffer);
 
-  while (1)
-  {
-
-    // 等待DMA接收完成信号
-    if (osSemaphoreAcquire(xMotorRxSemHandle, osWaitForever) == osOK)    
+    while (1)
     {
-      ucReciveLen = ulMotor_Get_DMA_Receive_Len();
 
-      DEBUGINFO("Motor received len:%d",ucReciveLen);
-      vPrint_Array(ucMotor_Task_Rx_Buffer, ucReciveLen);
+        // 等待DMA接收完成信号
+        if (osSemaphoreAcquire(xMotorRxSemHandle, osWaitForever) == osOK)    
+        {
+            ucReciveLen = ulMotor_Get_DMA_Receive_Len();
 
-      // 重启DMA接收(DMA单次模式下，重启后从缓冲区起始地址覆盖写入)
-      vMotor_Start_DMA_Receive(ucMotor_Task_Rx_Buffer);
+            DEBUGINFO("Motor received len:%d",ucReciveLen);
+            vPrint_Array(ucMotor_Task_Rx_Buffer, ucReciveLen);
+
+            // 重启DMA接收(DMA单次模式下，重启后从缓冲区起始地址覆盖写入)
+            vMotor_Start_DMA_Receive(ucMotor_Task_Rx_Buffer);
+        }
     }
-  }
 }
