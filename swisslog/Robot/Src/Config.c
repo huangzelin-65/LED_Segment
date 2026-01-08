@@ -163,7 +163,7 @@ void Config_ToCmd(Config_t* config)
         if (res != NULL) {
             DEBUGINFO("kind\n"); 
             DEBUGINFO("value:%s\n",config->value);  
-            res = strstr(config->name, "clean");
+            res = strstr(config->value, "clean");
             if (res != NULL) {
                 HMI_Update_DirtyStatus_Req(0);
             }

@@ -580,7 +580,7 @@ int Json_ParseAction(char* data)
                     memcpy(temp_feature.version,version,sizeof(version));
                     memcpy(temp_feature.name,name,sizeof(name));
                     memcpy(temp_feature.value,value,sizeof(value));   
-                    memcpy(temp_feature.params,params,sizeof(params)); 
+                    // memcpy(temp_feature.params,params,sizeof(params)); 
                     temp_feature.id = 0;
                     Feature_Event(&temp_feature);
                 }                
@@ -675,7 +675,7 @@ int Json_ParseAction(char* data)
                     memcpy(temp_config.version,version,sizeof(version));
                     memcpy(temp_config.name,name,sizeof(name));
                     memcpy(temp_config.value,value,sizeof(value));   
-                    memcpy(temp_config.params,params,sizeof(params)); 
+                    // memcpy(temp_config.params,params,sizeof(params)); 
                     temp_config.id = 0;
                     Config_Event(&temp_config);
                 }                
