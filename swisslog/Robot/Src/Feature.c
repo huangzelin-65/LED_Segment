@@ -196,7 +196,31 @@ void Feature_ToCmd(Feature_t* feature)
         }
     }
     //设置小车起点和终点信息
-    
+    {
+        char *res = strstr(feature->name, "task");
+        if (res != NULL) {
+            DEBUGINFO("task\n"); 
+            char *res = strstr(feature->value, "update");  
+            if (res != NULL) {
+                DEBUGINFO("update\n");
+
+                if(feature->params_cnt == 2)
+                {
+                    //第一个参数是 出发站点
+                    int src_station_num = atoi(feature->params[0]);
+                    DEBUGINFO("src_station_num:%d\n",src_station_num);
+
+                    HMI_Update_SrcStation_Req(src_station_num); 
+                    //第二个参数是 目标站点
+                    int dest_station_num = atoi(feature->params[1]);
+                    DEBUGINFO("dest_station_num:%d\n",dest_station_num);
+
+                    HMI_Update_DestStation_Req(dest_station_num);
+                }
+            }
+        }
+
+    }
 }
 //根据实际机器状态编辑feature状态
 void Feature_Edit(Feature_t *feature)
