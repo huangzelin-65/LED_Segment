@@ -158,7 +158,23 @@ void Config_ToCmd(Config_t* config)
             DEBUGINFO("time:%s min\n",config->value);                                                    
         }
     }
+    //设置洁车污车
+    {
+        char *res = strstr(config->name, "kind");
+        if (res != NULL) {
+            DEBUGINFO("kind\n"); 
+            DEBUGINFO("value:%s\n",config->value);  
+            res = strstr(config->name, "clean");
+            if (res != NULL) {
+                HMI_Update_DirtyStatus_Req(0);
+            }
+            else
+            {
+                HMI_Update_DirtyStatus_Req(1);
+            }                                                  
+        }
 
+    }
 }
 //根据实际机器状态编辑config状态
 void Config_Edit(Config_t *config)

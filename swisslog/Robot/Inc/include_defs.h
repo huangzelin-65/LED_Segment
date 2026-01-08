@@ -28,7 +28,7 @@
 #include "adaptor_ntp.h"
 #include "Register.h"
 #include "app_freertos.h"
-
+#include "DwinHMI.h"
 #endif
 
 
