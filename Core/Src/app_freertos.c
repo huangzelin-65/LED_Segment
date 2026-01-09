@@ -364,6 +364,13 @@ const osThreadAttr_t JsonParseTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 256 * 4
 };
+/* Definitions for MqttErrorHandleTask */
+osThreadId_t MqttErrorHandleTaskHandle;
+const osThreadAttr_t MqttErrorHandleTask_attributes = {
+  .name = "MqttErrorHandleTask",
+  .priority = (osPriority_t) osPriorityNormal2,
+  .stack_size = 256 * 4
+};
 /* Definitions for wifiUsartMutex */
 osMutexId_t wifiUsartMutexHandle;
 const osMutexAttr_t wifiUsartMutex_attributes = {
@@ -529,6 +536,11 @@ osMessageQueueId_t JsonParseQueueHandle;
 const osMessageQueueAttr_t JsonParseQueue_attributes = {
   .name = "JsonParseQueue"
 };
+/* Definitions for MqttErrorHandleQueue */
+osMessageQueueId_t MqttErrorHandleQueueHandle;
+const osMessageQueueAttr_t MqttErrorHandleQueue_attributes = {
+  .name = "MqttErrorHandleQueue"
+};
 /* Definitions for xMotorTxSem */
 osSemaphoreId_t xMotorTxSemHandle;
 const osSemaphoreAttr_t xMotorTxSem_attributes = {
@@ -686,6 +698,8 @@ void MX_FREERTOS_Init(void) {
   JsonGenerateQueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &JsonGenerateQueue_attributes);
   /* creation of JsonParseQueue */
   JsonParseQueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &JsonParseQueue_attributes);
+  /* creation of MqttErrorHandleQueue */
+  MqttErrorHandleQueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &MqttErrorHandleQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -820,6 +834,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of JsonParseTask */
   JsonParseTaskHandle = osThreadNew(vJsonParseTask, NULL, &JsonParseTask_attributes);
+
+  /* creation of MqttErrorHandleTask */
+  MqttErrorHandleTaskHandle = osThreadNew(vMqttErrorHandleTask, NULL, &MqttErrorHandleTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

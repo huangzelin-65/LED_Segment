@@ -50,7 +50,7 @@ void vWifiManagerTask(void *argument)
     {
       if(waitforperiod(&wifi_get_rssi_cnt,100))//10秒获取一次wifi信号强度
       {
-        Wifi_SendATCmd("AT+RSSI",2000);
+        // Wifi_SendATCmd("AT+RSSI",2000);
       }
       if(waitforperiod(&wifi_get_ip_cnt,50))//5秒获取一次获取ip地址,如果没有获取
       {

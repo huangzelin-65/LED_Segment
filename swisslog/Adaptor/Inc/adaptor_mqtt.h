@@ -50,13 +50,14 @@ typedef enum
     MQTT_MSG_ONLINE,
     MQTT_MSG_OFFLINE, 
     MQTT_MSG_REGISTER,
-    MQTT_MSG_DISCONNECT,   
+    MQTT_MSG_DISCONNECT, 
+    MQTT_MSG_RESEND,  
 }MqttMsgType_t;
 
 typedef struct 
 {
     MqttMsgType_t type;
-    char *data;
+    void *data;
 }MqttMsgdata_t;
 
 // 1：未连接
@@ -114,6 +115,21 @@ typedef struct {
     uint8_t Register_cnt;//代表注册的次数
 }MqttInfo_t;
 
+typedef struct {
+    char *topic;
+    char *data;
+}MqttReSendMsg_t;
+
+typedef enum
+{
+    MQTT_ERROR_RESEND_MSG = 0,
+}MqttErrorType_t;
+
+typedef struct 
+{
+    MqttErrorType_t type;
+    void *data;
+}MqttErrordata_t;
 
 extern MqttNet mNetwork;//网络结构体
 extern MqttClient mClient;//mqtt客户端
@@ -123,7 +139,8 @@ extern MqttInfo_t mqtt_info;
 
 int MqttInit(void);
 int MqttDeInit(void);
-void Mqtt_SendMsg(MqttMsgType_t msg,char *data);
+void Mqtt_SendMsg(MqttMsgType_t msg,void *data);
+void Mqtt_ErrorMsg(MqttErrorType_t msg,void *data);
 void Mqtt_ParseData(uint8_t* rbuf,int len);
 void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t qos, uint8_t retain);
 int Mqtt_SubscribeMsg(MqttTopic *topics,int count);
