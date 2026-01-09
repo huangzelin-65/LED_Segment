@@ -18,6 +18,7 @@
 #include "app_freertos.h"
 #include "semphr.h"
 #include "JsonCommon.h"
+#include "StringEdit.h"
 
 #define MQTT_HOST              "192.168.1.10" 
 #define MQTT_QOS               MQTT_QOS_1
@@ -598,34 +599,6 @@ int MqttDeInit(void)
     }
     return rc;
 }
-/**
- * @brief 在一个可能包含'\0'的字节数组中查找所有"+WFDATA="的起始位置。
- * 
- * @param arr 待搜索的字节数组。
- * @param arr_len 数组的总长度。
- * @param result 用于存储结果（起始索引）的数组。
- * @param max_result 结果数组的最大容量。
- * @return int 实际找到的匹配项数量。
- */
-int Mqtt_FindAllStrPositions(uint8_t *arr,char *target,int arr_len, int *result, int max_result)
-{
-    int target_len = strlen(target);
-    int count = 0;
-
-    // 遍历数组，直到剩下的长度不足以容纳目标字符串
-    for (int i = 0; i <= arr_len - target_len; i++) {
-        // 检查从当前位置i开始的字符串是否与目标匹配
-        if (memcmp(arr + i, target, target_len) == 0) {
-            // 如果找到匹配项，且结果数组还有空间，则存储位置
-            if (count < max_result) {
-                result[count] = i;
-            }
-            count++;
-        }
-    }
-
-    return count;
-}
 //将数据解析到数组里面（动态）
 void Mqtt_ParseData2List(uint8_t *result,int len)
 {
@@ -735,7 +708,7 @@ void Mqtt_ParseTcpData(uint8_t* rbuf,int len)
         // 假设最多查找 10 个位置
         char target_str[] = "+WFDATA=";
         int positions[10];
-        int found_count = Mqtt_FindAllStrPositions(rbuf,target_str,len,positions,10);
+        int found_count = find_allstr_positions(rbuf,target_str,len,positions,10);
 
         if (found_count > 0) {
             DEBUGINFO("found_count: %d\n", found_count);

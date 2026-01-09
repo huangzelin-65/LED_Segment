@@ -11,7 +11,7 @@ int uid_to_uuid(const uint32_t *pUID, char *pUuid,uint32_t uuid_len);
 int extract_last_numbers(char *src, char *dest, int dest_len);
 char* extract_ip(const char* input_str, char* ip_buffer, int buffer_size);
 int is_invalid_ip(const char* ip_str);
-
+int find_allstr_positions(uint8_t *arr,char *target,int arr_len, int *result, int max_result);
 
 
 
