@@ -20,6 +20,7 @@ extern osMessageQueueId_t xWifi_Parse_QueueHandle;
 /* WiFi管理任务入口函数 */
 void vWifiManagerTask(void *argument)
 {
+  int print_info_cnt = 0;
   int wifi_get_rssi_cnt = 0; 
   int wifi_get_ip_cnt = 0;  
   DEBUGINFO("vWifiManagerTask\r\n");
@@ -49,8 +50,7 @@ void vWifiManagerTask(void *argument)
     {
       if(waitforperiod(&wifi_get_rssi_cnt,100))//10秒获取一次wifi信号强度
       {
-        // Wifi_SendATCmd("AT+RSSI",2000);
-        DEBUGINFO("wifi status connect_state:%d rssi:%d ip:%s\n",wifi_status.connect_state,wifi_status.rssi,wifi_status.ip);
+        Wifi_SendATCmd("AT+RSSI",2000);
       }
       if(waitforperiod(&wifi_get_ip_cnt,50))//5秒获取一次获取ip地址,如果没有获取
       {
@@ -59,7 +59,11 @@ void vWifiManagerTask(void *argument)
           Wifi_SendATCmd("AT+LIP",2000);
         }
       }   
-    }    
+    }
+    if(waitforperiod(&print_info_cnt,30))
+    {
+      DEBUGINFO("wifi status connect_state:%d rssi:%d ip:%s\n",wifi_status.connect_state,wifi_status.rssi,wifi_status.ip);
+    }
 	  osDelay(pdMS_TO_TICKS(100));
   }
 }
