@@ -842,6 +842,16 @@ void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t 
     DEBUGINFO("rc:%d\n",rc);  
     DEBUGINFO("pub_topic:%s\n",pub_topic);
     DEBUGINFO("pub_buf:%s\n",pub_buf);
+    if(rc == MQTT_CODE_CONTINUE)
+    {
+        DEBUGINFO("MQTT_CODE_CONTINUE"); 
+        MqttClient_Publish(&mClient, &mqttObj.publish);
+    }
+    if(rc == MQTT_CODE_ERROR_TIMEOUT)
+    {
+        DEBUGINFO("MQTT_CODE_ERROR_TIMEOUT"); 
+        MqttClient_Publish(&mClient, &mqttObj.publish);
+    }    
 }
 //订阅话题调用接口
 int Mqtt_SubscribeMsg(MqttTopic *topics,int count)
