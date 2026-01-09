@@ -1,2 +1,3 @@
-../swisslog/Task/Src/Task_rs485.c:21:6:RS485_Interrupt_Receive_Init	8	static
-../swisslog/Task/Src/Task_rs485.c:33:6:rs485_communicate	24	static,ignoring_inline_asm
+../swisslog/Task/Src/Task_rs485.c:8:6:RS485_Start_DMA_Receive	24	static
+../swisslog/Task/Src/Task_rs485.c:30:6:Check_Data_Valid	16	static
+../swisslog/Task/Src/Task_rs485.c:34:6:RS485_Init	8	static

@@ -54,13 +54,6 @@ const osThreadAttr_t defaultTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for RS485 */
-osThreadId_t RS485Handle;
-const osThreadAttr_t RS485_attributes = {
-  .name = "RS485",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
-};
 /* Definitions for InitTask */
 osThreadId_t InitTaskHandle;
 const osThreadAttr_t InitTask_attributes = {
@@ -75,15 +68,22 @@ const osThreadAttr_t Package_Parse_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for xPrint_Queue */
-osMessageQueueId_t xPrint_QueueHandle;
-const osMessageQueueAttr_t xPrint_Queue_attributes = {
-  .name = "xPrint_Queue"
+/* Definitions for Segment_Blink */
+osThreadId_t Segment_BlinkHandle;
+const osThreadAttr_t Segment_Blink_attributes = {
+  .name = "Segment_Blink",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for xRS485RxSem */
 osSemaphoreId_t xRS485RxSemHandle;
 const osSemaphoreAttr_t xRS485RxSem_attributes = {
   .name = "xRS485RxSem"
+};
+/* Definitions for xSegBlinkSem */
+osSemaphoreId_t xSegBlinkSemHandle;
+const osSemaphoreAttr_t xSegBlinkSem_attributes = {
+  .name = "xSegBlinkSem"
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -92,9 +92,9 @@ const osSemaphoreAttr_t xRS485RxSem_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
-extern void rs485_communicate(void *argument);
 extern void vInitTask(void *argument);
-void xPackage_Parse(void *argument);
+extern void xPackage_Parse(void *argument);
+extern void xSegment_Blink(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -116,6 +116,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of xRS485RxSem */
   xRS485RxSemHandle = osSemaphoreNew(1, 0, &xRS485RxSem_attributes);
 
+  /* creation of xSegBlinkSem */
+  xSegBlinkSemHandle = osSemaphoreNew(1, 0, &xSegBlinkSem_attributes);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
@@ -123,10 +126,6 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
-
-  /* Create the queue(s) */
-  /* creation of xPrint_Queue */
-  xPrint_QueueHandle = osMessageQueueNew (16, sizeof(uint32_t), &xPrint_Queue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -136,14 +135,14 @@ void MX_FREERTOS_Init(void) {
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-  /* creation of RS485 */
-  RS485Handle = osThreadNew(rs485_communicate, NULL, &RS485_attributes);
-
   /* creation of InitTask */
   InitTaskHandle = osThreadNew(vInitTask, NULL, &InitTask_attributes);
 
   /* creation of Package_Parse */
   Package_ParseHandle = osThreadNew(xPackage_Parse, NULL, &Package_Parse_attributes);
+
+  /* creation of Segment_Blink */
+  Segment_BlinkHandle = osThreadNew(xSegment_Blink, NULL, &Segment_Blink_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -172,15 +171,6 @@ void StartDefaultTask(void *argument)
   }
   /* USER CODE END StartDefaultTask */
 }
-
-/* USER CODE BEGIN Header_xPackage_Parse */
-/**
-* @brief Function implementing the Package_Parse thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_xPackage_Parse */
-
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */

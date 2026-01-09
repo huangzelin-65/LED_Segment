@@ -37,8 +37,10 @@ swisslog/Task/Src/Task_Parse.o: ../swisslog/Task/Src/Task_Parse.c \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
+ ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
+ C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/Task_rs485.h \
+ C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/Task_Parse.h \
+ C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/Calculate_Crc16.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
@@ -78,5 +80,7 @@ C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/
 ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h:
-../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:
+C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/Task_rs485.h:
+C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/Task_Parse.h:
+C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/Calculate_Crc16.h:

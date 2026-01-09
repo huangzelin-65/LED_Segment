@@ -35,7 +35,8 @@ swisslog/Task/Src/Task_Init.o: ../swisslog/Task/Src/Task_Init.c \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
+ ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
+ C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/Task_LED_Segment.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
@@ -74,3 +75,4 @@ C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/
 ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:
+C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/Task_LED_Segment.h:

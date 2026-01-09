@@ -26,7 +26,8 @@
 #include "LogDebugInfo.h"
 #include "FreeRTOS.h"
 #include "semphr.h"
-#include "cmsis_os.h"
+#include "cmsis_os2.h"
+#include "Task_rs485.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -67,6 +68,9 @@ extern TIM_HandleTypeDef htim4;
 
 /* USER CODE BEGIN EV */
 extern osSemaphoreId_t xRS485RxSemHandle;
+extern uint16_t Rx_Len ;
+void RS485_Start_DMA_Receive(uint8_t* uRx_Buffer) ;
+extern uint8_t Rx_Buffer[Rx_Buf_Size];
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -224,23 +228,19 @@ void USART2_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
-    // 仅处理串口1的接收中断（RS485用串口1，保留此判断）
-    if (huart->Instance == USART1)
-    {
-        // 临界区保护：防止中断嵌套导致缓冲区操作异常
-        __disable_irq();
-        RS485_RxBuf[ucRxWritePtr] = ucRxTempByte;
-        ucRxWritePtr = (ucRxWritePtr + 1) % RS485_RX_BUF_LEN; // 环形缓冲区
-        ucRxDataFlag = 1; // 置位有数据标志
-        __enable_irq();
-        //释放信号量
-        BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-        xSemaphoreGiveFromISR(xRS485RxSemHandle, &xHigherPriorityTaskWoken);
-        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 
-        HAL_UART_Receive_IT(&huart1, &ucRxTempByte, 1);
-    }
+	if(huart->Instance ==USART1)
+	{
+		if(Size>0)
+		{
+		Rx_Len = Size;
+		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+		xSemaphoreGiveFromISR(xRS485RxSemHandle, &xHigherPriorityTaskWoken);
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+		RS485_Start_DMA_Receive(Rx_Buffer);
+		}
+	}
 }
 /* USER CODE END 1 */

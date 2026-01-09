@@ -1,60 +1,37 @@
 #include "main.h"
 #include "Task_rs485.h"
 #include "usart.h"
-#include "gpio.h"   // GPIO操作头文件
-#include "FreeRTOS.h"
-#include "task.h"   // 补充：FreeRTOS任务/临界区/延时函数的核心头文件
-#include <stdio.h>
+#include "LogDebugInfo.h"
 
-// 全局变量定义（中断和任务共享）
-uint8_t RS485_RxBuf[RS485_RX_BUF_LEN] = {0};  // 需确保Task_rs485.h中已定义该宏
-uint8_t ucRxWritePtr = 0;                     // 缓冲区写指针（中断用）
-uint8_t ucRxReadPtr = 0;                      // 缓冲区读指针（任务用）
-uint8_t ucRxDataFlag = 0;                     // 有数据待处理标志
-uint8_t ucRxTempByte = 0;                     // 中断临时接收字节
-
-extern UART_HandleTypeDef huart1;
-
-/**
- * @brief  485接收初始化（补全逻辑，修正变量）
- */
-void RS485_Interrupt_Receive_Init(void)
+uint8_t Rx_Buffer[Rx_Buf_Size] = {0};
+uint16_t Rx_Len = 0 ;
+void RS485_Start_DMA_Receive(uint8_t* uRx_Buffer) 		//初始化之后调用这个函数开始DMA接受
 {
-    // 1. 初始化485为接收模式（需确保Task_rs485.h中已定义该宏）
-    RS485_SET_RECEIVE();
+  // 1. 清除接收非空（RXNE）和溢出（ORE）标志
+  __HAL_UART_CLEAR_FLAG(&huart1, UART_FLAG_RXNE);
+  __HAL_UART_CLEAR_FLAG(&huart1, UART_FLAG_ORE);
 
-    // 2. 开启串口2字节接收中断（使用全局临时字节变量）
-    HAL_UART_Receive_IT(&huart1, &ucRxTempByte, 1);
+  // 2. 读取RDR寄存器（强制清空残留数据，即使无数据也不会阻塞）
+  uint8_t temp;
+  HAL_UART_Receive(&huart1, &temp, 1, 0); // 超时时间设为0，立即返回
+
+  // 3. 启动DMA接收（此时无残留数据，接收正常）
+  if(HAL_UARTEx_ReceiveToIdle_DMA(&huart1, uRx_Buffer, Rx_Buf_Size)!=HAL_OK)
+  {
+    DEBUGINFO("HAL_UARTEx_ReceiveToIdle_DMA() retry\r\n");
+    // 第一次启动DMA接收失败后，再次启动DMA接收
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart1, uRx_Buffer, Rx_Buf_Size);
+  }
+  // 关闭半传输+全传输中断
+  __HAL_DMA_DISABLE_IT(huart1.hdmarx, DMA_IT_HT);
+  __HAL_DMA_DISABLE_IT(huart1.hdmarx, DMA_IT_TC);
 }
 
-/**
- * @brief  RS485接收任务（保持原有逻辑不变）
- */
-void rs485_communicate(void *argument)
+void Check_Data_Valid(uint8_t* uPackage_Data,uint8_t uRx_Len)
 {
-    uint8_t ucRecvData = 0;
 
-    for (;;)
-    {
-        if (ucRxDataFlag == 1)
-        {
-            // 替换：HAL临界区保护
-            __disable_irq();
-
-            ucRecvData = RS485_RxBuf[ucRxReadPtr];
-            ucRxReadPtr = (ucRxReadPtr + 1) % RS485_RX_BUF_LEN;
-
-            if (ucRxReadPtr == ucRxWritePtr)
-            {
-                ucRxDataFlag = 0;
-            }
-
-            __enable_irq();
-
-            // 业务逻辑：打印接收数据
-            printf("RS485接收：0x%02X | ASCII：%c\r\n", ucRecvData, ucRecvData);
-        }
-
-        vTaskDelay(1);
-    }
+}
+void RS485_Init(void)
+{
+	RS485_Start_DMA_Receive(Rx_Buffer);
 }

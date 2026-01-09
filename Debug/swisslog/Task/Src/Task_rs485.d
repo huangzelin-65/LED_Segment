@@ -25,7 +25,8 @@ swisslog/Task/Src/Task_rs485.o: ../swisslog/Task/Src/Task_rs485.c \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
  C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/Task_rs485.h \
- ../Core/Inc/usart.h ../Core/Inc/main.h ../Core/Inc/gpio.h \
+ ../Core/Inc/usart.h ../Core/Inc/main.h \
+ C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/LogDebugInfo.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
  ../Core/Inc/FreeRTOSConfig.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h \
@@ -64,7 +65,7 @@ swisslog/Task/Src/Task_rs485.o: ../swisslog/Task/Src/Task_rs485.c \
 C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/Task_rs485.h:
 ../Core/Inc/usart.h:
 ../Core/Inc/main.h:
-../Core/Inc/gpio.h:
+C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/LogDebugInfo.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h:

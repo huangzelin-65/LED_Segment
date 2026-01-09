@@ -1,0 +1,5 @@
+../swisslog/Task/Src/Task_LED_Segment.c:46:6:num_display	1
+../swisslog/Task/Src/Task_LED_Segment.c:58:6:LED_Segment_Init	2
+../swisslog/Task/Src/Task_LED_Segment.c:72:6:LED_Segment_DeInit	1
+../swisslog/Task/Src/Task_LED_Segment.c:79:6:LED_Segment_ON	1
+../swisslog/Task/Src/Task_LED_Segment.c:86:6:xSegment_Blink	3
