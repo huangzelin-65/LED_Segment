@@ -79,7 +79,7 @@ MqttSocket_t mqtt_socket = {
 List *mqtt_list = NULL;
 MqttInfo_t mqtt_info;//mqtt消息
 //发送消息给线程，处理相关消息类型，指定处理内容
-void Mqtt_SendMsg(MqttMsgType_t msg,char *data)
+void Mqtt_SendMsg(MqttMsgType_t msg,void *data)
 {
     if(xMqttManagerQueueHandle != NULL)
     {
@@ -94,7 +94,22 @@ void Mqtt_SendMsg(MqttMsgType_t msg,char *data)
         } 
     } 
 }
-
+//mqtt处理异常消息
+void Mqtt_ErrorMsg(MqttErrorType_t msg,void *data)
+{
+    if(MqttErrorHandleQueueHandle != NULL)
+    {
+        MqttErrordata_t *msg_data = pvPortMalloc(sizeof(MqttErrordata_t));
+        if(msg_data == NULL)return;
+        msg_data->type = msg;
+        msg_data->data = data;
+        DEBUGINFO("uxQueueGetQueueLength:%d uxQueueSpacesAvailable:%d\n",uxQueueGetQueueLength(MqttErrorHandleQueueHandle),uxQueueSpacesAvailable(MqttErrorHandleQueueHandle));
+        if (xQueueSend(MqttErrorHandleQueueHandle, &msg_data, portMAX_DELAY) == pdPASS) 
+        {
+            DEBUGINFO("msg :%d\n",msg);
+        } 
+    } 
+}
 //发送消息给WiFi模块
 HAL_StatusTypeDef Mqtt_SendATCmd(const char *cmd,int32_t timeout_ms)
 {
@@ -842,16 +857,41 @@ void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t 
     DEBUGINFO("rc:%d\n",rc);  
     DEBUGINFO("pub_topic:%s\n",pub_topic);
     DEBUGINFO("pub_buf:%s\n",pub_buf);
+    if(qos !=  MQTT_QOS_1)
+    {
+        return;
+    }
     if(rc == MQTT_CODE_CONTINUE)
     {
-        DEBUGINFO("MQTT_CODE_CONTINUE"); 
-        MqttClient_Publish(&mClient, &mqttObj.publish);
+        DEBUGINFO("MQTT_CODE_CONTINUE");
+        osDelay(500);
+        mqttObj.publish.qos = 0;
+        int retry_rc = MqttClient_Publish(&mClient, &mqttObj.publish);
+        DEBUGINFO("retry rc:%d",retry_rc);
     }
-    if(rc == MQTT_CODE_ERROR_TIMEOUT)
+    if(rc == MQTT_CODE_ERROR_TIMEOUT )
     {
         DEBUGINFO("MQTT_CODE_ERROR_TIMEOUT"); 
-        MqttClient_Publish(&mClient, &mqttObj.publish);
-    }    
+        MqttReSendMsg_t *resend_data = pvPortMalloc(sizeof(MqttReSendMsg_t));
+        if(resend_data == NULL)return; 
+
+        size_t topic_str_len = strlen(pub_topic);
+        size_t topic_mem_size = topic_str_len + 1;
+
+        resend_data->topic = pvPortMalloc(topic_mem_size);
+        if(resend_data->topic == NULL)return; 
+
+        size_t data_str_len = strlen(pub_buf);
+        size_t data_mem_size = data_str_len + 1;
+
+        resend_data->data = pvPortMalloc(data_mem_size);
+        if(resend_data->data == NULL)return;
+
+        strcpy(resend_data->topic, pub_topic);        
+        strcpy(resend_data->data, pub_buf);
+
+        Mqtt_ErrorMsg(MQTT_ERROR_RESEND_MSG,resend_data);
+    }   
 }
 //订阅话题调用接口
 int Mqtt_SubscribeMsg(MqttTopic *topics,int count)

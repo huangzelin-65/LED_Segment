@@ -234,7 +234,18 @@ void vMqttManagerTask(void *argument)
                     }                    
                     DEBUGINFO("MQTT_MSG_DISCONNECT end\n");
                 }
-                break;                                           
+                break;
+                case MQTT_MSG_RESEND:
+                {
+                    DEBUGINFO("MQTT_MSG_RESEND start\n");
+                    MqttReSendMsg_t *resend_msg = (MqttReSendMsg_t *)msg->data;
+                    Mqtt_PublishMsg(resend_msg->topic, resend_msg->data, XSTRLEN(resend_msg->data), 0, 0);
+                    vPortFree(resend_msg->topic);
+                    vPortFree(resend_msg->data);
+                    vPortFree(resend_msg);
+                    DEBUGINFO("MQTT_MSG_RESEND end\n");
+                }   
+                break;                                        
                 default:break;
             }
             vPortFree(manage_data);
@@ -325,3 +336,34 @@ void vMqttNotifyTask(void *argument)
       }        
     }
 }
+
+//mqtt异常处理任务
+void vMqttErrorHandleTask(void *argument)
+{
+    char *error_data = NULL;
+    DEBUGINFO("vMqttErrorHandleTask\n");
+    while (1)
+    {
+        if(xQueueReceive(MqttErrorHandleQueueHandle, &error_data, portMAX_DELAY) == pdTRUE)
+        {
+            MqttErrordata_t *error_msg = (MqttErrordata_t *)error_data;
+            DEBUGINFO("msg type:%d\n",error_msg->type);            
+            switch (error_msg->type)
+            {
+                case MQTT_ERROR_RESEND_MSG:
+                {
+                    DEBUGINFO("MQTT_ERROR_RESEND_MSG start\n");
+                    Mqtt_SendMsg(MQTT_MSG_RESEND,error_msg->data); 
+                    DEBUGINFO("MQTT_ERROR_RESEND_MSG end\n");
+                }
+                break;
+                default:
+                break;
+            }
+            vPortFree(error_data);
+        }
+    }
+}
+
+
+
