@@ -182,7 +182,7 @@ extern void vResetButtonCallback(void *argument);
 extern void vSensorDebounceCallback(void *argument);
 extern void vToggleSwitchCallback(void *argument);
 extern void vBoxRfidLoginTimerCallback(void *argument);
-extern void vUVTimerCallback(void *argument);
+extern void v_UvClean_TimerCallback(void *argument);
 extern void vBoxELockDebounceCallback(void *argument);
 extern void vServiceJoystickCallback(void *argument);
 

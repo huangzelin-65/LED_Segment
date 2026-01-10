@@ -649,7 +649,7 @@ void MX_FREERTOS_Init(void) {
   xBoxRfidLoginTimerHandle = osTimerNew(vBoxRfidLoginTimerCallback, osTimerOnce, NULL, &xBoxRfidLoginTimer_attributes);
 
   /* creation of xUVTimer */
-  xUVTimerHandle = osTimerNew(vUVTimerCallback, osTimerOnce, NULL, &xUVTimer_attributes);
+  xUVTimerHandle = osTimerNew(v_UvClean_TimerCallback, osTimerOnce, NULL, &xUVTimer_attributes);
 
   /* creation of xBoxELockDebounceTimer */
   xBoxELockDebounceTimerHandle = osTimerNew(vBoxELockDebounceCallback, osTimerOnce, NULL, &xBoxELockDebounceTimer_attributes);

@@ -24,8 +24,8 @@ bool bInitProdRegisterInfo(const char *uuid, uint8_t len)
 	plRegInfo.info[2] = ((crc&0xFF0000)>>16) +1;
 	plRegInfo.info[3] = ((crc&0xFF000000)>>24) +1;
 
-	bEeprom_Check_Conn();
-	if(bEeprom_Write_Buf(EEP_ADD_PDTLINE_REGISTER_HEAD, (uint8_t*)&plRegInfo, sizeof(Stru_ProductLine_Register_Typedef)))
+	b_Eeprom_Check_Conn();
+	if(b_Eeprom_Write_Buf(EEP_ADD_PDTLINE_REGISTER_HEAD, (uint8_t*)&plRegInfo, sizeof(Stru_ProductLine_Register_Typedef)))
 		return true;
 	else
 		return false;
@@ -37,8 +37,8 @@ bool bReadProdRegisterInfo(const char *uuid, uint8_t len)
 
 	uint32_t crc = crc32_calc((uint32_t)uuid, len);
 	Stru_ProductLine_Register_Typedef plRegInfo;
-	bEeprom_Check_Conn();
-	if(!bEeprom_Read_Buf(EEP_ADD_PDTLINE_REGISTER_HEAD, (uint8_t*)&plRegInfo, sizeof(Stru_ProductLine_Register_Typedef)))
+	b_Eeprom_Check_Conn();
+	if(!b_Eeprom_Read_Buf(EEP_ADD_PDTLINE_REGISTER_HEAD, (uint8_t*)&plRegInfo, sizeof(Stru_ProductLine_Register_Typedef)))
 	{
 		return false;
 	}
@@ -58,7 +58,7 @@ bool bIncFieldRegisterErrTimes(void)
 	Stru_ProductLine_Register_Typedef plRegInfo;
 
 	//read out
-	if(!bEeprom_Read_Buf(EEP_ADD_PDTLINE_REGISTER_HEAD, (uint8_t*)&plRegInfo, sizeof(Stru_ProductLine_Register_Typedef)))
+	if(!b_Eeprom_Read_Buf(EEP_ADD_PDTLINE_REGISTER_HEAD, (uint8_t*)&plRegInfo, sizeof(Stru_ProductLine_Register_Typedef)))
 	{
 		return false;
 	}
@@ -75,8 +75,8 @@ bool bIncFieldRegisterErrTimes(void)
 	}
 
 	//write back to eeprom
-	bEeprom_Check_Conn();
-	if(bEeprom_Write_Buf(EEP_ADD_PDTLINE_REGISTER_HEAD, (uint8_t*)&plRegInfo, sizeof(Stru_ProductLine_Register_Typedef)))
+	b_Eeprom_Check_Conn();
+	if(b_Eeprom_Write_Buf(EEP_ADD_PDTLINE_REGISTER_HEAD, (uint8_t*)&plRegInfo, sizeof(Stru_ProductLine_Register_Typedef)))
 		return true;
 	else
 		return false;
@@ -94,8 +94,8 @@ bool bWriteFieldRegisterInfo(const Stru_Field_Register_Typedef *info)
 	temp.crc = crc32_calc((uint32_t)info, sizeof(Stru_Field_Register_Typedef)-4);
 
 	//write
-	bEeprom_Check_Conn();
-	if(bEeprom_Write_Buf(EEP_ADD_FIELD_REGISTER_USER_NAME_LEN, (uint8_t*)&temp, sizeof(Stru_Field_Register_Typedef)))
+	b_Eeprom_Check_Conn();
+	if(b_Eeprom_Write_Buf(EEP_ADD_FIELD_REGISTER_USER_NAME_LEN, (uint8_t*)&temp, sizeof(Stru_Field_Register_Typedef)))
 		return true;
 	else
 		return false;
@@ -104,8 +104,8 @@ bool bWriteFieldRegisterInfo(const Stru_Field_Register_Typedef *info)
 bool bReadFieldRegisterInfo(Stru_Field_Register_Typedef *info)
 {
 	//read out field register info
-	bEeprom_Check_Conn();
-	if(!bEeprom_Read_Buf(EEP_ADD_FIELD_REGISTER_USER_NAME_LEN, (uint8_t*)info, sizeof(Stru_Field_Register_Typedef)))
+	b_Eeprom_Check_Conn();
+	if(!b_Eeprom_Read_Buf(EEP_ADD_FIELD_REGISTER_USER_NAME_LEN, (uint8_t*)info, sizeof(Stru_Field_Register_Typedef)))
 	{
 		return false;
 	}
@@ -125,8 +125,8 @@ bool bEraseRegisterArea(void)
 	memset(&temp, 0xFF, sizeof(Stru_Field_Register_Typedef));
 
 	//clear eeprom area
-	bEeprom_Check_Conn();
-	if(bEeprom_Write_Buf(EEP_ADD_FIELD_REGISTER_USER_NAME_LEN, (uint8_t*)&temp, sizeof(Stru_Field_Register_Typedef)))
+	b_Eeprom_Check_Conn();
+	if(b_Eeprom_Write_Buf(EEP_ADD_FIELD_REGISTER_USER_NAME_LEN, (uint8_t*)&temp, sizeof(Stru_Field_Register_Typedef)))
 		return true;
 	else
 		return false;

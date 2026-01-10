@@ -36,7 +36,7 @@ extern uint8_t HmiRunTimeBCD[4];//save as bcd
 extern uint8_t HmiRunTimeASCII[8];//save as ascii
 
 extern uint8_t lastUvSetTime;
-extern uint8_t defaultUvSetTime;
+extern uint8_t u8_defaultUvDuration;
 extern uint8_t currentVirtualButtonEn;
 extern uint8_t hmiEnButton;
 // extern uint8_t currentInStationEn;
@@ -148,7 +148,7 @@ void vHmiRecvTask(void *argument)
 					localRTCTime[4] = BCDToh10(recMsg->data[7]);
 					localRTCTime[5] = BCDToh10(recMsg->data[8]);
 					if(actFlag == rtcForUv){
-						UvClean_Start(lastUvSetTime,localRTCTime);
+						v_UvClean_Start(lastUvSetTime,localRTCTime);
 						actFlag = rtcOnlyRead;
 					}else if(actFlag == rtcForSetting){
 						HMI_Update_Default_Setting_Page_RtcTime_Req(localRTCTime);
@@ -195,8 +195,8 @@ void vHmiRecvTask(void *argument)
 					DEBUGINFO("addSetCarNum\r\n");
 					carNum[0] = recMsg->data[3];
 					carNum[1] = recMsg->data[4];
-					bEeprom_Check_Conn();
-					bEeprom_Write_Buf(EEP_ADD_CAR_NUMBER,carNum,2);
+					b_Eeprom_Check_Conn();
+					b_Eeprom_Write_Buf(EEP_ADD_CAR_NUMBER,carNum,2);
 					NumDisp_SetNumber((uint16_t)(carNum[0]<<8)+carNum[1]);
 					break;
 				case addPasswdEy:
@@ -219,7 +219,7 @@ void vHmiRecvTask(void *argument)
 					break;
 				case addSetUvDefaultWorkTime:
 					DEBUGINFO("addSetUvDefaultWorkTime\r\n");
-					defaultUvSetTime = recMsg->data[4];
+					u8_defaultUvDuration = recMsg->data[4];
 					break;
 				case addSetDataYY :
 					DEBUGINFO("addSetDataYY\r\n");
@@ -283,20 +283,20 @@ void vHmiWaitTask(void *argument)
 
 	//START CHECK
 	//get id from eeprom,and send to hmi		
-	bEeprom_Check_Conn();
-	bEeprom_Read_Buf(EEP_ADD_CAR_NUMBER,carNum,2);//first read is error??
-	bEeprom_Read_Buf(EEP_ADD_CAR_NUMBER,carNum,2);
+	b_Eeprom_Check_Conn();
+	b_Eeprom_Read_Buf(EEP_ADD_CAR_NUMBER,carNum,2);//first read is error??
+	b_Eeprom_Read_Buf(EEP_ADD_CAR_NUMBER,carNum,2);
 	NumDisp_SetNumber((uint16_t)(carNum[0]<<8)+carNum[1]);
 
 	//GET CURRENT POSTION
-	// bEeprom_Check_Conn();
+	// b_Eeprom_Check_Conn();
 	// CarStationStatus stationSt=Car_Get_Station_Status();
 	
 	UserPswd_Init();
 
-	bEeprom_Read_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,&defaultUvSetTime);
-	HMI_Update_DefaultUVTime_Req(defaultUvSetTime);//twice when first commu
-	lastUvSetTime = defaultUvSetTime;
+	bEeprom_Read_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,&u8_defaultUvDuration);
+	HMI_Update_DefaultUVTime_Req(u8_defaultUvDuration);//twice when first commu
+	lastUvSetTime = u8_defaultUvDuration;
 			
 
 	//get setting
@@ -308,7 +308,7 @@ void vHmiWaitTask(void *argument)
 
 
 	//get last correct time
-	bEeprom_Read_Buf(EEP_ADD_LAST_CORRECT_DATE,lastCorrectDate,6);
+	b_Eeprom_Read_Buf(EEP_ADD_LAST_CORRECT_DATE,lastCorrectDate,6);
 
 	//***************临时设置*****************/
 	//设置wifi信号强度，0~4

@@ -786,9 +786,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
   if (huart->Instance == USART1)
   {
     //Test串口接收处理
-    uint16_t dataLength = ulTest_Get_DMA_Receive_Len();
-
-    if (dataLength > 0) 
+    if (Size > 0) 
     {
       osSemaphoreRelease(xTestRxSemHandle);  // 释放信号量,允许读取Test命令数据
     }
@@ -815,18 +813,14 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
   }
   else if (huart->Instance == UART8) {
     //Box Rfid串口接收处理
-    uint32_t dataLength = ulBoxRfid_Get_DMA_Receive_Len();
-
-    if (dataLength > 0) 
+    if (Size > 0)  
     {
       osSemaphoreRelease(xBoxRfidRxSemHandle);  // 释放信号量,允许读取RFID数据
     }
   }
   else if (huart->Instance == USART10) {
     //HMI串口接收处理
-    uint32_t dataLength = ulHMI_Get_DMA_Receive_Len();
-
-    if (dataLength > 0) 
+    if (Size > 0) 
     {
       osSemaphoreRelease(xHmiRxSemHandle);  // 释放信号量,允许读取HMI数据
     }

@@ -1208,8 +1208,8 @@ void Robot_ActionNotify(void)
     //     if(ServerToCarData.xStationStatus != Car_Get_Station_Status())
     //     {
     //         // 发送进出站消息
-    //         eBoxCtrlType box_msg = UpdateStationStatus;
-    //         if(osMessageQueuePut(xBox_Ctrl_QueueHandle, &box_msg, 0, pdMS_TO_TICKS(100)) != osOK)
+    //         eBoxCtrlType x_BoxMsg = UpdateStationStatus;
+    //         if(osMessageQueuePut(xBox_Ctrl_QueueHandle, &x_BoxMsg, 0, pdMS_TO_TICKS(100)) != osOK)
     //         {
     //             DEBUGINFO("send motion msg error\r\n");
     //         }

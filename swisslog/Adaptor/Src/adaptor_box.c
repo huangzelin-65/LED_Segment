@@ -74,7 +74,7 @@ void vBoxELockStatusCheck(void)
 
   volatile uint8_t BOX_ELOCK1_value;
   volatile uint8_t BOX_ELOCK2_value;
-  eBoxCtrlType box_msg;
+  eBoxCtrlType x_BoxMsg;
 
   //锁上是低电平，解锁是高电平
   // 读BOX_ELOCK1电平
@@ -111,22 +111,22 @@ void vBoxELockStatusCheck(void)
     DEBUGINFO("xBoxLocked = UnLock\r\n");
   }
 
-  box_msg = UpdateBoxLockStatus;
+  x_BoxMsg = UpdateBoxLockStatus;
 
     //发送电子锁事件
-  if(osMessageQueuePut(xBox_Ctrl_QueueHandle, &box_msg, 0, pdMS_TO_TICKS(100)) != osOK)
+  if(osMessageQueuePut(xBox_Ctrl_QueueHandle, &x_BoxMsg, 0, pdMS_TO_TICKS(100)) != osOK)
   {
-    DEBUGINFO("send box_msg error\r\n");
+    DEBUGINFO("send x_BoxMsg error\r\n");
   }
 }
 
 /*************************** 紫外线灯 *****************************/
-void vUV_Clean_enable(void)
+void v_UVClean_Enable(void)
 {
   GPIO_WRITE(UV_CLEAN_EN, GPIO_PIN_RESET);
 }
 
-void vUV_Clean_disable(void)
+void v_UVClean_Disable(void)
 {
   GPIO_WRITE(UV_CLEAN_EN, GPIO_PIN_SET);
 }

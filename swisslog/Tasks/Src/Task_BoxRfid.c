@@ -124,14 +124,14 @@ void RFID_Print_CardPasswd(void)
 static void RFID_Update_CardPasswd(void)
 {
 	uint8_t num = 0;
-	if(bEeprom_Check_Conn() == true)
+	if(b_Eeprom_Check_Conn() == true)
 	{
 		bEeprom_Read_Byte(EEP_ADD_IDCARD_PASSWORD_NUM,&num);
 		if(num>10) {
 			CardPasswordNum=0;
 		}
 		else {
-			bEeprom_Read_Buf(EEP_ADD_IDCARD_PASSWORD,CardPasswordBuf,num*6);
+			b_Eeprom_Read_Buf(EEP_ADD_IDCARD_PASSWORD,CardPasswordBuf,num*6);
 			CardPasswordNum = num;
 		}
 		DEBUGINFO("CardPasswordNum=%d\n",CardPasswordNum);
@@ -140,7 +140,7 @@ static void RFID_Update_CardPasswd(void)
 	}
 	else
 	{
-		DEBUGINFO("bEeprom_Check_Conn fail\n");
+		DEBUGINFO("b_Eeprom_Check_Conn fail\n");
 	}
 }
 
@@ -155,7 +155,7 @@ static void RFID_Update_CardPasswd(void)
  */
 uint8_t RFID_Write_CardPasswd(uint8_t *ucData)
 {
-	if(bEeprom_Check_Conn() == true)
+	if(b_Eeprom_Check_Conn() == true)
 	{
 		if(CardPasswordNum>0) {
 			for(int i=0; i<CardPasswordNum; i++) {
@@ -165,20 +165,20 @@ uint8_t RFID_Write_CardPasswd(uint8_t *ucData)
 		}
 		if(CardPasswordNum<MAX_CARD_PSWD) {
 			if(CardPasswordNum>0)
-				bEeprom_Write_Buf(EEP_ADD_IDCARD_PASSWORD+6,CardPasswordBuf,CardPasswordNum*6);
-			bEeprom_Write_Buf(EEP_ADD_IDCARD_PASSWORD,ucData,6);
+				b_Eeprom_Write_Buf(EEP_ADD_IDCARD_PASSWORD+6,CardPasswordBuf,CardPasswordNum*6);
+			b_Eeprom_Write_Buf(EEP_ADD_IDCARD_PASSWORD,ucData,6);
 			CardPasswordNum++;
-			bEeprom_Write_Byte(EEP_ADD_IDCARD_PASSWORD_NUM,CardPasswordNum);
+			b_Eeprom_Write_Byte(EEP_ADD_IDCARD_PASSWORD_NUM,CardPasswordNum);
 		}
 		else {
-			bEeprom_Write_Buf(EEP_ADD_IDCARD_PASSWORD+6,CardPasswordBuf,(MAX_CARD_PSWD-1)*6);
-			bEeprom_Write_Buf(EEP_ADD_IDCARD_PASSWORD,ucData,6);
+			b_Eeprom_Write_Buf(EEP_ADD_IDCARD_PASSWORD+6,CardPasswordBuf,(MAX_CARD_PSWD-1)*6);
+			b_Eeprom_Write_Buf(EEP_ADD_IDCARD_PASSWORD,ucData,6);
 		}
 		RFID_Update_CardPasswd();
 	}
 	else
 	{
-		DEBUGINFO("bEeprom_Check_Conn fail\n");
+		DEBUGINFO("b_Eeprom_Check_Conn fail\n");
 	}
 
 	return 0;
@@ -260,8 +260,8 @@ void vBoxRfidLoginTimerCallback(void *argument)
 	rfidTimeout = 1;
 
 	// 发送车厢RFID登录超时消息
-	eBoxCtrlType box_msg = RfidLoginTimeout;
-	osMessageQueuePut(xBox_Ctrl_QueueHandle, &box_msg, 0, pdMS_TO_TICKS(100));
+	eBoxCtrlType x_BoxMsg = RfidLoginTimeout;
+	osMessageQueuePut(xBox_Ctrl_QueueHandle, &x_BoxMsg, 0, pdMS_TO_TICKS(100));
 }
 
 /**

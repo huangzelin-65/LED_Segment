@@ -49,8 +49,8 @@ void vSet_Screen_LockStatus(eLockStatusType value)
 	}
 
 	CarStatus.xScreenLockStatus = value; // 更新全局变量的在站状态
-	bEeprom_Check_Conn();
-	bEeprom_Write_Byte(EEP_ADD_SCREEN_LOCK_STATUS,value); // 保存到eeprom
+	b_Eeprom_Check_Conn();
+	b_Eeprom_Write_Byte(EEP_ADD_SCREEN_LOCK_STATUS,value); // 保存到eeprom
 }
 
 /**
@@ -59,7 +59,7 @@ void vSet_Screen_LockStatus(eLockStatusType value)
 static eLockStatusType xRead_Screen_LockStatus(void)
 {
 	uint8_t result = 0;
-	bEeprom_Check_Conn();
+	b_Eeprom_Check_Conn();
 	bEeprom_Read_Byte(EEP_ADD_SCREEN_LOCK_STATUS,&result);	
 	DEBUGINFO("Read Status:%d\n",result);
 	
@@ -77,7 +77,7 @@ void vBoxCtrlTask(void *argument)
 {
 	DEBUGINFO("start");
 
-	eBoxCtrlType box_msg;
+	eBoxCtrlType x_BoxMsg;
 	uint8_t ucMotion_msg;
 
 	//初始化数码管显示
@@ -87,9 +87,9 @@ void vBoxCtrlTask(void *argument)
 	// NumDisp_SetNumber((uint16_t)111);
 	// NumDisp_BlueShan();
 
-	// vUV_Clean_enable();
+	// v_UVClean_Enable();
 	// osDelay(pdMS_TO_TICKS(2000));
-	// vUV_Clean_disable();
+	// v_UVClean_Disable();
 
   	while(1)
 	{
@@ -106,17 +106,17 @@ void vBoxCtrlTask(void *argument)
 
 	while(1)
 	{
-		if(osMessageQueueGet(xBox_Ctrl_QueueHandle, &box_msg, NULL, osWaitForever) == osOK)
+		if(osMessageQueueGet(xBox_Ctrl_QueueHandle, &x_BoxMsg, NULL, osWaitForever) == osOK)
 		{
-			// DEBUGINFO("box_msg = %d",box_msg);
-			switch (box_msg)
+			// DEBUGINFO("x_BoxMsg = %d",x_BoxMsg);
+			switch (x_BoxMsg)
 			{
 				//*********************************** 车厢电子锁操作 **************************************//
 				case BoxElockOps:
 					DEBUGINFO("case BoxElockOps");
-					DEBUGINFO("UvClean_IsRunning=%d, xIsCarRunning=%d, xBoxLocked=%d, HMI_Is_Button_En=%d",
-						UvClean_IsRunning(),CarStatus.xIsCarRunning,CarStatus.xBoxLocked,HMI_Is_Button_En());
-					if( !UvClean_IsRunning()&&
+					DEBUGINFO("u8_UvClean_IsRunning=%d, xIsCarRunning=%d, xBoxLocked=%d, HMI_Is_Button_En=%d",
+						u8_UvClean_IsRunning(),CarStatus.xIsCarRunning,CarStatus.xBoxLocked,HMI_Is_Button_En());
+					if( !u8_UvClean_IsRunning()&&
 						( CarStatus.xIsCarRunning == CarStop ) &&
 						( CarStatus.xBoxLocked == Locked ) && 
 						HMI_Is_Button_En()) // 检测HMI是否允许按键操作
@@ -147,10 +147,10 @@ void vBoxCtrlTask(void *argument)
 						// 解锁
 						DEBUGINFO("UnLock\n");
 						// 如果在消毒时，则停止消毒，跳转到消毒停止页面，记录已消毒的时间
-						if(UvClean_IsRunning())
+						if(u8_UvClean_IsRunning())
 						{
-							UvClean_Stop(); 
-							UvClean_Save_Record();
+							v_UvClean_Stop(); 
+							v_UvClean_Save_Record();
 							HMI_Change_Page(pgWarningUvCleanCanceled);
 						}
 						// 如果在运动中，则停止运动
@@ -171,13 +171,13 @@ void vBoxCtrlTask(void *argument)
 				case UpdateUVCleanStatus:
 					DEBUGINFO("case UpdateUVCleanStatus");
 					// 消毒结束，保存本次消毒开始的rtc时间 + 消毒时长
-					if( !CarStatus.ucUVTimeRemain )
+					if( !CarStatus.u8_uvTimeRemain )
 					{
-						UvClean_Save_Record();
+						v_UvClean_Save_Record();
 					}
 					// 推送UV清洁时间到HMI
-					HMI_Check_Uv_Clean(CarStatus.ucUVTimeRemain);
-					DEBUGINFO("UVTimeRemain:%d\n",CarStatus.ucUVTimeRemain);
+					HMI_Check_Uv_Clean(CarStatus.u8_uvTimeRemain);
+					DEBUGINFO("UVTimeRemain:%d\n",CarStatus.u8_uvTimeRemain);
 					break;
 
 				default:
@@ -201,7 +201,7 @@ void vBoxLEDTask(void *argument)
 		2、电子锁关闭，蓝灯闪烁
 		3、电子锁打开，红蓝闪烁
 		*/
-		if(UvClean_IsRunning()){
+		if(u8_UvClean_IsRunning()){
 			vRGB_LED(YELLOW);
 		}else{	
 			if(CarStatus.xBoxLocked == Locked){

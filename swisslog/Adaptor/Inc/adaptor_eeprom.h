@@ -55,13 +55,13 @@ extern EepromDevice eeprom_dev;
 void vEeprom_Data_Init(void);
 bool bEeprom_Adaptor_Init(void* hi2c);
 
-bool bEeprom_Check_Conn(void);
+bool b_Eeprom_Check_Conn(void);
 
-bool bEeprom_Write_Byte(uint16_t addr, uint8_t data);
+bool b_Eeprom_Write_Byte(uint16_t addr, uint8_t data);
 bool bEeprom_Read_Byte(uint16_t addr, uint8_t* data);
 
-bool bEeprom_Write_Buf(uint16_t addr, const uint8_t* data, uint16_t len);
-bool bEeprom_Read_Buf(uint16_t addr, uint8_t* data, uint16_t len);
+bool b_Eeprom_Write_Buf(uint16_t addr, const uint8_t* data, uint16_t len);
+bool b_Eeprom_Read_Buf(uint16_t addr, uint8_t* data, uint16_t len);
 
 //测试用函数
 void vEepromTest(void);

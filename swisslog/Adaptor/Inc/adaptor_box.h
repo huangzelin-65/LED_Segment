@@ -17,8 +17,8 @@ void vBoxELockStatusCheck(void);
 
 
 /*************************** 紫外线灯 *****************************/
-void vUV_Clean_enable(void);
-void vUV_Clean_disable(void);
+void v_UVClean_Enable(void);
+void v_UVClean_Disable(void);
 
 
 /*************************** RGB LED *****************************/

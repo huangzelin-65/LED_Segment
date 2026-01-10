@@ -224,7 +224,7 @@ typedef struct
     eLockStatusType xScreenLockStatus;          // 车厢屏幕是否锁上 UnLock:未锁上/Locked:已锁上
     uint32_t dwCurPos;                          // 小车当前位置地址编号0-99999
     uint32_t dwPrevPos;                         // 小车上一位置地址编号
-    uint8_t ucUVTimeRemain;                     // 剩余消毒时间
+    uint8_t u8_uvTimeRemain;                     // 剩余消毒时间
     uint8_t MotorStatus;   				        // 马达运行状态 0:正常/1:异常
     uint8_t MotorOverloadNum;                   // 电机过载次数
     uint16_t SumAverage;				        // 电流方均值

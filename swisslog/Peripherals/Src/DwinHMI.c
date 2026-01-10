@@ -55,12 +55,12 @@ uint8_t RunTimeHoursASCII[5] = {0};   // 4字节ASCII + 终止符
 uint8_t RunTimeMinutesASCII[3] = {0}; // 2字节ASCII + 终止符
 uint8_t RunTimeSecondsASCII[3] = {0}; // 2字节ASCII + 终止符
 
-uint8_t lastUvSetTime = 0;
-uint8_t defaultUvSetTime = 0;
 uint8_t currentVirtualButtonEn = 0; // 使能虚拟按钮(勾选或取消勾选)
 uint8_t hmiEnButton = 1; // HMI是否允许按键操作 (1：允许，0：不允许)
 // uint8_t currentInStationEn = 0; // 使能进站信号按钮(用于提醒PLC小车已进站，TK2.1可去掉)
 
+extern uint8_t lastUvSetTime;
+extern uint8_t u8_defaultUvDuration;
 
 /***********************************base function***************************************/
 uint8_t HMI_Free_DwinMsg(DwinMsgSt *ptr)
@@ -137,10 +137,10 @@ uint8_t HMI_Is_Button_En(void)
 // 触发屏幕上的解锁按键
 void HMI_Unlock_Button_Press()
 {
-	eBoxCtrlType box_msg;
-	DEBUGINFO("box_msg = BoxElockOps");
-	box_msg = BoxElockOps;
-	if(osMessageQueuePut(xBox_Ctrl_QueueHandle, &box_msg, 0, 0)!= osOK) {
+	eBoxCtrlType x_BoxMsg;
+	DEBUGINFO("x_BoxMsg = BoxElockOps");
+	x_BoxMsg = BoxElockOps;
+	if(osMessageQueuePut(xBox_Ctrl_QueueHandle, &x_BoxMsg, 0, 0)!= osOK) {
 		DEBUGINFO("Uv clean msg send failed!");
 	}
 }
@@ -212,7 +212,7 @@ void HMI_Force_Home_Page(void){
 		UserPswd_Clear_Decry();
 		UserPswd_Save_EncryToFlash();
 		UserPswd_Set_Encry_Status(0);
-		if(UvClean_IsRunning()){
+		if(u8_UvClean_IsRunning()){
 			HMI_Change_Page(pgUvWorking);
 		}else{
 			HMI_Change_Page(pgHome);
@@ -755,7 +755,7 @@ void HMI_CheckRFCard(uint8_t en){
 				UserPswd_Clear_Decry();
 				UserPswd_Save_EncryToFlash();
 				UserPswd_Set_Encry_Status(0);
-				if(UvClean_IsRunning()){
+				if(u8_UvClean_IsRunning()){
 					HMI_Change_Page(pgUvWorking);
 				}else{
 					HMI_Change_Page(pgHome);
@@ -763,7 +763,7 @@ void HMI_CheckRFCard(uint8_t en){
 				hmiEnButton = 1;
 				HMI_Unlock_Button_Press();	
 			}else{
-				if(!UvClean_IsRunning()){
+				if(!u8_UvClean_IsRunning()){
 					HMI_Unlock_Button_Press();
 				}
 			}
@@ -794,8 +794,8 @@ void HMI_CheckRFCard(uint8_t en){
 void HMI_Save_Last_Correct_Date(uint8_t temp[6]){
 	DEBUGINFO("HMI_Save_Last_Correct_Date\r\n");
 	memcpy(lastCorrectDate,temp,6);
-	bEeprom_Check_Conn();
-	bEeprom_Write_Buf(EEP_ADD_LAST_CORRECT_DATE,temp,6);
+	b_Eeprom_Check_Conn();
+	b_Eeprom_Write_Buf(EEP_ADD_LAST_CORRECT_DATE,temp,6);
 }
 
 //deal  the button presss from hmi
@@ -817,9 +817,9 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 		
 		case btToUVPage:
 			DEBUGINFO("btToUVPage\r\n");
-			lastUvSetTime = defaultUvSetTime;
-			HMI_Update_UVTime_Req(defaultUvSetTime);
-			UvClean_Get_Record(temp);
+			lastUvSetTime = u8_defaultUvDuration;
+			HMI_Update_UVTime_Req(u8_defaultUvDuration);
+			v_UvClean_Get_Record(temp);
 			HMI_Update_LastUvRecord_Req(temp);
 			HMI_Update_LastUvDuration_Req(temp[6]);
 			HMI_Display_Text_LastUvRecord(temp);
@@ -882,7 +882,7 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 				UserPswd_Clear_Decry();
 				UserPswd_Save_EncryToFlash();
 				UserPswd_Set_Encry_Status(0);
-				if(UvClean_IsRunning()){
+				if(u8_UvClean_IsRunning()){
 					HMI_Change_Page(pgUvWorking);
 				}else{
 					HMI_Change_Page(pgHome);			
@@ -913,8 +913,8 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 		case btStopUv:
 			DEBUGINFO("btStopUv\r\n");
 			//stop uv clean
-			UvClean_Stop();
-			UvClean_Save_Record();
+			v_UvClean_Stop();
+			v_UvClean_Save_Record();
 			HMI_Change_Page(pgWarningUvCleanCanceled);
 			break;
 			
@@ -926,15 +926,15 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 		case btChangeSetting:
 			DEBUGINFO("btChangeSetting\r\n");
 			//save the setting to eeprom and update local
-			bEeprom_Check_Conn();
-			bEeprom_Write_Byte(EEP_ADD_EN_VIRTUAL_BUTTON,currentVirtualButtonEn);
+			b_Eeprom_Check_Conn();
+			b_Eeprom_Write_Byte(EEP_ADD_EN_VIRTUAL_BUTTON,currentVirtualButtonEn);
 			HMI_Update_VirtualBtSetting_Req(currentVirtualButtonEn);
 				
-			// bEeprom_Write_Byte(EEP_ADD_EN_IN_STATION_SENSOR,currentInStationEn);
+			// b_Eeprom_Write_Byte(EEP_ADD_EN_IN_STATION_SENSOR,currentInStationEn);
 			// HMI_Update_InStationSetting_Req(currentInStationEn);
 				
-			bEeprom_Write_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,defaultUvSetTime);
-			HMI_Update_DefaultUVTime_Req(defaultUvSetTime);
+			b_Eeprom_Write_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,u8_defaultUvDuration);
+			HMI_Update_DefaultUVTime_Req(u8_defaultUvDuration);
 
 			setRTCTime[0] = h10ToBCD(setRTCTime[0]);
 			setRTCTime[1] = h10ToBCD(setRTCTime[1]);
@@ -956,8 +956,8 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 				// bEeprom_Read_Byte(EEP_ADD_EN_IN_STATION_SENSOR,&currentInStationEn);
 				// HMI_Update_InStationSetting_Req(currentInStationEn);
 
-				bEeprom_Read_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,&defaultUvSetTime);
-				HMI_Update_DefaultUVTime_Req(defaultUvSetTime);//twice when first commu
+				bEeprom_Read_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,&u8_defaultUvDuration);
+				HMI_Update_DefaultUVTime_Req(u8_defaultUvDuration);//twice when first commu
 			}
 			HMI_Update_CarNum_Req(carNum);
 			HMI_Change_Page(pgHome);
