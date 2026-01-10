@@ -60,7 +60,7 @@ static eLockStatusType xRead_Screen_LockStatus(void)
 {
 	uint8_t result = 0;
 	b_Eeprom_Check_Conn();
-	bEeprom_Read_Byte(EEP_ADD_SCREEN_LOCK_STATUS,&result);	
+	b_Eeprom_Read_Byte(EEP_ADD_SCREEN_LOCK_STATUS,&result);	
 	DEBUGINFO("Read Status:%d\n",result);
 	
 	// 有时候读出来的值变为160，原因未知，暂时强制限制范围

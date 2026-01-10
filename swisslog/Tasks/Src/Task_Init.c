@@ -65,7 +65,7 @@ void vInitTask(void *argument)
   DEBUGINFO("InitTask\r\n");
 
   vPower_Init();
-  vEeprom_Data_Init();
+  v_Eeprom_Data_Init();
   // vEepromTest();
   vTime_Tracker_Init();
   vGetChipID();

@@ -10,15 +10,15 @@
 #include "semphr.h"
 
 // 全局设备实例与硬件私有数据
-EepromDevice eeprom_dev;
-static M24C64_I2cPriv m24c64_i2c_priv;
+EepromDevice x_eepromDev;
+static M24C64_I2cPriv sx_m24c64_i2cPriv;
 
 // 测试数据定义
 #define TEST_ADDR_BYTE    0x0000  // 单字节测试地址
 #define TEST_ADDR_BUF     0x0100  // 缓冲区测试地址
 #define TEST_BUF_LEN      64      // 测试缓冲区长度
 
-static uint8_t Check_Fisrt_Boot()
+static uint8_t su8_Check_Fisrt_Boot()
 {
 	uint8_t bootTime[2] = {0,0};
 	b_Eeprom_Check_Conn();
@@ -28,7 +28,7 @@ static uint8_t Check_Fisrt_Boot()
 	return 0;
 }
 
-static void Update_Fisrt_Boot(void){
+static void sv_Update_Fisrt_Boot(void){
   //uint8_t bootTime[2] = {0x00,0x00};
 	uint8_t bootTime[2] = {0x51,0x4d};
 
@@ -36,13 +36,13 @@ static void Update_Fisrt_Boot(void){
 	b_Eeprom_Write_Buf(EEP_ADD_EEPROM_NEED_INIT,bootTime,2);
 }
 
-void vEeprom_Data_Init(void)
+void v_Eeprom_Data_Init(void)
 {
 	uint8_t temp[8]={0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 	//uint8_t temp2[8]={0x01,0x01,0x01,0x01};
 	uint8_t defaultUv = 10;
 
-	if(0 == Check_Fisrt_Boot()){
+	if(0 == su8_Check_Fisrt_Boot()){
     DEBUGINFO("Fisrt Boot\r\n");
 		//write card password
 		b_Eeprom_Write_Byte(EEP_ADD_IS_ENCRYED,temp[0]); 
@@ -57,7 +57,7 @@ void vEeprom_Data_Init(void)
 		b_Eeprom_Write_Buf(EEP_ADD_CAR_NUMBER,temp,2); 
 		// EEP_ADD_IDCARD_PASSWORD	      	  	21 //60 bytes
 		//write what you want for initialize
-		Update_Fisrt_Boot();
+		sv_Update_Fisrt_Boot();
 	}else{
     DEBUGINFO("Not Fisrt Boot\r\n");
   }
@@ -67,61 +67,61 @@ void vEeprom_Data_Init(void)
  * @brief 初始化EEPROM适配层
  * 整合硬件初始化、线程安全配置和操作集绑定
  */
-bool bEeprom_Adaptor_Init(void* hi2c) {
+bool b_Eeprom_Adaptor_Init(void* hi2c) {
     // 1. 初始化硬件私有数据
-    if (!M24C64_i2c_init_priv(&m24c64_i2c_priv, (I2C_HandleTypeDef*)hi2c)) {
+    if (!M24C64_i2c_init_priv(&sx_m24c64_i2cPriv, (I2C_HandleTypeDef*)hi2c)) {
         return false;
     }
 
     // 2. 初始化设备实例
-    memset(&eeprom_dev, 0, sizeof(EepromDevice));
-    eeprom_dev.hw_priv = &m24c64_i2c_priv;
-    eeprom_dev.ops = M24C64_i2c_get_ops();
+    memset(&x_eepromDev, 0, sizeof(EepromDevice));
+    x_eepromDev.hw_priv = &sx_m24c64_i2cPriv;
+    x_eepromDev.ops = M24C64_i2c_get_ops();
 
     // 3. 创建线程安全锁
-    eeprom_dev.mutex = xSemaphoreCreateMutex();
-    if (eeprom_dev.mutex == NULL) {
+    x_eepromDev.mutex = xSemaphoreCreateMutex();
+    if (x_eepromDev.mutex == NULL) {
         return false;
     }
 
     // 4. 初始化硬件并检查连接
-    return (eeprom_dev.ops->init(&eeprom_dev) && eeprom_dev.ops->check_conn(&eeprom_dev));
+    return (x_eepromDev.ops->init(&x_eepromDev) && x_eepromDev.ops->check_conn(&x_eepromDev));
 }
 
 // ------------------------------ 带线程安全的操作接口 ------------------------------
 
 bool b_Eeprom_Check_Conn(void) {
-    if (xSemaphoreTake(eeprom_dev.mutex, portMAX_DELAY) != pdPASS) return false;
-    bool result = eeprom_dev.ops->check_conn(&eeprom_dev);
-    xSemaphoreGive(eeprom_dev.mutex);
+    if (xSemaphoreTake(x_eepromDev.mutex, portMAX_DELAY) != pdPASS) return false;
+    bool result = x_eepromDev.ops->check_conn(&x_eepromDev);
+    xSemaphoreGive(x_eepromDev.mutex);
     return result;
 }
 
 bool b_Eeprom_Write_Byte(uint16_t addr, uint8_t data) {
-    if (xSemaphoreTake(eeprom_dev.mutex, portMAX_DELAY) != pdPASS) return false;
-    bool result = eeprom_dev.ops->write_byte(&eeprom_dev, addr, data);
-    xSemaphoreGive(eeprom_dev.mutex);
+    if (xSemaphoreTake(x_eepromDev.mutex, portMAX_DELAY) != pdPASS) return false;
+    bool result = x_eepromDev.ops->write_byte(&x_eepromDev, addr, data);
+    xSemaphoreGive(x_eepromDev.mutex);
     return result;
 }
 
-bool bEeprom_Read_Byte(uint16_t addr, uint8_t* data) {
-    if (xSemaphoreTake(eeprom_dev.mutex, portMAX_DELAY) != pdPASS) return false;
-    bool result = eeprom_dev.ops->read_byte(&eeprom_dev, addr, data);
-    xSemaphoreGive(eeprom_dev.mutex);
+bool b_Eeprom_Read_Byte(uint16_t addr, uint8_t* data) {
+    if (xSemaphoreTake(x_eepromDev.mutex, portMAX_DELAY) != pdPASS) return false;
+    bool result = x_eepromDev.ops->read_byte(&x_eepromDev, addr, data);
+    xSemaphoreGive(x_eepromDev.mutex);
     return result;
 }
 
 bool b_Eeprom_Write_Buf(uint16_t addr, const uint8_t* data, uint16_t len) {
-    if (xSemaphoreTake(eeprom_dev.mutex, portMAX_DELAY) != pdPASS) return false;
-    bool result = eeprom_dev.ops->write_buf(&eeprom_dev, addr, data, len);
-    xSemaphoreGive(eeprom_dev.mutex);
+    if (xSemaphoreTake(x_eepromDev.mutex, portMAX_DELAY) != pdPASS) return false;
+    bool result = x_eepromDev.ops->write_buf(&x_eepromDev, addr, data, len);
+    xSemaphoreGive(x_eepromDev.mutex);
     return result;
 }
 
 bool b_Eeprom_Read_Buf(uint16_t addr, uint8_t* data, uint16_t len) {
-    if (xSemaphoreTake(eeprom_dev.mutex, portMAX_DELAY) != pdPASS) return false;
-    bool result = eeprom_dev.ops->read_buf(&eeprom_dev, addr, data, len);
-    xSemaphoreGive(eeprom_dev.mutex);
+    if (xSemaphoreTake(x_eepromDev.mutex, portMAX_DELAY) != pdPASS) return false;
+    bool result = x_eepromDev.ops->read_buf(&x_eepromDev, addr, data, len);
+    xSemaphoreGive(x_eepromDev.mutex);
     return result;
 }
 
@@ -143,7 +143,7 @@ void vEepromTest(void) {
     DEBUGINFO("Write byte success: addr=0x%04X, data=0x%02X\r\n", 
             TEST_ADDR_BYTE, test_byte);
             
-    if (bEeprom_Read_Byte(TEST_ADDR_BYTE, &read_byte)) {
+    if (b_Eeprom_Read_Byte(TEST_ADDR_BYTE, &read_byte)) {
       DEBUGINFO("Read byte success: addr=0x%04X, data=0x%02X \r\n", 
             TEST_ADDR_BYTE, read_byte);
     } 

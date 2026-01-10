@@ -294,16 +294,16 @@ void vHmiWaitTask(void *argument)
 	
 	UserPswd_Init();
 
-	bEeprom_Read_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,&u8_defaultUvDuration);
+	b_Eeprom_Read_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,&u8_defaultUvDuration);
 	HMI_Update_DefaultUVTime_Req(u8_defaultUvDuration);//twice when first commu
 	lastUvSetTime = u8_defaultUvDuration;
 			
 
 	//get setting
-	bEeprom_Read_Byte(EEP_ADD_EN_VIRTUAL_BUTTON,&currentVirtualButtonEn);
+	b_Eeprom_Read_Byte(EEP_ADD_EN_VIRTUAL_BUTTON,&currentVirtualButtonEn);
 	HMI_Update_VirtualBtSetting_Req(currentVirtualButtonEn);
 
-	// bEeprom_Read_Byte(EEP_ADD_EN_IN_STATION_SENSOR,&currentInStationEn);
+	// b_Eeprom_Read_Byte(EEP_ADD_EN_IN_STATION_SENSOR,&currentInStationEn);
 	// HMI_Update_InStationSetting_Req(currentInStationEn);
 
 

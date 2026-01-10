@@ -126,7 +126,7 @@ static void RFID_Update_CardPasswd(void)
 	uint8_t num = 0;
 	if(b_Eeprom_Check_Conn() == true)
 	{
-		bEeprom_Read_Byte(EEP_ADD_IDCARD_PASSWORD_NUM,&num);
+		b_Eeprom_Read_Byte(EEP_ADD_IDCARD_PASSWORD_NUM,&num);
 		if(num>10) {
 			CardPasswordNum=0;
 		}

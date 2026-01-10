@@ -88,7 +88,7 @@ uint8_t UserPswd_Read_EncryFromFlash(){
 		}
 	}
 	b_Eeprom_Check_Conn();	
-	bEeprom_Read_Byte(EEP_ADD_IS_ENCRYED,&isEncryed); 
+	b_Eeprom_Read_Byte(EEP_ADD_IS_ENCRYED,&isEncryed); 
 	DEBUGINFO("isEncryed=%d \r\n", isEncryed);
 	return 1;	
 }
