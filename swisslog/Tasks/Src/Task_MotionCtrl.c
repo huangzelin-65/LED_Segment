@@ -19,7 +19,7 @@
 #include "Robot.h"
 // DMA缓冲区
 #define MOTOR_BUF_SIZE 16
-uint8_t MotorDmaBuffer[2][MOTOR_BUF_SIZE]={0};
+// uint8_t MotorDmaBuffer[2][MOTOR_BUF_SIZE]={0};
 uint8_t ucMotor_Task_Rx_Buffer[MOTOR_RX_BUF_SIZE];
 
 uint8_t* motor_msg;
@@ -259,7 +259,9 @@ void vMotionCtrlTask(void *argument)
 /* 电机反馈任务入口函数 */
 void vMotorFeedbackTask(void *argument)
 {
-    uint32_t ucReciveLen = 0;
+    uint32_t ucReciveLen = 0;         //DMA接收数据长度
+    uint32_t package_start_idx = 0 ;  //DMA接收数据包起始位置
+    static uint8_t temp_continuous_buf[MOTOR_RX_BUF_SIZE] = {0};
 
     //启动DMA接收
     vMotor_Start_DMA_Receive(ucMotor_Task_Rx_Buffer);
@@ -270,13 +272,12 @@ void vMotorFeedbackTask(void *argument)
         // 等待DMA接收完成信号
         if (osSemaphoreAcquire(xMotorRxSemHandle, osWaitForever) == osOK)    
         {
-            ucReciveLen = ulMotor_Get_DMA_Receive_Len();
+            ucReciveLen = ulMotor_Get_DMA_Receive_Len(&package_start_idx);
+            ucMotor_Rx_Buffer_Wrap_process(ucMotor_Task_Rx_Buffer,package_start_idx,
+    		  	  	  	  	  	  	  	  ucReciveLen,temp_continuous_buf);
 
-            DEBUGINFO("Motor received len:%d",ucReciveLen);
-            vPrint_Array(ucMotor_Task_Rx_Buffer, ucReciveLen);
-
-            // 重启DMA接收(DMA单次模式下，重启后从缓冲区起始地址覆盖写入)
-            vMotor_Start_DMA_Receive(ucMotor_Task_Rx_Buffer);
+            DEBUGINFO("Motor received len:%d, data:",ucReciveLen);
+            vPrint_Array(temp_continuous_buf, ucReciveLen);
         }
     }
 }

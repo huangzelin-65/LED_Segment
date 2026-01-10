@@ -82,10 +82,10 @@ char* RFID_Uart_SendRecvCheck(UART_HandleTypeDef *huart,
     static uint8_t dma_start_rx_flag = 0 ;
     if(dma_start_rx_flag == 0)
     {
-    //接受读卡器的响应
-    dma_start_rx_flag = 1;
-    //启动循环DMA
-    vCarRfid_Start_DMA_Receive(ucCarRfid_Rx_Buffer);
+        //接收读卡器的响应
+        dma_start_rx_flag = 1;
+        //启动循环DMA
+        vCarRfid_Start_DMA_Receive(ucCarRfid_Rx_Buffer);
     }
 
     sem_state = osSemaphoreAcquire(xCarRfidRxSemHandle, osWaitForever);
@@ -132,19 +132,17 @@ void bin_id_to_num_str(uint8_t *src, u32 src_len, char *dst)
         dst[i] = (src[i] % 10) + '0';
     }
 }
+
 //设置读卡器的读卡方式
 RFID_StatusTypeDef Set_Reading_Way(void)
 {
 	//计算校验码
-	Read_9bit_id[sizeof(Read_9bit_id)-2] =
-	    									Calc_XOR_CheckCode(Read_9bit_id,
-	    															 sizeof(Read_9bit_id));
+	Read_9bit_id[sizeof(Read_9bit_id)-2] = Calc_XOR_CheckCode(Read_9bit_id, sizeof(Read_9bit_id));
+    
     char* comm_result = NULL;
-
     comm_result = RFID_Uart_SendRecvCheck(&huart5, Read_9bit_id, sizeof(Read_9bit_id),
-                                          set_reading_way_succeed,
-                                         sizeof(set_reading_way_succeed),
-                                         RFID_WAIT_REPLY_TIMEOUT);
+                                        set_reading_way_succeed, sizeof(set_reading_way_succeed),
+                                        RFID_WAIT_REPLY_TIMEOUT);
     if (strcmp(comm_result, "OK") != 0)
     {
         DEBUGINFO("RFID: Reading_way setting failed, error code: %d\r\n", RFID_STATUS_READING_WAY_FAIL);
@@ -156,15 +154,13 @@ RFID_StatusTypeDef Set_Reading_Way(void)
 //设置LED跟蜂鸣器
 RFID_StatusTypeDef Set_LED_BUZZER(void)
 {
-	set_LED_and_BUZZER[sizeof(set_LED_and_BUZZER)-2]
-						  	  	  	  	  	 =Calc_XOR_CheckCode(set_LED_and_BUZZER,
-						  	  	  	  	  			 	 	 	 	 sizeof(set_LED_and_BUZZER));
+	set_LED_and_BUZZER[sizeof(set_LED_and_BUZZER)-2] = Calc_XOR_CheckCode(set_LED_and_BUZZER, sizeof(set_LED_and_BUZZER));
     char* comm_result = NULL;
 
-    comm_result = RFID_Uart_SendRecvCheck(&huart5, set_LED_and_BUZZER, sizeof(set_LED_and_BUZZER),
-                                         set_LED_BUZZER_succeed,
-                                         sizeof(set_LED_BUZZER_succeed),
-                                         RFID_WAIT_REPLY_TIMEOUT);
+    comm_result = RFID_Uart_SendRecvCheck(&huart5, 
+                                        set_LED_and_BUZZER, sizeof(set_LED_and_BUZZER),
+                                        set_LED_BUZZER_succeed, sizeof(set_LED_BUZZER_succeed),
+                                        RFID_WAIT_REPLY_TIMEOUT);
     if (strcmp(comm_result, "OK") != 0)
     {
         DEBUGINFO("RFID: LED_BUZZER setting failed, error code: %d\r\n", RFID_STATUS_LED_BUZZER_FAIL);
@@ -176,15 +172,13 @@ RFID_StatusTypeDef Set_LED_BUZZER(void)
 //设置上报间隔
 RFID_StatusTypeDef Set_Report_Interval(void)
 {
-	set_Report_Interval [sizeof(set_Report_Interval)-2]
-						  	  	  	  	  	 =Calc_XOR_CheckCode(set_Report_Interval,
-						  	  	  	  	  			 	 	 	 	 sizeof(set_Report_Interval));
+	set_Report_Interval [sizeof(set_Report_Interval)-2] = Calc_XOR_CheckCode(set_Report_Interval, sizeof(set_Report_Interval));
     char* comm_result = NULL;
 
-    comm_result = RFID_Uart_SendRecvCheck(&huart5, set_Report_Interval, sizeof(set_Report_Interval),
-                                          set_Report_Interval_succeed,
-                                         sizeof(set_Report_Interval_succeed),
-                                         RFID_WAIT_REPLY_TIMEOUT);
+    comm_result = RFID_Uart_SendRecvCheck(&huart5, 
+                                        set_Report_Interval, sizeof(set_Report_Interval),
+                                        set_Report_Interval_succeed, sizeof(set_Report_Interval_succeed),
+                                        RFID_WAIT_REPLY_TIMEOUT);
     if (strcmp(comm_result, "OK") != 0)
     {
         DEBUGINFO("RFID: Report interval setting failed, error code: %d\r\n", RFID_STATUS_REPORT_INTERVAL_FAIL);

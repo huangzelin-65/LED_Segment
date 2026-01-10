@@ -224,9 +224,9 @@ void vMotorOps(u8 Direction, u8 Speed)
 			break;
 	}
 
-	// osDelay(pdMS_TO_TICKS(100));
+	osDelay(pdMS_TO_TICKS(20));
 	vMotorRead(MOTOR_GET_STATUS);
-	// osDelay(pdMS_TO_TICKS(100));
+	osDelay(pdMS_TO_TICKS(20));
 	vMotorRead(MOTOR_GET_ERROR);
 }
 

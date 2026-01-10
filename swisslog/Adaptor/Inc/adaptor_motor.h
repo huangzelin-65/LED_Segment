@@ -14,6 +14,10 @@
 
 void vSendToMotor(uint8_t * CmdDataArr,uint8_t len); //发送数据到motor
 void vMotor_Start_DMA_Receive(uint8_t* ucMotor_Rx_Buffer);
-uint32_t ulMotor_Get_DMA_Receive_Len(void);
+uint32_t ulMotor_Get_DMA_Receive_Len(uint32_t* pulStartIdx);
+uint8_t* ucMotor_Rx_Buffer_Wrap_process(uint8_t* pSrcBuf,
+											uint32_t startIdx,
+											uint32_t dataLen,
+											uint8_t* pTempBuf);
 
 #endif /* ADAPTOR_INC_ADAPTOR_MOTOR_H_ */

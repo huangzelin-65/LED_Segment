@@ -84,6 +84,8 @@ extern DMA_NodeTypeDef Node_GPDMA2_Channel3;
 extern DMA_QListTypeDef List_GPDMA2_Channel3;
 extern DMA_HandleTypeDef handle_GPDMA2_Channel3;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel1;
+extern DMA_NodeTypeDef Node_GPDMA1_Channel0;
+extern DMA_QListTypeDef List_GPDMA1_Channel0;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel0;
 extern DMA_HandleTypeDef handle_GPDMA2_Channel0;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel5;
@@ -806,8 +808,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
   else if (huart->Instance == UART7)
   {
     //motor串口接收处理
-    uint16_t dataLength = ulMotor_Get_DMA_Receive_Len();
-    if (dataLength > 0) 
+    if (Size > 0) 
     {
       osSemaphoreRelease(xMotorRxSemHandle);  // 释放信号量,允许读取motor数据
     }
