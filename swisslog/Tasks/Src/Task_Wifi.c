@@ -125,7 +125,7 @@ void vWifiReceiveTask(void *argument)
             }
         }
         DEBUGINFO("printf_buffer:%s\n",printf_buffer);
-        // vPrint_Array(read_buffer,dataLength);
+        vPrint_Array(read_buffer,dataLength);
         if(read_buffer[0] == '\0')  
         {
           read_buffer[0] = ' ';//去掉字符串起始的结束符

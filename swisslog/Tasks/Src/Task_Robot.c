@@ -142,7 +142,7 @@ void vRobotHeartBeatTask(void *argument)
             {
                 DEBUGINFO("heartbeat\n");
                 // Robot_Notify(ROBOT_HEARTBEAT);
-                if(!mqtt_info.Register)Heart_Event();
+                // if(!mqtt_info.Register)Heart_Event();
             }
             if(waitforperiod(&register_info_cnt,5))
             {

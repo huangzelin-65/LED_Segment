@@ -864,10 +864,19 @@ void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t 
     if(rc == MQTT_CODE_CONTINUE)
     {
         DEBUGINFO("MQTT_CODE_CONTINUE");
-        osDelay(500);
         mqttObj.publish.qos = 0;
-        int retry_rc = MqttClient_Publish(&mClient, &mqttObj.publish);
-        DEBUGINFO("retry rc:%d",retry_rc);
+        int retry_rc = 0;
+        int retry_cnt = 5;
+        while(retry_cnt--)
+        {
+            osDelay(100);
+            retry_rc = MqttClient_Publish(&mClient, &mqttObj.publish);           
+            DEBUGINFO("retry rc:%d",retry_rc);
+            if(retry_rc == MQTT_CODE_SUCCESS)
+            {
+                break;
+            }
+        }    
     }
     if(rc == MQTT_CODE_ERROR_TIMEOUT )
     {
