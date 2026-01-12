@@ -126,6 +126,11 @@ void Feature_Execute(void)
             Feature_ToCmd(feature);
         }
     }
+    //如不等待设置结果，此处直接释放内存
+    while(!list_is_empty(feature_list))
+    {
+        list_pop_tail(feature_list,vPortFree);
+    }    
 }
 
 //动作实际执行
@@ -216,8 +221,6 @@ void Feature_ToCmd(Feature_t* feature)
                     DEBUGINFO("dest_station_num:%d\n",dest_station_num);
 
                     HMI_Update_DestStation_Req(dest_station_num);
-
-                    list_remove_by_value(feature_list,feature,Feature_FindName,vPortFree);//直接释放该命令，不等回复
                 }
             }
         }
