@@ -26,7 +26,6 @@
 #define MQTT_PUBLISH_MSG                "HEARTBEAT"
 #define MQTT_CMD_TIMEOUT_MS             30000
 
-extern CarStatus_t CarStatus;
 extern osMessageQueueId_t xMqttManagerQueueHandle;
 
 Stru_Field_Register_Typedef g_register_info; 
