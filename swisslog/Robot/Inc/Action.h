@@ -31,6 +31,7 @@ typedef struct {
     Cmd_t cmd;
     int execute;//代表是否执行。0：待执行 1：已经执行
     int running;//代表机器是否在执行动作
+    int to_delete; //代表需要从链表中删除
     uint32_t curPos;//当前最新的标签   
 } Action_t;	
 

@@ -5,6 +5,7 @@
 #include "main.h"
 #include "common.h"
 
+Action_t action_compare;
 
 List *action_list = NULL;
 
@@ -20,6 +21,7 @@ void Action_ListInit(void)
 void Action_Init(void)
 {
     Action_ListInit();
+    action_compare.to_delete = 1;
 }
 //寻找对应流水号的数据
 int Action_FindId(const void* action, const void* input_action)
@@ -42,6 +44,19 @@ int Action_FindCmdId(const void* action, const void* input_action)
     const  Action_t* val_input_action = (const  Action_t*)input_action;
 
     return strcmp(val_action->cmd.cmdId,val_input_action->cmd.cmdId);
+}
+//寻找对应cmd status的数据
+int Action_FindToDelete(const void* action, const void* input_action)
+{
+    // 强制类型转换为int*，取值后比较
+    const  Action_t* val_action = (const  Action_t*)action;
+    const  Action_t* val_input_action = (const  Action_t*)input_action;
+
+    if(val_action->to_delete == val_input_action->to_delete)
+    {
+        return 0;
+    }
+    return 1;
 }
 //事件发生，需更新动作，id为0，针对于单机器状态使用 (此接口json解析函数中使用)
 void Action_Event(Action_t *action)
@@ -224,11 +239,13 @@ void Action_Edit(Action_t *action)
                             else
                             {
                                 memcpy(action->cmd.status,"failed",7);
+                                action->to_delete = 1;
                             }
                         }
                         else
                         {
                             memcpy(action->cmd.status,"finished",9);
+                            action->to_delete = 1;
                         }
                         action->curPos = CarStatus.dwCurPos;
                         //发送状态更新
@@ -237,7 +254,7 @@ void Action_Edit(Action_t *action)
                         Json_GenerateMsg(JSON_G_ACTION,json_action);  
                         
                         //动作结束后，从链表中删除
-                        list_remove_by_value(action_list,action,Action_FindCmdId,vPortFree);
+                        // list_remove_by_value(action_list,action,Action_FindCmdId,vPortFree);
                     }
                     else//触发标签停止
                     {
@@ -247,9 +264,9 @@ void Action_Edit(Action_t *action)
                         Action_t* json_action = pvPortMalloc(sizeof(Action_t));
                         memcpy(json_action,action,sizeof(Action_t));                    
                         Json_GenerateMsg(JSON_G_ACTION,json_action); 
-                        
+                        action->to_delete = 1;
                         //动作结束后，从链表中删除
-                        list_remove_by_value(action_list,action,Action_FindCmdId,vPortFree);                        
+                        // list_remove_by_value(action_list,action,Action_FindCmdId,vPortFree);                        
                     }             
                 }
             }
@@ -312,6 +329,7 @@ void Action_Update(int id)
                 Action_Edit(action);
             }
         }
+        while(list_remove_by_value(action_list,&action_compare,Action_FindToDelete,vPortFree) != NULL);
         osMutexRelease(actionMutexHandle); 
     }
 }
