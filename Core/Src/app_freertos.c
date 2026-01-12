@@ -378,6 +378,20 @@ const osThreadAttr_t MqttHeartBeatTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 256 * 4
 };
+/* Definitions for RegisterManagerTask */
+osThreadId_t RegisterManagerTaskHandle;
+const osThreadAttr_t RegisterManagerTask_attributes = {
+  .name = "RegisterManagerTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
+/* Definitions for RegisterHandleTask */
+osThreadId_t RegisterHandleTaskHandle;
+const osThreadAttr_t RegisterHandleTask_attributes = {
+  .name = "RegisterHandleTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
 /* Definitions for wifiUsartMutex */
 osMutexId_t wifiUsartMutexHandle;
 const osMutexAttr_t wifiUsartMutex_attributes = {
@@ -847,6 +861,12 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of MqttHeartBeatTask */
   MqttHeartBeatTaskHandle = osThreadNew(vMqttHeartBeatTask, NULL, &MqttHeartBeatTask_attributes);
+
+  /* creation of RegisterManagerTask */
+  RegisterManagerTaskHandle = osThreadNew(vRegisterManagerTask, NULL, &RegisterManagerTask_attributes);
+
+  /* creation of RegisterHandleTask */
+  RegisterHandleTaskHandle = osThreadNew(vRegisterHandleTask, NULL, &RegisterHandleTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
