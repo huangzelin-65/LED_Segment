@@ -65,7 +65,7 @@ void Action_Event(Action_t *action)
     //第一次使用需创建链表
     if(action_list == NULL)
     {
-        Action_ListInit();
+        Action_Init();
     }  
     if(action_list == NULL) return;
     if(actionMutexHandle == NULL)return;  
@@ -80,8 +80,6 @@ void Action_Event(Action_t *action)
         memset(new_action,0,sizeof(Action_t));
 
         memcpy(new_action,action,sizeof(Action_t));
-
-        new_action->running  = CarStatus.xIsCarRunning;
 
         for(int i = 0; i < action_list->size;i++)
         {
@@ -119,7 +117,7 @@ void Action_Execute(void)
             //需要回复ack
             memcpy(action->cmd.status,"ack",4);
             action->curPos = CarStatus.dwCurPos;
-
+            action->running  = CarStatus.xIsCarRunning;
             Action_t* json_action = pvPortMalloc(sizeof(Action_t));
             memcpy(json_action,action,sizeof(Action_t));            
             Json_GenerateMsg(JSON_G_ACTION,json_action);
@@ -318,7 +316,7 @@ void Action_Update(int id)
     //第一次使用需创建链表
     if(action_list == NULL)
     {
-        Action_ListInit();
+        Action_Init();
     }  
     if(action_list == NULL) return;  
     if(actionMutexHandle == NULL)return; 
