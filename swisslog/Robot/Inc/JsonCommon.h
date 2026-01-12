@@ -13,6 +13,7 @@ typedef enum {
     JSON_G_CONFIG,
     JSON_G_NOTIFY,
     JSON_G_REGISTER,
+    JSON_G_FACTSHEET,
 } JsonGenerateType_t;
 
 typedef struct {
@@ -40,6 +41,7 @@ char* Json_Generate_Feature(void *feature);
 char* Json_Generate_Config(void *config);
 char* Json_Generate_Notify(void *notify);
 char* Json_Generate_Register(void *register_info);
+char* Json_Generate_Factsheet(void *factsheet);
 void Json_ParseMsg(JsonParseType_t type,void *data);
 int Json_ParseTopic(const char* topic);
 int Json_ParseAction(char* data);

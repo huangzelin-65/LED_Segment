@@ -13,6 +13,7 @@
 #include "Config.h"
 #include "Notify.h"
 #include "RegisterInfo.h"
+#include "Factsheet.h"
 
 #define TOPIC_ACTION                 "tk/v1/slhc/tkv-%s/instantactions"
 #define TOPIC_CONN_ACK               "tk/v1/slhc/tkv-%s/connection/ack"
@@ -300,6 +301,27 @@ char* Json_Generate_Register(void *register_info)
     cJSON_Delete(root);
 
     return json_str;    
+}
+
+char* Json_Generate_Factsheet(void *factsheet)
+{
+    Factsheet_t *data = (Factsheet_t *)factsheet;
+    cJSON* root = cJSON_CreateObject();
+    if(root == NULL)
+    {
+        DEBUGINFO("cJSON_CreateObject fail\n");
+        return NULL;
+    }
+    //创建单字段json对象
+    cJSON_AddStringToObject(root, "headerId", data->headerId);
+    cJSON_AddStringToObject(root, "timestamp", data->timestamp);
+    cJSON_AddStringToObject(root, "version", data->version);
+
+    char* json_str = cJSON_PrintUnformatted(root);//需free
+
+    cJSON_Delete(root);
+
+    return json_str;
 }
 
 void Json_ParseMsg(JsonParseType_t type,void *data)

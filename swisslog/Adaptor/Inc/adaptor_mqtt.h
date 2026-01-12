@@ -52,6 +52,7 @@ typedef enum
     MQTT_MSG_REGISTER,
     MQTT_MSG_DISCONNECT, 
     MQTT_MSG_RESEND,  
+    MQTT_MSG_FACTSHEET,
 }MqttMsgType_t;
 
 typedef struct 

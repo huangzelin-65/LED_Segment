@@ -245,7 +245,21 @@ void vMqttManagerTask(void *argument)
                     vPortFree(resend_msg);
                     DEBUGINFO("MQTT_MSG_RESEND end\n");
                 }   
-                break;                                        
+                break;
+                case MQTT_MSG_FACTSHEET:
+                {
+                    DEBUGINFO("MQTT_MSG_FACTSHEET start\n");
+                    char* robot_json_str = (char*)msg->data;
+                    if(robot_json_str != NULL)
+                    {
+                        char topic[64] = {0};
+                        snprintf(topic, sizeof(topic), MQTT_FACTSHEET_TOPIC_NAME, mqtt_info.id);
+                        Mqtt_PublishMsg(topic, robot_json_str, XSTRLEN(robot_json_str), 1, 0);
+                        vPortFree(robot_json_str);
+                    }
+                    DEBUGINFO("MQTT_MSG_FACTSHEET end\n");                    
+                }   
+                break;                                     
                 default:break;
             }
             vPortFree(manage_data);

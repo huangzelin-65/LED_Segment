@@ -20,6 +20,7 @@
 #include "Config.h"
 #include "Notify.h"
 #include "RegisterInfo.h"
+#include "Factsheet.h"
 #include "StringCommon.h"
 
 void vJsonGenerateTask(void *argument)
@@ -101,7 +102,19 @@ void vJsonGenerateTask(void *argument)
                     Mqtt_SendMsg(MQTT_MSG_REGISTER,json_str);//mqtt发送完则释放内存
                     DEBUGINFO("JSON_G_REGISTER end\n"); 
                 }
-                break;                                                                                                                                 
+                break;
+                case JSON_G_FACTSHEET:
+                {
+                    Factsheet_t* factsheet = (Factsheet_t*)(json_data->data);
+                    DEBUGINFO("JSON_G_FACTSHEET start\n");
+                    StrCommon_CreateHeadId(factsheet->headerId);
+                    StrCommon_CreateVersion(factsheet->version);
+                    StrCommon_CreateTimeStamp(factsheet->timestamp);                        
+                    char* json_str = Json_Generate_Factsheet(factsheet); 
+                    Mqtt_SendMsg(MQTT_MSG_FACTSHEET,json_str);//mqtt发送完则释放内存
+                    DEBUGINFO("JSON_G_FACTSHEET end\n");                     
+                }    
+                break;                                                                                                                             
                 default:
                 break;
             }
