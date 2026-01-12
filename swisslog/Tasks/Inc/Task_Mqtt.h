@@ -7,4 +7,5 @@ void vMqttManagerTask(void *argument);
 void vMqttReceiveTask(void *argument);
 void vMqttNotifyTask(void *argument);
 void vMqttErrorHandleTask(void *argument);
+void vMqttHeartBeatTask(void *argument);
 #endif

@@ -842,6 +842,8 @@ void Mqtt_ParseData(uint8_t* rbuf,int len)
 void Mqtt_PublishMsg(char *pub_topic, char *pub_buf, uint16_t data_len, uint8_t qos, uint8_t retain)
 {
     if(!mqtt_isConnected)return;
+    mqtt_info.heartbeat_cnt = 0;//只有没有收到服务器指令时，才需要发送心跳包
+
     MqttObject mqttObj;
     XMEMSET(&mqttObj, 0, sizeof(mqttObj));
     mqttObj.publish.qos = qos;

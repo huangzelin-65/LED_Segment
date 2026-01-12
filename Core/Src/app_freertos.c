@@ -371,6 +371,13 @@ const osThreadAttr_t MqttErrorHandleTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal2,
   .stack_size = 256 * 4
 };
+/* Definitions for MqttHeartBeatTask */
+osThreadId_t MqttHeartBeatTaskHandle;
+const osThreadAttr_t MqttHeartBeatTask_attributes = {
+  .name = "MqttHeartBeatTask",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4
+};
 /* Definitions for wifiUsartMutex */
 osMutexId_t wifiUsartMutexHandle;
 const osMutexAttr_t wifiUsartMutex_attributes = {
@@ -838,6 +845,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of MqttErrorHandleTask */
   MqttErrorHandleTaskHandle = osThreadNew(vMqttErrorHandleTask, NULL, &MqttErrorHandleTask_attributes);
 
+  /* creation of MqttHeartBeatTask */
+  MqttHeartBeatTaskHandle = osThreadNew(vMqttHeartBeatTask, NULL, &MqttHeartBeatTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   
@@ -877,6 +887,8 @@ void MX_FREERTOS_Init(void) {
   osThreadSuspend(CANManagerTaskHandle);
   osThreadSuspend(JsonGenerateTaskHandle);
   osThreadSuspend(JsonParseTaskHandle);
+  osThreadSuspend(MqttErrorHandleTaskHandle);
+  osThreadSuspend(MqttHeartBeatTaskHandle);  
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */

@@ -18,6 +18,7 @@
 #include "Register.h"
 #include "StringEdit.h"
 #include "RegisterInfo.h"
+#include "HeartBeat.h"
 
 #define MQTT_TOPIC_NAME                 "tk/v1/slhc/tkv-%s/state" 
 #define MQTT_HEARTBEAT_TOPIC_NAME       "tk/v1/slhc/tkv-%s/connection" 
@@ -378,6 +379,22 @@ void vMqttErrorHandleTask(void *argument)
         }
     }
 }
-
-
+//处理mqtt心跳包和注册事务
+void vMqttHeartBeatTask(void *argument)
+{     
+    DEBUGINFO("vMqttCycleTask\n"); 
+    while (1)
+    {
+        if(Mqtt_IsConnected())
+        {
+            if(mqtt_info.heartbeat_cnt++ >= 10)//10秒一次心跳
+            {
+                DEBUGINFO("heartbeat\n");
+                mqtt_info.heartbeat_cnt = 0;
+                Heart_Event();
+            }
+        }        
+        osDelay(1000);
+    }    
+}
 

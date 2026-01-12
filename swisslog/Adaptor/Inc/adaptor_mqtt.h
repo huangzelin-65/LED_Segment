@@ -112,6 +112,7 @@ typedef struct {
     char id[MQTT_ID_LENGTH];//从sn中获取
     char uuid[MQTT_UUID_ID_LENGTH];//16进制表示的uid 
     char sub_topic[MQTT_SUBSCRIBE_COUNT][MQTT_SUBSCRIBE_LENGTH];//订阅话题
+    uint8_t heartbeat_cnt;
     uint8_t Register;//代表需要注册
     uint8_t Register_cnt;//代表注册的次数
 }MqttInfo_t;
