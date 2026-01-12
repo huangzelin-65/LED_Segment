@@ -14,6 +14,7 @@
 #define FENZI 12
 #define FENMU	6
 
+extern uint8_t u8_hmiEnButton;
 extern uint8_t startFinishedFlag;
 extern CarStatus_t CarStatus;
 extern ServerToCarData_t ServerToCarData;
@@ -32,7 +33,11 @@ void vSet_Screen_LockStatus(eLockStatusType value)
 	{
 		if(CarStatus.xBoxLocked == Locked){
 			DEBUGINFO("Lock Screen");
-			HMI_Set_RFCardPage();	// 发送命令切换到”请刷rfid卡“页面;
+			// HMI_Set_RFCardPage();	
+			// 发送命令切换到”请刷rfid卡“页面;
+			HMI_Show_Rf_Page();
+			RFID_Scan_Enable(1);
+			u8_hmiEnButton = 0;
 		} else {
 			DEBUGINFO("Can't Lock Screen!! Box not Locked!!\r\n");
 		}
@@ -90,6 +95,8 @@ void vBoxCtrlTask(void *argument)
 	// v_UVClean_Enable();
 	// osDelay(pdMS_TO_TICKS(2000));
 	// v_UVClean_Disable();
+
+	CarStatus.u8_uvCleanRunning = u8_UvClean_IsRunning();  // 获取当前消毒状态
 
   	while(1)
 	{

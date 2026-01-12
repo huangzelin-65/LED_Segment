@@ -35,10 +35,8 @@ extern uint8_t lastCorrectDate[6];//save as dec
 extern uint8_t HmiRunTimeBCD[4];//save as bcd
 extern uint8_t HmiRunTimeASCII[8];//save as ascii
 
-extern uint8_t lastUvSetTime;
-extern uint8_t u8_defaultUvDuration;
 extern uint8_t currentVirtualButtonEn;
-extern uint8_t hmiEnButton;
+extern uint8_t u8_hmiEnButton;
 // extern uint8_t currentInStationEn;
 
 extern osSemaphoreId_t xHmiRxSemHandle;
@@ -57,8 +55,8 @@ void vHmiEventTask(void *argument)
     if (osSemaphoreAcquire(xHmiRxSemHandle, osWaitForever) == osOK)
     {
 			ucReciveLen = ulHMI_Get_DMA_Receive_Len();
-			DEBUGINFO("HMI received len:%d ,data:",ucReciveLen);
-			vPrint_Array(ucHMI_Rx_Buffer[ucHMI_current_buf_idx], ucReciveLen);
+			// DEBUGINFO("HMI received len:%d ,data:",ucReciveLen);
+			// vPrint_Array(ucHMI_Rx_Buffer[ucHMI_current_buf_idx], ucReciveLen);
 
 			// 处理接收到的数据
 			HMI_Usart_GetDataHandler(ucHMI_Rx_Buffer[ucHMI_current_buf_idx],ucReciveLen);
@@ -112,7 +110,7 @@ void vHmiRecvTask(void *argument)
       		DEBUGINFO("xQueueReceive failed");
 			continue;
 		}
-		DEBUGINFO("Receive from HMI\r\n");
+		// DEBUGINFO("Receive from HMI\r\n");
 
 		switch(recMsg->cmd) 
 		{
@@ -148,7 +146,7 @@ void vHmiRecvTask(void *argument)
 					localRTCTime[4] = BCDToh10(recMsg->data[7]);
 					localRTCTime[5] = BCDToh10(recMsg->data[8]);
 					if(actFlag == rtcForUv){
-						v_UvClean_Start(lastUvSetTime,localRTCTime);
+						v_UvClean_Start(CarStatus.u8_uvDuration,localRTCTime);
 						actFlag = rtcOnlyRead;
 					}else if(actFlag == rtcForSetting){
 						HMI_Update_Default_Setting_Page_RtcTime_Req(localRTCTime);
@@ -214,12 +212,12 @@ void vHmiRecvTask(void *argument)
 					UserPswd_Add_Sys_Passwd(recMsg->data[4]);
 					HMI_Display_Text_SysPasswd();
 				case addUvWorkTime:
-					DEBUGINFO("addUvWorkTime\r\n");
-					lastUvSetTime = recMsg->data[4];
+					DEBUGINFO("addUvWorkTime:%d",recMsg->data[4]);
+					CarStatus.u8_uvDuration = recMsg->data[4]; // 消毒页面输入消毒时长后的回调（仅用于本次消毒）
 					break;
 				case addSetUvDefaultWorkTime:
-					DEBUGINFO("addSetUvDefaultWorkTime\r\n");
-					u8_defaultUvDuration = recMsg->data[4];
+					DEBUGINFO("addSetUvDefaultWorkTime:%d",recMsg->data[4]);
+					CarStatus.u8_uvDuration = recMsg->data[4]; // 设置页面输入默认消毒时长后的回调
 					break;
 				case addSetDataYY :
 					DEBUGINFO("addSetDataYY\r\n");
@@ -294,9 +292,8 @@ void vHmiWaitTask(void *argument)
 	
 	UserPswd_Init();
 
-	b_Eeprom_Read_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,&u8_defaultUvDuration);
-	HMI_Update_DefaultUVTime_Req(u8_defaultUvDuration);//twice when first commu
-	lastUvSetTime = u8_defaultUvDuration;
+	b_Eeprom_Read_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,&CarStatus.u8_uvDuration); //读取eeprom里的默认消毒时长设置
+	HMI_Update_DefaultUVTime_Req(CarStatus.u8_uvDuration);  //发送默认消毒时长设置到hmi
 			
 
 	//get setting
@@ -327,11 +324,11 @@ void vHmiWaitTask(void *argument)
 	{
 	//encryed
 		RFID_Scan_Enable(1);
-		hmiEnButton = 0;
+		u8_hmiEnButton = 0;
 		HMI_Show_Rf_Page();
 	}else{
 		RFID_Scan_Enable(0); 
-		hmiEnButton = 1;
+		u8_hmiEnButton = 1;
 		HMI_Change_Page(pgHome);
 	}
 

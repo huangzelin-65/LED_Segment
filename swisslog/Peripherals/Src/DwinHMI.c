@@ -56,13 +56,10 @@ uint8_t RunTimeMinutesASCII[3] = {0}; // 2字节ASCII + 终止符
 uint8_t RunTimeSecondsASCII[3] = {0}; // 2字节ASCII + 终止符
 
 uint8_t currentVirtualButtonEn = 0; // 使能虚拟按钮(勾选或取消勾选)
-uint8_t hmiEnButton = 1; // HMI是否允许按键操作 (1：允许，0：不允许)
+uint8_t u8_hmiEnButton = 1; // HMI是否允许按键操作 (1：允许，0：不允许)
 // uint8_t currentInStationEn = 0; // 使能进站信号按钮(用于提醒PLC小车已进站，TK2.1可去掉)
 
-extern uint8_t lastUvSetTime;
-extern uint8_t u8_defaultUvDuration;
-
-/***********************************base function***************************************/
+/*********************************** HMI base function start ***************************************/
 uint8_t HMI_Free_DwinMsg(DwinMsgSt *ptr)
 {
 	if(ptr->data) {
@@ -130,10 +127,12 @@ static uint8_t HMI_Send_Msg_To_RecTask(uint8_t *buf,uint8_t len)
 
 uint8_t HMI_Is_Button_En(void)
 {
-	return hmiEnButton;
+	return u8_hmiEnButton;
 }
 
-/*****************************local function***************************************/
+/*********************************** HMI base function end ***************************************/
+
+/********************************** HMI local function start ***************************************/
 // 触发屏幕上的解锁按键
 void HMI_Unlock_Button_Press()
 {
@@ -166,6 +165,14 @@ void HMI_TPCal_Triger(void){
 	HMI_Send_Msg_To_SendTask(sendSt);
 }
 
+//touch panel correct trigger
+void HMI_Save_Last_Correct_Date(uint8_t temp[6]){
+	DEBUGINFO("HMI_Save_Last_Correct_Date\r\n");
+	memcpy(lastCorrectDate,temp,6);
+	b_Eeprom_Check_Conn();
+	b_Eeprom_Write_Buf(EEP_ADD_LAST_CORRECT_DATE,temp,6);
+}
+
 void HMI_Change_Page(eDwinPage page){
 	DEBUGINFO("cmd:DwinWriteReg data[0]:addRegPic_Id data[1]:%d\r\n",page);
 	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(2);
@@ -180,6 +187,7 @@ void HMI_Change_Page(eDwinPage page){
 	currentPage = page;
 }
 
+// 显示锁定屏幕
 void HMI_Show_Rf_Page(){
 	if(UserPswd_Get_Encry_Status()&&(UserPswd_Get_Encry_Len()>0)){
 		//encryed
@@ -189,15 +197,15 @@ void HMI_Show_Rf_Page(){
 	}
 }
 
-//open for uv clean task
-void HMI_Set_RFCardPage(){
-	if(currentPage !=pgRfCard && currentPage != pgRfCardWithOutPasswd ){
-		//change page to rfCard
-		HMI_Show_Rf_Page();
-		RFID_Scan_Enable(1);
-		hmiEnButton = 0;	
-	}
-}
+// // 锁定屏幕
+// void HMI_Set_RFCardPage(){
+// 	if(currentPage !=pgRfCard && currentPage != pgRfCardWithOutPasswd ){
+// 		//change page to rfCard
+// 		HMI_Show_Rf_Page();
+// 		RFID_Scan_Enable(1);
+// 		u8_hmiEnButton = 0;	
+// 	}
+// }
 
 
 /*
@@ -217,11 +225,12 @@ void HMI_Force_Home_Page(void){
 		}else{
 			HMI_Change_Page(pgHome);
 		}
-		hmiEnButton = 1;
+		u8_hmiEnButton = 1;
 	}
 }
+/********************************** HMI local function end ***************************************/
 
-
+/********************************** HMI get data function start ***************************************/
 void HMI_Get_Page_Req(){
 	DEBUGINFO("cmd:DwinReadReg data[0]:addRegPic_Id data[1]:1\r\n");
 	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(2);
@@ -260,8 +269,69 @@ void HMI_Get_Runtime(){
 // uint8_t HMI_Get_Instation_Setting(void){
 // 	return currentInStationEn;
 // }
+/********************************** HMI get data function end ***************************************/
 
+/********************************** HMI UV function start ***************************************/
+/**
+ * @brief 操作HMI的UV消毒功能
+ * @param x_onOff 操作状态（ENABLE：打开消毒，DISABLE：关闭消毒）
+ * @return bool 操作结果（true：成功，false：失败）
+ * @note
+ *   - 如果持续时间为0，返回失败
+ *   - 如果车厢未锁上，返回失败
+ *   - 如果当前操作状态不为读取RTC，返回失败
+ *   - 如果消毒未在进行中，关闭消毒时返回失败
+ */
+bool b_HMI_UV_OnOff(FunctionalState x_onOff)
+{
+	// 打开消毒
+	if(ENABLE == x_onOff) 
+	{
+		DEBUGINFO("start UVClean");
 
+		if(u8_UvClean_IsRunning()){
+			DEBUGINFO("start UVClean fail! UVClean is running!");
+			return false; // 消毒在进行中返回失败
+		}
+
+		if (CarStatus.u8_uvDuration == 0) {
+			DEBUGINFO("start UVClean fail! defaultUvDuration is 0!");
+			return false;	// 当前设置消毒持续时间为0，返回失败
+		}
+
+		if(CarStatus.xBoxLocked == UnLock) { 	
+			HMI_Change_Page(pgWarningDoorIsOpenStartUv);
+			DEBUGINFO("start UVClean fail! Door is unlock!");
+			return false;  // 车厢未锁上返回失败
+		} else {
+			if(actFlag != rtcOnlyRead){
+				DEBUGINFO("start UVClean fail! actFlag is busy!");
+				return false; // 当前操作状态不为读取RTC时返回失败(有其他依赖rtc的操作进行中)
+			}
+			actFlag = rtcForUv;
+			HMI_Change_Page(pgUvWorking);
+			HMI_Get_Rtc();
+		}
+	} 
+	// 关闭消毒
+	else if(DISABLE == x_onOff) 
+	{
+		DEBUGINFO("stop UVClean");
+		if(u8_UvClean_IsRunning()){
+			v_UvClean_Stop();
+			v_UvClean_Save_Record();
+			HMI_Change_Page(pgWarningUvCleanCanceled);
+		} else {
+			DEBUGINFO("stop UVClean fail! UVClean is not running!");
+			return false; // 消毒未在进行中返回失败
+		}
+	}
+
+	return true;
+}
+/********************************** HMI UV function end ***************************************/
+
+/********************************** HMI display function start ***************************************/
 void HMI_Display_Text_Stm32Version(){
 	DEBUGINFO("\r\n");
 	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(18);
@@ -289,7 +359,6 @@ void HMI_Display_Text_Stm32Version(){
 	HMI_Send_Msg_To_SendTask(sendSt);
 }
 
-/*****************************local function***************************************/
 void HMI_Display_Text_HmiVersion(){
 	DEBUGINFO("\r\n");
 	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(20);
@@ -475,6 +544,7 @@ void HMI_Display_Text_RunTime(){
 
 	HMI_Send_Msg_To_SendTask(sendSt);
 }
+/********************************** HMI display function end ***************************************/
 
 /*
 void HMI_Clear_Encry_Password(void){
@@ -498,6 +568,7 @@ void HMI_Clear_Decry_Password(void){
 }
 */
 
+/********************************** HMI update function start ***************************************/
 void HMI_Update_SrcStation_Req(uint16_t StationNum){
 	DEBUGINFO("StationNum = %d\r\n",StationNum);
 	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(4);
@@ -574,7 +645,7 @@ void HMI_Update_UVTime_Req(uint8_t time){
 }
 
 void HMI_Update_DefaultUVTime_Req(uint8_t time){
-	DEBUGINFO("\r\n");
+	DEBUGINFO("addSetUvDefaultWorkTime:%d",time);
 	DwinMsgSt *sendSt = HMI_Malloc_DwinMsg(4);
 	sendSt->cmd = DwinWriteValue;
 	sendSt->length = 5;
@@ -714,6 +785,9 @@ void HMI_Update_Default_Setting_Page_RtcTime_Req(uint8_t date[6]){
 	HMI_Send_Msg_To_SendTask(sendSt);
 }
 
+/********************************** HMI update function end ***************************************/
+
+/********************************** HMI Check function start ***************************************/
 
 uint8_t HMI_Check_Correct_Status(uint8_t currentTime[6]){
 	DEBUGINFO("\r\n");
@@ -760,7 +834,7 @@ void HMI_CheckRFCard(uint8_t en){
 				}else{
 					HMI_Change_Page(pgHome);
 				}
-				hmiEnButton = 1;
+				u8_hmiEnButton = 1;
 				HMI_Unlock_Button_Press();	
 			}else{
 				if(!u8_UvClean_IsRunning()){
@@ -788,15 +862,9 @@ void HMI_CheckRFCard(uint8_t en){
 	}
 }
 
+/********************************** HMI Check function end ***************************************/
 
-
-//touch panel correct trigger
-void HMI_Save_Last_Correct_Date(uint8_t temp[6]){
-	DEBUGINFO("HMI_Save_Last_Correct_Date\r\n");
-	memcpy(lastCorrectDate,temp,6);
-	b_Eeprom_Check_Conn();
-	b_Eeprom_Write_Buf(EEP_ADD_LAST_CORRECT_DATE,temp,6);
-}
+/********************************** HMI data process function start ***************************************/
 
 //deal  the button presss from hmi
 void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
@@ -817,8 +885,7 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 		
 		case btToUVPage:
 			DEBUGINFO("btToUVPage\r\n");
-			lastUvSetTime = u8_defaultUvDuration;
-			HMI_Update_UVTime_Req(u8_defaultUvDuration);
+			HMI_Update_UVTime_Req(CarStatus.u8_uvDuration); // HMI显示当前设置的消毒时间
 			v_UvClean_Get_Record(temp);
 			HMI_Update_LastUvRecord_Req(temp);
 			HMI_Update_LastUvDuration_Req(temp[6]);
@@ -869,7 +936,7 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 				UserPswd_Set_Encry_Status(1);
 				HMI_Show_Rf_Page();
 				RFID_Scan_Enable(1);
-				hmiEnButton = 0;
+				u8_hmiEnButton = 0;
 			}			
 			break;
 			
@@ -887,7 +954,7 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 				}else{
 					HMI_Change_Page(pgHome);			
 				}
-				hmiEnButton = 1;
+				u8_hmiEnButton = 1;
 				HMI_Unlock_Button_Press();
 			}
 			else{
@@ -897,11 +964,11 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 			
 		case btStartUv:
 			DEBUGINFO("btStartUv\r\n");
-			if(lastUvSetTime == 0){
+			if(CarStatus.u8_uvDuration == 0){
 				break;
 			}
 			//check if the door is closed?
-			if((!ELOCK1_LEVEL)&&(!ELOCK2_LEVEL)){
+			if(CarStatus.xBoxLocked == UnLock){
 				HMI_Change_Page(pgWarningDoorIsOpenStartUv);
 			}else{
 				HMI_Change_Page(pgUvWorking);
@@ -933,8 +1000,8 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 			// b_Eeprom_Write_Byte(EEP_ADD_EN_IN_STATION_SENSOR,currentInStationEn);
 			// HMI_Update_InStationSetting_Req(currentInStationEn);
 				
-			b_Eeprom_Write_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,u8_defaultUvDuration);
-			HMI_Update_DefaultUVTime_Req(u8_defaultUvDuration);
+			b_Eeprom_Write_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,CarStatus.u8_uvDuration); //更新eeprom里的默认消毒时长
+			HMI_Update_DefaultUVTime_Req(CarStatus.u8_uvDuration);  //更新默认消毒时长到HMI
 
 			setRTCTime[0] = h10ToBCD(setRTCTime[0]);
 			setRTCTime[1] = h10ToBCD(setRTCTime[1]);
@@ -956,8 +1023,8 @@ void HMI_Deal_HmiButtonCmd(eDwinButtonDef button)
 				// b_Eeprom_Read_Byte(EEP_ADD_EN_IN_STATION_SENSOR,&currentInStationEn);
 				// HMI_Update_InStationSetting_Req(currentInStationEn);
 
-				b_Eeprom_Read_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,&u8_defaultUvDuration);
-				HMI_Update_DefaultUVTime_Req(u8_defaultUvDuration);//twice when first commu
+				b_Eeprom_Read_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,&CarStatus.u8_uvDuration);
+				HMI_Update_DefaultUVTime_Req(CarStatus.u8_uvDuration);
 			}
 			HMI_Update_CarNum_Req(carNum);
 			HMI_Change_Page(pgHome);
@@ -1079,4 +1146,4 @@ void HMI_Usart_GetDataHandler(uint8_t* ucReciveData, uint32_t ulReciveLen)
 	}
 }
 
-
+/********************************** HMI data process function end ***************************************/

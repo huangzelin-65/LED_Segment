@@ -61,7 +61,7 @@ typedef enum {
 	addCarNum = 0x0002, // 车辆号
 	addPasswdEy = 0x0003, // 显示加密页面密码显示区域
 	addPasswdDy = 0x0005, // 显示解密页面密码显示区域
-	addUvWorkTime = 0x0007, // 本次已消毒分钟数
+	addUvWorkTime = 0x0007, // 设置本次消毒分钟数（剩余消毒分钟数共用此变量）
 	addSetUvDefaultWorkTime = 0x0008, // 默认消毒分钟数
 	addSetDataYY = 0x0009, // 年
 	addSetDataMM = 0x0000A, // 月
@@ -143,10 +143,12 @@ uint8_t HMI_Is_Button_En(void);
 
 void HMI_Change_Page(eDwinPage page);
 void HMI_Show_Rf_Page();
-void HMI_Set_RFCardPage(void);
+// void HMI_Set_RFCardPage(void);
 void HMI_Force_Home_Page(void);
 
 void HMI_Get_Rtc();
+
+bool b_HMI_UV_OnOff(FunctionalState x_onOff); // 联动HMI的UV消毒开关
 
 void HMI_Display_Text_Stm32Version();
 void HMI_Display_Text_HmiVersion();

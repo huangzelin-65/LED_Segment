@@ -16,9 +16,6 @@
 #include "UV_Clean.h"
 #include "LogDebugInfo.h"
 
-uint8_t lastUvSetTime = 0;
-uint8_t u8_defaultUvDuration = 0;
-
 extern CarStatus_t CarStatus;
 extern osTimerId_t xUVTimerHandle;
 extern osMessageQueueId_t xBox_Ctrl_QueueHandle;
@@ -44,11 +41,12 @@ void v_UvClean_Start(uint8_t u8_timeMin,uint8_t au8_startTime[6])
 	osDelay(pdMS_TO_TICKS(200));
 	if(u8_timeMin == 0)
 		u8_timeMin = 5;
-	if(u8_uvCleanRunning==0){
+	if(u8_uvCleanRunning == 0){
 	 	memcpy(asu8_cleanTime,au8_startTime,6);
  		su8_cleanTime = u8_timeMin;
-		CarStatus.u8_uvTimeRemain = u8_timeMin;
-		u8_uvCleanRunning=1;
+		CarStatus.u8_uvTimeRemain = u8_timeMin; // 更新消毒剩余时间
+		u8_uvCleanRunning = 1;
+		CarStatus.u8_uvCleanRunning = 1;
 		osTimerStart(xUVTimerHandle,pdMS_TO_TICKS(1000*60));
 		//HMI_Check_Uv_Clean(UvTimeCnt);
 	}
@@ -61,7 +59,8 @@ void v_UvClean_Start(uint8_t u8_timeMin,uint8_t au8_startTime[6])
 */
 void v_UvClean_Stop(void)
 {
-	u8_uvCleanRunning=0;
+	u8_uvCleanRunning = 0;
+	CarStatus.u8_uvCleanRunning = 0;
     osTimerStop(xUVTimerHandle);
 	v_UVClean_Disable();
 	Robot_Event(); //上报小车状态
@@ -85,6 +84,25 @@ void v_UvClean_Get_Record(uint8_t time[7]){
 	memcpy(time,temp,7);	
 }
 
+// 设置默认消毒时长(更新eeprom里的消毒时长设置 和 CarStatus里的消毒时长设置)
+bool b_UvClean_Set_Duration(uint8_t u8_Duration){
+	if(b_Eeprom_Check_Conn()== false)
+		return false;
+	b_Eeprom_Write_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,u8_Duration); // 更新eeprom里的默认消毒时长
+	HMI_Update_DefaultUVTime_Req(u8_Duration); // 更新默认消毒时长到HMI
+	CarStatus.u8_uvDuration = u8_Duration;
+	return true;
+}
+
+// 获取默认消毒时长
+uint8_t u8_UvClean_Get_Duration(void){
+	uint8_t u8_duration;
+	if(b_Eeprom_Check_Conn()== false)
+		return 0;
+	b_Eeprom_Read_Byte(EEP_ADD_UVCLEAN_TIME_MINUTES,&u8_duration);
+	return u8_duration;
+}
+
 /*
 消毒定时器任务
 */
@@ -92,12 +110,13 @@ void v_UvClean_TimerCallback(void *argument)
 {
 	eBoxCtrlType x_BoxMsg;
 	
-	CarStatus.u8_uvTimeRemain = (CarStatus.u8_uvTimeRemain - 1 > 0) ? (CarStatus.u8_uvTimeRemain - 1) : 0;
+	CarStatus.u8_uvTimeRemain = (CarStatus.u8_uvTimeRemain - 1 > 0) ? (CarStatus.u8_uvTimeRemain - 1) : 0; // 更新消毒剩余时间
 
 	if(CarStatus.u8_uvTimeRemain>0){
 		osTimerStart(xUVTimerHandle,pdMS_TO_TICKS(1000*60));
 	}else{
 		u8_uvCleanRunning = 0;
+		CarStatus.u8_uvCleanRunning = 0;
 		v_UVClean_Disable();
 	}
 	

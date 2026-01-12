@@ -11,7 +11,7 @@
 #define EEP_ADD_EEPROM_NEED_INIT		    16  // 2bytes EEPROM是否需要初始化标志（初始化后写入{0x51,0x4d}）
 #define EEP_ADD_IDCARD_PASSWORD_NUM		  	20 //1 bytes 车厢卡密码位数
 #define EEP_ADD_IDCARD_PASSWORD	      	  	21 //60 bytes 车厢卡密码（暂时没使用）
-#define EEP_ADD_UVCLEAN_TIME_MINUTES	    100 //1bytes 消毒时长设置 
+#define EEP_ADD_UVCLEAN_TIME_MINUTES	    100 //1bytes 默认消毒时长设置 
 #define EEP_ADD_LAST_UVCLEAN_DATE	      	101 //rtc time+clean time bytes 上次消毒rtc时间 + 消毒时长
 #define EEP_ADD_SEND_PASSWORD		      	120 //6 bytes 屏幕上设置的6位数密码
 #define EEP_ADD_IS_ENCRYED			      	130 //1 bytes 车厢加密状态（1加密/0未加密）(为0时设置小车为在站状态)
