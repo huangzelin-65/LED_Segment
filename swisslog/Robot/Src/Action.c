@@ -81,6 +81,8 @@ void Action_Event(Action_t *action)
 
         memcpy(new_action,action,sizeof(Action_t));
 
+        new_action->running  = CarStatus.xIsCarRunning;
+
         for(int i = 0; i < action_list->size;i++)
         {
             Action_t* action = list_find_at(action_list, i);
@@ -206,6 +208,7 @@ void Action_Edit(Action_t *action)
     {
         if(action->id == 0)//单设备，id为0
         {
+            DEBUGINFO("xMotorStopReason:%d",CarStatus.xMotorStopReason);
             if(CarStatus.xIsCarRunning == CarRunning)//当前为running
             {
                 if(action->running != CarRunning)//之前为stop
@@ -238,7 +241,14 @@ void Action_Edit(Action_t *action)
                             }
                             else
                             {
-                                memcpy(action->cmd.status,"failed",7);
+                                if(CarStatus.xMotorStopReason == ByCommand)
+                                {
+                                    memcpy(action->cmd.status,"finished",9);
+                                }
+                                else
+                                {
+                                    memcpy(action->cmd.status,"failed",7);
+                                }
                                 action->to_delete = 1;
                             }
                         }
@@ -252,9 +262,6 @@ void Action_Edit(Action_t *action)
                         Action_t* json_action = pvPortMalloc(sizeof(Action_t));
                         memcpy(json_action,action,sizeof(Action_t));                    
                         Json_GenerateMsg(JSON_G_ACTION,json_action);  
-                        
-                        //动作结束后，从链表中删除
-                        // list_remove_by_value(action_list,action,Action_FindCmdId,vPortFree);
                     }
                     else//触发标签停止
                     {
@@ -264,9 +271,7 @@ void Action_Edit(Action_t *action)
                         Action_t* json_action = pvPortMalloc(sizeof(Action_t));
                         memcpy(json_action,action,sizeof(Action_t));                    
                         Json_GenerateMsg(JSON_G_ACTION,json_action); 
-                        action->to_delete = 1;
-                        //动作结束后，从链表中删除
-                        // list_remove_by_value(action_list,action,Action_FindCmdId,vPortFree);                        
+                        action->to_delete = 1;                    
                     }             
                 }
             }

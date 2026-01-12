@@ -15,6 +15,7 @@
 #include "adaptor_box.h"
 #include "UV_Clean.h"
 #include "LogDebugInfo.h"
+#include "DwinHMI.h"
 
 extern CarStatus_t CarStatus;
 extern osTimerId_t xUVTimerHandle;
