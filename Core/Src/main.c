@@ -76,8 +76,6 @@ UART_HandleTypeDef huart11;
 DMA_NodeTypeDef Node_GPDMA1_Channel6;
 DMA_QListTypeDef List_GPDMA1_Channel6;
 DMA_HandleTypeDef handle_GPDMA1_Channel6;
-DMA_NodeTypeDef Node_GPDMA2_Channel3;
-DMA_QListTypeDef List_GPDMA2_Channel3;
 DMA_HandleTypeDef handle_GPDMA2_Channel3;
 DMA_HandleTypeDef handle_GPDMA1_Channel1;
 DMA_NodeTypeDef Node_GPDMA1_Channel0;
