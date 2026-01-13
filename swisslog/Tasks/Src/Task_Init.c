@@ -39,6 +39,7 @@ extern osThreadId_t TcpReceiveTaskHandle;
 extern osThreadId_t RobotHeartBeatTaskHandle;
 extern osThreadId_t MqttNotifyTaskHandle;
 extern CarStatus_t CarStatus;
+extern I2C_HandleTypeDef hi2c1;
 
 void vGetChipID(void)
 {
@@ -63,7 +64,7 @@ void vGetChipID(void)
 void vInitTask(void *argument)
 {
   DEBUGINFO("InitTask\r\n");
-
+  b_Eeprom_Adaptor_Init(&hi2c1);
   vPower_Init();
   v_Eeprom_Data_Init();
   // vEepromTest();
