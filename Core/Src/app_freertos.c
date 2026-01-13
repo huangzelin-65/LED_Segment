@@ -908,7 +908,9 @@ void MX_FREERTOS_Init(void) {
   osThreadSuspend(JsonGenerateTaskHandle);
   osThreadSuspend(JsonParseTaskHandle);
   osThreadSuspend(MqttErrorHandleTaskHandle);
-  osThreadSuspend(MqttHeartBeatTaskHandle);  
+  osThreadSuspend(MqttHeartBeatTaskHandle); 
+  osThreadSuspend(RegisterManagerTaskHandle);
+  osThreadSuspend(RegisterHandleTaskHandle);   
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
