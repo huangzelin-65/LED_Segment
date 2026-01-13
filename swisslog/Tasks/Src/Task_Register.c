@@ -20,6 +20,7 @@
 #include "StringEdit.h"
 #include "RegisterInfo.h"
 #include "ChipInfo.h"
+#include "Calculate.h"
 
 //处理注册消息，获取工程注册信息或已经获取到的注册信息,存入mqtt登录信息中
 void vRegisterManagerTask(void *argument)
@@ -114,9 +115,29 @@ void vRegisterManagerTask(void *argument)
 //从服务器中获取注册信息（主要获取流水号）
 void vRegisterHandleTask(void *argument)
 {
+    int register_info_cnt = 0;     
     DEBUGINFO("vRegisterHandleTask\r\n");
     while(1)
     {
+        if(Mqtt_IsConnected())
+        {
+            if(waitforperiod(&register_info_cnt,5))
+            {
+                if(g_register_state.to_register)
+                {
+                    if(g_register_state.register_cnt++ > 5)
+                    {
+                        DEBUGINFO("register fail\n");
+                        g_register_state.to_register = 0;
+                        bIncFieldRegisterErrTimes();//记录注册失败次数
+                    }
+                    else
+                    {
+                        Register_Event();
+                    }
+                }
+            }
+        }
         osDelay(1000);
     }
 }
