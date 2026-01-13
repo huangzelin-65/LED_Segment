@@ -353,7 +353,7 @@ int Mqtt_NetWrite(void *context, const byte* buf, int buf_len,int timeout_ms)
     DEBUGINFO("start timeout_ms:%d",timeout_ms);
     #ifdef MQTT_USE_WIFI
     memset(Mqtt_SendBuffer,0,1024);
-    int prefix_len = snprintf(Mqtt_SendBuffer, MQTT_TX_BUF_SIZE, "AT+SOCKETSENDLINE=%d,%d,", mqtt_socket_id, buf_len);
+    int prefix_len = snprintf(Mqtt_SendBuffer, MQTT_TX_BUF_SIZE, "AT+SOCKETSENDLINE=%d,%d,", mqtt_socket_id, buf_len + 2);
     // 检查前缀生成是否正常，以及剩余空间是否足够容纳 buf
     if (prefix_len < 0 || prefix_len >= 1024) {
         // 前缀生成失败（缓冲区不足），处理错误
@@ -375,6 +375,10 @@ int Mqtt_NetWrite(void *context, const byte* buf, int buf_len,int timeout_ms)
     if (wifiUsartMutexHandle == NULL) return MQTT_CODE_ERROR_TIMEOUT;
 
     if (osMutexAcquire(wifiUsartMutexHandle, portMAX_DELAY) != osOK) return MQTT_CODE_ERROR_TIMEOUT;
+
+    // DEBUGINFO("Mqtt_SendBuffer len:%d\n\n",prefix_len + buf_len + 2);
+
+    // vPrint_Array(Mqtt_SendBuffer,prefix_len + buf_len + 2);
 
     HAL_UART_Transmit(&huart6, (uint8_t*)Mqtt_SendBuffer, (prefix_len + buf_len + 2), 3000);
 

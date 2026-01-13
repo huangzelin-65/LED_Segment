@@ -9,6 +9,8 @@
 #include "queue.h"
 #include "app_freertos.h"
 
+
+Stru_Field_Register_Typedef g_register_information; 
 RegisterState_t g_register_state;
 
 void Register_Init(void)
