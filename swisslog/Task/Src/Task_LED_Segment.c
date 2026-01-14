@@ -108,8 +108,8 @@ void xSegment_Blink(void *argument)
 			LED_Segment_DeInit();
 			if(Display_Flag ==0)						//如果是设置显示模式下调用，则需要设置闪烁间隔跟闪烁次数
 			{
-			blink_interval_cnt = Package_Data[3];
-			blink_cnt = Package_Data[4];
+				blink_interval_cnt = ((Package_Data[3] >> 4) * 10) + (Package_Data[3] & 0x0F);
+				blink_cnt = ((Package_Data[4] >> 4) * 10) + (Package_Data[4] & 0x0F);
 			}
 			if(blink_interval_cnt == 0x00)				//判断是否设置闪烁间隔,未设置时设为2
 			{
@@ -134,6 +134,11 @@ void xSegment_Blink(void *argument)
 			{
 				for(uint8_t i = 0 ;i<blink_cnt; i++)
 				{
+					if(Display_Flag ==0)						//如果是设置显示模式下调用，则需要设置闪烁间隔跟闪烁次数
+					{
+						blink_interval_cnt = ((Package_Data[3] >> 4) * 10) + (Package_Data[3] & 0x0F);
+						blink_cnt = ((Package_Data[4] >> 4) * 10) + (Package_Data[4] & 0x0F);
+					}
 				LED_Segment_ON(pRs485_Recv->rx_data_bit1,pRs485_Recv->rx_data_bit2,pRs485_Recv->rx_data_bit3);
 				vTaskDelay(pdMS_TO_TICKS(blink_interval_cnt*BLINK_INTERVAL_UNIT));
 				LED_Segment_DeInit();
