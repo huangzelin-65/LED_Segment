@@ -78,8 +78,8 @@ void xPackage_Parse(void *argument)
     {
         if(xSemaphoreTake(xRS485RxSemHandle, portMAX_DELAY) == pdTRUE)
         {
-            DEBUGINFO("RX_Buffer:");
-            vPrint_Array(Rx_Buffer, Rx_Len);
+            //DEBUGINFO("RX_Buffer:");
+            //vPrint_Array(Rx_Buffer, Rx_Len);
             memcpy(Package_Data,Rx_Buffer,Rx_Len);
             DEBUGINFO("Package_Data:");
             vPrint_Array(Package_Data, Rx_Len);
@@ -92,9 +92,15 @@ void xPackage_Parse(void *argument)
 					{
 						case FUNC_DISPLAY :
 							{
-							rs485_recv.rx_data_bit1 = Package_Data[2];
-							rs485_recv.rx_data_bit2 = Package_Data[3];
-							rs485_recv.rx_data_bit3 = Package_Data[4];
+							//rs485_recv.rx_data_bit1 = Package_Data[2];
+							//rs485_recv.rx_data_bit2 = Package_Data[3];
+							//rs485_recv.rx_data_bit3 = Package_Data[4];
+							//前面表示高四位，小数点要错位，结合协议来看
+							rs485_recv.rx_data_bit1 = ((Package_Data[3] >> 4) * 10) + (Package_Data[2] & 0x0F);
+							rs485_recv.rx_data_bit2 = ((Package_Data[4] >> 4) * 10) + (Package_Data[3] & 0x0F);
+							//在显示时第三位固定不显示小数点
+							//rs485_recv.rx_data_bit3 = ((Package_Data[4] >> 4) * 10) + (Package_Data[4] & 0x0F);
+							rs485_recv.rx_data_bit3 = (Package_Data[4] & 0x0F);
 							if(Blink_Flag == 0)
 							{
 							LED_Segment_ON(rs485_recv.rx_data_bit1,rs485_recv.rx_data_bit2,rs485_recv.rx_data_bit3);

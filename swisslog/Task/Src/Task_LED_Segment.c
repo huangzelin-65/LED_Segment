@@ -75,7 +75,7 @@ void LED_Segment_Init(void)
 	LED_Segment_ON(i,i,i);
 	HAL_Delay(500);
 	}
-	LED_Segment_DeInit();
+	LED_Segment_ON(0,0,0);
 }
 
 void LED_Segment_DeInit(void)
