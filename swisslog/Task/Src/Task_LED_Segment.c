@@ -71,11 +71,16 @@ void num_display(Digit_Seg_Pins_Typedef* digit_pins,uint8_t shownum)
 
 void LED_Segment_Init(void)
 {
-	for(uint8_t i = 10 ; i<=20 ;i++)
-	{
-	LED_Segment_ON(i,i,i);
+//	for(uint8_t i = 10 ; i<=20 ;i++)
+//	{
+//	LED_Segment_ON(i,i,i);
+//	HAL_Delay(500);
+//	}
+
+	LED_Segment_ON(0,0,0);
 	HAL_Delay(500);
-	}
+	LED_Segment_ON(8,8,8);
+	HAL_Delay(500);
 	LED_Segment_ON(0,0,0);
 }
 

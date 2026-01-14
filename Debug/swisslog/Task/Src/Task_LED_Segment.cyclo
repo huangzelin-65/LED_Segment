@@ -1,5 +1,5 @@
 ../swisslog/Task/Src/Task_LED_Segment.c:59:6:num_display	1
-../swisslog/Task/Src/Task_LED_Segment.c:72:6:LED_Segment_Init	2
-../swisslog/Task/Src/Task_LED_Segment.c:82:6:LED_Segment_DeInit	1
-../swisslog/Task/Src/Task_LED_Segment.c:89:6:LED_Segment_ON	1
-../swisslog/Task/Src/Task_LED_Segment.c:96:6:xSegment_Blink	8
+../swisslog/Task/Src/Task_LED_Segment.c:72:6:LED_Segment_Init	1
+../swisslog/Task/Src/Task_LED_Segment.c:87:6:LED_Segment_DeInit	1
+../swisslog/Task/Src/Task_LED_Segment.c:94:6:LED_Segment_ON	1
+../swisslog/Task/Src/Task_LED_Segment.c:101:6:xSegment_Blink	8
