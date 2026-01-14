@@ -112,6 +112,7 @@ typedef struct {
     char uuid[MQTT_UUID_ID_LENGTH];//16进制表示的uid 
     char sub_topic[MQTT_SUBSCRIBE_COUNT][MQTT_SUBSCRIBE_LENGTH];//订阅话题
     uint8_t heartbeat_cnt;
+    uint8_t recieve_msg_cnt;
 }MqttInfo_t;
 
 typedef struct {
@@ -152,4 +153,5 @@ MqttReceiveData_t* Mqtt_GetListTail(void);
 void Mqtt_Notify(uint32_t value);
 void Mqtt_Restart(void);
 int Mqtt_IsConnected(void);
+void Mqtt_ResetStatus(void);
 #endif

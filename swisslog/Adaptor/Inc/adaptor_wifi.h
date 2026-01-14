@@ -46,7 +46,8 @@ typedef struct
 { 
     int rssi;
     WifiResult_t connect_state;//wifi是否成功连接到热点
-    char ip[36];    
+    char ip[36]; 
+    uint8_t to_restart;   
 }WifiStatus_t;
 
 typedef enum
@@ -67,10 +68,11 @@ void Wifi_ConnectProcess(void);
 void Wifi_ConnectAck(uint8_t* rbuf,int len);
 bool Wifi_IsConnected(void);
 bool Wifi_IsChanged(void);
+bool Wifi_IsNeedRestart(void);
 void Wifi_Init(void);
 void Wifi_SetPower(WifiPower_t power);
 void Wifi_OtaProcess(void);
-
-
+void Wifi_Restart(void);
+void Wifi_SetRestart(void);
 
 #endif /* ADAPTOR_INC_ADAPTOR_WIFI_H_ */

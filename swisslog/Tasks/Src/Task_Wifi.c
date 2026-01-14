@@ -64,6 +64,10 @@ void vWifiManagerTask(void *argument)
     {
       DEBUGINFO("wifi status connect_state:%d rssi:%d ip:%s\n",wifi_status.connect_state,wifi_status.rssi,wifi_status.ip);
     }
+    if(Wifi_IsNeedRestart())
+    {
+      Wifi_Restart();
+    }
 	  osDelay(pdMS_TO_TICKS(100));
   }
 }

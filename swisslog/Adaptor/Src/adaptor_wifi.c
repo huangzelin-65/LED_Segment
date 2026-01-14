@@ -49,6 +49,7 @@ HAL_StatusTypeDef Wifi_SendATCmd(const char *cmd,int32_t timeout_ms)
 void Wifi_Init(void)
 {
     DEBUGINFO("Start\n");
+    wifi_status.to_restart = 0;
     Wifi_SetPower(WIFI_POWER_OFF); //关闭wifi电源 
     osDelay(pdMS_TO_TICKS(500));//wifi模块先掉电
     Wifi_SetPower(WIFI_POWER_ON); //开启wifi电源 
@@ -124,6 +125,30 @@ bool Wifi_IsChanged(void)
         return true;
     }
     return false;
+}
+//重启wifi模块
+void Wifi_Restart(void)
+{
+    DEBUGINFO("Wifi restart");
+    wifi_status.connect_state = WIFI_ERROR;
+    Wifi_Init();
+    Wifi_ConnectStart();
+}
+//判断是否重启wifi模块
+bool Wifi_IsNeedRestart(void)
+{
+    if(wifi_status.to_restart)
+    {
+        wifi_status.to_restart = 0;
+        return true;
+    }
+    return false;
+}
+//设置wifi模块重启
+void Wifi_SetRestart(void)
+{
+    DEBUGINFO("Wifi restart");
+    wifi_status.to_restart = 1;
 }
 //启动状态机，开始连接wifi,一般需要wifi上电之后的3秒，才能启动连接wifi
 void Wifi_ConnectStart(void)

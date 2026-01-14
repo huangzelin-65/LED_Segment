@@ -500,7 +500,7 @@ static int Mqtt_MessageCb(MqttClient *client, MqttMessage *msg,byte msg_new, byt
 
     if (msg_done) {
         DEBUGINFO("MQTT Message: Done");
-
+        mqtt_info.recieve_msg_cnt = 0;//复位接收数据计数
         // MqttRcMsg_t *mqtt_msg = pvPortMalloc(sizeof(MqttRcMsg_t));
         // if(mqtt_msg != NULL)
         // {
@@ -1065,6 +1065,12 @@ int Mqtt_IsConnected(void)
 {
     return mqtt_isConnected;
 }
-
+//复位mqtt状态
+void Mqtt_ResetStatus(void)
+{
+    DEBUGINFO("start");
+    mqtt_isConnected = 0;
+    MqttReadReady = 0;
+}
 
 

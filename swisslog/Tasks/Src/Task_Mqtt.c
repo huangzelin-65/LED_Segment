@@ -308,6 +308,12 @@ void vMqttHeartBeatTask(void *argument)
                 mqtt_info.heartbeat_cnt = 0;
                 Heart_Event();
             }
+            if(mqtt_info.recieve_msg_cnt++ >= 25)
+            {
+                mqtt_info.recieve_msg_cnt = 0;
+                Mqtt_ResetStatus();
+                Wifi_SetRestart();
+            }
         }        
         osDelay(1000);
     }    
