@@ -27,7 +27,7 @@
 #define MQTT_USE_WIFI     //开启此宏，mqtt通过WiFi模块tcp功能实现
 // #define MQTT_USE_ETH      //开启此宏，mqtt通过有线网口实现
 #define ROBOT            //开启此宏，响应与服务器交互事件
-
+#define REGISTER        //注册流程用
 
 /********************************* RFID配置 ****************************************/
 // #define ZHONGNENG_RFID 	//开启此宏，开启读取众能RFID模块

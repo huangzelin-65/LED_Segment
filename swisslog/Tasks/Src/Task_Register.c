@@ -54,7 +54,12 @@ void vRegisterManagerTask(void *argument)
             Chip_GetUId(uid);                    
             uid_to_uuid(uid,mqtt_info.uuid,MQTT_UUID_ID_LENGTH);
             DEBUGINFO("uuid:%s\n",mqtt_info.uuid);
-
+            #ifndef REGISTER
+            strcpy(mqtt_info.name, MQTT_TEST_NAME);//使用默认名称
+            strcpy(mqtt_info.pwd, MQTT_TEST_PSW); //使用默认密码
+            snprintf(mqtt_info.id, 7, "%d", usEncoder_Read_Number());
+            Mqtt_Notify(MQTT_NOTIFY_INIT);
+            #else
             bool rc = bReadFieldRegisterInfo(&g_register_information);
             if(rc == true)//正常登录
             {
@@ -114,9 +119,9 @@ void vRegisterManagerTask(void *argument)
                     //产品无法正常使用
                     DEBUGINFO("bReadProdRegisterInfo fail\n"); 
                 }
-            }            
+            }     
+            #endif       
         }        
-
       }
     }
 }

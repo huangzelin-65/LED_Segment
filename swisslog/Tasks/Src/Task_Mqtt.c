@@ -24,7 +24,7 @@
 #define MQTT_HEARTBEAT_TOPIC_NAME       "tk/v1/slhc/tkv-%s/connection" 
 #define MQTT_FACTSHEET_TOPIC_NAME       "tk/v1/slhc/tkv-%s/factsheet" 
 #define MQTT_PUBLISH_MSG                "HEARTBEAT"
-#define MQTT_CMD_TIMEOUT_MS             30000
+#define MQTT_CMD_TIMEOUT_MS             60000
 
 extern osMessageQueueId_t xMqttManagerQueueHandle;
 
