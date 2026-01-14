@@ -11,8 +11,9 @@ extern osSemaphoreId_t xSegBlinkSemHandle;
 extern RS485_Recv_Data_Bit rs485_recv;
 extern uint8_t Package_Data[Rx_Buf_Size];
 extern uint8_t Display_Flag;
-static uint8_t blink_interval_cnt = 2;
-static uint8_t blink_cnt = 0xFF ;
+extern uint8_t Blink_Flag;
+uint8_t blink_interval_cnt = 2;
+uint8_t blink_cnt = 0xFF ;
 
 Digit_Seg_Pins_Typedef Digit1_Pins={
   .A_Port=GPIOB,.A_Pin=GPIO_PIN_0,
@@ -115,13 +116,14 @@ void xSegment_Blink(void *argument)
 			}
 			if(blink_cnt == 0xFF)	//闪烁无限次
 			{
-				while(1)
+				while(Blink_Flag)
 				{
 				LED_Segment_ON(pRs485_Recv->rx_data_bit1,pRs485_Recv->rx_data_bit2,pRs485_Recv->rx_data_bit3);
 				vTaskDelay(pdMS_TO_TICKS(blink_interval_cnt*BLINK_INTERVAL_UNIT));
 				LED_Segment_DeInit();
 			    vTaskDelay(pdMS_TO_TICKS(blink_interval_cnt*BLINK_INTERVAL_UNIT));
 				}
+				LED_Segment_ON(pRs485_Recv->rx_data_bit1,pRs485_Recv->rx_data_bit2,pRs485_Recv->rx_data_bit3);
 			}
 			else
 			{

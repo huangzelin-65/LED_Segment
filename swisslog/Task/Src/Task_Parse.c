@@ -35,9 +35,9 @@ uint8_t cal_crc16_high = 0;
 extern osSemaphoreId_t xRS485RxSemHandle;
 extern osSemaphoreId_t xSegBlinkSemHandle;
 extern osSemaphoreId_t xChangeSlaveAddrSemHandle;
-
 extern uint16_t Rx_Len ;
 extern uint8_t Rx_Buffer[Rx_Buf_Size];
+extern uint8_t blink_interval_cnt ;
 uint8_t Package_Data[Rx_Buf_Size];
 uint8_t Blink_Flag = 0 ; //当收到闪烁指令时标志位置1，根据标志位判断显示模式是常量还是闪烁
 uint8_t Display_Flag = 0 ; //闪烁模式下显示数字会调用xSegment_Blink，这个标志位是用来区分谁调用,如果是设置显示模式则为0，设置显示数字则为1
@@ -86,15 +86,12 @@ void xPackage_Parse(void *argument)
             char* pCheck_Rx_Data_Valid = Check_Rx_Data_Valid(Package_Data);
             if(pCheck_Rx_Data_Valid != NULL)
 				{
-				//存储LED显示数字
             	    //根据功能码释放对应信号量,执行相应任务
 					switch (Package_Data[1])
 					{
 						case FUNC_DISPLAY :
 							{
-							//rs485_recv.rx_data_bit1 = Package_Data[2];
-							//rs485_recv.rx_data_bit2 = Package_Data[3];
-							//rs485_recv.rx_data_bit3 = Package_Data[4];
+							Display_Flag = 1 ;
 							//前面表示高四位，小数点要错位，结合协议来看
 							rs485_recv.rx_data_bit1 = ((Package_Data[3] >> 4) * 10) + (Package_Data[2] & 0x0F);
 							rs485_recv.rx_data_bit2 = ((Package_Data[4] >> 4) * 10) + (Package_Data[3] & 0x0F);
@@ -107,7 +104,6 @@ void xPackage_Parse(void *argument)
 							}
 							else if(Blink_Flag == 1)
 							{
-								Display_Flag = 1 ;
 								xSemaphoreGive(xSegBlinkSemHandle);
 							}
 							break;
