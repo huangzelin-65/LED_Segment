@@ -52,9 +52,9 @@ void vMotorInit()
     vMotorDisable(); // 禁用电机
 
     osDelay(pdMS_TO_TICKS(500));
-    vMotorSetting(MOTOR_SETTING_ACCEL, MOTOR_SETTING_ACCEL_8000); // 设置电机加速度
+    vMotorSetting(MOTOR_SETTING_ACCEL, MOTOR_SETTING_ACCEL_10000); // 设置电机加速度
     osDelay(pdMS_TO_TICKS(500));
-    vMotorSetting(MOTOR_SETTING_DECEL, MOTOR_SETTING_DECEL_8000); // 设置电机减速度
+    vMotorSetting(MOTOR_SETTING_DECEL, MOTOR_SETTING_DECEL_10000); // 设置电机减速度
 }
 
 // 设置小车“远程手动模式”/“远程自动模式”
