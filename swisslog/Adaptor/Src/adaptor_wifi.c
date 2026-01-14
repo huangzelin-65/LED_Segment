@@ -52,7 +52,7 @@ void Wifi_Init(void)
     Wifi_SetPower(WIFI_POWER_OFF); //关闭wifi电源 
     osDelay(pdMS_TO_TICKS(500));//wifi模块先掉电
     Wifi_SetPower(WIFI_POWER_ON); //开启wifi电源 
-    osDelay(pdMS_TO_TICKS(3000));//wifi模块上电需要等待3秒才可以发送命令
+    osDelay(pdMS_TO_TICKS(6000));//wifi模块上电需要等待3秒才可以发送命令
 }
 //启动串口空闲中断，关闭DMA半传输中断和传输完成中断，只响应串口空闲完成中断；
 void Wifi_ReceiveInit(void)

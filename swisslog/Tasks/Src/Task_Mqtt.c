@@ -195,14 +195,14 @@ void vMqttReceiveTask(void *argument)
             rc = MqttClient_WaitMessage_ex(&mClient, &mqttObj, MQTT_CMD_TIMEOUT_MS);
             if (rc == MQTT_CODE_ERROR_TIMEOUT) {
                 DEBUGINFO("MQTT_CODE_ERROR_TIMEOUT");
-                // rc = MqttClient_Ping_ex(&mClient, &mqttObj.ping);
-                // if (rc != MQTT_CODE_SUCCESS) {
-                //     DEBUGINFO("MqttClient_Ping_ex fail");
-                // }
-                // else
-                // {
-                //     DEBUGINFO("MQTT Keep-Alive Ping");
-                // } 
+                rc = MqttClient_Ping_ex(&mClient, &mqttObj.ping);
+                if (rc != MQTT_CODE_SUCCESS) {
+                    DEBUGINFO("MqttClient_Ping_ex fail");
+                }
+                else
+                {
+                    DEBUGINFO("MQTT Keep-Alive Ping");
+                } 
             }
             else if (rc != MQTT_CODE_SUCCESS && rc != MQTT_CODE_CONTINUE) {
                 DEBUGINFO("MqttClient_WaitMessage_ex:%d",rc);

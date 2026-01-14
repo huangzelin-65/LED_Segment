@@ -148,6 +148,7 @@ void vRobotHeartBeatTask(void *argument)
             DEBUGINFO("FreeHeapSize %u bytes", xPortGetFreeHeapSize());
             DEBUGINFO("encode_number: %d", robotSate.encode_number);
             DEBUGINFO("mqtt connect state: %d", Mqtt_IsConnected());
+            DEBUGINFO("MqttReadReady: %d", MqttReadReady);           
         }        
         osDelay(1000);
     }    
