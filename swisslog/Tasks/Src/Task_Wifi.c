@@ -12,7 +12,7 @@
 #include "queue.h"
 #include "adaptor_mqtt.h"
 #include "Calculate.h"
-
+#include "adaptor_register.h"
 // #define WIFI_OTA
 
 extern osMessageQueueId_t xWifi_Parse_QueueHandle;
@@ -41,7 +41,7 @@ void vWifiManagerTask(void *argument)
       {
         Wifi_SendATCmd("AT+LIP",2000);
         #ifdef MQTT_ENABLE
-        Mqtt_SendMsg(MQTT_MSG_START,NULL);
+        Register_Notify(REGISTER_NOTIFY_GET_INFO);
         #endif
       }
     }

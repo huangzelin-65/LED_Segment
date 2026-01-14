@@ -13,6 +13,7 @@
 #include "adaptor_tcp.h"
 #include "adaptor_mqtt.h"
 #include "adaptor_ntp.h"
+#include "adaptor_register.h"
 
 extern osMessageQueueId_t xTcpManageQueueHandle;
 
@@ -35,7 +36,7 @@ void vTcpManagerTask(void *argument)
             {
                 #ifdef MQTT_ENABLE
                 DEBUGINFO("TCP_MSG_MQTT\n"); 
-                Mqtt_SendMsg(MQTT_MSG_START,NULL);  
+                Register_Notify(REGISTER_NOTIFY_GET_INFO);  
                 #endif     
             }
             break;

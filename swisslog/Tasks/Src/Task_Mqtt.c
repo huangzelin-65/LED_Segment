@@ -36,10 +36,6 @@ void vMqttManagerTask(void *argument)
     Mqtt_ListInit();
     char *manage_data = NULL;
 
-    //测试用
-    // bEraseRegisterArea();
-    // memset(&g_register_info,0x0,sizeof(Stru_Field_Register_Typedef));
-    // bReadFieldRegisterInfo(&g_register_info);
     while (1)
     {
         if(xQueueReceive(xMqttManagerQueueHandle, &manage_data, portMAX_DELAY) == pdTRUE)
@@ -48,76 +44,6 @@ void vMqttManagerTask(void *argument)
             DEBUGINFO("msg type:%d\n",msg->type);
             switch(msg->type)
             {
-                case MQTT_MSG_START://获取登录信息
-                {
-                    DEBUGINFO("MQTT_MSG_START");
-                    memset(&mqtt_info,0,sizeof(MqttInfo_t));
-                    memset(&g_register_info,0,sizeof(Stru_Field_Register_Typedef));
-                    //初始化uuid
-                    uint32_t UID[3];
-                    HAL_ICACHE_Disable();
-                    UID[0] = HAL_GetUIDw0();
-                    UID[1] = HAL_GetUIDw1();
-                    UID[2] = HAL_GetUIDw2(); 
-                    HAL_ICACHE_Enable();                    
-                    uid_to_uuid(UID,mqtt_info.uuid,MQTT_UUID_ID_LENGTH);
-                    DEBUGINFO("uuid:%s\n",mqtt_info.uuid);
-
-                    bool rc = bReadFieldRegisterInfo(&g_register_info);
-                    if(rc == true)//正常登录
-                    {
-                        //这里已经获取正常账号和密码
-                        memcpy(mqtt_info.name,g_register_info.name,MQTT_NAME_LENGTH);
-                        memcpy(mqtt_info.pwd,g_register_info.pwd,MQTT_PSW_LENGTH);
-                        memcpy(mqtt_info.sn,g_register_info.sn,MQTT_SN_LENGTH);
-                        mqtt_info.Register = 0;//不需要静默注册
-
-                        DEBUGINFO("name:%s pwd:%s sn:%s\n", g_register_info.name,g_register_info.pwd,g_register_info.sn);
-                        //从sn中提取ID信息
-                        if (extract_last_numbers((char *)g_register_info.sn, mqtt_info.id, sizeof(mqtt_info.id))) {                            
-                            DEBUGINFO("id:%s\n", mqtt_info.id);
-
-                            //测试用
-                            snprintf(mqtt_info.id, 7, "%d", usEncoder_Read_Number());  //"%06d"
-
-                            Mqtt_Notify(MQTT_NOTIFY_INIT);
-                        }                        
-                    }
-                    else
-                    {
-                        //以下是测试用，模拟工程注册，后需要删除
-                        {
-                            bool rc = bInitProdRegisterInfo(mqtt_info.uuid, MQTT_UUID_ID_LENGTH);
-                            if(rc == true)
-                            {
-                               DEBUGINFO("bInitProdRegisterInfo success\n"); 
-                            }
-                        }
-                        
-                        //校验产品
-                        bool rc = bReadProdRegisterInfo(mqtt_info.uuid, MQTT_UUID_ID_LENGTH);
-                        if(rc == true)//校验成功，产品需静默注册
-                        {                            
-                            strcpy(mqtt_info.name, MQTT_REGISTER_NAME);//使用默认名称
-                            strcpy(mqtt_info.pwd, MQTT_REGISTER_PSW); //使用默认密码
-                            strcpy(mqtt_info.sn, mqtt_info.uuid);//为了满足多台机器同时静默升级且不冲突，此处用uuid作为client id 登录
-                            mqtt_info.Register = 1;  //需要执行静默注册  
-
-
-                            //测试用
-                            // strcpy(mqtt_info.name, MQTT_TEST_NAME);
-                            // strcpy(mqtt_info.pwd, MQTT_TEST_PSW);
-                            // snprintf(mqtt_info.id, 7, "%d", usEncoder_Read_Number());  
-
-                            Mqtt_Notify(MQTT_NOTIFY_INIT);                       
-                        }
-                        else
-                        {
-                            //产品无法正常使用
-                        }
-                    }
-                }
-                break;
                 case MQTT_MSG_INIT:
                 {
                     int rc = MqttInit();
@@ -165,16 +91,8 @@ void vMqttManagerTask(void *argument)
                     }  
                     else
                     {
-                        if(mqtt_info.Register)//发布注册消息
-                        {
-                            DEBUGINFO("Mqtt_SubscribeTopicInit success,start register");   
-                            MqttReadReady = 1;//开始接收消息       
-                        }
-                        else//正常登录上线
-                        {
-                            DEBUGINFO("Mqtt_SubscribeTopicInit success,start online");
-                            Mqtt_Notify(MQTT_NOTIFY_ONLINE);  
-                        }
+                        DEBUGINFO("Mqtt_SubscribeTopicInit success,start online");
+                        Mqtt_Notify(MQTT_NOTIFY_ONLINE);                          
                     }                                       
                 }
                 break; 
@@ -228,9 +146,6 @@ void vMqttManagerTask(void *argument)
                     {  
                         DEBUGINFO("MqttDeInit SUCCESS");
                         MqttReadReady = 0;
-                        
-                        //服务器断开连接后需要重新连接
-                        Mqtt_Notify(MQTT_NOTIFY_RESTART);
                     }                    
                     DEBUGINFO("MQTT_MSG_DISCONNECT end\n");
                 }
@@ -279,14 +194,15 @@ void vMqttReceiveTask(void *argument)
         {
             rc = MqttClient_WaitMessage_ex(&mClient, &mqttObj, MQTT_CMD_TIMEOUT_MS);
             if (rc == MQTT_CODE_ERROR_TIMEOUT) {
-                rc = MqttClient_Ping_ex(&mClient, &mqttObj.ping);
-                if (rc != MQTT_CODE_SUCCESS) {
-                    DEBUGINFO("MqttClient_Ping_ex fail");
-                }
-                else
-                {
-                    DEBUGINFO("MQTT Keep-Alive Ping");
-                } 
+                DEBUGINFO("MQTT_CODE_ERROR_TIMEOUT");
+                // rc = MqttClient_Ping_ex(&mClient, &mqttObj.ping);
+                // if (rc != MQTT_CODE_SUCCESS) {
+                //     DEBUGINFO("MqttClient_Ping_ex fail");
+                // }
+                // else
+                // {
+                //     DEBUGINFO("MQTT Keep-Alive Ping");
+                // } 
             }
             else if (rc != MQTT_CODE_SUCCESS && rc != MQTT_CODE_CONTINUE) {
                 DEBUGINFO("MqttClient_WaitMessage_ex:%d",rc);
@@ -345,7 +261,7 @@ void vMqttNotifyTask(void *argument)
           if(ulNotificationValue & MQTT_NOTIFY_RESTART)
           {
             DEBUGINFO("MQTT_NOTIFY_RESTART\n");  
-            Mqtt_SendMsg(MQTT_MSG_START,NULL);
+            Mqtt_SendMsg(MQTT_MSG_INIT,NULL);
           }                                                                                      
       }        
     }

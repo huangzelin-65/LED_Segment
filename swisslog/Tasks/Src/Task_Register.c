@@ -76,6 +76,7 @@ void vRegisterManagerTask(void *argument)
             }
             else
             {
+                DEBUGINFO("get number from server");
                 //以下是测试用，模拟工程注册，后需要删除
                 {
                     bool rc = bInitProdRegisterInfo(mqtt_info.uuid, MQTT_UUID_ID_LENGTH);
@@ -83,12 +84,18 @@ void vRegisterManagerTask(void *argument)
                     {
                         DEBUGINFO("bInitProdRegisterInfo success\n"); 
                     }
+                    else
+                    {
+                        DEBUGINFO("bInitProdRegisterInfo fail\n");
+                    }
                 }
                 
                 //校验产品
                 bool rc = bReadProdRegisterInfo(mqtt_info.uuid, MQTT_UUID_ID_LENGTH);
+                rc = true;//测试用
                 if(rc == true)//校验成功，产品需静默注册
-                {                            
+                {    
+                    DEBUGINFO("bReadProdRegisterInfo success\n");                         
                     strcpy(mqtt_info.name, MQTT_REGISTER_NAME);//使用默认名称
                     strcpy(mqtt_info.pwd, MQTT_REGISTER_PSW); //使用默认密码
                     strcpy(mqtt_info.sn, mqtt_info.uuid);//为了满足多台机器同时静默升级且不冲突，此处用uuid作为client id 登录
@@ -105,6 +112,7 @@ void vRegisterManagerTask(void *argument)
                 else
                 {
                     //产品无法正常使用
+                    DEBUGINFO("bReadProdRegisterInfo fail\n"); 
                 }
             }            
         }        

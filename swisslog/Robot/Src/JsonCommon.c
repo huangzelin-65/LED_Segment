@@ -925,7 +925,7 @@ int Json_ParseRegister(char* data)
     DEBUGINFO("  sn: %s\n",sn);
     // DEBUGINFO("  timestamp: %s\n", timestamp);
 
-    mqtt_info.Register = 0;//无需再发布注册消息
+    g_register_state.to_register = 0;//无需再发布注册消息
 
     memset(&s_register,0,sizeof(Stru_Field_Register_Typedef));
 
@@ -941,7 +941,9 @@ int Json_ParseRegister(char* data)
     {
         DEBUGINFO("bWriteFieldRegisterInfo success\n"); 
         //通知mqtt重新断开并重新连接
-        Mqtt_SendMsg(MQTT_MSG_DISCONNECT,NULL);   
+        Mqtt_SendMsg(MQTT_MSG_DISCONNECT,NULL);  
+        //重新连接
+        Mqtt_SendMsg(MQTT_MSG_INIT,NULL);  
     }
 
     return 0;

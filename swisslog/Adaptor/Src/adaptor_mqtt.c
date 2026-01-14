@@ -291,7 +291,7 @@ int Mqtt_NetRead(void *context, byte* buf, int buf_len, int timeout_ms)
                 cnt = 0;   
                 MqttReceiveData_t *rec_data = Mqtt_GetListTail();
                 if(rec_data == NULL)return MQTT_CODE_ERROR_BAD_ARG; 
-                DEBUGINFO("buf_len:%d len:%d rest_len:%d\n",buf_len,rec_data->len,rec_data->rest_len);
+                // DEBUGINFO("buf_len:%d len:%d rest_len:%d\n",buf_len,rec_data->len,rec_data->rest_len);
                 if(rec_data->len == rec_data->rest_len)
                 {
                     memcpy(mReadBuf,rec_data->data,rec_data->len);
@@ -353,7 +353,7 @@ int Mqtt_NetWrite(void *context, const byte* buf, int buf_len,int timeout_ms)
     DEBUGINFO("start timeout_ms:%d",timeout_ms);
     #ifdef MQTT_USE_WIFI
     memset(Mqtt_SendBuffer,0,1024);
-    int prefix_len = snprintf(Mqtt_SendBuffer, MQTT_TX_BUF_SIZE, "AT+SOCKETSENDLINE=%d,%d,", mqtt_socket_id, buf_len + 2);
+    int prefix_len = snprintf(Mqtt_SendBuffer, MQTT_TX_BUF_SIZE, "AT+SOCKETSENDLINE=%d,%d,", mqtt_socket_id, buf_len);// + 2
     // 检查前缀生成是否正常，以及剩余空间是否足够容纳 buf
     if (prefix_len < 0 || prefix_len >= 1024) {
         // 前缀生成失败（缓冲区不足），处理错误
@@ -369,8 +369,8 @@ int Mqtt_NetWrite(void *context, const byte* buf, int buf_len,int timeout_ms)
     // 步骤2：用 memcpy 复制 buf 的全部内容（包括中间的 '\0'）
     memcpy(Mqtt_SendBuffer + prefix_len, buf, buf_len);   
 
-    Mqtt_SendBuffer[prefix_len + buf_len] = '\r';
-    Mqtt_SendBuffer[prefix_len + buf_len + 1] = '\n';
+    // Mqtt_SendBuffer[prefix_len + buf_len] = '\r';
+    // Mqtt_SendBuffer[prefix_len + buf_len + 1] = '\n';
  
     if (wifiUsartMutexHandle == NULL) return MQTT_CODE_ERROR_TIMEOUT;
 
@@ -380,7 +380,7 @@ int Mqtt_NetWrite(void *context, const byte* buf, int buf_len,int timeout_ms)
 
     // vPrint_Array(Mqtt_SendBuffer,prefix_len + buf_len + 2);
 
-    HAL_UART_Transmit(&huart6, (uint8_t*)Mqtt_SendBuffer, (prefix_len + buf_len + 2), 3000);
+    HAL_UART_Transmit(&huart6, (uint8_t*)Mqtt_SendBuffer, (prefix_len + buf_len), 3000);//+ 2
 
     osMutexRelease(wifiUsartMutexHandle);
 
@@ -959,15 +959,12 @@ int Mqtt_SubscribeTopicInit(void)
         DEBUGINFO("sub topic:%s",subscribe_topics[i].topic_filter);
     }
     //注册流程需订阅话题
-    if(mqtt_info.Register)
-    {
-        snprintf(mqtt_sub_topic[MQTT_SUBSCRIBE_COUNT], 64, MQTT_REGISTER_SUB_TOPIC);
-        subscribe_topics[MQTT_SUBSCRIBE_COUNT].topic_filter = mqtt_sub_topic[MQTT_SUBSCRIBE_COUNT];
-        subscribe_topics[MQTT_SUBSCRIBE_COUNT].qos = MQTT_QOS;
-        DEBUGINFO("sub topic:%s",subscribe_topics[MQTT_SUBSCRIBE_COUNT].topic_filter);
+    snprintf(mqtt_sub_topic[MQTT_SUBSCRIBE_COUNT], 64, MQTT_REGISTER_SUB_TOPIC);
+    subscribe_topics[MQTT_SUBSCRIBE_COUNT].topic_filter = mqtt_sub_topic[MQTT_SUBSCRIBE_COUNT];
+    subscribe_topics[MQTT_SUBSCRIBE_COUNT].qos = MQTT_QOS;
+    DEBUGINFO("sub topic:%s",subscribe_topics[MQTT_SUBSCRIBE_COUNT].topic_filter);
 
-        subscribe_cnt = MQTT_SUBSCRIBE_COUNT + 1;
-    }
+    subscribe_cnt = MQTT_SUBSCRIBE_COUNT + 1;
 
     int rc = Mqtt_SubscribeMsg(subscribe_topics,subscribe_cnt);
     if (rc == MQTT_CODE_SUCCESS) {
@@ -1061,7 +1058,7 @@ void Mqtt_Restart(void)
     DEBUGINFO("start");
     mqtt_isConnected = 0;
     MqttReadReady = 0;
-    Mqtt_SendMsg(MQTT_MSG_START,NULL); 
+    Mqtt_SendMsg(MQTT_MSG_INIT,NULL); 
 }
 //获取mqtt服务连接状态
 int Mqtt_IsConnected(void)

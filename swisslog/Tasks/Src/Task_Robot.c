@@ -132,7 +132,6 @@ void vRobotReceiveTask(void *argument)
 void vRobotHeartBeatTask(void *argument)
 {  
     int prinrf_info_cnt = 0;
-    int register_info_cnt = 0;     
     DEBUGINFO("vRobotHeartBeatTask\n"); 
     while (1)
     {
@@ -142,24 +141,7 @@ void vRobotHeartBeatTask(void *argument)
             {
                 DEBUGINFO("heartbeat\n");
                 // Robot_Notify(ROBOT_HEARTBEAT);
-                // if(!mqtt_info.Register)Heart_Event();
-            }
-            if(waitforperiod(&register_info_cnt,5))
-            {
-                if(mqtt_info.Register)
-                {
-                    if(mqtt_info.Register_cnt++ > 5)
-                    {
-                        DEBUGINFO("register fail\n");
-                        mqtt_info.Register = 0;
-                        bIncFieldRegisterErrTimes();//记录注册失败次数
-                    }
-                    else
-                    {
-                        Register_Event();
-                    }
-                }
-            }            
+            }           
         }
         if(waitforperiod(&prinrf_info_cnt,3))
         {
