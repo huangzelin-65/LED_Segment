@@ -53,7 +53,9 @@ void Wifi_Init(void)
     Wifi_SetPower(WIFI_POWER_OFF); //关闭wifi电源 
     osDelay(pdMS_TO_TICKS(500));//wifi模块先掉电
     Wifi_SetPower(WIFI_POWER_ON); //开启wifi电源 
-    osDelay(pdMS_TO_TICKS(6000));//wifi模块上电需要等待3秒才可以发送命令
+    osDelay(pdMS_TO_TICKS(6000));//wifi模块上电需要等待8秒才可以发送命令
+    Wifi_SendATCmd("AT+RESTORE",2000);
+    osDelay(2000);
 }
 //启动串口空闲中断，关闭DMA半传输中断和传输完成中断，只响应串口空闲完成中断；
 void Wifi_ReceiveInit(void)
@@ -131,6 +133,8 @@ void Wifi_Restart(void)
 {
     DEBUGINFO("Wifi restart");
     wifi_status.connect_state = WIFI_ERROR;
+    Wifi_SendATCmd("AT+RESTORE",2000);
+    osDelay(1000);
     Wifi_Init();
     Wifi_ConnectStart();
 }
@@ -382,6 +386,8 @@ void Wifi_OtaProcess(void)
 {
     Wifi_SendATCmd("AT+RAP=dianys,88888888",2000);//开启手机热点给WiFi模块连接
     osDelay(10000);
-    Wifi_SendATCmd("AT+HTTPOTA=http://120.78.6.197:8888/down/LqmWTlmwNdIU.bin",2000);//没讯提供ota连接
+    Wifi_SendATCmd("AT+HTTPOTA=http://120.78.6.197:8888/down/Fst22ONPkoYk.bin",2000);//没讯提供ota连接
+    osDelay(20000);
+    Wifi_SendATCmd("AT+RESTORE",2000);
     //等待ota结果
 }

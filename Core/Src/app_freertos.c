@@ -179,7 +179,7 @@ const osThreadAttr_t WifiReceiveTask_attributes = {
 osThreadId_t PrintTaskHandle;
 const osThreadAttr_t PrintTask_attributes = {
   .name = "PrintTask",
-  .priority = (osPriority_t) osPriorityBelowNormal,
+  .priority = (osPriority_t) osPriorityAboveNormal,
   .stack_size = 256 * 4
 };
 /* Definitions for BoxCtrlTask */
