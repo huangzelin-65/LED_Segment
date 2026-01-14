@@ -168,7 +168,7 @@ void HMI_Update_Default_Setting_Page_RtcTime_Req(uint8_t date[6]);
 void HMI_Update_SrcStation_Req(uint16_t StationNum); // 设置起始站点，000~999
 void HMI_Update_DestStation_Req(uint16_t StationNum); // 设置目标站点，000~999
 void HMI_Update_WifiSignalBars_Req(uint8_t WifiSignalBars); //设置Wifi信号强度
-void HMI_Update_DirtyStatus_Req(uint8_t isDirty); // 设置污车、洁车，0~1
+void HMI_Update_DirtyStatus_Req(uint8_t isDirty); // 设置污车：1/洁车：0
 void HMI_Update_CurLocationId_Req(uint32_t CurLocationId); // 设置当前位置，00000~99999
 void HMI_Update_Rtc(uint8_t date[6]); // 更新屏幕rtc时间
 

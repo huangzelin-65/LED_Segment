@@ -17,6 +17,8 @@
 #include "adaptor_wifi.h"
 #include "motor_LD25B60G.h"
 #include "Robot.h"
+#include "UartDMA.h"
+
 // DMA缓冲区
 #define MOTOR_BUF_SIZE 16
 // uint8_t MotorDmaBuffer[2][MOTOR_BUF_SIZE]={0};
@@ -272,9 +274,12 @@ void vMotorFeedbackTask(void *argument)
         // 等待DMA接收完成信号
         if (osSemaphoreAcquire(xMotorRxSemHandle, osWaitForever) == osOK)    
         {
-            ucReciveLen = ulMotor_Get_DMA_Receive_Len(&package_start_idx);
-            ucMotor_Rx_Buffer_Wrap_process(ucMotor_Task_Rx_Buffer,package_start_idx,
-    		  	  	  	  	  	  	  	  ucReciveLen,temp_continuous_buf);
+            ucReciveLen = u32_Motor_Get_DMA_Receive_Len(&package_start_idx);
+            pu8_Swisslog_Rx_Buffer_Wrap_process(ucMotor_Task_Rx_Buffer,
+                                                MOTOR_RX_BUF_SIZE,
+                                                package_start_idx,
+    		  	  	  	  	  	  	  	        ucReciveLen,
+                                                temp_continuous_buf);
 
             DEBUGINFO("Motor received len:%d, data:",ucReciveLen);
             vPrint_Array(temp_continuous_buf, ucReciveLen);
