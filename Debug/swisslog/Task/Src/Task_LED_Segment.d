@@ -39,7 +39,9 @@ swisslog/Task/Src/Task_LED_Segment.o: \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
  C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/LogDebugInfo.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h \
- C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/Task_LED_Segment.h
+ C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/Task_LED_Segment.h \
+ C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/Task_Parse.h \
+ C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/Task_rs485.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
@@ -81,3 +83,5 @@ swisslog/Task/Src/Task_LED_Segment.o: \
 C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/LogDebugInfo.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h:
 C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/Task_LED_Segment.h:
+C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/Task_Parse.h:
+C:/Users/e3huara25g/STM32CubeIDE/workspace_1.19.0/LED_Segment/swisslog/Task/Inc/Task_rs485.h:

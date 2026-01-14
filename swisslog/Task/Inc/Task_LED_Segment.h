@@ -1,6 +1,7 @@
 #ifndef _Task_LED_Segment_h
 #define _Task_LED_Segment_h
 
+#define BLINK_INTERVAL_UNIT 100  //上班间隔单位/ms
 typedef struct
 {
     GPIO_TypeDef* A_Port;

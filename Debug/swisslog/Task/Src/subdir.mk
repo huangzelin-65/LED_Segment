@@ -7,25 +7,31 @@
 C_SRCS += \
 ../swisslog/Task/Src/Calculate_Crc16.c \
 ../swisslog/Task/Src/LogDebugInfo.c \
+../swisslog/Task/Src/Task_Flash.c \
 ../swisslog/Task/Src/Task_Init.c \
 ../swisslog/Task/Src/Task_LED_Segment.c \
 ../swisslog/Task/Src/Task_Parse.c \
+../swisslog/Task/Src/Task_Slave_Addr.c \
 ../swisslog/Task/Src/Task_rs485.c 
 
 OBJS += \
 ./swisslog/Task/Src/Calculate_Crc16.o \
 ./swisslog/Task/Src/LogDebugInfo.o \
+./swisslog/Task/Src/Task_Flash.o \
 ./swisslog/Task/Src/Task_Init.o \
 ./swisslog/Task/Src/Task_LED_Segment.o \
 ./swisslog/Task/Src/Task_Parse.o \
+./swisslog/Task/Src/Task_Slave_Addr.o \
 ./swisslog/Task/Src/Task_rs485.o 
 
 C_DEPS += \
 ./swisslog/Task/Src/Calculate_Crc16.d \
 ./swisslog/Task/Src/LogDebugInfo.d \
+./swisslog/Task/Src/Task_Flash.d \
 ./swisslog/Task/Src/Task_Init.d \
 ./swisslog/Task/Src/Task_LED_Segment.d \
 ./swisslog/Task/Src/Task_Parse.d \
+./swisslog/Task/Src/Task_Slave_Addr.d \
 ./swisslog/Task/Src/Task_rs485.d 
 
 
@@ -36,7 +42,7 @@ swisslog/Task/Src/%.o swisslog/Task/Src/%.su swisslog/Task/Src/%.cyclo: ../swiss
 clean: clean-swisslog-2f-Task-2f-Src
 
 clean-swisslog-2f-Task-2f-Src:
-	-$(RM) ./swisslog/Task/Src/Calculate_Crc16.cyclo ./swisslog/Task/Src/Calculate_Crc16.d ./swisslog/Task/Src/Calculate_Crc16.o ./swisslog/Task/Src/Calculate_Crc16.su ./swisslog/Task/Src/LogDebugInfo.cyclo ./swisslog/Task/Src/LogDebugInfo.d ./swisslog/Task/Src/LogDebugInfo.o ./swisslog/Task/Src/LogDebugInfo.su ./swisslog/Task/Src/Task_Init.cyclo ./swisslog/Task/Src/Task_Init.d ./swisslog/Task/Src/Task_Init.o ./swisslog/Task/Src/Task_Init.su ./swisslog/Task/Src/Task_LED_Segment.cyclo ./swisslog/Task/Src/Task_LED_Segment.d ./swisslog/Task/Src/Task_LED_Segment.o ./swisslog/Task/Src/Task_LED_Segment.su ./swisslog/Task/Src/Task_Parse.cyclo ./swisslog/Task/Src/Task_Parse.d ./swisslog/Task/Src/Task_Parse.o ./swisslog/Task/Src/Task_Parse.su ./swisslog/Task/Src/Task_rs485.cyclo ./swisslog/Task/Src/Task_rs485.d ./swisslog/Task/Src/Task_rs485.o ./swisslog/Task/Src/Task_rs485.su
+	-$(RM) ./swisslog/Task/Src/Calculate_Crc16.cyclo ./swisslog/Task/Src/Calculate_Crc16.d ./swisslog/Task/Src/Calculate_Crc16.o ./swisslog/Task/Src/Calculate_Crc16.su ./swisslog/Task/Src/LogDebugInfo.cyclo ./swisslog/Task/Src/LogDebugInfo.d ./swisslog/Task/Src/LogDebugInfo.o ./swisslog/Task/Src/LogDebugInfo.su ./swisslog/Task/Src/Task_Flash.cyclo ./swisslog/Task/Src/Task_Flash.d ./swisslog/Task/Src/Task_Flash.o ./swisslog/Task/Src/Task_Flash.su ./swisslog/Task/Src/Task_Init.cyclo ./swisslog/Task/Src/Task_Init.d ./swisslog/Task/Src/Task_Init.o ./swisslog/Task/Src/Task_Init.su ./swisslog/Task/Src/Task_LED_Segment.cyclo ./swisslog/Task/Src/Task_LED_Segment.d ./swisslog/Task/Src/Task_LED_Segment.o ./swisslog/Task/Src/Task_LED_Segment.su ./swisslog/Task/Src/Task_Parse.cyclo ./swisslog/Task/Src/Task_Parse.d ./swisslog/Task/Src/Task_Parse.o ./swisslog/Task/Src/Task_Parse.su ./swisslog/Task/Src/Task_Slave_Addr.cyclo ./swisslog/Task/Src/Task_Slave_Addr.d ./swisslog/Task/Src/Task_Slave_Addr.o ./swisslog/Task/Src/Task_Slave_Addr.su ./swisslog/Task/Src/Task_rs485.cyclo ./swisslog/Task/Src/Task_rs485.d ./swisslog/Task/Src/Task_rs485.o ./swisslog/Task/Src/Task_rs485.su
 
 .PHONY: clean-swisslog-2f-Task-2f-Src
 

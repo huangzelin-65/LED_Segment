@@ -1,0 +1,4 @@
+../swisslog/Task/Src/Task_Flash.c:8:19:Flash_Write_Data	48	static
+../swisslog/Task/Src/Task_Flash.c:43:10:Flash_Read_Data	16	static
+../swisslog/Task/Src/Task_Flash.c:54:6:SlaveAddr_SaveToFlash	16	static
+../swisslog/Task/Src/Task_Flash.c:66:9:SlaveAddr_ReadFromFlash	16	static

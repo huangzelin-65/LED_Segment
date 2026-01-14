@@ -25,7 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "Task_Parse.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -75,6 +75,13 @@ const osThreadAttr_t Segment_Blink_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for ChangeSlaveAddr */
+osThreadId_t ChangeSlaveAddrHandle;
+const osThreadAttr_t ChangeSlaveAddr_attributes = {
+  .name = "ChangeSlaveAddr",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* Definitions for xRS485RxSem */
 osSemaphoreId_t xRS485RxSemHandle;
 const osSemaphoreAttr_t xRS485RxSem_attributes = {
@@ -84,6 +91,11 @@ const osSemaphoreAttr_t xRS485RxSem_attributes = {
 osSemaphoreId_t xSegBlinkSemHandle;
 const osSemaphoreAttr_t xSegBlinkSem_attributes = {
   .name = "xSegBlinkSem"
+};
+/* Definitions for xChangeSlaveAddrSem */
+osSemaphoreId_t xChangeSlaveAddrSemHandle;
+const osSemaphoreAttr_t xChangeSlaveAddrSem_attributes = {
+  .name = "xChangeSlaveAddrSem"
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -95,6 +107,7 @@ void StartDefaultTask(void *argument);
 extern void vInitTask(void *argument);
 extern void xPackage_Parse(void *argument);
 extern void xSegment_Blink(void *argument);
+extern void xChangeSlaveAddr(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -118,6 +131,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of xSegBlinkSem */
   xSegBlinkSemHandle = osSemaphoreNew(1, 0, &xSegBlinkSem_attributes);
+
+  /* creation of xChangeSlaveAddrSem */
+  xChangeSlaveAddrSemHandle = osSemaphoreNew(1, 0, &xChangeSlaveAddrSem_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -143,6 +159,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of Segment_Blink */
   Segment_BlinkHandle = osThreadNew(xSegment_Blink, NULL, &Segment_Blink_attributes);
+
+  /* creation of ChangeSlaveAddr */
+  ChangeSlaveAddrHandle = osThreadNew(xChangeSlaveAddr, NULL, &ChangeSlaveAddr_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
