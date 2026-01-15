@@ -16,6 +16,7 @@ void vStatus_Task(void *argument)
   DEBUGINFO("vStatus_Task\r\n");   
   while (1)
   {
+	// R = 运行中（Running）、B = 阻塞（Blocked）、S = 挂起（Suspended）、D = 删除（Deleted）    
     vTaskList(buffer);
     DEBUGINFO("task state priority reststack index\n%s", buffer);
 
