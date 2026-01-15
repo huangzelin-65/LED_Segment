@@ -42,9 +42,27 @@ void vMotor_Start_DMA_Receive(uint8_t* ucMotor_Rx_Buffer)
 
 
 // 获取当前DMA接收的数据长度
-uint32_t u32_Motor_Get_DMA_Receive_Len(uint32_t* pulStartIdx)
+uint32_t u32_Motor_Get_DMA_Receive_Len(uint32_t* pu32_startIdx)
 {
-    uint32_t u32_len = u32_Swisslog_Get_DMA_Receive_Len(&huart7, pulStartIdx, MOTOR_RX_BUF_SIZE);
-    return u32_len;
+	static uint32_t u32_currentLen = 0;
+	static uint32_t u32_lastLen = 0;
+	uint32_t u32_len = 0 ;
+	if (pu32_startIdx != NULL) {
+		*pu32_startIdx = u32_lastLen % MOTOR_RX_BUF_SIZE;; // 起始位置 = 上一次的累计长度
+	}
+
+	// 计算当前DMA累计长度
+	u32_currentLen = MOTOR_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart7.hdmarx);
+
+	// 计算单包长度（缓冲区绕回/没有绕回）
+	if(u32_currentLen > u32_lastLen) {
+		u32_len = u32_currentLen - u32_lastLen ;
+	} else {
+		u32_len = (MOTOR_RX_BUF_SIZE - u32_lastLen) + u32_currentLen;
+	}
+
+	u32_lastLen = u32_currentLen ;
+
+	return u32_len;	// 返回单包长度
 }
 

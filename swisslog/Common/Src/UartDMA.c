@@ -33,34 +33,6 @@ void v_Swisslog_Start_DMA_Receive(UART_HandleTypeDef* huart,
 }
 
 
-// 获取当前DMA接收的数据长度
-uint32_t u32_Swisslog_Get_DMA_Receive_Len(UART_HandleTypeDef* huart, 
-                                            uint32_t* pulStartIdx, 
-                                            uint32_t u32_rxBuffSize)
-{
-	static uint32_t ulCurrentLen= 0;
-	static uint32_t ulLastLen = 0 ;
-	uint32_t ulLen = 0 ;
-	if (pulStartIdx != NULL) {
-		*pulStartIdx = ulLastLen % u32_rxBuffSize;; // 起始位置 = 上一次的累计长度
-	}
-
-	// 计算当前DMA累计长度
-	ulCurrentLen = u32_rxBuffSize - __HAL_DMA_GET_COUNTER((*huart).hdmarx);
-
-	// 计算单包长度（缓冲区绕回/没有绕回）
-	if(ulCurrentLen > ulLastLen) {
-		ulLen = ulCurrentLen - ulLastLen ;
-	} else {
-		ulLen = (u32_rxBuffSize - ulLastLen) + ulCurrentLen;
-	}
-
-	ulLastLen = ulCurrentLen ;
-
-	return ulLen;	// 返回单包长度
-}
-
-
 /**
  * @brief  当缓冲区绕回时，将两段数据合并为一段
  * @param  pu8_rxBuff: 原始缓冲区
