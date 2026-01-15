@@ -121,7 +121,8 @@ void vInitTask(void *argument)
   osThreadResume(MqttErrorHandleTaskHandle);
   osThreadResume(MqttHeartBeatTaskHandle);   
   osThreadResume(RegisterManagerTaskHandle);
-  osThreadResume(RegisterHandleTaskHandle);  
+  osThreadResume(RegisterHandleTaskHandle);
+  osThreadResume(Status_TaskHandle);  
 #endif
 
 #ifdef  USE_CAN

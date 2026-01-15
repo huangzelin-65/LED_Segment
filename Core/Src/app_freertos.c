@@ -392,6 +392,13 @@ const osThreadAttr_t RegisterHandleTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 256 * 4
 };
+/* Definitions for Status_Task */
+osThreadId_t Status_TaskHandle;
+const osThreadAttr_t Status_Task_attributes = {
+  .name = "Status_Task",
+  .priority = (osPriority_t) osPriorityHigh,
+  .stack_size = 256 * 4
+};
 /* Definitions for wifiUsartMutex */
 osMutexId_t wifiUsartMutexHandle;
 const osMutexAttr_t wifiUsartMutex_attributes = {
@@ -868,6 +875,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of RegisterHandleTask */
   RegisterHandleTaskHandle = osThreadNew(vRegisterHandleTask, NULL, &RegisterHandleTask_attributes);
 
+  /* creation of Status_Task */
+  Status_TaskHandle = osThreadNew(vStatus_Task, NULL, &Status_Task_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   
@@ -910,7 +920,8 @@ void MX_FREERTOS_Init(void) {
   osThreadSuspend(MqttErrorHandleTaskHandle);
   osThreadSuspend(MqttHeartBeatTaskHandle); 
   osThreadSuspend(RegisterManagerTaskHandle);
-  osThreadSuspend(RegisterHandleTaskHandle);   
+  osThreadSuspend(RegisterHandleTaskHandle); 
+  osThreadSuspend(Status_TaskHandle);   
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
