@@ -15,6 +15,7 @@
 #include "sensors.h"
 #include "adaptor_box.h"
 #include "LogDebugInfo.h"
+#include "adaptor_power.h"
 
 extern osMessageQueueId_t xInterrupt_QueueHandle;
 //extern osMessageQueueId_t motion_QueueHandle;
@@ -33,17 +34,19 @@ volatile uint8_t ServiceJoystickDebounce_flag;
 
 void LowVoltageDetect_Test(void)
 {
-  uint16_t i = 0;
-  while (1)
-  {
-    DEBUGINFO("%d",i);
-    // if(50 == i)
-    // {
-    //   break;
+    // uint16_t i = 0;
+    // while (1) {
+    //   DEBUGINFO("%d",i);
+    //   if(50 == i) {
+    //     break;
+    //   }
+    //   i++;
+    //   osDelay(pdMS_TO_TICKS(100));
     // }
-    i++;
-    osDelay(pdMS_TO_TICKS(100));
-  }
+    CarStatus.u8_lowVoltageDetect = 1;
+    DEBUGINFO("SystemReset");
+    osDelay(pdMS_TO_TICKS(3000)); 
+    NVIC_SystemReset();
 }
 
 void vIntProcessTask(void *argument)
@@ -61,6 +64,10 @@ void vIntProcessTask(void *argument)
     //if (xQueueReceive(xInterrupt_QueueHandle, &IntProcessRecv_msg, portMAX_DELAY) == pdPASS) 
     if (osMessageQueueGet(xInterrupt_QueueHandle, &IntProcessRecv_msg, NULL, osWaitForever) == osOK) 
     {
+      if(CarStatus.u8_lowVoltageDetect == 1) {
+          DEBUGINFO("LowVoltageDetect, ignore interrupt");
+          continue;;
+      }
       //DEBUGINFO("IntProcessRecv_msg = %d \r\n",IntProcessRecv_msg);
       switch(IntProcessRecv_msg)
       {
@@ -101,7 +108,7 @@ void vIntProcessTask(void *argument)
         case LowVoltageDetect:
           // 检查到电源低电压
           DEBUGINFO("LowVoltageDetect\r\n");
-          // LowVoltageDetect_Test();
+          LowVoltageDetect_Test();
           break;
 
         case ServiceJoystick:

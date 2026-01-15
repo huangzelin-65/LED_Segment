@@ -71,10 +71,11 @@ void vInitTask(void *argument)
   vTime_Tracker_Init();
   vGetChipID();
 
+  CarStatus.u8_lowVoltageDetect = 0;  // 低电压检测初始化
+
   CarStatus.usCarID = usEncoder_Read_Number(); // 读取编码器编号
   DEBUGINFO("CarID: %d", CarStatus.usCarID);
 
-  // Car_Set_Station_Status(InStation);// 设置小车状态为InStation
   CarStatus.xSetDirection = Forward; //小车预设运行方向为前进
   CarStatus.xMotorStopReason = NoStopReason; //小车停止原因为无
 

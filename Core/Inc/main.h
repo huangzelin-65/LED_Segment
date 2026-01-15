@@ -225,10 +225,11 @@ typedef struct
     uint32_t dwCurPos;                          // 小车当前位置地址编号0-99999
     uint32_t dwPrevPos;                         // 小车上一位置地址编号
     uint8_t u8_uvDuration;                      // 当前设置消毒时长（分钟）
-    uint8_t u8_uvTimeRemain;                     // 剩余消毒时间（分钟）
+    uint8_t u8_uvTimeRemain;                    // 剩余消毒时间（分钟）
     uint8_t u8_uvCleanRunning;                  // 当前消毒状态 0:关闭/1:正在消毒
     uint8_t MotorStatus;   				        // 马达运行状态 0:正常/1:异常
     uint8_t MotorOverloadNum;                   // 电机过载次数
+    uint8_t u8_lowVoltageDetect;                // 电源低电压检测 0:正常/1:低电压
     uint16_t SumAverage;				        // 电流方均值
     uint16_t MaxSpeed;					        // 最大速度
     uint16_t MaxCurrent;				        // 最大电流
