@@ -19,6 +19,7 @@
 #include "adaptor_wifi.h"
 #include "DwinHMI.h"
 #include"Task_CarRfid.h"
+#include "UartDMA.h"
 
 #ifdef ZHONGNENG_RFID
 #include "ZhongnengRfidReader.h"
@@ -264,8 +265,11 @@ void vCarRfidTask(void *argument)
     if (osSemaphoreAcquire(xCarRfidRxSemHandle, osWaitForever) == osOK)
     {
       ucReciveLen = ulCarRfid_Get_DMA_Receive_Len(&package_start_idx);
-      ucCarRfid_Rx_Buffer_Wrap_process(ucCarRfid_Rx_Buffer,package_start_idx,
-    		  	  	  	  	  	  	  	  ucReciveLen,temp_continuous_buf);
+      pu8_Swisslog_Rx_Buffer_Wrap_process(ucCarRfid_Rx_Buffer,
+                                          CAR_RFID_RX_BUF_SIZE,
+                                          package_start_idx,
+    		  	  	  	  	  	  	  	      ucReciveLen,
+                                          temp_continuous_buf);
 #ifdef ZHONGNENG_RFID
       DEBUGINFO("rfid received len:%d\r\n",ucReciveLen);
       //vPrint_Array(temp_continuous_buf,ucReciveLen);

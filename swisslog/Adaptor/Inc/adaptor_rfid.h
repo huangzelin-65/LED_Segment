@@ -16,10 +16,7 @@
 // 函数声明
 void vCarRfid_Start_DMA_Receive(uint8_t* ucCarRfid_Rx_Buffer);
 uint32_t ulCarRfid_Get_DMA_Receive_Len(uint32_t* pulStartIdx);
-u8* ucCarRfid_Rx_Buffer_Wrap_process(u8* pSrcBuf,
-											u32 startIdx,
-											uint32_t dataLen,
-											uint8_t* pTempBuf);
+
 // *************************小车车厢RFID****************************
 #define BOX_RFID_RX_BUF_SIZE 64
 
