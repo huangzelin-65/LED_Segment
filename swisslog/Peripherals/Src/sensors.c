@@ -64,8 +64,8 @@ void vSensorStatusCheck(void)
   if(((FC_H_value == GPIO_PIN_SET)&&(FC_L_value == GPIO_PIN_SET)) || 
     ((FC_H_value == GPIO_PIN_RESET)&&(FC_L_value == GPIO_PIN_RESET)))
   {
-    // CarStatus.FrontCrashStatus = SensorError;
-    CarStatus.FrontCrashStatus = SensorRelease;
+    CarStatus.FrontCrashStatus = SensorError;
+    // CarStatus.FrontCrashStatus = SensorRelease;
   }
 
   // 判断 后碰撞传感器 是否触发、释放、异常
@@ -82,8 +82,8 @@ void vSensorStatusCheck(void)
   if(((RC_H_value == GPIO_PIN_SET)&&(RC_L_value == GPIO_PIN_SET)) ||
     ((RC_H_value == GPIO_PIN_RESET)&&(RC_L_value == GPIO_PIN_RESET)))
   {
-    // CarStatus.RearCrashStatus = SensorError;
-    CarStatus.RearCrashStatus = SensorRelease;
+    CarStatus.RearCrashStatus = SensorError;
+    // CarStatus.RearCrashStatus = SensorRelease;
   }
 
   // 判断 前距离传感器 是否触发、释放、异常
@@ -100,8 +100,8 @@ void vSensorStatusCheck(void)
   if(((FP_H_value == GPIO_PIN_SET)&&(FP_L_value == GPIO_PIN_SET)) ||
     ((FP_H_value == GPIO_PIN_RESET)&&(FP_L_value == GPIO_PIN_RESET)))
   {
-    // CarStatus.FrontProxStatus = SensorError;
-    CarStatus.FrontProxStatus = SensorRelease;
+    CarStatus.FrontProxStatus = SensorError;
+    // CarStatus.FrontProxStatus = SensorRelease;
   }
 
   // 判断 后距离传感器 是否触发、释放、异常
@@ -118,8 +118,8 @@ void vSensorStatusCheck(void)
   if(((RP_H_value == GPIO_PIN_SET)&&(RP_L_value == GPIO_PIN_SET)) ||
     ((RP_H_value == GPIO_PIN_RESET)&&(RP_L_value == GPIO_PIN_RESET)))
   {
-    // CarStatus.RearProxStatus = SensorError;
-    CarStatus.RearProxStatus = SensorRelease;
+    CarStatus.RearProxStatus = SensorError;
+    // CarStatus.RearProxStatus = SensorRelease;
   }
 
   // 发送消息到xSensor_Queue
