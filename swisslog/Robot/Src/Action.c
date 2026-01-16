@@ -81,6 +81,9 @@ void Action_Event(Action_t *action)
 
         memcpy(new_action,action,sizeof(Action_t));
 
+        //状态需要根据id获取
+        action->running  = CarStatus.xIsCarRunning; 
+
         for(int i = 0; i < action_list->size;i++)
         {
             Action_t* action = list_find_at(action_list, i);
