@@ -34,18 +34,19 @@ volatile uint8_t ServiceJoystickDebounce_flag;
 
 void LowVoltageDetect_Test(void)
 {
-    // uint16_t i = 0;
-    // while (1) {
-    //   DEBUGINFO("%d",i);
-    //   if(50 == i) {
-    //     break;
-    //   }
-    //   i++;
-    //   osDelay(pdMS_TO_TICKS(100));
-    // }
     CarStatus.u8_lowVoltageDetect = 1;
+    vPower_DeInit();
     DEBUGINFO("SystemReset");
-    osDelay(pdMS_TO_TICKS(3000)); 
+
+    uint16_t i = 0;
+    while (1) {
+      DEBUGINFO("%d",i);
+      if(15 == i) {   // 若短暂掉电上电，则 15s 后重启
+        break;
+      }
+      i++;
+      osDelay(pdMS_TO_TICKS(1000));
+    }
     NVIC_SystemReset();
 }
 
