@@ -49,4 +49,5 @@ void Action_Event(Action_t *action);
 void Action_Execute(void);
 void Action_ToCmd(Action_t *action);
 void Action_Update(int id);
+void Action_Delete(void);
 #endif

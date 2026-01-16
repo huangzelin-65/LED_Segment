@@ -105,6 +105,8 @@ void Action_Event(Action_t *action)
 
         DEBUGINFO("list_size:%d",list_size(action_list));
 
+        Action_Delete();//提前释放一些不需要回复的动作
+
         osMutexRelease(actionMutexHandle); 
     }  
 }
@@ -335,11 +337,17 @@ void Action_Update(int id)
                 Action_Edit(action);
             }
         }
-        while(list_remove_by_value(action_list,&action_compare,Action_FindToDelete,vPortFree) != NULL);
+        Action_Delete();
         osMutexRelease(actionMutexHandle); 
     }
 }
 
-
+//不需要等待结果的动作提前释放
+void Action_Delete(void)
+{
+    DEBUGINFO("start");
+    while(list_remove_by_value(action_list,&action_compare,Action_FindToDelete,vPortFree) != NULL);
+    DEBUGINFO("end");
+}
 
 
