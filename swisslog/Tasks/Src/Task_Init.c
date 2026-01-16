@@ -79,6 +79,10 @@ void vInitTask(void *argument)
   CarStatus.xSetDirection = Forward; //小车预设运行方向为前进
   CarStatus.xMotorStopReason = NoStopReason; //小车停止原因为无
 
+#ifndef BOX_CTRL
+  CarStatus.xBoxLocked = Locked; // 不接车厢时，默认车厢锁上
+#endif
+
   osDelay(pdMS_TO_TICKS(100));
 
   osThreadResume(PrintTaskHandle);
